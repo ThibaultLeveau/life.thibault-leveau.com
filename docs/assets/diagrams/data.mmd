@@ -1,0 +1,19 @@
+---
+config:
+  theme: neutral
+  themeVariables:
+    fontFamily: 'Arial, sans-serif'
+---
+erDiagram
+    users ||--o{ workspaces : possede
+    users ||--o{ login_sessions : ouvre
+    workspaces ||--o{ sections : organise
+    workspaces ||--|{ task_statuses : configure
+    workspaces ||--o{ task_labels : definit
+    workspaces ||--|| view_preferences : conserve
+    workspaces ||--o{ tasks : contient
+    sections |o--o{ tasks : regroupe
+    task_statuses ||--o{ tasks : qualifie
+    tasks ||--|{ task_events : historise
+    tasks ||--o{ task_label_links : associe
+    task_labels ||--o{ task_label_links : marque

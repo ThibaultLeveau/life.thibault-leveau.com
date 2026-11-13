@@ -1,43 +1,29 @@
-# Documentation technique
+# Documentation de Life
 
-Life est un espace personnel destiné au suivi des tâches, du sport et des objectifs. Cette version pose le socle technique : un accueil, une navigation et une API minimale.
+Life organise vos tâches dans des espaces et des sections, en liste à cocher ou en tableau kanban. Une section devient une liste ou une ligne du tableau selon sa visibilité ; les colonnes représentent les statuts. Les données restent privées derrière une connexion personnelle.
 
-[Ouvrir l'application](https://life.thibault-leveau.com/){ .md-button .md-button--primary }
-[Installer le projet](demarrage.md){ .md-button }
+[Ouvrir les tâches](https://life.thibault-leveau.com/tasks){ .md-button .md-button--primary }
+[Guide utilisateur](taches.md){ .md-button }
 
-## Ce qui est livré
+## Ce que contient cette version
 
-- Une interface React en français, adaptée au mobile, avec la marque Life, l'accueil et l'accès à cette documentation.
-- Un backend FastAPI qui expose une sonde de santé et sa référence OpenAPI.
-- Une image Docker réunissant l'application, ses ressources locales et la documentation compilée.
-- Des dépendances verrouillées, des tests HTTP et des contrôles GitHub Actions.
-- Une procédure manuelle de publication sur le VPS Hostinger, avec retour à l'image précédente.
+- Espaces, sections, tâches, colonnes et étiquettes configurables, recherche, filtres et ordre manuel.
+- Thèmes clair, sombre ou système et préférences conservées en base.
+- API complète, accès contrôlés et historique immuable des résolutions/réouvertures.
+- PostgreSQL 17, migrations explicites, sauvegardes et restauration documentées.
+- Tests HTTP et navigateur sur l'image livrée ; déploiement manuel derrière Caddy.
 
-Les tâches, le sport, les objectifs, l'authentification et la persistance ne sont pas encore implémentés. Leur ajout est décrit dans [Faire évoluer l'application](evolution.md).
+Les statistiques visuelles, le sport, les objectifs, les récurrences et la collaboration ne font pas partie de cette livraison. La disponibilité sur le domaine dépend du déploiement du commit et de la création du compte.
 
-## Lire selon son besoin
-
-| Besoin | Point d'entrée |
+| Besoin | Guide |
 | --- | --- |
-| Lancer le projet sur sa machine | [Démarrage](demarrage.md) |
-| Comprendre les composants et les flux | [Architecture](architecture.md) |
-| Modifier le Python ou le React | [Backend](backend.md), [Frontend](frontend.md) |
-| Régler les variables ou consulter les routes | [Configuration](configuration.md), [API](api.md) |
-| Vérifier une modification | [Tests et qualité](tests.md) |
-| Livrer une version | [Déploiement](deploiement.md) |
-| Diagnostiquer une panne | [Exploitation](exploitation.md) |
-| Préparer des données personnelles | [Sécurité](securite.md) |
+| Organiser mes tâches | [Utiliser les tâches](taches.md) |
+| Démarrer le projet | [Démarrage](demarrage.md) |
+| Comprendre le code et les données | [Architecture](architecture.md), [Modèle de données](donnees.md) |
+| Utiliser un client indépendant | [API](api.md) |
+| Régler les variables | [Configuration](configuration.md) |
+| Vérifier une modification | [Tests](tests.md) |
+| Publier ou restaurer | [Déploiement](deploiement.md), [Sauvegardes](sauvegardes.md) |
+| Diagnostiquer et protéger | [Exploitation](exploitation.md), [Sécurité](securite.md) |
 
-## Repères techniques
-
-| Élément | Choix |
-| --- | --- |
-| Langage serveur | Python 3.13 |
-| Serveur HTTP | FastAPI / Uvicorn |
-| Interface | React / TypeScript / Vite |
-| Documentation | MkDocs Material |
-| Dépendances | uv et npm, avec fichiers de verrouillage |
-| Production | Docker Compose, Caddy, VPS Hostinger |
-| Domaine | `life.thibault-leveau.com` |
-
-Le dépôt et les fichiers de verrouillage constituent la source de vérité pour les versions exactes. Les décisions de la V1 sont conservées dans [l'ADR initial](decisions/001-architecture-initiale.md).
+Les décisions initiales restent dans l'[ADR 001](decisions/001-architecture-initiale.md). L'[ADR 002](decisions/002-gestion-taches.md) consigne l'accord de Thibault pour la persistance et l'authentification.

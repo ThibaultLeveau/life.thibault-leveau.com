@@ -4,7 +4,7 @@
 
 Life est publié sur un VPS Hostinger déjà équipé de Docker et Caddy. La livraison utilise un projet Compose dédié `life`, sur le réseau externe `multisite_proxy`. Aucun port applicatif supplémentaire n'est ouvert sur l'hôte.
 
-Le script de livraison construit l'image à partir d'un commit Git propre, démarre le service et conserve la référence de l'image précédente. DNS et Caddy sont configurés une première fois, puis les livraisons courantes ne modifient que Life.
+Le script construit l'image depuis un commit propre, démarre PostgreSQL, sauvegarde, migre explicitement puis démarre le service web. Il conserve la référence de l'image précédente ; revenir à cette image ne restaure pas les données. DNS et Caddy sont configurés une première fois, puis les livraisons courantes ne modifient que Life.
 
 ## Prérequis sur le serveur
 
@@ -39,28 +39,48 @@ git rev-parse HEAD
 
 Le répertoire de travail doit être propre. Les fichiers non suivis faisant partie de l'application doivent être ajoutés et commités avant la livraison. Les fichiers ignorés de développement ou d'exploitation ne font pas partie du commit.
 
-## 2. Démarrer Life
+## 2. Configurer et démarrer Life
+
+À la première activation des tâches :
+
+```bash
+cp .env.production.example .env.production
+chmod 600 .env.production
+```
+
+Remplacer les marqueurs par deux secrets PostgreSQL aléatoires distincts. Le mot de passe applicatif doit être identique dans `LIFE_POSTGRES_PASSWORD` et l'URL `LIFE_DATABASE_URL`. Le rôle applicatif est `life`, l'hôte `db`, la base `life`. Le mot de passe administrateur ne doit pas être utilisé par l'application. Voir [Configuration](configuration.md). Aucun secret ne doit être commité.
 
 ```bash
 ./scripts/deploy.sh
 ```
 
-Le script associe le SHA complet du commit à `local/life:<SHA>`, construit l'image, puis met à jour le service `web` du projet Compose `life`. Il conserve l'état local dans :
+Sous un verrou local, le script :
 
-```text
-.deployment/current-image
-.deployment/previous-image
-```
+1. Construit `local/life:<SHA complet>` depuis le répertoire propre.
+2. Démarre le PostgreSQL privé et attend sa disponibilité (120 secondes maximum).
+3. Crée un dump protégé dans `backups/`, même lors de la première installation.
+4. Exécute `life migrate` avec la nouvelle image, dans un conteneur ponctuel.
+5. Recrée le service web et attend sa sonde `/api/v1/health/ready` (90 secondes maximum).
+6. Enregistre `.deployment/current-image` et, si applicable, `.deployment/previous-image` après réussite.
 
-Le script attend que le service devienne sain, avec un délai maximal de 90 secondes. En cas d’échec, il affiche les journaux et tente de remettre l’image précédente en service lorsqu’une autre version était déjà active. Un verrou local empêche deux livraisons simultanées. Les références sont enregistrées seulement après réussite.
+En cas d'échec, il s'arrête, affiche les journaux concernés et conserve les données et sauvegardes. Il ne rétrograde pas automatiquement la base ni ne relance aveuglément une image ancienne après migration. Diagnostiquer puis appliquer la [procédure de récupération](sauvegardes.md). Les migrations futures doivent documenter si l'ancienne application peut continuer à écrire pendant leur exécution ; prévoir une fenêtre d'arrêt pour un changement incompatible.
 
-L'image précédente doit rester disponible sur le serveur pour un retour arrière. Éviter un nettoyage global des images avant la fin de la période d'observation.
-
-Le service utilise le port interne `8000` et l'alias réseau `life-web`. Son processus s'exécute sans privilèges administrateur et dispose d'une sonde de santé. Consulter le service sans dépendre de son nom de conteneur généré :
+Créer ensuite le compte personnel, sans mot de passe dans la ligne de commande :
 
 ```bash
-docker ps --filter label=com.docker.compose.project=life
+export LIFE_IMAGE=$(cat .deployment/current-image)
+docker compose --env-file .env.production exec web life create-user thibault
 ```
+
+Le CLI demande un mot de passe d'au moins 12 caractères et sa confirmation. Aucun compte par défaut n'est créé par la migration. Vérifier la connexion et un cycle création/résolution/réouverture sur `/tasks`.
+
+Le volume `postgres_data` persiste indépendamment de l'image. PostgreSQL n'expose aucun port hôte ; le service web utilise l'alias `life-web` sur le réseau du proxy. Ne jamais employer `down --volumes` pour une livraison ou un retour arrière.
+
+```bash
+docker compose --env-file .env.production ps
+```
+
+Conserver l'image précédente et les sauvegardes nécessaires. La CI valide l'image mais ne déploie pas le site. La fusion de la PR n'exécute aucune de ces étapes de production.
 
 ## 3. Intégrer Caddy
 
@@ -113,7 +133,7 @@ curl --head https://life.thibault-leveau.com/
 
 Si `dig` n'est pas installé, consulter la zone et utiliser un résolveur DNS disponible sur le poste. Une mise à jour DNS peut mettre du temps à être vue selon les caches déjà présents ; le TTL de 300 secondes ne force pas l'expiration des anciennes réponses.
 
-Contrôler dans un navigateur l'accueil, le lien Documentation, une page documentaire interne, la recherche et les ressources locales. Vérifier aussi que les sites déjà servis par Caddy répondent comme avant la modification du proxy.
+Contrôler dans un navigateur l'accueil, la connexion aux tâches, les deux vues, le thème, l'historique, la documentation et ses ressources locales. Vérifier aussi que les sites déjà servis par Caddy répondent comme avant la modification du proxy.
 
 ## Livraisons suivantes
 
@@ -131,6 +151,8 @@ Les paramètres DNS et le bloc Caddy restent stables tant que le domaine, le ré
 ./scripts/smoke-test.sh https://life.thibault-leveau.com
 ```
 
-Le retour arrière utilise la référence enregistrée dans `.deployment/previous-image`. Il ne reconstruit pas l'image et ne modifie ni Git, ni le DNS, ni Caddy. Il nécessite qu'une livraison précédente ait été enregistrée et que l'image existe toujours localement. Il conserve aussi le fichier `compose.yaml` courant : si une livraison change sa configuration de manière incompatible, restaurer la configuration correspondante depuis Git avant de revenir à l'ancienne image.
+Le retour arrière utilise `.deployment/previous-image` sans reconstruire. L'image doit être disponible et reconnaître exactement la révision Alembic actuelle ; le script teste cette compatibilité avant de la démarrer. Il ne modifie ni données, ni Git, ni DNS, ni Caddy.
 
-S'il n'existe aucune version précédente, corriger la version courante et publier un nouveau commit. Ne pas choisir au hasard une image non identifiée. Pour un incident survenu immédiatement après une modification de Caddy, restaurer aussi la sauvegarde du proxy, valider, puis recharger.
+Si le schéma a changé, le script refuse de prétendre qu'un simple changement d'image suffit. Suivre [Sauvegardes et restauration](sauvegardes.md) pour choisir une correction en avant ou restaurer un dump puis une image compatible. Le socle antérieur à PostgreSQL ne possède pas la sonde de compatibilité : son retour exige de reprendre sa configuration documentée, en conservant la sauvegarde et le volume actuel.
+
+La configuration Compose utilisée reste celle du checkout courant. Si elle a changé de façon incompatible, préparer un checkout de la version cible et examiner ses différences avant toute opération. Ne pas supprimer des volumes ou modifier les autres services du VPS pour tenter un retour arrière.

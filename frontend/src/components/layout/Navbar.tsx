@@ -16,6 +16,7 @@ export function Navbar() {
             <span className="active-dot" aria-hidden="true" />
             Accueil
           </a>
+          <a className="nav-link" href="/tasks">Tâches</a>
           <a className="nav-link nav-link-documentation" href="/documentation/">
             Documentation
             <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">

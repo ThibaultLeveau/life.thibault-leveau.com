@@ -51,8 +51,10 @@ def test_public_api_documentation(client: TestClient) -> None:
     assert client.get("/api/docs").status_code == 200
     schema = client.get("/api/openapi.json").json()
     assert schema["info"]["title"] == "Life API"
-    assert set(schema["paths"]) == {"/api/v1/health"}
+    assert {"/api/v1/health", "/api/v1/tasks", "/api/v1/auth/session"} <= set(schema["paths"])
     assert schema["paths"]["/api/v1/health"]["get"]["responses"]["200"]
+    assert schema["paths"]["/api/v1/tasks"]["get"]["security"]
+    assert schema["components"]["securitySchemes"]["APIKeyCookie"]["in"] == "cookie"
 
 
 @pytest.mark.parametrize("path", ["/", "/favicon.svg"])

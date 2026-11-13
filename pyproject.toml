@@ -5,10 +5,17 @@ description = "Life — espace personnel, API FastAPI et interface React."
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "alembic>=1.13,<2",
+    "argon2-cffi>=25.1,<26",
     "fastapi>=0.115,<1.0",
+    "psycopg[binary]>=3.2,<4",
     "pydantic-settings>=2.8,<3.0",
+    "sqlalchemy>=2.0,<3",
     "uvicorn[standard]>=0.34,<1.0",
 ]
+
+[project.scripts]
+life = "life_app.cli:main"
 
 [build-system]
 requires = ["hatchling>=1.27"]

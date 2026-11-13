@@ -52,9 +52,11 @@ extra:
       name: Ouvrir Life
 nav:
   - Présentation: index.md
+  - Utiliser les tâches: taches.md
   - Développer:
       - Démarrage: demarrage.md
       - Architecture: architecture.md
+      - Données et historique: donnees.md
       - Backend: backend.md
       - Frontend: frontend.md
       - Configuration: configuration.md
@@ -62,9 +64,11 @@ nav:
       - Tests et qualité: tests.md
   - Mettre en production:
       - Déploiement: deploiement.md
+      - Sauvegardes et restauration: sauvegardes.md
       - Exploitation: exploitation.md
       - Sécurité: securite.md
   - Faire évoluer:
       - Ajouter une fonctionnalité: evolution.md
       - Spécification des tâches: taches-specification.md
       - Décision initiale: decisions/001-architecture-initiale.md
+      - Tâches et persistance: decisions/002-gestion-taches.md

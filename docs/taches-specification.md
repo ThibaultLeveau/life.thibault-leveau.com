@@ -1,10 +1,10 @@
 # Gestion des tâches — spécification
 
-**État :** préparation de la fonctionnalité, architecture en attente d'accord.
+**État :** contrat implémenté dans le dépôt, architecture acceptée dans l'[ADR 002](decisions/002-gestion-taches.md).
 
 **Suivi :** [issue GitHub #3](https://github.com/ThibaultLeveau/life.thibault-leveau.com/issues/3).
 
-Cette page décrit le résultat attendu et les scénarios de validation. Elle ne décrit pas une fonctionnalité déjà disponible. Le socle actuel reste celui de l'[architecture](architecture.md) et de l'[ADR 001](decisions/001-architecture-initiale.md). La proposition de stockage et d'authentification figure dans l'issue ; elle doit recevoir l'accord explicite de Thibault avant son implémentation.
+Cette page conserve le périmètre de la demande et ses scénarios de validation. Le [guide utilisateur](taches.md), le [modèle de données](donnees.md) et la [référence API](api.md) décrivent le comportement implémenté. La disponibilité sur le domaine dépend du déploiement de cette version. Le socle initial est décrit dans l'[ADR 001](decisions/001-architecture-initiale.md). Thibault a approuvé la proposition de stockage et d'authentification dans la conversation ; l'accord est consigné dans l'issue et l'ADR 002.
 
 ## Organisation et vocabulaire
 
@@ -27,7 +27,7 @@ Dans l'espace « Personnel », les sections « Maison » et « Administratif » 
 
 Déplacer « Réparer la lampe » dans la colonne « Terminé » résout la tâche ; la case correspondante devient cochée en liste. Changer seulement de ligne change sa section sans modifier son état de résolution.
 
-## Interface attendue
+## Interface
 
 La référence visuelle est Todoist : navigation latérale compacte, nom de l'espace en tête de page, création rapide, séparateurs discrets, cases à cocher circulaires, cartes de kanban lisibles, actions contextuelles et panneau de détails. Conserver l'identité Life et les ressources locales du projet.
 
@@ -47,7 +47,7 @@ Les thèmes **clair**, **sombre** et **système** doivent couvrir l'ensemble de 
 
 Sur mobile, la navigation se replie et le kanban peut défiler horizontalement dans sa propre zone. Les actions essentielles restent accessibles sans survol ni glisser-déposer obligatoire. Prévoir les états chargement, aucun espace, espace vide, filtre sans résultat, erreur réseau et session expirée.
 
-## Configuration à livrer
+## Configuration
 
 « Configurable » couvre les réglages suivants, accessibles dans l'interface et par API. Leur persistance doit être vérifiée après rechargement et nouvelle connexion.
 
@@ -84,11 +84,11 @@ Les changements de données et leurs événements doivent être enregistrés dan
 
 L'archivage d'un espace ou d'une section masque son contenu dans les vues actives sans terminer artificiellement les tâches. La restauration rétablit l'accès aux données en conservant les tâches qui étaient déjà archivées individuellement. Toute suppression définitive future devra définir son effet sur l'historique et les sauvegardes.
 
-Changer le caractère ouvert/terminé d'un statut utilisé ne doit pas réinterpréter silencieusement le passé. La solution devra soit refuser cette modification avec une action de réaffectation explicite, soit enregistrer individuellement les transitions concernées. La règle retenue sera décrite dans le contrat livré.
+Changer le caractère ouvert/terminé d'un statut utilisé ne doit pas réinterpréter silencieusement le passé. La modification est refusée pour un statut utilisé. La suppression exige un remplacement du même type ouvert/terminé ; un changement de résolution passe par des déplacements de tâches explicites.
 
-## Contrat API à réaliser
+## Contrat API
 
-Les routes suivantes constituent un contrat proposé ; elles n'existent pas encore. Leur forme définitive, leurs schémas et leurs exemples seront publiés dans la [référence API](api.md) et OpenAPI au fil de l'implémentation.
+Les ressources suivantes sont implémentées. Les méthodes, schémas, codes et exemples exacts sont dans la [référence API](api.md) et OpenAPI.
 
 | Ressource sous `/api/v1` | Opérations requises |
 | --- | --- |
@@ -104,7 +104,7 @@ Les routes suivantes constituent un contrat proposé ; elles n'existent pas enco
 | `/tasks/{id}/complete` et `/tasks/{id}/reopen` | Transitions explicites utilisées par les cases à cocher |
 | `/tasks/{id}/events` | Consultation paginée de l'historique de cycle de vie |
 
-L'archivage et la restauration peuvent utiliser un champ dédié dans les opérations de modification. Les opérations d'ordre doivent préciser les éléments affectés et empêcher toute référence à une ressource d'un autre propriétaire. Un déplacement entre espaces exige un statut et une section compatibles avec la destination ; le traitement des étiquettes doit être documenté.
+L'archivage et la restauration utilisent le champ `archived` des opérations PATCH. Les opérations d'ordre doivent préciser les éléments affectés et empêcher toute référence à une ressource d'un autre propriétaire. Un déplacement entre espaces exige un statut et une section compatibles avec la destination ; le traitement des étiquettes doit être documenté.
 
 Chaque route métier doit contrôler l'authentification et la propriété des ressources côté serveur. Une requête visant un identifiant privé d'un autre propriétaire ne doit pas révéler son contenu. Ne pas se fier à un identifiant de propriétaire envoyé par le navigateur.
 
@@ -130,15 +130,13 @@ La présence de fichiers ou de routes ne suffit pas : vérifier le résultat de 
 | Refuser une session absente, expirée ou révoquée | Aucune lecture ni écriture métier autorisée |
 | Présenter une ressource d'un autre propriétaire | Accès et mutations refusés, aucune fuite dans les réponses |
 | Échouer ou réessayer une mutation | Pas de données partielles, pas de résolution dupliquée, erreur utilisable dans l'interface |
-| Migrer une base vide et restaurer une sauvegarde | Schéma, contraintes et données synthétiques retrouvés sur PostgreSQL si la proposition est validée |
+| Migrer une base vide et restaurer une sauvegarde | Schéma, contraintes et données synthétiques retrouvés sur PostgreSQL |
 | Utiliser uniquement un client HTTP | Toutes les opérations métier de l'interface disponibles sans accès direct à la base |
 
 Exécuter `make check`, `make test` et `make build`, ainsi que les tests comportementaux pertinents, avant la PR. Le changement de packaging impose également la construction Docker et les tests HTTP du conteneur lorsque l'environnement le permet. Documenter les résultats réels, réaliser une revue du diff complet et attendre la CI du dernier commit avant fusion.
 
 ## Documentation de livraison
 
-Après l'accord d'architecture, ajouter un ADR dédié sans modifier l'ADR initial. Mettre à jour le README, l'architecture, l'évolution, la configuration et les guides backend/frontend. Décrire les modèles, contraintes, événements, sessions, erreurs et limites du système livré.
+L'[ADR 002](decisions/002-gestion-taches.md) consigne l'accord sans réécrire l'ADR initial. Le [guide utilisateur](taches.md), les [contrats API](api.md), les [données](donnees.md), les [tests](tests.md) et les [sauvegardes](sauvegardes.md) décrivent le résultat. Les règles API/documentation sont inscrites dans `AGENTS.md`.
 
-La documentation d'exploitation devra couvrir la création du compte personnel, les secrets de configuration, les migrations explicites, les sauvegardes et la restauration, ainsi que le retour arrière après évolution du schéma. Aucun secret réel ni exemple tiré des tâches personnelles ne doit être commité.
-
-À la livraison, remplacer les éléments proposés par le contrat réellement vérifié et publier un guide utilisateur pour les espaces, sections, tâches, vues et réglages. La fusion de la PR et la mise en production restent deux opérations distinctes ; suivre le [guide de déploiement](deploiement.md) lorsqu'une publication est demandée.
+Les résultats réels et la revue sont consignés dans l'issue et la PR. La fusion et la mise en production restent distinctes ; suivre le [déploiement](deploiement.md) lorsqu'une publication est demandée.

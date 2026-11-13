@@ -1,8 +1,14 @@
-.PHONY: install dev-backend dev-frontend dev-docs check test build docs docker-build deploy smoke
+.PHONY: install dev-db migrate dev-backend dev-frontend dev-docs check test test-ui test-container build docs docker-build deploy smoke
 
 install:
 	uv sync --frozen --group docs
 	npm --prefix frontend ci
+
+dev-db:
+	docker compose -f compose.dev.yaml up -d --wait db
+
+migrate:
+	uv run life migrate
 
 dev-backend:
 	uv run uvicorn life_app.main:create_app --factory --reload --host 127.0.0.1 --port 8100
@@ -17,10 +23,16 @@ check:
 	uv run ruff check backend
 	uv run ruff format --check backend
 	npm --prefix frontend run typecheck
-	bash -n scripts/deploy.sh scripts/smoke-test.sh
+	@for script in scripts/*.sh infrastructure/postgres/*.sh; do bash -n "$$script" || exit; done
 
 test:
-	uv run pytest
+	bash scripts/test.sh
+
+test-ui:
+	npm --prefix frontend run test:e2e
+
+test-container:
+	bash scripts/test-container.sh
 
 build:
 	npm --prefix frontend run build

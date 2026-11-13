@@ -41,6 +41,9 @@ for path in assets.paths:
     assert body and 'text/html' not in headers['Content-Type'], f'Bundle invalide : {path}'
 body, _ = get('/api/v1/health')
 assert json.loads(body) == {'status': 'ok'}, 'Réponse de santé inattendue'
+get('/tasks')
+get('/api/v1/health/ready')
+get('/api/v1/tasks', 401)
 get('/api/docs')
 body, _ = get('/api/openapi.json')
 assert '/api/v1/health' in json.loads(body)['paths'], 'Schéma OpenAPI incomplet'

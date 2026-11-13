@@ -1,74 +1,36 @@
 # Frontend
 
-## Structure
+React, TypeScript et Vite conservent l'outillage du socle. `App.tsx` sélectionne l'accueil `/` ou les tâches `/tasks`, sans routeur supplémentaire ni fallback général. L'espace actif peut être référencé avec `?space=<UUID>` ; les accès sont toujours contrôlés côté serveur.
 
-L'interface utilise React et TypeScript. Vite fournit le serveur de développement et compile le site pour la production.
+## Module tâches
 
-| Emplacement | Responsabilité |
+| Fichier / composant | Rôle |
 | --- | --- |
-| `src/main.tsx` | Monter React dans le document HTML |
-| `src/app/App.tsx` | Assembler l'application |
-| `src/components/layout/AppLayout.tsx` | Encadrer le contenu de page |
-| `src/components/layout/Navbar.tsx` | Afficher la marque et les liens principaux |
-| `src/pages/HomePage.tsx` | Afficher l'accueil |
-| `src/styles/tokens.css` | Définir couleurs, dimensions et typographie |
-| `src/styles/global.css` | Appliquer les styles et l'adaptation aux écrans |
-| `public/favicon.svg` | Favicon distribué à la racine |
+| `TasksPage.tsx` | Session, espaces, état de chargement, filtres et assemblage |
+| `api.ts` | Requêtes de même origine, CSRF en mémoire, pagination et erreurs |
+| `types.ts` | Contrats TypeScript et formatage des dates calendaires |
+| `TaskViews` | Listes, lignes/colonnes du tableau, ajouts rapides et glisser-déposer |
+| `TaskEditor`, `MoveDialog` | Édition atomique, conflits, historique et déplacement accessible |
+| `WorkspaceSettings`, `WorkspaceDialog` | Propriétés, ordre, sections, colonnes, étiquettes et archives |
+| `Dialog`, `LoginPanel` | Dialogues natifs, focus et connexion |
+| `tasks.css` | Présentation et tokens spécifiques à la fonctionnalité |
 
-La V1 ne nécessite ni gestionnaire d'état global ni routeur client. Les liens de navigation sont de véritables liens HTML ; la documentation est une application statique distincte servie par le même backend.
+`@dnd-kit/core` fournit les capteurs pointeur/clavier et les cibles de dépôt. Le serveur calcule l'ordre final. Un tri automatique désactive les poignées ; la commande de déplacement reste disponible. Les sections sont filtrées selon leur visibilité ; les statuts définissent les colonnes, sans les confondre avec les sections.
 
-## Ligne graphique
+Le client recharge les données après mutation. Les préférences de vue sont écrites dans l'ordre et la recherche attend 300 ms après la saisie. Les requêtes de lecture obsolètes sont annulées lors d'un changement d'espace. Les contrôles de disposition attendent le chargement de la configuration pour éviter qu'une réponse tardive écrase le choix de l'utilisateur.
 
-L'accueil se limite à la marque **Life**, aux liens **Accueil** et **Documentation**, et au titre **« Bienvenue, Thibault. »**. Le fond blanc cassé, le texte anthracite et l'accent vert profond sont définis dans les tokens. La police Inter est distribuée avec les ressources de l'application.
+## Thèmes et accessibilité
 
-Les marges, la largeur maximale et la hiérarchie typographique portent l'interface. Ne pas ajouter de compteurs fictifs, de cartes inactives ou de texte d'explication pour remplir l'écran. Les futurs éléments doivent correspondre à une fonction disponible.
+Les tokens globaux de l'accueil restent dans `styles/tokens.css`. Les tokens des tâches sont définis au niveau racine, avec variantes explicites `data-theme=light/dark` et média système ; ce choix évite une transformation partielle de `light-dark()` dans le CSS compilé. Le thème du compte est chargé depuis l'API, sans secret ni donnée métier dans localStorage.
 
-## Accessibilité
+Inter est servi localement. Les icônes sont des SVG décoratifs avec des noms accessibles sur leurs boutons. Les dialogues natifs retiennent le focus, se ferment avec Échap, donnent le focus au premier champ et le rendent au déclencheur. Les onglets acceptent flèches, Début et Fin. Chaque tâche dispose d'une commande de déplacement utilisable sans geste de glisser-déposer.
 
-Conserver une structure sémantique avec navigation, contenu principal et titre de niveau 1. Le lien actif expose `aria-current` et les liens restent accessibles au clavier. Le focus doit être visible sur les fonds clairs comme sur l'accent vert.
+Le menu se replie sous 800 px. Le kanban défile horizontalement à l'intérieur de sa zone ; la page et les dialogues restent utilisables à 320 px. Les erreurs d'enregistrement et les succès utilisent des annonces accessibles. Une interface vide ne contient pas de fausses tâches de démonstration.
 
-Lors d'une modification, vérifier :
+## Contrats et limites
 
-- La lecture et la navigation à 320–375 px de largeur, puis sur ordinateur.
-- L'absence de défilement horizontal à 200 % de zoom.
-- L'ordre du focus et le lien d'accès direct au contenu lorsqu'il est présent.
-- Des noms compréhensibles pour les liens, icônes et boutons.
-- Le respect de `prefers-reduced-motion` si une animation est introduite.
-- Le contraste du texte et des états interactifs.
+Les données privées proviennent exclusivement de l'API. Un `expected_version` périmé déclenche une erreur explicite ; le formulaire est conservé et propose de recharger. Aucun retry de mutation ne remplace silencieusement la version attendue. La déconnexion/expiration efface les données de session affichables.
 
-Les éléments décoratifs n'ont pas besoin d'être annoncés par les technologies d'assistance.
+Les échéances sont formatées comme dates locales, sans conversion d'un minuit UTC susceptible de changer de jour. Les événements sont convertis depuis leurs instants UTC vers le fuseau du navigateur.
 
-## Serveur de développement
-
-```bash
-make dev-frontend
-```
-
-Vite écoute sur `127.0.0.1:5173`. Sa configuration transmet `/api` à FastAPI sur `127.0.0.1:8100` et `/documentation` à MkDocs sur `127.0.0.1:8101`, en conservant les préfixes.
-
-Les appels API futurs doivent utiliser des URL relatives, par exemple `/api/v1/tasks`, afin de fonctionner avec ce proxy puis avec l'origine publique en production. Ne pas inscrire `localhost` dans le code de l'application.
-
-Les variables exposées par Vite et les fichiers frontend sont publics. Aucun secret serveur ne doit utiliser le préfixe `VITE_` ni se retrouver dans `public/`.
-
-## Construction
-
-```bash
-npm --prefix frontend ci
-npm --prefix frontend run build
-```
-
-La sortie se trouve dans `frontend/dist/`. Vite produit des noms d'assets contenant une empreinte pour distinguer les versions. Le backend sert l'index uniquement à `/`, puis les ressources depuis `/assets/` et le favicon depuis `/favicon.svg`.
-
-Ne pas éditer `dist/` : modifier les sources et reconstruire. Les polices étant locales, l'accueil ne dépend pas d'un service de typographie distant.
-
-## Documentation visuelle
-
-MkDocs partage la palette du site via `docs/assets/stylesheets/extra.css`. Le thème ne charge pas de police Google (`font: false`). Les diagrammes Mermaid sont fournis sous forme de SVG déjà rendus, accompagnés de leurs sources `.mmd` ; le navigateur n'a donc pas besoin d'une bibliothèque Mermaid distante.
-
-Pour faire évoluer les diagrammes, voir les instructions de régénération dans [Tests et qualité](tests.md#diagrammes-de-documentation).
-
-## Préparer une fonctionnalité
-
-Créer un dossier `src/features/<fonctionnalite>/` lorsque plusieurs composants et appels HTTP propres à une fonctionnalité apparaissent. Garder les composants réellement transverses dans `components/`. Définir explicitement les états chargement, vide et erreur lorsqu'une API est ajoutée.
-
-La procédure complète et les prérequis liés aux données personnelles figurent dans [Faire évoluer l'application](evolution.md).
+Pas de mode hors connexion, service worker, synchronisation temps réel ou virtualisation. Le client lit les pages API de 200 tâches jusqu'au total pour une vue personnelle complète. Les tests de navigateur utilisent la compilation de production, afin de vérifier aussi les effets de l'optimisation CSS/JavaScript. Voir [Tests](tests.md).

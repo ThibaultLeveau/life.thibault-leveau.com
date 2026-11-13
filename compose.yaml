@@ -1,6 +1,28 @@
 name: life
 
 services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: life
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${LIFE_POSTGRES_ADMIN_PASSWORD:?Set the database administrator password}
+      LIFE_APP_PASSWORD: ${LIFE_POSTGRES_PASSWORD:?Set LIFE_POSTGRES_PASSWORD in .env.production}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infrastructure/postgres/init.sh:/docker-entrypoint-initdb.d/10-life.sh:ro
+    networks: [database]
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -h 127.0.0.1 -U life -d life"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
   web:
     image: ${LIFE_IMAGE:?Set LIFE_IMAGE to the image built for this release}
     restart: unless-stopped
@@ -16,7 +38,13 @@ services:
       LIFE_ENVIRONMENT: production
       LIFE_PUBLIC_BASE_URL: https://life.thibault-leveau.com
       LIFE_LOG_LEVEL: INFO
+      LIFE_DATABASE_URL: ${LIFE_DATABASE_URL:?Set the PostgreSQL connection URL in .env.production}
+      LIFE_SESSION_HOURS: ${LIFE_SESSION_HOURS:-168}
+    depends_on:
+      db:
+        condition: service_healthy
     networks:
+      database:
       proxy:
         aliases:
           - life-web
@@ -27,6 +55,11 @@ services:
         max-file: '3'
 
 networks:
+  database:
+    internal: true
   proxy:
     external: true
     name: multisite_proxy
+
+volumes:
+  postgres_data:
