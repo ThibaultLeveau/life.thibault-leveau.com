@@ -2,105 +2,59 @@
 
 ## Vue d'ensemble
 
-Life est un monorepo. En développement, trois serveurs spécialisés permettent le rechargement rapide. En production, un seul processus Uvicorn sert l'API, le frontend compilé et la documentation statique.
+Life conserve le monorepo FastAPI / React / MkDocs. Un processus Uvicorn sert l'API, le frontend compilé et la documentation. PostgreSQL 17 est le seul service de données ajouté, conformément à l'[ADR 002](decisions/002-gestion-taches.md).
 
-![Flux de production : navigateur, HTTPS, Caddy puis conteneur FastAPI distribuant API, frontend et documentation.](assets/diagrams/production.svg)
+![Flux de production : navigateur, Caddy, application puis PostgreSQL privé.](assets/diagrams/production.svg)
 
-[Source Mermaid du diagramme](assets/diagrams/production.mmd)
+[Source Mermaid](assets/diagrams/production.mmd)
 
-Le navigateur ne communique pas directement avec Docker. Caddy termine TLS et transmet les requêtes au service `life-web:8000` sur le réseau externe `multisite_proxy`. Le conteneur Life ne publie aucun port sur l'hôte.
+Caddy termine TLS et transmet à `life-web:8000` sur `multisite_proxy`. Le service web rejoint aussi le réseau Compose interne `database`. PostgreSQL ne rejoint pas le réseau du proxy, ne publie aucun port hôte et conserve ses données dans `postgres_data`. Le rôle applicatif est propriétaire de sa base, sans droits d'administration du cluster.
+
+En développement, Vite, FastAPI et MkDocs disposent de serveurs distincts ; le proxy Vite maintient une origine unique. `compose.dev.yaml` fournit un PostgreSQL local indépendant de la production.
 
 ## Responsabilités
 
-| Bloc | Responsabilité | Ne contient pas |
-| --- | --- | --- |
-| `backend/src/life_app/core/` | Paramètres typés et journalisation | Routes métier |
-| `backend/src/life_app/api/` | Routes JSON versionnées | Rendu React |
-| `backend/src/life_app/web/` | Distribution contrôlée des fichiers compilés | Règles métier |
-| `frontend/src/app/` | Assemblage de l'interface | Requêtes serveur implicites |
-| `frontend/src/components/layout/` | Navigation et structure commune | Fausses fonctionnalités |
-| `frontend/src/pages/` | Contenu des pages | Infrastructure |
-| `frontend/src/styles/` | Tokens visuels et styles globaux | Secrets ou configuration serveur |
-| `docs/` | Sources MkDocs et ressources documentaires | Données personnelles |
-| `infrastructure/` | Exemple d'intégration au proxy existant | Configuration complète d'autres sites |
-| `scripts/` | Publication et vérification opérationnelle | Provisionnement de comptes ou achats |
+| Dossier | Responsabilité |
+| --- | --- |
+| `core/` | Paramètres, journalisation, engine et sessions SQL |
+| `features/auth/` | Contrats, modèles et services de connexion/autorisation |
+| `features/tasks/` | Contrats, modèles, ordre, transitions et événements des tâches |
+| `api/v1/` | Routes JSON, dépendances et frontières de transaction |
+| `web/` | Distribution contrôlée des fichiers statiques |
+| `migrations/` | Évolutions du schéma figées et versionnées |
+| `frontend/src/app/` | Sélection du shell accueil ou tâches |
+| `frontend/src/features/tasks/` | Composants métier, états d'interface et client HTTP |
+| `frontend/src/components/layout/` | Navigation commune de l'accueil |
+| `frontend/src/styles/` | Tokens et styles globaux |
+| `docs/` | Documentation publique, sans données personnelles |
+| `infrastructure/` | Intégration Caddy et initialisation du rôle PostgreSQL |
+| `scripts/` | Tests, publication, sauvegarde et restauration explicites |
 
-## Arborescence
+Les services métier utilisent SQLAlchemy directement : aucune couche générique de dépôt, file de messages ou microservice supplémentaire. Une session SQL est partagée par les dépendances d'une requête. Les mutations d'un propriétaire sont sérialisées et les tâches utilisent un numéro de version. Voir [Backend](backend.md) et [Données](donnees.md).
 
-```text
-.
-├── backend/
-│   ├── src/life_app/
-│   │   ├── main.py
-│   │   ├── core/
-│   │   │   ├── config.py
-│   │   │   └── logging.py
-│   │   ├── api/
-│   │   │   ├── router.py
-│   │   │   └── health.py
-│   │   └── web/static.py
-│   └── tests/
-├── frontend/
-│   ├── public/
-│   ├── src/
-│   │   ├── main.tsx
-│   │   ├── app/App.tsx
-│   │   ├── components/layout/
-│   │   ├── pages/HomePage.tsx
-│   │   └── styles/
-│   ├── package.json
-│   ├── package-lock.json
-│   ├── tsconfig.json
-│   └── vite.config.ts
-├── docs/
-│   ├── assets/
-│   ├── decisions/
-│   └── *.md
-├── infrastructure/caddy/life.caddy
-├── scripts/
-│   ├── deploy.sh
-│   └── smoke-test.sh
-├── .github/workflows/ci.yml
-├── .env.example
-├── .python-version
-├── pyproject.toml
-├── uv.lock
-├── mkdocs.yml
-├── Dockerfile
-├── compose.yaml
-├── Makefile
-└── README.md
-```
+## Flux métier
 
-## Flux HTTP
+1. Le navigateur ouvre une session via l'API et reçoit un cookie opaque HttpOnly.
+2. Les lectures vérifient la session et le propriétaire. Les écritures vérifient aussi l'origine et le jeton CSRF.
+3. Le routeur appelle le service : validation, mutation et événements dans la même transaction PostgreSQL.
+4. L'interface recharge les données enregistrées. Les préférences de vue et de thème passent par la même API.
 
-Les routes de l'API sont déclarées explicitement. L'accueil est servi uniquement à `/`, les ressources Vite sous `/assets/`, et MkDocs sous `/documentation/`. Un chemin inconnu produit une erreur HTTP 404 ; il n'est jamais réinterprété comme la page d'accueil React.
+React ne conserve pas de base métier parallèle dans localStorage. Les champs en cours de saisie et l'état des dialogues restent transitoires. Les mutations de tâche exigent `expected_version` et retournent un conflit 409 si une autre écriture a changé la tâche.
 
-Cette règle évite qu'un appel à une route API inexistante renvoie un document HTML avec un statut 200. Elle permet aussi de repérer immédiatement un fichier JavaScript ou une page de documentation absente.
+## HTTP et compilation
 
-La liste complète des chemins et de leurs contrats figure dans la [référence API](api.md).
+`/` et `/tasks` sont les seules routes HTML React. Les assets sont sous `/assets/`, l'API sous `/api/v1`, Swagger sous `/api/docs` et MkDocs sous `/documentation/`. Tout chemin inconnu reste 404. Le frontend utilise des URL API relatives, sans service réseau distinct pour le rendu.
 
-## Construction de l'image
+![Construction multi-étapes : frontend et documentation compilés rejoignent le runtime Python.](assets/diagrams/build.svg)
 
-![Construction : sources et verrous produisent un frontend statique, une documentation statique et un environnement Python réunis dans une image runtime.](assets/diagrams/build.svg)
+[Source Mermaid de la construction](assets/diagrams/build.mmd)
 
-[Source Mermaid du diagramme](assets/diagrams/build.mmd)
+Le runtime contient les dépendances Python applicatives, le CLI, les migrations et les fichiers compilés. Node, Vite, Playwright et MkDocs ne tournent pas en production. L'utilisateur runtime n'est pas privilégié et son système de fichiers est en lecture seule.
 
-Le Dockerfile utilise plusieurs étapes : installation npm et compilation Vite, installation des outils de documentation et compilation MkDocs, puis installation de l'application Python dans l'image finale. Les sorties du frontend et de la documentation sont copiées dans le runtime.
+Les verrous uv/npm sont versionnés. Les images portent le SHA complet des sources ; les tags des images de base peuvent néanmoins évoluer entre deux reconstructions. Conserver l'image publiée et sa sauvegarde de données. Une image précédente n'annule jamais une migration.
 
-L'image finale n'exécute ni Node, ni Vite, ni `mkdocs serve`. Elle lance Uvicorn avec un utilisateur non privilégié. Les bibliothèques Python nécessaires au serveur sont distinctes des outils de test et de documentation.
+## Limites choisies
 
-## Dépendances et reproductibilité
+L'application reste personnelle : pas de partage d'espaces, inscription publique, SSO, synchronisation temps réel, pièces jointes, récurrences ou tableau statistique. Le modèle conserve les événements nécessaires aux statistiques futures. La recherche est une recherche SQL de sous-chaîne, et le frontend charge toutes les tâches de la vue : des volumes importants nécessiteront pagination visuelle/indexation après mesure.
 
-- `pyproject.toml` décrit le package Python et ses groupes de dépendances ; `uv.lock` verrouille leur résolution.
-- `frontend/package.json` décrit les scripts et dépendances web ; `package-lock.json` verrouille leur installation.
-- `.python-version` fixe la famille Python utilisée localement ; le Dockerfile et la CI utilisent Python 3.13 et Node.js 24.
-- Les images applicatives sont identifiées par le SHA complet du commit Git.
-
-Les tags des images de base peuvent recevoir des corrections. Un SHA applicatif identifie les sources ; il ne garantit pas à lui seul que deux reconstructions réalisées à des dates différentes produisent les mêmes octets. Conserver l'image réellement publiée permet un retour arrière sans reconstruction.
-
-## Limites actuelles
-
-Il n'y a aucun stockage persistant, compte utilisateur, ordonnanceur, file de messages ou service métier. La santé HTTP indique que le processus répond, sans contrôle d'une dépendance distante.
-
-Le choix d'un seul service évite une séparation opérationnelle prématurée. La structure permet d'ajouter des modules métier, puis une base de données et une authentification lorsque leurs besoins seront définis. Voir [la décision initiale](decisions/001-architecture-initiale.md).
+L'[ADR initial](decisions/001-architecture-initiale.md) reste inchangé. Toute évolution structurante suit les règles d'accord explicite du dépôt.

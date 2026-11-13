@@ -14,7 +14,11 @@ flowchart TD
     browser["Navigateur"] -->|"HTTPS · life.thibault-leveau.com"| proxy["Caddy · certificat TLS"]
     subgraph network["Réseau Docker multisite_proxy"]
       proxy -->|"HTTP · life-web:8000"| app["FastAPI / Uvicorn"]
-      app --> api["/api/v1/health · JSON"]
-      app --> front["/ · React compilé"]
+      app --> api["/api/v1 · sessions, tâches, préférences"]
+      app --> front["/ et /tasks · React compilé"]
       app --> docs["/documentation/ · MkDocs compilé"]
+    end
+    subgraph private["Réseau privé Life · aucun port hôte"]
+      app -->|"SQLAlchemy / psycopg"| db["PostgreSQL 17"]
+      db --> volume["Volume postgres_data"]
     end

@@ -1,78 +1,45 @@
 # Backend
 
-## Point d'entrée
+`life_app.main:create_app` assemble FastAPI, la configuration, les connexions, les routes et les fichiers statiques. L'installation `backend/src/` expose aussi la commande `life` ; aucun ajustement manuel de `PYTHONPATH` n'est nécessaire.
 
-`life_app.main:create_app` est la factory FastAPI. Elle construit l'application, charge les paramètres validés, configure la journalisation, ajoute les routes de l'API et enregistre les fichiers statiques.
-
-```bash
-uv run uvicorn life_app.main:create_app --factory --reload --host 127.0.0.1 --port 8100
-```
-
-L'installation du package utilise l'organisation `backend/src/`. Il n'est donc pas nécessaire de modifier `PYTHONPATH` à chaque commande. Exécuter les commandes via `uv run` garantit l'utilisation de l'environnement du projet.
-
-## Organisation
-
-| Module | Rôle |
+| Module | Responsabilité |
 | --- | --- |
-| `main.py` | Assembler l'application, sans logique métier |
-| `core/config.py` | Charger et valider les variables `LIFE_*` |
-| `core/logging.py` | Configurer le niveau et la sortie des journaux |
-| `api/router.py` | Regrouper les routes versionnées |
-| `api/health.py` | Fournir la sonde de santé |
-| `web/static.py` | Servir les artefacts frontend et MkDocs |
+| `core/config.py`, `core/logging.py` | Paramètres typés, sortie standard et suppression des paramètres de requête des logs d'accès |
+| `core/database.py` | Engine PostgreSQL, pool et session SQLAlchemy par requête |
+| `features/auth/` | Comptes, sessions, limites de connexion, contrats et contrôles d'accès |
+| `features/tasks/` | Modèles relationnels, contrats Pydantic et règles métier |
+| `api/v1/` | Traduction HTTP, dépendances et commit explicite des mutations |
+| `api/health.py` | Vie du processus et disponibilité base/migrations |
+| `web/static.py` | Routes publiques explicites et artefacts autorisés |
+| `migrations/` | Historique Alembic inclus dans le package et l'image |
+| `cli.py` | Migration, création de compte et réinitialisation du mot de passe |
 
-Le préfixe de version est `/api/v1`. L'OpenAPI et Swagger UI ont leurs propres adresses sous `/api`, détaillées dans [la référence API](api.md).
+## Transactions et concurrence
 
-## Configuration et démarrage
+Les accès SQLAlchemy/psycopg synchrones sont utilisés dans les routes FastAPI synchrones. Une requête partage une session SQL et la ferme à sa fin ; un échec annule les mutations non commitées. Le routeur commite après validation des résultats. Le service enregistre la tâche et ses événements dans la même transaction.
 
-Les paramètres sont gérés par Pydantic Settings. Une valeur invalide doit provoquer un échec visible au démarrage, plutôt qu'une correction silencieuse. Les environnements acceptés sont `development`, `test` et `production`.
+Chaque mutation authentifiée verrouille la ligne utilisateur avant de lire les objets modifiables. Cela sérialise les écritures d'un même propriétaire, y compris les déplacements entre espaces. Une tâche exige en plus `expected_version` ; une édition périmée obtient 409 au lieu d'écraser silencieusement un autre changement. Réordonner peut changer la version des autres tâches dont la position évolue.
 
-En développement, les artefacts statiques peuvent ne pas encore exister : l'API reste utilisable et Vite sert l'interface. Tant que l’index frontend n’est pas construit, `/` sur le backend renvoie 503. En production, les répertoires compilés font partie de l'image et doivent être présents. Les [tests](tests.md) couvrent ce contrat.
+Les lectures n'ont pas ce verrou. Une liste paginée n'est pas un instantané multi-requêtes ; un client parcourant de très nombreuses pages pendant des modifications doit rafraîchir ses données. Le frontend charge toutes les pages pour rendre la vue personnelle, sans virtualisation.
 
-Toutes les variables documentées et leur portée sont recensées dans [Configuration](configuration.md).
+L'authentification applique les contrôles côté serveur sur toutes les routes métier. Les identifiants de propriétaire ne proviennent jamais d'une entrée cliente. Les références espace/section/statut/étiquette sont vérifiées dans le service et les clés étrangères composites. Voir [Données](donnees.md) et [Sécurité](securite.md).
 
-## Distribution statique
+## Erreurs et contrats
 
-Le code ne monte pas tout le répertoire de travail comme un site public. Seuls les fichiers de production nécessaires sont servis : l'index d'accueil, les ressources compilées, le favicon et le site MkDocs.
+Les schémas interdisent les champs inconnus. Les PATCH distinguent un champ absent de `null` ; seuls `section_id` et `due_date` peuvent être remis à `null` sur une tâche. Les erreurs de validation n'incluent pas la valeur saisie. Les conflits SQL deviennent 409 et les autres erreurs de base 503, sans requête SQL ou valeur personnelle dans la réponse.
 
-Points à conserver lors d'une modification :
-
-- Une route JSON inconnue retourne 404.
-- Un asset manquant retourne 404, pas `index.html`.
-- Les chemins relatifs ne permettent pas de sortir du répertoire servi.
-- Le préfixe `/documentation/` fonctionne pour les pages, les styles et l'index de recherche.
-- Les URL de l'application et de l'API restent indépendantes du serveur Vite.
-
-N'ajouter un fallback SPA que lorsqu'une vraie navigation côté client l'exige, avec une liste de routes ou une stratégie explicite qui préserve ces règles.
-
-## Ajouter un endpoint
-
-Créer un module sous `api/`, définir un `APIRouter`, puis l'enregistrer dans le routeur central. Utiliser un modèle Pydantic pour les entrées et sorties qui ont une structure métier. Un endpoint appelle une couche de service dès qu'il orchestre une règle métier ou un accès aux données ; il ne doit pas accumuler cette logique dans `main.py`.
-
-Conventions :
-
-- Verbes HTTP conformes à l'action : lecture via GET, création via POST, modification via PATCH ou PUT, suppression via DELETE.
-- Noms de ressources cohérents, pluriels lorsque la route représente une collection.
-- Réponses et codes d'erreur décrits dans OpenAPI.
-- Pas de secret, jeton ou valeur personnelle dans les messages d'erreur et les logs.
-- Une opération bloquante n'est pas rendue non bloquante par le seul mot-clé `async` ; choisir des bibliothèques adaptées avant d'introduire des entrées/sorties asynchrones.
-
-Les modules métier futurs sont décrits dans [Faire évoluer l'application](evolution.md).
-
-## Tests
-
-Les tests utilisent pytest et le client HTTP de FastAPI/Starlette. Ils créent des artefacts temporaires pour vérifier le routage sans nécessiter de compilation npm pendant chaque test.
+Les contraintes de colonnes et les index sont figés dans une migration explicite. Ne pas recréer le schéma avec `create_all` au démarrage. Pour une évolution, générer une nouvelle migration, relire ses effets, tester la transition et documenter la compatibilité avec l'image précédente.
 
 ```bash
-uv run pytest backend/tests
-uv run ruff check backend
-uv run ruff format --check backend
+uv run alembic revision --autogenerate -m "description"
+uv run life migrate
+make test
 ```
 
-Les tests unitaires ne remplacent pas la vérification de l'image construite : celle-ci confirme que les vrais fichiers et les chemins de production sont correctement assemblés.
+Ne jamais réécrire une migration déjà publiée. Le fichier `alembic.ini` facilite le développement ; la commande empaquetée localise ses migrations sans dépendre de ce fichier dans le runtime.
 
-## Références
+## Distribution HTTP
 
-- [FastAPI : applications plus importantes](https://fastapi.tiangolo.com/tutorial/bigger-applications/)
-- [FastAPI : déploiement avec Docker](https://fastapi.tiangolo.com/deployment/docker/)
-- [Pydantic Settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/)
+Seuls `/` et `/tasks` servent le shell React. `/tasks?space=<UUID>` ouvre directement un espace autorisé ; un identifiant inconnu revient au premier espace actif. `/assets/`, `/favicon.svg` et `/documentation/` servent leurs artefacts dédiés. Les autres chemins restent 404, y compris une route API inconnue. Aucun répertoire de travail, secret ou sauvegarde n'est exposé.
+
+Les tests combinent artefacts temporaires pour le routage et PostgreSQL réel pour les fonctions privées. Voir [Tests](tests.md) et [Référence API](api.md).

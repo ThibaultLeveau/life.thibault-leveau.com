@@ -9,6 +9,14 @@ Ces règles s'appliquent à l'ensemble du dépôt et à chaque requête concerna
 - Si une requête nécessite une évolution architecturale (nouvelle couche, réorganisation des responsabilités, stockage, authentification, service, framework ou mode de déploiement), présenter à Thibault le besoin, la proposition, les alternatives et les conséquences, puis demander son accord explicite **avant de l'implémenter**. Une piste décrite dans `docs/evolution.md` ne vaut pas autorisation.
 - Consigner l'accord dans l'issue. Après accord, documenter la décision dans `docs/decisions/` et actualiser la documentation concernée, sans réécrire l'historique des décisions.
 
+## Fonctionnalités accessibles par API et documentées
+
+- Toute opération métier proposée par l'interface doit être accessible par l'API versionnée, y compris les réglages persistants, les déplacements, le réordonnancement, l'archivage et la restauration. Le frontend utilise cette API ; il ne constitue pas un stockage métier parallèle.
+- Définir et maintenir les contrats d'entrée/sortie, les erreurs, les contrôles d'accès et les règles de validation côté serveur. Tenir OpenAPI à jour et fournir des exemples d'utilisation indépendants de l'interface.
+- Documenter dans la même branche le comportement utilisateur livré, les paramètres configurables, le modèle de données, les limites et les procédures d'exploitation affectées. Distinguer explicitement une proposition d'une fonctionnalité disponible.
+- Pour des données persistantes, documenter et tester les contraintes, les transitions de cycle de vie, les migrations et les procédures de sauvegarde/restauration concernées. Pour les tâches, préserver les dates et l'historique nécessaires aux futures statistiques de résolution, notamment lors des réouvertures et archivages.
+- Vérifier la parité entre l'API et les parcours de l'interface avec des tests de comportement pertinents. Une fonctionnalité n'est pas terminée si son accès API, sa documentation ou ses validations restent incomplets.
+
 ## Workflow obligatoire pour chaque requête
 
 1. **Créer une issue GitHub avant toute modification.** Détailler la demande, le contexte, le périmètre, les critères d'acceptation, la solution envisagée et les validations prévues. La tenir à jour avec les décisions, résultats et éventuels blocages. Les échanges de suivi d'une même requête restent dans son issue.

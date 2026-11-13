@@ -1,57 +1,180 @@
 # Référence API
 
-## Adresses
+Toutes les fonctions métier de l'interface passent par `/api/v1`. Les schémas exacts, champs requis et réponses sont disponibles dans [OpenAPI](https://life.thibault-leveau.com/api/openapi.json) et [Swagger UI](https://life.thibault-leveau.com/api/docs), pour le commit effectivement déployé. Les routes privées exigent une session ; aucune inscription publique n'est disponible.
 
-L'origine de production est `https://life.thibault-leveau.com`. En développement, les chemins `/api` sont accessibles via le backend sur le port `8100` ou via le proxy Vite sur `5173`. Vite sert les sources de l’interface ; le backend ne sert l’accueil et les assets qu’après compilation. MkDocs fournit l’aperçu documentaire sur `8101`, également accessible par le proxy Vite sous `/documentation/`.
+## Session et protections
 
-| Méthode | Chemin | Réponse |
-| --- | --- | --- |
-| GET | `/` | Page d'accueil HTML |
-| GET | `/favicon.svg` | Favicon SVG |
-| GET | `/assets/{fichier}` | Ressource frontend compilée existante |
-| GET | `/api/v1/health` | Sonde JSON |
-| GET | `/api/docs` | Documentation interactive Swagger UI |
-| GET | `/api/openapi.json` | Schéma OpenAPI |
-| GET | `/documentation/` | Accueil MkDocs |
-| GET | `/documentation/{chemin}` | Page ou ressource documentaire existante |
+| Méthode et chemin sous `/api/v1` | Contrat |
+| --- | --- |
+| `POST /auth/session` | `{username,password}` → session 200 + cookie `life_session` |
+| `GET /auth/session` | Session actuelle, expiration, thème et `csrf_token` |
+| `DELETE /auth/session` | Révocation et suppression du cookie, 204 |
+| `GET /preferences` | `{theme}` |
+| `PUT /preferences` | `{theme: "system" | "light" | "dark"}` → préférences |
 
-L'interface Swagger permet d'examiner le contrat courant ; le schéma OpenAPI est généré à partir des routes et modèles du backend. Les routes statiques ne constituent pas des opérations métier et peuvent ne pas apparaître dans ce schéma.
+Le cookie est HttpOnly, SameSite=Lax et Secure en production. Le mot de passe n'est jamais renvoyé. L'identifiant est normalisé en minuscules par `casefold` et sans espaces extérieurs ; le mot de passe reste exact. Une session expire après `LIFE_SESSION_HOURS` (168 heures par défaut), sans prolongation automatique.
 
-## Sonde de santé
+Après connexion, conserver le cookie et envoyer **`X-CSRF-Token`** pour toute mutation, y compris déconnexion et préférences. `GET /auth/session` permet de retrouver ce jeton après rechargement. Les navigateurs doivent utiliser l'origine configurée. Un client HTTP sans en-tête `Origin` reste autorisé avec cookie et jeton CSRF ; si `Origin` est présent, il est vérifié aussi à la connexion.
 
-```bash
-curl --fail --silent --show-error   https://life.thibault-leveau.com/api/v1/health
-```
+Swagger montre les contrats, mais le navigateur ne peut pas définir lui-même un en-tête Cookie arbitraire : utiliser la session obtenue sur la même origine et renseigner `X-CSRF-Token` dans l'opération. L'exemple Python ci-dessous couvre un client indépendant.
 
-Réponse attendue : statut **200**, type `application/json` et corps :
+## Espaces et configuration
+
+Dans les chemins ci-dessous, `{w}`, `{s}`, `{c}` et `{l}` sont des UUID d'espace, section, statut et étiquette.
+
+| Méthode et chemin | Opération / réponse |
+| --- | --- |
+| `GET /workspaces?archived=false` | Liste ordonnée des espaces actifs ; `true` donne les archives |
+| `POST /workspaces` | `{name,description?,color?}` → espace, 201, trois statuts initiaux |
+| `GET /workspaces/{w}` | Espace autorisé, même archivé |
+| `PATCH /workspaces/{w}` | Nom, description, couleur, `archived` → espace |
+| `PUT /workspaces/order` | `{ids:[...]}` ordre complet, archives incluses, 204 |
+| `GET /workspaces/{w}/sections?archived=false` | Sections ordonnées ; archives séparées via `true` |
+| `POST /workspaces/{w}/sections` | Nom, description, couleur, `visibility` → section, 201 |
+| `PATCH /workspaces/{w}/sections/{s}` | Propriétés, visibilité, `archived` → section |
+| `PUT /workspaces/{w}/sections/order` | Ordre complet des sections, archives incluses, 204 |
+| `GET /workspaces/{w}/statuses` | Statuts ordonnés |
+| `POST /workspaces/{w}/statuses` | `{name,color?,is_completed?}` → statut, 201 |
+| `PATCH /workspaces/{w}/statuses/{c}` | Nom, couleur, type → statut |
+| `PUT /workspaces/{w}/statuses/order` | Ordre complet, 204 |
+| `DELETE /workspaces/{w}/statuses/{c}?replacement_id=...` | Retrait et réaffectation éventuelle, 204 |
+| `GET /workspaces/{w}/labels` | Étiquettes triées par nom |
+| `POST /workspaces/{w}/labels` | `{name,color?}` → étiquette, 201 |
+| `PUT /workspaces/{w}/labels/{l}` | Remplacement du nom/couleur → étiquette |
+| `DELETE /workspaces/{w}/labels/{l}` | Suppression des associations et du filtre concerné, 204 |
+| `GET /workspaces/{w}/view` | Configuration de vue |
+| `PUT /workspaces/{w}/view` | Remplacement de la configuration ; champs omis remis au défaut |
+
+Les noms d'espace et section ont 1 à 120 caractères, les statuts 1 à 80, les étiquettes 1 à 50 ; les descriptions au plus 20 000. Les couleurs suivent `#RRGGBB`. `visibility` vaut `list`, `board` ou `both`. Les tableaux `ids` doivent contenir exactement tous les éléments concernés une seule fois, sinon 409 (limite 10 000 identifiants).
+
+Les espaces, sections et tâches s'archivent via PATCH `{archived:true}` et se restaurent via `{archived:false}`. Ils n'ont pas de DELETE définitif. Les tâches d'un parent archivé ne sont plus modifiables ; restaurer d'abord le parent. Renommer un parent ne modifie pas les événements historiques.
+
+Un espace conserve au moins un statut ouvert et un terminé. Changer `is_completed` sur un statut utilisé est refusé. Le retrait d'un statut utilisé exige `replacement_id` appartenant au même espace et du même type, archives comprises. Il conserve les dates de résolution.
+
+### Préférences de vue
 
 ```json
-{"status":"ok"}
+{
+  "layout": "board",
+  "density": "comfortable",
+  "show_completed": true,
+  "search": "",
+  "sort": "manual",
+  "status_id": null,
+  "priority": null,
+  "label_id": null,
+  "due": "all"
+}
 ```
 
-La sonde vérifie que le processus répond. Elle ne teste aucun service tiers et ne promet pas la disponibilité d'une base de données : il n'y en a pas en V1. Docker l'utilise pour évaluer la santé du conteneur ; elle est également utile aux vérifications après publication.
+Valeurs : `layout` list/board, `density` comfortable/compact, `sort` manual/priority/due_date, `due` all/overdue/today/upcoming/none. La priorité optionnelle vaut 1 à 4, la recherche au plus 500 caractères. Statut et étiquette référencés doivent appartenir à l'espace. Le défaut de disposition est `list`, les autres défauts figurent dans cet exemple. Ces réglages ne changent jamais le cycle de vie.
 
-## Erreurs et redirections
+## Tâches
 
-Un chemin inconnu renvoie **404**, notamment :
+| Méthode et chemin | Contrat |
+| --- | --- |
+| `GET /tasks` | Liste filtrée et paginée |
+| `POST /tasks` | Création → tâche, 201 |
+| `GET /tasks/{id}` | Tâche autorisée, même archivée |
+| `PATCH /tasks/{id}` | Édition atomique, archivage ou restauration → tâche |
+| `POST /tasks/{id}/move` | Déplacement et ordre atomiques → tâche |
+| `POST /tasks/{id}/complete` | Terminer → tâche |
+| `POST /tasks/{id}/reopen` | Rouvrir → tâche |
+| `GET /tasks/{id}/events` | Historique paginé, ordre chronologique |
 
-```text
-/api/v1/inconnu
-/assets/fichier-absent.js
-/documentation/page-absente/
-/une-page-absente
+Création : `workspace_id` et `title` requis (1 à 500 caractères), `section_id` facultatif, `status_id` facultatif (premier statut ouvert par défaut), `description`, `priority` (4 par défaut), `due_date` (`YYYY-MM-DD` ou null) et `label_ids` (100 maximum, sans doublon). Les références doivent appartenir au même espace.
+
+Une réponse tâche contient également UUID, position, version, dates `created_at`, `updated_at`, `completed_at` et `archived_at`. Les dates d'instant sont en UTC. Toutes les modifications de tâche exigent **`expected_version`** égal à la dernière version lue. Une réponse 409 demande une relecture et une décision du client, jamais un écrasement automatique.
+
+PATCH accepte les champs de création sauf `workspace_id`, ainsi que `archived`. Les champs omis sont inchangés ; `section_id:null` enlève la section et `due_date:null` enlève l'échéance. Pour restaurer une tâche archivée, envoyer uniquement `expected_version` et `archived:false` après avoir restauré ses parents.
+
+Déplacement :
+
+```json
+{
+  "expected_version": 3,
+  "workspace_id": "UUID-espace-destination",
+  "section_id": null,
+  "status_id": "UUID-statut-destination",
+  "before_id": null
+}
 ```
 
-Le serveur ne renvoie pas `index.html` pour masquer une ressource manquante. Le corps d'une erreur statique peut être différent de celui d'une erreur API ; s'appuyer d'abord sur le code HTTP.
+`before_id` est une tâche active de la section cible ; null ajoute en fin d'espace, donc en fin de sa liste/cellule. Le serveur n'impose pas que la tâche de repère ait le même statut, l'ordre étant commun à l'espace. Les étiquettes sont reprises par nom exact entre espaces, avec conservation de l'étiquette cible si elle existe déjà.
 
-`/documentation` est redirigé vers `/documentation/` afin que les chemins relatifs fonctionnent. Caddy redirige également les accès HTTP publics vers HTTPS. Un client de contrôle qui inspecte le résultat final doit suivre les redirections.
+Terminer/rouvrir reçoit `{expected_version:...}` et utilise le premier statut compatible de l'ordre. Répéter l'action sur l'état déjà demandé ne crée pas de résolution supplémentaire ; une version périmée reste un conflit.
 
-## Authentification et données
+### Filtres et pagination
 
-Ces chemins sont publics. La V1 ne comporte ni session, ni route d'écriture métier, ni jeton utilisateur. Ne pas utiliser ce périmètre public pour exposer des tâches ou des données de santé lors des prochaines versions sans avoir mis en place l'authentification et l'autorisation.
+`GET /tasks` accepte `workspace_id`, `section_id`, `status_id`, `priority`, `label_id`, `search`, `completed`, `archived`, `due`, `today`, `sort`, `offset` et `limit`. Sans filtre d'espace, le résultat couvre les espaces du propriétaire. Un filtre pointant sur une ressource étrangère renvoie une liste vide sans révéler ses données.
 
-## Versionnement
+- `archived=false` exclut les archives individuelles et celles des parents ; `true` sélectionne ces archives effectives.
+- `search` cherche une sous-chaîne insensible à la casse dans titre/description ; `%` et `_` sont littéraux.
+- `overdue` exclut les tâches terminées ; today/upcoming filtrent la date sans changer le filtre de résolution.
+- `today=YYYY-MM-DD` fournit la date locale du client ; sans cette valeur, le serveur utilise sa date courante.
+- `sort=manual` utilise la position ; priority place P1 en premier ; due_date place les échéances absentes à la fin.
+- `limit` vaut 100 par défaut, entre 1 et 200 ; `offset` commence à 0.
 
-Les routes métier à venir rejoindront `/api/v1`. Le segment de version représente un contrat HTTP, pas la version de l'image Docker. Une modification incompatible d'un contrat déjà consommé nécessite une stratégie explicite de migration ; ne pas changer silencieusement la forme d'une réponse.
+Les tâches et événements retournent `{items,total,offset,limit}`. L'historique utilise les mêmes bornes de pagination. Les événements exposent le contexte de la transition, sans recopier le titre ou la description de la tâche. Voir [Données](donnees.md).
 
-Le frontend utilisera des URL relatives à l'origine. La V1 n'a pas besoin d'une politique CORS générale, puisque le navigateur utilise le proxy Vite en développement et une origine unique en production.
+## Exemple autonome Python
+
+Après création du compte et migration, exécuter depuis la racine du dépôt avec `uv run python`, ou dans un environnement doté de `httpx`. Le mot de passe est saisi sans être écrit dans l'historique du shell. Remplacer l'origine par HTTPS pour la production.
+
+```python
+import getpass
+import httpx
+
+with httpx.Client(base_url="http://127.0.0.1:8100/api/v1", timeout=20) as client:
+    def call(method, path, **kwargs):
+        response = client.request(method, path, **kwargs)
+        response.raise_for_status()
+        return None if response.status_code == 204 else response.json()
+
+    session = call("POST", "/auth/session", json={
+        "username": input("Identifiant : "), "password": getpass.getpass(),
+    })
+    client.headers["X-CSRF-Token"] = session["csrf_token"]
+    space = call("POST", "/workspaces", json={"name": "Exemple API"})
+    section = call("POST", f"/workspaces/{space['id']}/sections", json={
+        "name": "À préparer", "visibility": "both",
+    })
+    statuses = call("GET", f"/workspaces/{space['id']}/statuses")
+    task = call("POST", "/tasks", json={
+        "workspace_id": space["id"], "title": "Vérifier le parcours API",
+    })
+    task = call("POST", f"/tasks/{task['id']}/move", json={
+        "expected_version": task["version"], "workspace_id": space["id"],
+        "section_id": section["id"], "status_id": statuses[1]["id"],
+    })
+    for action in ("complete", "reopen", "complete"):
+        task = call("POST", f"/tasks/{task['id']}/{action}", json={
+            "expected_version": task["version"],
+        })
+    events = call("GET", f"/tasks/{task['id']}/events")
+    print([event["kind"] for event in events["items"]])
+    call("PUT", "/preferences", json={"theme": "dark"})
+    call("DELETE", "/auth/session")
+```
+
+Cet exemple crée de vraies données dans la base choisie. Les archiver ensuite depuis l'interface si elles ne servent plus. Les cookies, mots de passe et jetons ne doivent pas être enregistrés dans un exemple ou une capture publique.
+
+## Erreurs
+
+| Code | Signification |
+| --- | --- |
+| 401 | Session absente, expirée/révoquée, ou identifiants incorrects |
+| 403 | Origine ou jeton CSRF refusé |
+| 404 | Ressource absente ou appartenant à un autre compte |
+| 409 | Version périmée, parent archivé, contrainte, doublon ou configuration incohérente |
+| 422 | Entrée invalide, champ inconnu, référence de forme invalide |
+| 429 | Plus de 5 tentatives par identifiant ou 30 par IP en 15 minutes ; `Retry-After: 900` |
+| 503 | Base absente/indisponible ou migration manquante pour la sonde de disponibilité |
+
+Les réponses privées portent `Cache-Control: no-store`, erreurs comprises. Une connexion réussie efface le compteur de l'identifiant ; les connexions réussies comptent toujours dans la limite IP. Les erreurs ne renvoient ni mot de passe ni paramètres SQL.
+
+## Routes publiques
+
+`GET /api/v1/health` retourne `{"status":"ok"}` si le processus répond. `GET /api/v1/health/ready` vérifie la connexion PostgreSQL et la révision Alembic attendue : 200 ou 503, sans détail de connexion. Docker utilise cette seconde sonde.
+
+`/`, `/tasks`, `/favicon.svg`, `/assets/...`, `/documentation/...`, `/api/docs` et `/api/openapi.json` sont publics. Le shell `/tasks` ne contient aucune donnée privée. Un chemin inconnu reste 404, sans fallback HTML. `/documentation` redirige vers `/documentation/`.

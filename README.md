@@ -1,79 +1,63 @@
 # Life
 
-Le point de départ d'un espace personnel pour suivre ses tâches, son sport et ses objectifs. Cette première version propose un accueil sobre, une navigation et une documentation technique complète.
+Un espace personnel pour organiser ses tâches : espaces, sections, listes à cocher et kanban en glisser-déposer, avec thèmes clair et sombre. Les sections forment les listes et les **lignes** du tableau ; les statuts deviennent ses colonnes.
 
 **[Ouvrir Life](https://life.thibault-leveau.com/)** · **[Documentation](https://life.thibault-leveau.com/documentation/)** · **[Référence API](https://life.thibault-leveau.com/api/docs)**
 
 ## Architecture
 
-Python 3.13, FastAPI et Uvicorn servent une application React / TypeScript construite avec Vite, ainsi que la documentation MkDocs Material. Un seul conteneur tourne en production, derrière le Caddy du VPS Hostinger. La V1 ne stocke aucune donnée métier et n'a ni base de données ni authentification.
+FastAPI / Python 3.13 sert React / TypeScript, l'API et MkDocs depuis une image Docker commune. PostgreSQL 17 conserve les données privées et l'historique des résolutions. SQLAlchemy et Alembic gèrent les transactions et les migrations. Le compte personnel utilise un mot de passe Argon2 et une session sécurisée. Le service web rejoint le Caddy existant ; PostgreSQL reste sur un réseau privé.
 
 | Dossier | Responsabilité |
 | --- | --- |
-| `backend/src/life_app/` | Application FastAPI, configuration, API et fichiers statiques |
-| `backend/tests/` | Tests du contrat HTTP et de la configuration |
-| `frontend/` | Interface React, styles, ressources locales et compilation Vite |
-| `docs/` | Documentation en français et diagrammes d'architecture |
-| `infrastructure/caddy/` | Configuration du domaine dans le proxy existant |
-| `scripts/` | Déploiement manuel, retour arrière et vérification HTTP |
-| `.github/workflows/` | Contrôles continus, sans déploiement automatique |
+| `backend/src/life_app/core/` | Configuration, connexions et journaux |
+| `backend/src/life_app/features/` | Modèles, contrats et services tâches/authentification |
+| `backend/src/life_app/api/` | API versionnée et sondes |
+| `backend/src/life_app/migrations/` | Migrations versionnées incluses dans l'image |
+| `frontend/src/features/tasks/` | Interface et client API des tâches |
+| `backend/tests/`, `frontend/tests/` | Tests HTTP/PostgreSQL et parcours navigateur |
+| `docs/` | Guides utilisateur, architecture, API et exploitation |
+| `infrastructure/`, `scripts/` | Intégration Caddy/PostgreSQL, publication et sauvegardes |
 
-Le détail des flux et des responsabilités se trouve dans [l'architecture](docs/architecture.md).
+Voir [l'architecture](docs/architecture.md), l'[ADR approuvé](docs/decisions/002-gestion-taches.md) et le [guide utilisateur](docs/taches.md).
 
 ## Démarrage
 
-Prérequis : Git, [uv](https://docs.astral.sh/uv/getting-started/installation/), Python 3.13, Node.js 24 et npm. Docker avec Compose v2 est nécessaire uniquement pour construire ou exécuter le conteneur.
+Prérequis : Git, uv, Python 3.13, Node.js 24/npm et Docker avec Compose v2 (ou un PostgreSQL 17 local configuré).
 
 ```bash
-git clone https://github.com/ThibaultLeveau/life.thibault-leveau.com.git
-cd life.thibault-leveau.com
 make install
 cp .env.example .env
+make dev-db
+make migrate
+uv run life create-user thibault
 ```
 
-Ouvrir trois terminaux à la racine du dépôt :
+La commande demande un mot de passe de 12 caractères minimum. Aucun compte prédéfini n'est livré. Dans trois terminaux :
 
 ```bash
 make dev-backend   # http://127.0.0.1:8100/api/docs
-make dev-frontend  # http://127.0.0.1:5173
+make dev-frontend  # http://localhost:5173/tasks
 make dev-docs      # http://127.0.0.1:8101/documentation/
 ```
 
-Vite transmet `/api` au backend et `/documentation` à MkDocs. La configuration d'exemple suffit pour le développement ; aucun secret n'est requis.
+Utiliser l'origine `http://localhost:5173` configurée dans `.env` pour les contrôles CSRF. Vite transmet `/api` au backend et `/documentation` à MkDocs. Les identifiants PostgreSQL de l'exemple servent uniquement au développement.
 
-## Vérifier et construire
+## Vérifier
 
 ```bash
-make check        # Ruff et TypeScript
-make test         # tests Python
+make check        # Ruff, format Python, TypeScript et syntaxe shell
+make test         # tests Python/HTTP sur PostgreSQL isolé
 make build        # frontend et documentation en mode strict
-make docker-build # image de production
+make docker-build
+(cd frontend && npx playwright install --with-deps chromium)
+make test-container # image, navigateur et restauration d'une sauvegarde isolée
 ```
 
-Les dépendances exactes sont verrouillées dans `uv.lock` et `frontend/package-lock.json`. La CI exécute les vérifications sur GitHub, construit l’image Docker et contrôle ses routes dans un conteneur, sans publier le site.
+`make test` démarre puis supprime son PostgreSQL de test. Un serveur existant peut être fourni via `LIFE_TEST_DATABASE_URL` : les tests y créent et suppriment uniquement leur schéma aléatoire. Les dépendances sont verrouillées dans `uv.lock` et `frontend/package-lock.json`. La CI exécute ces validations sans déploiement automatique.
 
-## Publier
+## Exploitation
 
-Sur le VPS, depuis un commit validé et un répertoire de travail propre :
+La première activation nécessite les secrets PostgreSQL, la migration et la création du compte. Suivre le [déploiement](docs/deploiement.md), puis les [sauvegardes et restaurations](docs/sauvegardes.md). La fusion GitHub ne publie pas le site.
 
-```bash
-./scripts/deploy.sh
-./scripts/smoke-test.sh https://life.thibault-leveau.com
-```
-
-Le script utilise le réseau Docker externe `multisite_proxy`, l'alias `life-web` et le port interne `8000`. Il ne modifie pas le DNS ni la configuration Caddy. Leur mise en place initiale, les vérifications HTTPS et le retour arrière sont décrits dans le [guide de déploiement](docs/deploiement.md).
-
-```bash
-./scripts/deploy.sh --rollback
-```
-
-## Repères
-
-- [Configuration et variables d'environnement](docs/configuration.md)
-- [Routes et contrats HTTP](docs/api.md)
-- [Tests et qualité](docs/tests.md)
-- [Journaux, diagnostic et exploitation](docs/exploitation.md)
-- [Sécurité et limites de la V1](docs/securite.md)
-- [Ajouter les premières fonctionnalités](docs/evolution.md)
-
-La documentation fait partie de l'image : une version de l'application est toujours publiée avec la documentation issue du même commit.
+Toutes les opérations de l'interface sont accessibles par [API](docs/api.md). L'historique est prêt pour les futures statistiques ; les tableaux de bord statistiques, le sport et les objectifs restent à développer. Les tâches, sections et espaces sont archivables, sans suppression définitive dans cette version.

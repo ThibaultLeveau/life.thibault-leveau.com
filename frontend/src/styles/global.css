@@ -246,7 +246,7 @@ h1 {
   }
 }
 
-@media (max-width: 360px) {
+@media (max-width: 640px) {
   .header-inner {
     flex-wrap: wrap;
     gap: 10px;

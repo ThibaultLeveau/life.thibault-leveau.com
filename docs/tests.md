@@ -1,6 +1,8 @@
 # Tests et qualité
 
-## Vérification avant livraison
+## Contrôles obligatoires
+
+Depuis la racine :
 
 ```bash
 make install
@@ -9,89 +11,61 @@ make test
 make build
 ```
 
-`make check` vérifie le Python avec Ruff et les types TypeScript. `make test` exécute les tests backend. `make build` compile Vite puis MkDocs en mode strict. Ces contrôles doivent réussir avant la création d'une image livrable.
+`make check` exécute Ruff, le contrôle de format Python, TypeScript (interface et tests navigateur) et la syntaxe de chaque script shell. `make build` compile Vite et MkDocs en mode strict. Les dépendances exactes sont verrouillées.
 
-Les outils sont installés depuis les fichiers de verrouillage. Une mise à jour de dépendance doit inclure le manifeste, le verrou correspondant et les résultats des contrôles pertinents.
+## Python et PostgreSQL
 
-## Contrats couverts
-
-| Zone | Comportement à vérifier |
-| --- | --- |
-| Santé | Statut 200 et réponse JSON `{"status":"ok"}` |
-| Configuration | Paramètres par défaut, remplacement par environnement, rejet des valeurs invalides |
-| Routes API | Schéma OpenAPI et documentation accessibles |
-| Frontend statique | Accueil et fichiers existants correctement distribués |
-| Erreurs | Vraies réponses 404 pour API, asset et page inconnus |
-| Documentation | Pages et ressources servies sous `/documentation/` |
-| Production | Présence des artefacts attendus dans l'image |
-
-Les tests HTTP utilisent des fichiers temporaires pour isoler les règles de routage. Ils ne prétendent pas valider le rendu visuel du vrai build React. La vérification de l'image et l'inspection navigateur complètent ces tests.
-
-## Vérification visuelle et clavier
-
-Contrôler l'accueil à 375 px puis à une largeur d'ordinateur, et compléter à 320 px si la navigation change. Vérifier le titre, l'alignement de la barre de navigation, les marges, les retours à la ligne et l'absence de débordement horizontal.
-
-Utiliser Tab et Entrée pour parcourir les liens. Le focus doit rester visible et le lien vers la documentation doit ouvrir une page fonctionnelle. Examiner l'interface à 200 % de zoom et avec la préférence de réduction des animations.
-
-Sur la documentation, ouvrir une page interne, utiliser la recherche avec « déploiement » puis un terme anglais comme « health », et copier un bloc de commande. La recherche doit retrouver les pages dans le sous-chemin `/documentation/`.
-
-## Documentation stricte
+`make test` démarre un PostgreSQL 17 jetable sur une adresse locale, attend sa disponibilité, exécute pytest puis supprime le conteneur et ses volumes anonymes. Avec `LIFE_TEST_DATABASE_URL`, il utilise ce serveur et crée un schéma aléatoire, supprimé à la fin. Les tests métier ne sont pas ignorés si la base manque : utiliser le script ou fournir un serveur de test. Ne pas utiliser la production.
 
 ```bash
-uv run --group docs mkdocs build --strict
+LIFE_TEST_DATABASE_URL=postgresql+psycopg://user:password@127.0.0.1:5432/test make test
 ```
 
-Toute page ajoutée doit être intégrée à `nav` dans `mkdocs.yml`, et les liens locaux doivent viser un fichier existant. Les exemples de configuration doivent rester cohérents avec le code et `.env.example`.
+La suite vérifie notamment :
 
-La vérification stricte détecte les erreurs signalées par MkDocs ; elle ne vérifie pas la disponibilité de tous les liens externes ni l'exactitude opérationnelle d'une commande. Vérifier manuellement ces points lors d'une modification du déploiement.
+- Routage explicite, fichiers absents, HEAD, traversal et OpenAPI.
+- Migration initiale aller/retour et comparaison du schéma aux modèles ORM.
+- Création, édition atomique, ordre, filtres, pagination et préférences.
+- Résolutions/réouvertures, idempotence, déplacements entre espaces et snapshots historiques.
+- Archives parentes/individuelles et configuration des statuts sans fausse résolution.
+- Contraintes de base, rollback après erreur et immuabilité des événements.
+- Conflits de version et deux résolutions concurrentes, dont une seule est acceptée.
+- Sessions, CSRF, origine, isolation des comptes, limite de connexion, expiration, cookie Secure et réinitialisation du mot de passe.
+- Absence de valeurs privées dans les logs de recherche et les erreurs de validation.
 
-## Diagrammes de documentation
+Les tests de routage fabriquent de petits artefacts ; ils ne remplacent pas le contrôle de l'image réelle.
 
-Les diagrammes sont écrits en Mermaid dans `docs/assets/diagrams/*.mmd`, puis rendus en SVG à côté des sources. MkDocs distribue les SVG sans JavaScript Mermaid dans le navigateur. Modifier ensemble la source et son rendu.
-
-Une commande de régénération, depuis la racine du dépôt :
-
-```bash
-npx --yes --package @mermaid-js/mermaid-cli@11.12.0 mmdc   --input docs/assets/diagrams/production.mmd   --output docs/assets/diagrams/production.svg   --backgroundColor transparent
-
-npx --yes --package @mermaid-js/mermaid-cli@11.12.0 mmdc   --input docs/assets/diagrams/build.mmd   --output docs/assets/diagrams/build.svg   --backgroundColor transparent
-```
-
-Mermaid CLI utilise Chromium via Puppeteer. Cette dépendance est nécessaire seulement pour modifier un diagramme ; elle ne fait partie ni de l'image de production ni du build MkDocs. Utiliser la version indiquée et vérifier le SVG généré avant de le commiter.
-
-## Image et site publié
-
-Construire puis lancer l’image localement sur un port réservé au test :
+## Image, navigateur et sauvegarde
 
 ```bash
 make docker-build
-docker run -d --name life-preview --read-only \
-  --tmpfs /tmp:rw,size=16m --cap-drop ALL \
-  --security-opt no-new-privileges:true \
-  -p 127.0.0.1:18100:8000 "local/life:$(git rev-parse HEAD)"
-
-for attempt in $(seq 1 30); do
-  if curl --fail --silent http://127.0.0.1:18100/api/v1/health >/dev/null; then break; fi
-  sleep 2
-done
-./scripts/smoke-test.sh http://127.0.0.1:18100
-docker rm -f life-preview
+(cd frontend && npx playwright install --with-deps chromium)
+make test-container
 ```
 
-Si un contrôle échoue, lire `docker logs life-preview` avant de supprimer le conteneur. Le port de test n’est lié qu’à l’interface locale ; cette commande ne modifie pas le service public.
+Le script crée un réseau privé, un PostgreSQL et un conteneur applicatif jetables. Il utilise l'image du SHA courant, le rôle applicatif non administrateur, les migrations empaquetées et un compte synthétique. Le port HTTP est choisi dynamiquement sur 127.0.0.1. Le runtime est en lecture seule, avec les mêmes restrictions de capacités que la production. Pour le navigateur local HTTP, seul l'environnement est réglé sur `test` ; le cookie Secure de production est vérifié dans les tests HTTP.
 
-Après la livraison, vérifier séparément le domaine public :
+Le smoke test vérifie routes publiques, disponibilité de la base, absence d'accès anonyme aux tâches, bundles, recherche MkDocs et vraies 404. Playwright exerce les formulaires de configuration, le cycle complet d'une tâche, le glisser-déposer entre lignes/colonnes, l'ordre en liste, les thèmes persistants, le mobile 320/375 px, le clavier, le déplacement inter-espaces et un conflit d'édition simulé. Les couleurs calculées du thème sombre sont contrôlées sur le bundle compilé.
+
+Enfin, le script restaure un dump dans une seconde base, compare les événements, vérifie la révocation des sessions, les objets retirés et l'annulation sur erreur, puis revérifie migrations/immutabilité. Le nettoyage retire uniquement les ressources créées par ce script, sans toucher aux projets de développement ou de production.
+
+Pour cibler une autre image locale :
 
 ```bash
-./scripts/smoke-test.sh https://life.thibault-leveau.com
+LIFE_TEST_IMAGE=local/life:ma-validation make test-container
 ```
 
-Le script HTTP accepte une origine comme argument. Un test public vérifie la version réellement publiée, pas une image construite localement mais non démarrée.
+Pour rejouer uniquement le navigateur sur un serveur **de test** existant :
 
-Après déploiement, contrôler également le statut Docker, le certificat TLS et les journaux. Une réponse saine du backend ne remplace pas la vérification de la page, de ses ressources et de la documentation.
+```bash
+LIFE_E2E_URL=http://127.0.0.1:8100 \
+LIFE_E2E_USERNAME=compte-test LIFE_E2E_PASSWORD=mot-de-passe-synthetique make test-ui
+```
 
-## Intégration continue
+Ces scénarios créent de vraies données dans le serveur choisi ; ils ne doivent pas cibler la production. Les captures et traces restent sous `frontend/test-results/`, ignoré par Git. Une trace peut contenir cookies et données : seuls les résultats synthétiques sont téléversés en CI en cas d'échec, avec rétention de 7 jours.
 
-GitHub Actions effectue les contrôles Python, les tests, la validation TypeScript et les constructions frontend/documentation. Il construit aussi l’image Docker et exécute le smoke test sur un conteneur démarré avec les protections du runtime. Le workflow utilise Python 3.13 et Node.js 24. Il ne modifie ni le DNS, ni Caddy, ni les conteneurs du VPS.
+## CI et revue
 
-Un workflow réussi autorise la revue d'une livraison ; la publication reste une commande explicite exécutée sur le serveur, selon le [guide de déploiement](deploiement.md).
+GitHub Actions exécute les contrôles, les tests Python, les compilations, la construction de l'image puis `make test-container`. Aucune publication du site n'est déclenchée. Attendre les contrôles sur le dernier commit avant fusion, consigner la revue complète et résoudre ses constats.
+
+Les résultats exacts de la livraison sont consignés dans l'issue et la PR. Les essais automatiques Chromium ne remplacent pas une recette sur tous les navigateurs/téléphones physiques ; vérifier les navigateurs ciblés lors des évolutions de compatibilité.

@@ -1,91 +1,61 @@
 # Démarrage
 
-## Prérequis
-
-Installer Git, [uv](https://docs.astral.sh/uv/getting-started/installation/), Node.js 24 et npm. `uv` peut télécharger Python 3.13 si cette version n'est pas déjà disponible. Docker Engine et le plugin Compose v2 sont utiles pour vérifier la production, mais ne sont pas requis pour développer l'interface ou l'API.
-
-```bash
-git --version
-uv --version
-node --version
-npm --version
-```
-
-Les commandes ci-dessous s'exécutent à la racine du dépôt, dans un shell compatible avec les scripts Bash du projet. Sous Windows, utiliser WSL pour les commandes Make et les scripts de déploiement.
-
 ## Installer
+
+Prérequis : Git, [uv](https://docs.astral.sh/uv/getting-started/installation/), Python 3.13, Node.js 24/npm, Make et Bash. Docker Engine avec Compose v2 fournit PostgreSQL en local et permet les tests du conteneur. Sous Windows, utiliser WSL.
 
 ```bash
 git clone https://github.com/ThibaultLeveau/life.thibault-leveau.com.git
 cd life.thibault-leveau.com
 make install
 cp .env.example .env
+make dev-db
+make migrate
+uv run life create-user thibault
 ```
 
-L'installation synchronise l'environnement Python `.venv` avec `uv.lock`, y compris les groupes de développement et de documentation, puis installe le frontend avec `npm ci`. Le fichier `.env` est local et ignoré par Git.
+`make install` installe les versions verrouillées Python, documentation et frontend. `make dev-db` utilise le projet Compose séparé `life-development`, un volume persistant et le port local `8102`. Le mot de passe PostgreSQL de l'exemple est réservé au développement. La commande de création du compte demande et confirme un mot de passe de 12 à 1024 caractères.
 
-Ne modifier que les paramètres nécessaires. Aucun jeton ni mot de passe n'est requis pour démarrer cette V1.
+Si PostgreSQL est déjà disponible, configurer `LIFE_DATABASE_URL` puis exécuter la migration ; Docker n'est alors pas nécessaire au développement. Ne jamais pointer l'environnement de développement ou les tests vers la base de production.
 
-## Démarrer les trois serveurs
+## Démarrer
 
-Ouvrir trois terminaux à la racine du dépôt :
+Dans trois terminaux à la racine du dépôt :
 
 ```bash
 make dev-backend
-```
-
-```bash
 make dev-frontend
-```
-
-```bash
 make dev-docs
 ```
 
-| Service | Adresse | Rôle |
-| --- | --- | --- |
-| Vite | `http://127.0.0.1:5173` | Interface et rechargement à chaud |
-| FastAPI | `http://127.0.0.1:8100/api/docs` | API et documentation interactive |
-| MkDocs | `http://127.0.0.1:8101/documentation/` | Aperçu de la documentation |
+| Adresse | Usage |
+| --- | --- |
+| `http://localhost:5173/tasks` | Interface avec rechargement à chaud |
+| `http://127.0.0.1:8100/api/docs` | OpenAPI interactif |
+| `http://127.0.0.1:8101/documentation/` | Documentation en cours d'édition |
 
-Ouvrir l'interface sur le port `5173`. Le proxy Vite conserve une seule origine dans le navigateur : les appels `/api` sont transmis au port `8100`, et `/documentation` au port `8101`. Pour ouvrir la documentation depuis la barre de navigation, garder MkDocs actif.
+Vite conserve une seule origine : `/api` est transmis à FastAPI et `/documentation` à MkDocs. Ouvrir **localhost:5173**, conformément à `LIFE_PUBLIC_BASE_URL`. Pour utiliser une autre origine, ajuster cette variable puis redémarrer FastAPI ; sinon les écritures sont refusées avec 403.
 
-Le backend peut fonctionner sans artefacts frontend. Dans ce cas, sa page d'accueil n'est pas disponible ; l'interface de développement est servie par Vite.
-
-## Construire et vérifier
+Sans compilation, les routes statiques `/` et `/tasks` du backend peuvent renvoyer 503 ; utiliser Vite ou lancer `make build`. L'API et sa sonde de disponibilité fonctionnent indépendamment des fichiers frontend.
 
 ```bash
-make check
-make test
-make build
+curl --fail http://127.0.0.1:8100/api/v1/health/ready
 ```
 
-La construction produit `frontend/dist/` et `site/`. Ces répertoires sont générés et ne doivent pas être commités.
+## Compte et données locales
 
-Une fois ces artefacts présents, démarrer le backend permet aussi de consulter le site compilé sur `http://127.0.0.1:8100/` et sa documentation sous `/documentation/`. Cette vérification est utile pour détecter les erreurs masquées par le serveur de développement Vite.
+```bash
+uv run life reset-password thibault
+```
 
-## Commandes utiles
+Le changement de mot de passe révoque toutes les sessions du compte. Il n'y a pas d'inscription publique. Créer les données depuis l'interface ou les [exemples API](api.md), sans données de démonstration imposées au premier lancement.
 
-| Commande | Effet |
-| --- | --- |
-| `make install` | Installer les dépendances verrouillées |
-| `make dev-backend` | Démarrer Uvicorn avec rechargement sur `8100` |
-| `make dev-frontend` | Démarrer Vite sur `5173` |
-| `make dev-docs` | Démarrer MkDocs sur `8101` |
-| `make check` | Vérifier le code Python et TypeScript |
-| `make test` | Exécuter les tests backend |
-| `make build` | Compiler l'interface et la documentation |
-| `make docs` | Construire seulement la documentation en mode strict |
-| `make docker-build` | Construire l'image Docker |
-| `make deploy` | Publier la version courante sur le VPS configuré |
-| `make smoke` | Vérifier les routes du site publié |
+```bash
+docker compose -f compose.dev.yaml stop db
+```
 
-## Problèmes fréquents
+Cette commande conserve le volume. `down --volumes` efface les données de développement ; l'utiliser seulement pour repartir volontairement d'une base vide, puis relancer migrations et création du compte.
 
-**Le port est occupé.** Arrêter le serveur de développement précédent. Si un port doit changer, ajuster également sa cible dans `frontend/vite.config.ts` ; ne modifier pas les services déjà en production pour libérer un port de développement.
+## Valider
 
-**La documentation ne s'ouvre pas depuis Vite.** Vérifier que `make dev-docs` est actif et que l'URL contient `/documentation/`. Le préfixe doit être conservé dans le proxy.
-
-**Une dépendance paraît manquer.** Relancer `make install` après avoir récupéré une modification des fichiers de verrouillage. Éviter les installations manuelles dans `.venv` qui ne sont pas décrites par `pyproject.toml`.
-
-**Le build strict échoue.** Lire le premier avertissement MkDocs : un fichier absent de la navigation ou un lien local incorrect doit être corrigé dans les sources. Ne pas contourner le contrôle en supprimant `--strict`.
+Suivre les [tests](tests.md) avant une PR. Les commandes de publication et les secrets de production sont distincts, décrits dans [Déploiement](deploiement.md).

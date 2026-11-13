@@ -29,6 +29,7 @@ def register_static_routes(app: FastAPI, settings: Settings) -> None:
         )
 
     @app.api_route("/", methods=["GET", "HEAD"], include_in_schema=False)
+    @app.api_route("/tasks", methods=["GET", "HEAD"], include_in_schema=False)
     async def home() -> FileResponse:
         index = frontend / "index.html"
         if not index.is_file():

@@ -10,6 +10,8 @@ site/
 .env
 .env.*
 !.env.example
+!.env.production.example
+backups/
 .deployment/
 test-results/
 playwright-report/

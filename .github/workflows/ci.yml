@@ -39,12 +39,14 @@ jobs:
         run: make build
       - name: Validate production image
         run: make docker-build
-      - name: Smoke-test production container
-        run: |
-          trap 'docker logs life-ci; docker rm -f life-ci' EXIT
-          docker run -d --name life-ci --read-only --tmpfs /tmp:rw,size=16m --cap-drop ALL --security-opt no-new-privileges:true -p 127.0.0.1:8100:8000 "local/life:$(git rev-parse HEAD)"
-          for attempt in $(seq 1 30); do
-            if curl --fail --silent http://127.0.0.1:8100/api/v1/health >/dev/null; then break; fi
-            sleep 2
-          done
-          ./scripts/smoke-test.sh http://127.0.0.1:8100
+      - name: Install browser for acceptance tests
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+      - name: Test container, browser and backup restoration
+        run: make test-container
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-failure
+          path: frontend/test-results/
+          retention-days: 7

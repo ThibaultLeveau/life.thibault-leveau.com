@@ -1,62 +1,43 @@
 # Configuration
 
-## Principes
+Pydantic Settings charge les variables du processus avant `.env`. Les commandes locales partent de la racine du dépôt. `.env.example` configure le développement ; `.env.production.example` sert de modèle aux secrets Compose. Les fichiers réels et les sauvegardes restent exclus de Git et de l'image.
 
-Le backend charge sa configuration via Pydantic Settings. Les variables du processus ont priorité sur le fichier `.env`. Les noms sont préfixés par `LIFE_` pour éviter les collisions. Le fichier `.env.example` décrit les valeurs de développement ; `.env` reste ignoré par Git.
+## Application
 
-Exécuter les commandes de développement depuis la racine du dépôt pour charger le fichier `.env` attendu. Les chemins d’artefacts relatifs sont résolus par rapport à la racine du projet. En production, le conteneur utilise des chemins explicites vers ses artefacts.
-
-## Variables applicatives
-
-| Variable | Valeur par défaut | Description |
+| Variable | Défaut | Portée |
 | --- | --- | --- |
-| `LIFE_ENVIRONMENT` | `development` | Environnement parmi `development`, `test`, `production` |
-| `LIFE_PUBLIC_BASE_URL` | `http://localhost:8100` | Adresse publique déclarée de l'application ; valeur de production définie dans Compose |
-| `LIFE_LOG_LEVEL` | `INFO` | Niveau de journalisation du backend |
-| `LIFE_FRONTEND_DIR` | `frontend/dist` | Répertoire du frontend compilé |
-| `LIFE_DOCUMENTATION_DIR` | `site` | Répertoire de la documentation compilée |
+| `LIFE_ENVIRONMENT` | `development` | `development`, `test`, `production` ; active le cookie Secure en production |
+| `LIFE_PUBLIC_BASE_URL` | `http://localhost:8100` | Origine autorisée pour les écritures depuis le navigateur |
+| `LIFE_DATABASE_URL` | absente | URL `postgresql+psycopg://utilisateur:motdepasse@hôte:port/base` |
+| `LIFE_SESSION_HOURS` | `168` | Durée fixe des sessions, de 1 à 720 heures ; pas de prolongation automatique |
+| `LIFE_LOG_LEVEL` | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL` |
+| `LIFE_FRONTEND_DIR` | `frontend/dist` | Artefacts frontend ; chemin relatif à la racine du dépôt |
+| `LIFE_DOCUMENTATION_DIR` | `site` | Artefacts MkDocs ; chemin relatif à la racine du dépôt |
 
-`LIFE_PUBLIC_BASE_URL` ne crée pas d'enregistrement DNS, ne configure pas Caddy et ne change pas le port d'écoute. Le site documentaire utilise également son URL canonique définie dans `mkdocs.yml`. En cas de changement de domaine, mettre à jour les deux configurations et reconstruire les artefacts.
+Sans URL de base, la sonde `/health` et les fichiers publics restent utilisables ; les fonctions privées et `/health/ready` répondent 503. La disponibilité de la base est contrôlée par la sonde, sans migration au démarrage. Une URL SQL incompatible est refusée.
 
-Les niveaux usuels sont `DEBUG`, `INFO`, `WARNING`, `ERROR` et `CRITICAL`. Garder `INFO` en production ; limiter `DEBUG` à une investigation temporaire.
+`LIFE_PUBLIC_BASE_URL` doit être l'origine exacte, sans sous-chemin : `http://localhost:5173` en développement, `https://life.thibault-leveau.com` en production. Elle ne configure ni DNS ni Caddy. Le proxy Vite permet d'éviter CORS ; aucune politique CORS générale n'est ouverte. En développement/test, l'origine du backend lui-même est également acceptée.
 
-## Exemple local
+## PostgreSQL et Compose
 
-```dotenv
-LIFE_ENVIRONMENT=development
-LIFE_PUBLIC_BASE_URL=http://localhost:5173
-LIFE_LOG_LEVEL=INFO
-LIFE_FRONTEND_DIR=frontend/dist
-LIFE_DOCUMENTATION_DIR=site
-```
+| Variable | Usage |
+| --- | --- |
+| `LIFE_IMAGE` | Image `local/life:<SHA complet>` fournie par le script de publication |
+| `LIFE_POSTGRES_PASSWORD` | Mot de passe du rôle applicatif `life`, non administrateur |
+| `LIFE_POSTGRES_ADMIN_PASSWORD` | Mot de passe distinct de l'administrateur PostgreSQL |
+| `LIFE_DATABASE_URL` | Connexion applicative avec le même mot de passe que `LIFE_POSTGRES_PASSWORD`, hôte `db`, base `life` |
 
-Une configuration incorrecte, notamment un environnement inconnu ou une URL mal formée, doit échouer à la validation. Lire l'erreur de démarrage plutôt que désactiver la validation.
+Copier `.env.production.example` vers `.env.production`, remplacer les marqueurs avec deux mots de passe aléatoires distincts et protéger le fichier (`chmod 600`). Choisir une représentation hexadécimale pour éviter les caractères réservés des URL. Ne pas afficher `docker compose config` sans `--quiet` dans des journaux publics : la sortie contient les secrets interpolés.
 
-## Ports et réseau
+Le script d'initialisation PostgreSQL crée le rôle `life` propriétaire de sa base, sans droits superutilisateur, création de bases ou création de rôles. Il ne s'exécute que sur un volume vide. Changer le fichier d'environnement ne change pas le mot de passe d'un rôle existant : coordonner une commande d'administration PostgreSQL et la nouvelle URL lors d'une rotation.
 
-| Usage | Écoute | Exposition |
-| --- | --- | --- |
-| Frontend de développement | `127.0.0.1:5173` | Machine de développement |
-| Backend de développement | `127.0.0.1:8100` | Machine de développement |
-| Documentation de développement | `127.0.0.1:8101` | Machine de développement |
-| Backend en conteneur | `0.0.0.0:8000` | Réseau Docker uniquement |
-| Caddy public | HTTP/HTTPS | Domaine public |
+| Service | Écoute |
+| --- | --- |
+| Vite local | `127.0.0.1:5173` |
+| FastAPI local | `127.0.0.1:8100` |
+| MkDocs local | `127.0.0.1:8101` |
+| PostgreSQL local | `127.0.0.1:8102` |
+| Application en production | `8000`, réseau Docker `multisite_proxy`, alias `life-web` |
+| PostgreSQL en production | `5432`, réseau privé Compose `database`, aucun port hôte |
 
-Le réseau Docker `multisite_proxy` est externe au projet Compose Life. L'alias `life-web` permet à Caddy de joindre le backend sans dépendre du nom généré du conteneur.
-
-## Variables de déploiement
-
-L'image applicative est nommée `local/life:<SHA Git complet>`. Le script de déploiement transmet sa référence à Compose, puis conserve la version courante dans `.deployment/current-image` et la précédente dans `.deployment/previous-image`.
-
-Ces fichiers sont des métadonnées locales d'exploitation, pas des secrets ni des sources. Ils ne sont pas commités. Ne pas les remplacer manuellement pour masquer un déploiement échoué : inspecter d'abord le conteneur et ses journaux.
-
-La variable `LIFE_IMAGE` fournit la référence d’image à Compose. Le script la définit pour chaque opération. Pour une opération courante, utiliser les scripts plutôt que reconstituer à la main leur configuration. En production, Compose fixe `LIFE_PUBLIC_BASE_URL=https://life.thibault-leveau.com`.
-
-## Modifier une valeur
-
-1. Modifier le fichier ou l'environnement qui fournit la valeur.
-2. Redémarrer le backend en local, ou recréer le service en production via le déploiement.
-3. Vérifier la sonde et le comportement concerné.
-4. Mettre à jour `.env.example` et cette page si le contrat de configuration change.
-
-Modifier une variable Python ne reconstruit pas le frontend ou MkDocs. Toute valeur intégrée à leurs fichiers lors de la compilation nécessite une nouvelle image.
+Les secrets sont des paramètres serveur. Les noms, couleurs, ordres, filtres et thèmes sont des **données métier**, modifiables via l'[API](api.md), jamais via des variables frontend.

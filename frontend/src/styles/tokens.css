@@ -20,3 +20,25 @@
   --content-width: 1200px;
   --page-gutter: clamp(24px, 5vw, 72px);
 }
+
+@supports (color: light-dark(white, black)) {
+  :root {
+    color-scheme: light dark;
+    --color-background: light-dark(#f6f7f3, #151b18);
+    --color-surface: light-dark(#fcfcf9, #1d2520);
+    --color-text: light-dark(#252d29, #ecf0e9);
+    --color-muted: light-dark(#59625c, #a7b3a9);
+    --color-accent: light-dark(#254d3f, #a4cbb2);
+    --color-accent-soft: light-dark(#b4cfbd, #2c5b45);
+    --color-active: light-dark(#e8eee6, #283b30);
+    --color-line: light-dark(#dee3da, #344238);
+  }
+
+  :root[data-theme='light'] {
+    color-scheme: light;
+  }
+
+  :root[data-theme='dark'] {
+    color-scheme: dark;
+  }
+}
