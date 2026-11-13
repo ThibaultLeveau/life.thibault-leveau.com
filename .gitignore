@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+frontend/node_modules/
+site/
+.env
+.env.*
+!.env.example
+.deployment/
+test-results/
+playwright-report/
+.DS_Store
+*.log

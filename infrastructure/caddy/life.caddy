@@ -1,0 +1,4 @@
+life.thibault-leveau.com {
+	import common
+	reverse_proxy life-web:8000
+}

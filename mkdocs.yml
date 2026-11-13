@@ -1,0 +1,69 @@
+site_name: Life · Documentation
+site_description: Architecture, développement et exploitation de Life.
+site_url: https://life.thibault-leveau.com/documentation/
+docs_dir: docs
+site_dir: site
+strict: true
+use_directory_urls: true
+theme:
+  name: material
+  language: fr
+  font: false
+  favicon: assets/favicon.svg
+  logo: assets/logo.svg
+  palette:
+    scheme: default
+    primary: custom
+    accent: custom
+  features:
+    - navigation.sections
+    - navigation.top
+    - navigation.tracking
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+plugins:
+  - search:
+      lang:
+        - fr
+        - en
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+extra_css:
+  - assets/stylesheets/extra.css
+extra:
+  generator: false
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/ThibaultLeveau/life.thibault-leveau.com
+      name: Code source sur GitHub
+    - icon: material/home-outline
+      link: https://life.thibault-leveau.com/
+      name: Ouvrir Life
+nav:
+  - Présentation: index.md
+  - Développer:
+      - Démarrage: demarrage.md
+      - Architecture: architecture.md
+      - Backend: backend.md
+      - Frontend: frontend.md
+      - Configuration: configuration.md
+      - Référence API: api.md
+      - Tests et qualité: tests.md
+  - Mettre en production:
+      - Déploiement: deploiement.md
+      - Exploitation: exploitation.md
+      - Sécurité: securite.md
+  - Faire évoluer:
+      - Ajouter une fonctionnalité: evolution.md
+      - Décision initiale: decisions/001-architecture-initiale.md

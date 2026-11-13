@@ -1,0 +1,50 @@
+name: Quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.13.7'
+          enable-cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install locked dependencies
+        run: make install
+      - name: Check code
+        run: make check
+      - name: Test backend and routing
+        run: make test
+      - name: Build frontend and documentation
+        run: make build
+      - name: Validate production image
+        run: make docker-build
+      - name: Smoke-test production container
+        run: |
+          trap 'docker logs life-ci; docker rm -f life-ci' EXIT
+          docker run -d --name life-ci --read-only --tmpfs /tmp:rw,size=16m --cap-drop ALL --security-opt no-new-privileges:true -p 127.0.0.1:8100:8000 "local/life:$(git rev-parse HEAD)"
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8100/api/v1/health >/dev/null; then break; fi
+            sleep 2
+          done
+          ./scripts/smoke-test.sh http://127.0.0.1:8100

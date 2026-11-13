@@ -1,0 +1,32 @@
+name: life
+
+services:
+  web:
+    image: ${LIFE_IMAGE:?Set LIFE_IMAGE to the image built for this release}
+    restart: unless-stopped
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      LIFE_ENVIRONMENT: production
+      LIFE_PUBLIC_BASE_URL: https://life.thibault-leveau.com
+      LIFE_LOG_LEVEL: INFO
+    networks:
+      proxy:
+        aliases:
+          - life-web
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+
+networks:
+  proxy:
+    external: true
+    name: multisite_proxy

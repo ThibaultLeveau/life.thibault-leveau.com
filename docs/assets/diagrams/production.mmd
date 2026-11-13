@@ -1,0 +1,20 @@
+---
+config:
+  theme: base
+  themeVariables:
+    primaryColor: '#edf2e9'
+    primaryTextColor: '#202623'
+    primaryBorderColor: '#214c3d'
+    lineColor: '#647567'
+    secondaryColor: '#fafaf7'
+    tertiaryColor: '#f0f2ec'
+    fontFamily: 'Arial, sans-serif'
+---
+flowchart TD
+    browser["Navigateur"] -->|"HTTPS · life.thibault-leveau.com"| proxy["Caddy · certificat TLS"]
+    subgraph network["Réseau Docker multisite_proxy"]
+      proxy -->|"HTTP · life-web:8000"| app["FastAPI / Uvicorn"]
+      app --> api["/api/v1/health · JSON"]
+      app --> front["/ · React compilé"]
+      app --> docs["/documentation/ · MkDocs compilé"]
+    end

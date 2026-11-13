@@ -1,0 +1,23 @@
+---
+config:
+  theme: base
+  themeVariables:
+    primaryColor: '#edf2e9'
+    primaryTextColor: '#202623'
+    primaryBorderColor: '#214c3d'
+    lineColor: '#647567'
+    secondaryColor: '#fafaf7'
+    tertiaryColor: '#f0f2ec'
+    fontFamily: 'Arial, sans-serif'
+---
+flowchart TD
+    git["Commit Git validé"] --> node["Node 24 · npm ci · Vite"]
+    git --> doc["Python 3.13 · uv · MkDocs strict"]
+    git --> py["Python 3.13 · uv · dépendances runtime"]
+    node --> assets["frontend/dist/"]
+    doc --> site["site/"]
+    py --> runtime["Image runtime · Uvicorn non privilégié"]
+    assets --> runtime
+    site --> runtime
+    runtime --> image["local/life:SHA-complet"]
+    image --> compose["Docker Compose · projet life"]

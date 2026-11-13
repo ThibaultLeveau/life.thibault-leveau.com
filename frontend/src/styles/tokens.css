@@ -1,0 +1,22 @@
+@font-face {
+  font-family: 'Inter Variable';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('@fontsource-variable/inter/files/inter-latin-wght-normal.woff2') format('woff2');
+}
+
+:root {
+  color-scheme: light;
+  --color-background: #f6f7f3;
+  --color-surface: #fcfcf9;
+  --color-text: #252d29;
+  --color-muted: #59625c;
+  --color-accent: #254d3f;
+  --color-accent-soft: #b4cfbd;
+  --color-active: #e8eee6;
+  --color-line: #dee3da;
+  --font-sans: 'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --content-width: 1200px;
+  --page-gutter: clamp(24px, 5vw, 72px);
+}
