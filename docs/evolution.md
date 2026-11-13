@@ -6,6 +6,8 @@ Le socle livré n'a qu'une page d'accueil et une sonde de santé. Les domaines *
 
 Ne pas créer de couches vides pour anticiper tous les scénarios. Ajouter un module avec sa première règle métier et ses tests.
 
+La première demande de gestion des tâches est suivie dans l'[issue #3](https://github.com/ThibaultLeveau/life.thibault-leveau.com/issues/3). Sa [spécification fonctionnelle](taches-specification.md) précise les espaces, les sections, les deux vues et les scénarios de validation. Elle est en préparation : la proposition de persistance et d'authentification attend l'accord explicite de Thibault et n'est pas encore implémentée.
+
 ## Organisation par fonctionnalité
 
 Pour les tâches, une évolution pourrait introduire :

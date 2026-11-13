@@ -66,4 +66,5 @@ nav:
       - Sécurité: securite.md
   - Faire évoluer:
       - Ajouter une fonctionnalité: evolution.md
+      - Spécification des tâches: taches-specification.md
       - Décision initiale: decisions/001-architecture-initiale.md
