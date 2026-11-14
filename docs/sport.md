@@ -35,7 +35,7 @@ Dans **Séances**, choisir **Nouvelle séance**, donner un nom, ajouter des exer
 4. Une série validée peut être corrigée sans relancer le repos ni changer sa date de validation. **Annuler la validation** retire son résultat et arrête le repos. Les valeurs de la série précédente servent de proposition pour la suivante.
 5. Après toutes les séries, **Terminer l’entraînement** enregistre les résultats et calcule le score. Les notes accueillent le ressenti. **Abandonner** conserve les séries dans l’historique, sans statistiques ni score.
 
-Une session terminée ou abandonnée est conservée et ne se modifie plus. Modifier ou archiver la séance d’origine ne change pas les sessions existantes. Avant un nouveau lancement, les exercices personnels doivent être actifs ; si leur type a changé, adapter les objectifs de la séance. Le bouton **Actualiser l’entraînement** permet de retrouver la version serveur après une modification depuis un autre appareil. Une version obsolète produit un conflit explicite, sans écraser les données.
+Une session terminée ou abandonnée est conservée et ne se modifie plus. Modifier ou archiver la séance d’origine ne change pas les sessions existantes. Avant un nouveau lancement, les exercices personnels doivent être actifs ; si leur type a changé, retirer puis ajouter à nouveau l’exercice dans la séance pour saisir ses nouveaux objectifs. Le bouton **Actualiser l’entraînement** permet de retrouver la version serveur après une modification depuis un autre appareil. Une version obsolète produit un conflit explicite, sans écraser les données.
 
 ## Mensurations
 
