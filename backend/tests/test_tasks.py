@@ -257,6 +257,31 @@ def test_composed_french_api_preview_persistence_and_diagnostics(client, app, mo
         assert without_csrf.post("/api/v1/scheduling/parse", json=payload).status_code == 403
 
 
+def test_plural_article_weekly_schedule_api(client, monkeypatch):
+    from datetime import UTC, datetime
+
+    from life_app.apps.tasks import service
+
+    monkeypatch.setattr(service, "utcnow", lambda: datetime(2026, 11, 14, 12, tzinfo=UTC))
+    response = client.post(
+        "/api/v1/scheduling/parse",
+        json={
+            "text": "S’occuper des plantes tous les vendredis",
+            "today": "2026-11-14",
+            "timezone": "Europe/Paris",
+        },
+    )
+    assert response.status_code == 200
+    parsed = response.json()
+    assert parsed["status"] == "recognized"
+    assert parsed["title"] == "S’occuper des plantes"
+    assert parsed["recurrence"]["rrule"] == "FREQ=WEEKLY;BYDAY=FR"
+    space, _ = create_space(client)
+    task = create_task(client, space, title=parsed["title"], recurrence=parsed["recurrence"])
+    assert task["due_date"] == "2026-11-20"
+    assert mutate(client, task, "complete")["due_date"] == "2026-11-27"
+
+
 def test_schema_matches_models_and_migration_roundtrip(engine, app):
     with engine.begin() as conn:
         assert compare_metadata(MigrationContext.configure(conn), Base.metadata) == []

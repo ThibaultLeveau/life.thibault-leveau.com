@@ -95,6 +95,7 @@ class Token:
     value: str
     start: int
     end: int
+    original: str = ""
 
 
 def normalize(text: str) -> str:
@@ -123,7 +124,13 @@ def tokenize(text: str) -> list[Token]:
         r"\d{4}-\d{2}-\d{2}|\d{1,2}/\d{1,2}(?:/\d{4})?|\d+(?:ieme|eme|ere|er|e|ᵉ)?|[a-z]+|[^\s]"
     )
     return [
-        Token(m[0], starts[m.start()], ends[m.end() - 1]) for m in re.finditer(pattern, normalized)
+        Token(
+            m[0],
+            starts[m.start()],
+            ends[m.end() - 1],
+            unicodedata.normalize("NFC", text[starts[m.start()] : ends[m.end() - 1]]).lower(),
+        )
+        for m in re.finditer(pattern, normalized)
     ]
 
 

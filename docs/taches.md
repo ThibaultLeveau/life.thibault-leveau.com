@@ -109,6 +109,8 @@ Combiner **un rythme**, **une sélection de jours**, puis éventuellement **un d
 
 Les nombres acceptent les chiffres ou les lettres, avec espaces ou traits d’union : `deux`, `vingt et un`, `vingt-et-une`, `soixante-douze`, `quatre-vingt-dix-neuf`, `deux cent vingt et un`, `mille`. Les variantes `septante`, `huitante`, `octante` et `nonante` sont aussi reconnues. Les mêmes nombres servent aux intervalles, jours du mois, durées et nombres de résolutions ; les limites de chaque réglage restent appliquées. Accents, majuscules, espaces insécables et apostrophes typographiques sont acceptés.
 
+La saisie « S’occuper des plantes tous les vendredis » conserve le titre « S’occuper des plantes » et programme chaque vendredi. L’article « des » reste dans le titre ; « dès » introduit une date de début. Sans accent, « des » est accepté comme borne lorsqu’une date le suit (par exemple « des demain »).
+
 | Élément | Exemples combinables |
 | --- | --- |
 | Intervalle | `tous les deux jours`, `toutes les deux semaines`, `tous les mois`, `tous les trois ans` |

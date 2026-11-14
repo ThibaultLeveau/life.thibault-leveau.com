@@ -356,3 +356,37 @@ def test_maximum_input_size_and_deterministic_malformed_vocabulary_do_not_crash(
         assert result["status"] in {"none", "recognized", "incomplete", "invalid"}
         if result["status"] != "recognized":
             assert result["title"] == text and result["recurrence"] is None
+
+
+@pytest.mark.parametrize("title", ["S’occuper des plantes", "Acheter des fleurs", "DES plantes"])
+@pytest.mark.parametrize("before", [True, False])
+def test_plural_article_preserves_title_around_recurrence(title, before):
+    expression = "tous les vendredis"
+    text = f"{title} {expression}" if before else f"{expression} {title}"
+    result = parse_schedule(text, TODAY, "Europe/Paris")
+    assert result["status"] == "recognized"
+    assert result["title"] == title
+    assert result["matched_text"] == expression
+    assert text[result["start"] : result["end"]] == expression
+    assert result["recurrence"].rrule == "FREQ=WEEKLY;BYDAY=FR"
+    assert result["dates"][:2] == [date(2026, 11, 20), date(2026, 11, 27)]
+
+
+@pytest.mark.parametrize("introducer", ["dès", "DÈS", "dès", "des"])
+@pytest.mark.parametrize("before", [True, False])
+def test_start_bound_with_and_without_accent(introducer, before):
+    bound = f"{introducer} le 27 novembre 2026"
+    expression = f"{bound} tous les vendredis" if before else f"tous les vendredis {bound}"
+    result = parse_schedule("S’occuper des plantes " + expression, TODAY, "Europe/Paris")
+    assert result["status"] == "recognized"
+    assert result["title"] == "S’occuper des plantes"
+    assert result["due_date"] == date(2026, 11, 27)
+
+
+@pytest.mark.parametrize("expression", ["dès", "dès", "dès tous les vendredis", "des 31 février"])
+def test_start_bound_still_reports_incomplete_or_invalid_date(expression):
+    text = "Lire tous les vendredis " + expression
+    result = parse_schedule(text, TODAY, "Europe/Paris")
+    assert result["status"] in {"incomplete", "invalid"}
+    assert result["title"] == text
+    assert result["recurrence"] is None
