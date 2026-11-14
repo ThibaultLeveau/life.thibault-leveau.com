@@ -185,6 +185,8 @@ Cocher une tâche actualise les résultats en gardant la liste affichée et sa p
 
 Les champs de saisie, descriptions et sélecteurs utilisent une taille de texte adaptée au mobile pour éviter le zoom automatique habituel à la saisie. Le zoom volontaire reste disponible. Quand le navigateur signale l’espace occupé par le clavier, la vue et les dialogues s’y adaptent ; un champ masqué est remonté dans la zone visible. Vous pouvez continuer à faire défiler librement et les brouillons restent en place. Les navigateurs et claviers flottants qui ne signalent pas leur emprise gardent leur comportement natif. Ces adaptations ne changent pas la présentation des champs sur ordinateur.
 
+Dans **Configurer l’espace → Sections**, le champ de la section en cours reste visible au-dessus du clavier, y compris pour la deuxième section, les suivantes et l’ajout en bas du formulaire. Le dialogue suit aussi les déplacements tardifs du navigateur. Faire défiler au doigt garde la priorité ; reprendre la saisie ramène le champ actif à l’écran sans effacer le texte.
+
 ## Archiver et restaurer
 
 Archiver une tâche dans ses détails. L'onglet **Archives** des réglages restaure tâches et sections. Restaurer d'abord une section archivée, puis ses tâches archivées individuellement si nécessaire. Une tâche seulement masquée par l'archive de sa section redevient visible avec celle-ci.
