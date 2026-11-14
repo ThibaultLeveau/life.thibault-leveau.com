@@ -262,6 +262,9 @@ test("Sport : bibliothèque, séance mixte, repos, mensurations et statistiques 
   await page
     .getByRole("switch", { name: "Activer Sport", exact: true })
     .click();
+  await expect(
+    page.getByRole("switch", { name: "Activer Sport", exact: true }),
+  ).not.toBeChecked();
   expect((await page.request.get("/api/v1/sport/sessions")).status()).toBe(403);
   await page.goto("/sport");
   await expect(
@@ -271,6 +274,9 @@ test("Sport : bibliothèque, séance mixte, repos, mensurations et statistiques 
   await page
     .getByRole("switch", { name: "Activer Sport", exact: true })
     .click();
+  await expect(
+    page.getByRole("switch", { name: "Activer Sport", exact: true }),
+  ).toBeChecked();
   const restored = await (
     await page.request.get(`/api/v1/sport/sessions/${stored.id}`)
   ).json();
