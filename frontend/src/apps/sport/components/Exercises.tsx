@@ -253,6 +253,7 @@ export function Exercises({ kinds }: { kinds: KindDefinition[] }) {
         <label>
           Afficher
           <select
+            aria-label="Afficher"
             value={String(archived)}
             onChange={(e) => {
               setArchived(e.target.value === "true");

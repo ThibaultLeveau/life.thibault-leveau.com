@@ -1,4 +1,4 @@
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { sportApi } from "../api";
 import { measureFields, type KindDefinition, type MeasureKey } from "../types";
 import { day, Empty, LoadState, localDay, number, useResource } from "./common";
@@ -13,6 +13,17 @@ function Chart({
   points: { label: string; value: number }[];
 }) {
   const id = useId();
+  const svg = useRef<SVGSVGElement>(null);
+  const [width, setWidth] = useState(640);
+  const hasPoints = points.length > 0;
+  useEffect(() => {
+    if (!svg.current) return;
+    const observer = new ResizeObserver(([entry]) => {
+      setWidth(Math.max(180, entry.contentRect.width));
+    });
+    observer.observe(svg.current);
+    return () => observer.disconnect();
+  }, [hasPoints]);
   if (!points.length)
     return <Empty title={title}>Aucune donnée sur cette période.</Empty>;
   const min = Math.min(...points.map((p) => p.value));
@@ -20,7 +31,8 @@ function Chart({
   const spread = max - min || Math.max(1, max * 0.05);
   const low = min - spread * 0.1;
   const high = max + spread * 0.1;
-  const x = (i: number) => 50 + (i / Math.max(1, points.length - 1)) * 560;
+  const x = (i: number) =>
+    50 + (i / Math.max(1, points.length - 1)) * (width - 70);
   const y = (v: number) => 175 - ((v - low) / (high - low)) * 145;
   const last = points.at(-1)!;
   const first = points[0];
@@ -39,7 +51,12 @@ function Chart({
           {number(change)} {unit} entre le premier et le dernier relevé
         </p>
       )}
-      <svg viewBox="0 0 640 215" role="img" aria-labelledby={id}>
+      <svg
+        ref={svg}
+        viewBox={`0 0 ${width} 215`}
+        role="img"
+        aria-labelledby={id}
+      >
         <title id={id}>
           {title} : {points.length} relevés, de {number(first.value)} à{" "}
           {number(last.value)} {unit}. Valeurs détaillées dans le tableau.
@@ -50,7 +67,7 @@ function Chart({
             <g key={v}>
               <line
                 x1="50"
-                x2="610"
+                x2={width - 20}
                 y1={y(v)}
                 y2={y(v)}
                 className="sport-chart-grid"
@@ -81,7 +98,7 @@ function Chart({
         <text x="50" y="205">
           {first.label}
         </text>
-        <text x="610" y="205" textAnchor="end">
+        <text x={width - 20} y="205" textAnchor="end">
           {last.label}
         </text>
       </svg>

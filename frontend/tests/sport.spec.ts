@@ -167,6 +167,7 @@ test("Sport : bibliothèque, séance mixte, repos, mensurations et statistiques 
       await expect(page.getByRole("timer")).not.toHaveText("00:00");
     }
   }
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({
     path: testInfo.outputPath("sport-entrainement.png"),
     fullPage: true,
@@ -247,6 +248,7 @@ test("Sport : bibliothèque, séance mixte, repos, mensurations et statistiques 
   await expect(
     page.getByRole("cell", { name: "78", exact: true }),
   ).toBeVisible();
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({
     path: testInfo.outputPath("sport-statistiques.png"),
     fullPage: true,
@@ -338,6 +340,7 @@ test("Sport : création personnelle, mobile, clavier, archives et validation en 
         () => document.documentElement.scrollWidth <= innerWidth,
       ),
     ).toBe(true);
+    await page.evaluate(() => window.scrollTo(0, 0));
     await page.screenshot({
       path: testInfo.outputPath(`sport-mobile-${width}.png`),
       fullPage: true,

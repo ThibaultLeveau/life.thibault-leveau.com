@@ -17,7 +17,7 @@ SPECS = [
         "weight_reps",
         "Charge et répétitions",
         ["weight_kg", "reps"],
-        "Volume : somme de (charge + 1) × répétitions",
+        "Somme de (charge + 1) × répétitions",
         "points",
     ),
     ("reps", "Poids du corps / répétitions", ["reps"], "Nombre total de répétitions", "rép."),

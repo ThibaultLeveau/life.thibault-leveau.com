@@ -55,6 +55,7 @@ export function Page() {
         <button
           key={id}
           className={`sport-nav-item ${tab === id ? "is-active" : ""}`}
+          aria-label={label}
           aria-current={tab === id ? "page" : undefined}
           onClick={() => choose(id)}
         >

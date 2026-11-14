@@ -39,7 +39,7 @@ export function RestTimer({
         Math.ceil(
           (Date.parse(training.rest_until) -
             anchor.server -
-            (now - anchor.local)) /
+            Math.max(0, now - anchor.local)) /
             1000,
         ),
       )
