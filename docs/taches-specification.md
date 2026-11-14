@@ -139,4 +139,4 @@ Exécuter `make check`, `make test` et `make build`, ainsi que les tests comport
 
 L'[ADR 002](decisions/002-gestion-taches.md) consigne l'accord sans réécrire l'ADR initial. Le [guide utilisateur](taches.md), les [contrats API](api.md), les [données](donnees.md), les [tests](tests.md) et les [sauvegardes](sauvegardes.md) décrivent le résultat. Les règles API/documentation sont inscrites dans `AGENTS.md`.
 
-Les résultats réels et la revue sont consignés dans l'issue et la PR. La fusion et la mise en production restent distinctes ; suivre le [déploiement](deploiement.md) lorsqu'une publication est demandée.
+Les résultats réels et la revue sont consignés dans l'issue et la PR. Après chaque fusion, déployer sur le VPS selon le [guide de déploiement](deploiement.md), vérifier la publication et consigner son résultat dans l'issue, conformément à `AGENTS.md`.

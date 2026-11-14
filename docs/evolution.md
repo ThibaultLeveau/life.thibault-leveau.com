@@ -30,8 +30,9 @@ Réutiliser les sessions SQL, les contrôles d'accès, le routage explicite et l
 5. Livrer l'interface avec chargement, vide, erreur et conflit explicites.
 6. Mettre à jour OpenAPI, le guide utilisateur, la configuration et l'exploitation.
 7. Exécuter les contrôles, ouvrir la PR, consigner la revue, attendre la CI et fusionner selon `AGENTS.md`.
+8. Déployer le dernier `main` validé sur le VPS selon le [guide de déploiement](deploiement.md), vérifier la publication et consigner les résultats dans l'issue, y compris pour un changement documentaire.
 
-Toute action métier de l'interface doit avoir son équivalent API, y compris un réglage persistant. Ajouter une documentation sans prétendre qu'un contrôle non exécuté a réussi. Fusion et publication restent distinctes.
+Toute action métier de l'interface doit avoir son équivalent API, y compris un réglage persistant. Ajouter une documentation sans prétendre qu'un contrôle non exécuté a réussi. Fusion et publication sont deux étapes successives obligatoires ; signaler explicitement tout blocage empêchant la publication.
 
 ## Migrations et statistiques futures
 

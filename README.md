@@ -58,6 +58,6 @@ make test-container # image, navigateur et restauration d'une sauvegarde isolée
 
 ## Exploitation
 
-La première activation nécessite les secrets PostgreSQL, la migration et la création du compte. Suivre le [déploiement](docs/deploiement.md), puis les [sauvegardes et restaurations](docs/sauvegardes.md). La fusion GitHub ne publie pas le site.
+La première activation nécessite les secrets PostgreSQL, la migration et la création du compte. Suivre le [déploiement](docs/deploiement.md), puis les [sauvegardes et restaurations](docs/sauvegardes.md). Après chaque changement fusionné, y compris documentaire, l'agent déploie le dernier `main` validé sur le VPS et vérifie la publication. La fusion GitHub ne publie pas elle-même le site.
 
 Toutes les opérations de l'interface sont accessibles par [API](docs/api.md). L'historique est prêt pour les futures statistiques ; les tableaux de bord statistiques, le sport et les objectifs restent à développer. Les tâches, sections et espaces sont archivables, sans suppression définitive dans cette version.
