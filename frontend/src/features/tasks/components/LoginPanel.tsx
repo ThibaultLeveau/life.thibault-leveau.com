@@ -40,14 +40,7 @@ export function LoginPanel({
         Life<span className="brand-period">.</span>
       </a>
       <section className="login-card">
-        <div className="login-symbol">
-          <Icon name="list" size={30} />
-        </div>
-        <p className="eyebrow">UN PEU DE CLARTÉ, CHAQUE JOUR</p>
-        <h1>Place à l’essentiel.</h1>
-        <p className="muted">
-          Connectez-vous pour retrouver vos espaces et avancer à votre rythme.
-        </p>
+        <h1>Connexion</h1>
         <form onSubmit={submit} className="stack-form">
           <label>
             Identifiant
@@ -71,15 +64,11 @@ export function LoginPanel({
           </label>
           <ErrorMessage message={error} />
           <button className="primary-button" disabled={busy}>
-            {busy ? "Connexion…" : "Ouvrir mon espace"}
+            {busy ? "Connexion…" : "Se connecter"}
             <Icon name="arrow" />
           </button>
         </form>
-        <p className="login-footer">Votre espace personnel, au même endroit.</p>
       </section>
-      <a className="muted login-docs" href="/documentation/">
-        Documentation de Life <Icon name="arrow" size={14} />
-      </a>
     </main>
   );
 }

@@ -2,7 +2,7 @@
 
 ## Se connecter et créer un espace
 
-Ouvrir **Tâches** dans la navigation et utiliser le compte créé par l'opérateur. La déconnexion se trouve à côté du profil. Une session expirée demande une nouvelle connexion ; les données déjà enregistrées restent conservées.
+Ouvrir **Tâches** dans la navigation et utiliser le compte créé par l'opérateur. La page de connexion présente les champs **Identifiant** et **Mot de passe**, puis le bouton **Se connecter**. Les erreurs s’affichent dans le formulaire. La déconnexion se trouve à côté du profil. Une session expirée demande une nouvelle connexion ; les données déjà enregistrées restent conservées.
 
 Un espace peut représenter Personnel, Travail ou un projet. **Nouvel espace** définit son nom, sa description et sa couleur. Les trois colonnes initiales sont À faire, En cours et Terminé. Les réglages `…` à côté du titre permettent de les adapter. L'icône près de **Mes espaces** permet de réordonner les espaces avec les flèches.
 

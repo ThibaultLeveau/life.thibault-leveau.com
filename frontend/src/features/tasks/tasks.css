@@ -1437,40 +1437,14 @@
   border-radius: 14px;
   box-shadow: 0 5px 35px #00000004;
 }
-.login-symbol {
-  color: var(--task-accent);
-  margin-bottom: 24px;
-}
-.login-card .eyebrow {
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  margin-bottom: 10px;
-}
 .login-card h1 {
-  margin: 0;
+  margin: 0 0 26px;
   font-size: 29px;
-}
-.login-card > p.muted {
-  margin: 13px 0 26px;
-  font-size: 12px;
-  line-height: 1.8;
 }
 .login-card .primary-button {
   margin-top: 3px;
   width: 100%;
   font-size: 13px;
-}
-.login-footer {
-  text-align: center;
-  font-size: 10px;
-  color: var(--task-muted);
-  margin: 24px 0 0;
-}
-.login-docs {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 11px;
 }
 .mobile-only,
 .mobile-scrim {
