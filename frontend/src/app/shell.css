@@ -11,7 +11,7 @@
   min-height: 88px;
   gap: 20px;
 }
-.brand-symbol {
+.brand .brand-symbol {
   display: grid;
   place-items: center;
   border-radius: 10px;
