@@ -492,6 +492,9 @@ test("ajout rapide mobile : des plantes chaque vendredi", async ({ page }) => {
   expect(task.title).toBe("S’occuper des plantes");
   expect(task.due_date).toBe("2027-01-29");
   expect(task.recurrence.rrule).toBe("FREQ=WEEKLY;BYDAY=FR");
+  await expect(
+    page.getByRole("checkbox", { name: "Terminer : S’occuper des plantes", exact: true }),
+  ).toBeVisible();
   await page.reload();
   await expect(
     page.getByRole("checkbox", { name: "Terminer : S’occuper des plantes", exact: true }),
