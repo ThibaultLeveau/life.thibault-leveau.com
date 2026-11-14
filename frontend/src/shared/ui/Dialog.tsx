@@ -6,11 +6,13 @@ export function Dialog({
   children,
   onClose,
   wide = false,
+  initialFocus = "field",
 }: {
   title: string;
   children: ReactNode;
   onClose: () => void;
   wide?: boolean;
+  initialFocus?: "field" | "close";
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
@@ -23,7 +25,9 @@ export function Dialog({
     element.showModal();
     element
       .querySelector<HTMLElement>(
-        'input:not([type="color"]):not([type="checkbox"]), select, textarea',
+        initialFocus === "close"
+          ? ".dialog-header button"
+          : 'input:not([type="color"]):not([type="checkbox"]), select, textarea',
       )
       ?.focus();
     return () => {
@@ -39,7 +43,7 @@ export function Dialog({
           .querySelector<HTMLElement>("main[tabindex]")
           ?.focus({ preventScroll: true });
     };
-  }, []);
+  }, [initialFocus]);
   return (
     <dialog
       ref={ref}
