@@ -186,6 +186,36 @@ test("Sport : bibliothèque, séance mixte, repos, mensurations et statistiques 
   expect(stored.sets).toHaveLength(4);
   expect(stored.status).toBe("completed");
   expect(stored.metrics[0].volume_kg).toBe(600);
+  // A second comparable session exercises the persisted reference and its visible score.
+  let next: Training = await (
+    await page.request.post("/api/v1/sport/sessions", {
+      headers,
+      data: { workout_id: stored.workout_id, expected_version: 1 },
+    })
+  ).json();
+  const improved = [
+    { weight_kg: 72.2, reps: 10 },
+    { distance_m: 1000, duration_seconds: 300 },
+    { weight_kg: 48.2, distance_m: 30 },
+    { reps: 24 },
+  ];
+  for (const [index, values] of improved.entries()) {
+    const response = await page.request.put(
+      `/api/v1/sport/sessions/${next.id}/sets/${index}/0`,
+      { headers, data: { expected_version: next.version, values } },
+    );
+    expect(response.ok()).toBeTruthy();
+    next = await response.json();
+  }
+  const completed = await page.request.put(
+    `/api/v1/sport/sessions/${next.id}/finish`,
+    { headers, data: { expected_version: next.version, outcome: "completed" } },
+  );
+  expect(completed.ok()).toBeTruthy();
+  expect((await completed.json()).score).toBe(120);
+  await page.reload();
+  await expect(page.locator(".sport-history-row").first()).toContainText("120");
+
   await tab(page, "Mensurations");
   await page.getByRole("button", { name: "Nouveau relevé" }).click();
   await page.getByLabel("Date du relevé").fill("2026-01-15");

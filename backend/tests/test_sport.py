@@ -452,3 +452,69 @@ def test_database_constraints_and_migration_refuse_data_loss(client, engine):
     with pytest.raises(IntegrityError), engine.begin() as conn:
         conn.execute(text("UPDATE sport_sessions SET owner_id=:owner"), {"owner": uuid4()})
     assert UUID(t["id"])
+
+
+def test_score_averages_ratios_without_adding_incompatible_units(client):
+    loaded = exercise(client)
+    body = exercise(client, "reps")
+    w = call(
+        client,
+        "POST",
+        "/workouts",
+        {
+            "name": "Mixte",
+            "entries": [
+                {"exercise_id": loaded["id"], "sets": 1},
+                {"exercise_id": body["id"], "sets": 1},
+            ],
+        },
+        201,
+    )
+    t = record(client, start(client, w), {"weight_kg": 49, "reps": 10})
+    first = finish(client, record(client, t, {"reps": 10}, entry=1))
+    t = record(client, start(client, w), {"weight_kg": 99, "reps": 10})
+    second = finish(client, record(client, t, {"reps": 5}, entry=1))
+    assert second["score"] == 125  # Mean of 200% and 50%, not a sum of kg and reps.
+    assert second["baseline_id"] == first["id"]
+    assisted = workout(client, exercise(client, "assisted_reps"))
+    finish(client, record(client, start(client, assisted), {"assistance_kg": 19, "reps": 10}))
+    better = finish(
+        client, record(client, start(client, assisted), {"assistance_kg": 9, "reps": 10})
+    )
+    assert better["score"] == 200
+
+
+def test_empty_measurement_update_and_restore_collision_are_rejected(client):
+    today = str(datetime.now(UTC).date())
+    first = call(client, "POST", "/measurements", {"measured_on": today, "weight_kg": 70}, 201)
+    call(
+        client,
+        "PUT",
+        f"/measurements/{first['id']}",
+        {
+            "expected_version": 1,
+            "measured_on": today,
+        },
+        422,
+    )
+    first = call(
+        client,
+        "PUT",
+        f"/measurements/{first['id']}/archive",
+        {
+            "expected_version": 1,
+            "archived": True,
+        },
+    )
+    call(client, "POST", "/measurements", {"measured_on": today, "weight_kg": 71}, 201)
+    call(
+        client,
+        "PUT",
+        f"/measurements/{first['id']}/archive",
+        {
+            "expected_version": first["version"],
+            "archived": False,
+        },
+        409,
+    )
+    call(client, "GET", "/statistics?since=9999-12-30&until=9999-12-31", status=422)
