@@ -1,6 +1,6 @@
 .tasks-shell {
   display: flex;
-  height: 100svh;
+  height: var(--ui-viewport-height, 100svh);
   min-height: 0;
   background: var(--ui-paper);
 }
@@ -267,7 +267,7 @@
   border-radius: 4px;
   background: transparent;
   color: var(--ui-text);
-  font-size: 12px;
+  font-size: var(--ui-input-size, 12px);
   padding: 7px 3px;
 }
 .task-search-field input::placeholder {
@@ -323,7 +323,7 @@
   border-radius: 5px;
   background: var(--ui-paper);
   color: var(--ui-text);
-  font-size: 11px;
+  font-size: var(--ui-input-size, 11px);
 }
 .filter-panel .check-label {
   flex-direction: row;
@@ -565,7 +565,7 @@
   border: 0;
   background: transparent;
   color: var(--ui-text);
-  font-size: 12px;
+  font-size: var(--ui-input-size, 12px);
 }
 .quick-add-form > div {
   display: flex;
@@ -1320,7 +1320,7 @@
 .entity-form input:not([type="color"]):not([type="checkbox"]),
 .entity-form select {
   padding: 7px 9px;
-  font-size: 12px;
+  font-size: var(--ui-input-size, 12px);
 }
 .entity-detail {
   display: flex;
@@ -1353,7 +1353,7 @@
   max-width: 190px;
 }
 .entity-actions select {
-  font-size: 10px;
+  font-size: var(--ui-input-size, 10px);
   padding: 5px;
 }
 .archive-space {
@@ -1566,7 +1566,7 @@
     opacity: 0.6;
   }
   .app-dialog {
-    max-height: calc(100svh - 24px);
+    max-height: calc(var(--ui-viewport-height, 100svh) - 24px);
     width: calc(100vw - 20px);
     border-radius: 10px;
   }
@@ -1940,7 +1940,7 @@
 }
 @media (max-width: 800px) {
   .tasks-shell {
-    height: 100dvh;
+    height: var(--ui-viewport-height, 100dvh);
   }
   .task-sidebar {
     display: flex;
@@ -1969,6 +1969,7 @@
   }
   .tasks-main {
     overscroll-behavior-y: contain;
+    scroll-padding-top: 80px;
   }
   .task-page-content {
     padding-bottom: calc(40px + env(safe-area-inset-bottom));
@@ -2055,14 +2056,6 @@
   .quick-add {
     min-height: 44px;
   }
-  .tasks-shell input,
-  .tasks-shell select,
-  .app-dialog input,
-  .app-dialog select,
-  .app-dialog textarea,
-  .auth-page input {
-    font-size: 16px;
-  }
   .task-search-field {
     min-width: 0;
   }
@@ -2072,7 +2065,8 @@
   }
   .app-dialog {
     width: calc(100vw - 16px);
-    max-height: calc(100dvh - 16px);
+    max-height: calc(var(--ui-viewport-height, 100dvh) - 24px);
+    scroll-padding-bottom: 96px;
     overscroll-behavior: contain;
   }
   .dialog-actions {

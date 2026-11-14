@@ -10,6 +10,7 @@ import {
 } from "../platform/applications/ApplicationProvider";
 import { ErrorMessage } from "../shared/ui/Dialog";
 import { Icon } from "../shared/ui/Icon";
+import { useMobileFormViewport } from "../shared/ui/useMobileFormViewport";
 import "./shell.css";
 class ApplicationBoundary extends Component<
   { children: ReactNode },
@@ -110,6 +111,7 @@ function Routes() {
   );
 }
 export function App() {
+  useMobileFormViewport();
   return (
     <SessionProvider>
       <ApplicationProvider>

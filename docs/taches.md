@@ -177,6 +177,12 @@ Un tri automatique désactive les poignées ; le message au-dessus des tâches p
 
 Le thème, sous la navigation, suit le système ou impose clair/sombre. Il est enregistré dans le compte. Sur mobile, le bouton de menu ouvre un panneau latéral ; le focus reste dans ce panneau jusqu’à sa fermeture. Le tableau défile horizontalement dans sa zone. Les commandes et champs sont adaptés aux petits écrans ; la barre d’actions groupées reste accessible en bas de l’écran. Les animations respectent le réglage système de réduction des mouvements.
 
+### Saisir et cocher sur mobile
+
+Cocher une tâche actualise les résultats en gardant la liste affichée et sa position, même pendant une connexion lente. Une tâche terminée peut disparaître si les filtres la masquent ; une récurrence peut passer à une autre date. En cas d’échec d’actualisation, les derniers résultats restent visibles et **Réessayer** relance leur lecture.
+
+Les champs de saisie, descriptions et sélecteurs utilisent une taille de texte adaptée au mobile pour éviter le zoom automatique habituel à la saisie. Le zoom volontaire reste disponible. Quand le navigateur signale l’espace occupé par le clavier, la vue et les dialogues s’y adaptent ; un champ masqué est remonté dans la zone visible. Vous pouvez continuer à faire défiler librement et les brouillons restent en place. Les navigateurs et claviers flottants qui ne signalent pas leur emprise gardent leur comportement natif. Ces adaptations ne changent pas la présentation des champs sur ordinateur.
+
 ## Archiver et restaurer
 
 Archiver une tâche dans ses détails. L'onglet **Archives** des réglages restaure tâches et sections. Restaurer d'abord une section archivée, puis ses tâches archivées individuellement si nécessaire. Une tâche seulement masquée par l'archive de sa section redevient visible avec celle-ci.

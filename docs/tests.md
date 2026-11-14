@@ -64,14 +64,15 @@ Pour cibler une autre image locale :
 LIFE_TEST_IMAGE=local/life:ma-validation make test-container
 ```
 
-Pour rejouer uniquement le navigateur sur un serveur **de test** existant :
+Pour rejouer un fichier de parcours navigateur sur un serveur **de test** existant :
 
 ```bash
 LIFE_E2E_URL=http://127.0.0.1:8100 \
-LIFE_E2E_USERNAME=compte-test LIFE_E2E_PASSWORD=mot-de-passe-synthetique make test-ui
+LIFE_E2E_USERNAME=compte-test LIFE_E2E_PASSWORD=mot-de-passe-synthetique \
+npm --prefix frontend run test:e2e -- mobile-comfort.spec.ts
 ```
 
-Ces scénarios créent de vraies données dans le serveur choisi ; ils ne doivent pas cibler la production. Les captures et traces restent sous `frontend/test-results/`, ignoré par Git. Une trace peut contenir cookies et données : seuls les résultats synthétiques sont téléversés en CI en cas d'échec, avec rétention de 7 jours.
+Ces scénarios créent de vraies données dans le serveur choisi ; ils ne doivent pas cibler la production. Pour la suite complète, préférer `make test-container` : il réinitialise les compteurs de connexion de sa base jetable entre fichiers, sans désactiver la limite de 30 connexions par adresse sur 15 minutes. `make test-ui` ne réinitialise pas un serveur fourni. Les captures et traces restent sous `frontend/test-results/`, ignoré par Git, avec un sous-dossier par fichier lors du test de conteneur. Une trace peut contenir cookies et données : seuls les résultats synthétiques sont téléversés en CI en cas d'échec, avec rétention de 7 jours.
 
 ## CI et revue
 
@@ -79,10 +80,12 @@ GitHub Actions exécute les contrôles, les tests Python, les compilations, la c
 
 Les résultats exacts de la livraison sont consignés dans l'issue et la PR. Les essais automatiques Chromium ne remplacent pas une recette sur tous les navigateurs/téléphones physiques ; vérifier les navigateurs ciblés lors des évolutions de compatibilité.
 
+`mobile-comfort.spec.ts` vérifie la continuité des longues listes, du tableau et de l’agenda après résolution/réouverture, les lectures lentes et en échec, les filtres et récurrences, ainsi que les tailles calculées des champs à 320/375 px dans les deux thèmes. Un visual viewport simulé rétrécit sans changer la hauteur de mise en page : ajout rapide, description, dialogue, déplacement natif, défilement manuel et zoom volontaire sont contrôlés. Cette simulation teste l’intégration, pas l’apparition d’un vrai clavier ni le zoom automatique d’un iPhone physique. Les parcours ordinateur vérifient aussi les tailles originales et le focus clavier.
+
 Les tests de duplication et de lots vérifient l’indépendance des historiques, les séries résolues en avance, les statuts ouverts/terminés, les étiquettes inter-espaces, l’ordre, les archives/restaurations, les droits/CSRF et le rollback intégral après conflit ou calendrier invalide. `task-actions.spec.ts` exerce les menus (trois points/clic droit/clavier), le rectangle en liste et tableau, l’agenda, les actions groupées et leurs conflits, ainsi que de vrais événements tactiles Chromium (défilement et appui long) sur une page compilée. Les captures et mesures contrôlent la sélection et les menus mobiles dans les deux thèmes.
 
 ## Applications et bibliothèque
 
 `test_architecture.py` vérifie structure commune, identifiants et chemins uniques, correspondance des manifestes et frontières d’imports backend/frontend. `test_applications.py` vérifie défauts, idempotence, compte propriétaire, CSRF, booléens stricts, contraintes SQL, migration et conservation des tâches/événements/préférences. Il parcourt toutes les routes métier enregistrées pour prouver le refus après désactivation.
 
-Les parcours `applications.spec.ts` couvrent connexion depuis l’accueil, bibliothèque au clavier, persistance après rechargement, accueil vide, accès direct désactivé, réactivation avec tâche/historique conservés, thème commun, mobile à 320 px, erreurs réseau, changements externes au retour au premier plan et expiration de session. Les parcours Tâches existants restent exécutés après extraction du socle. Le test du conteneur inclut les activations dans la restauration transactionnelle. Il réinitialise les compteurs de connexion de sa base jetable entre les 30 connexions du navigateur et la phase de restauration ; la limite applicative de production reste inchangée.
+Les parcours `applications.spec.ts` couvrent connexion depuis l’accueil, bibliothèque au clavier, persistance après rechargement, accueil vide, accès direct désactivé, réactivation avec tâche/historique conservés, thème commun, mobile à 320 px, erreurs réseau, changements externes au retour au premier plan et expiration de session. Les parcours Tâches existants restent exécutés après extraction du socle. Le test du conteneur inclut les activations dans la restauration transactionnelle. Il exécute chaque fichier navigateur comme une phase de recette distincte, puis la restauration ; les compteurs de connexion de sa seule base jetable sont réinitialisés entre les phases pour permettre l’ajout de scénarios. La limite applicative de production reste inchangée.
