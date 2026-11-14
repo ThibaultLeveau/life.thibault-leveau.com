@@ -469,7 +469,7 @@ test("espaces parents : création, déplacement, ordre et archives persistantes"
       .click();
     await dialog.getByLabel("Nom de l’espace").fill(name);
     await dialog
-      .getByLabel("Espace parent", { exact: true })
+      .getByRole("combobox", { name: "Espace parent", exact: true })
       .selectOption(parentId);
     const saved = page.waitForResponse(
       (response) =>
@@ -527,7 +527,10 @@ test("espaces parents : création, déplacement, ordre et archives persistantes"
   await page
     .getByRole("button", { name: "Configurer l’espace", exact: true })
     .click();
-  const parents = dialog.getByLabel("Espace parent", { exact: true });
+  const parents = dialog.getByRole("combobox", {
+    name: "Espace parent",
+    exact: true,
+  });
   for (const id of [parent.id, child.id, leaf.id, sibling.id]) {
     await expect(parents.locator(`option[value="${id}"]`)).toHaveCount(0);
   }
@@ -540,7 +543,9 @@ test("espaces parents : création, déplacement, ordre et archives persistantes"
   await page
     .getByRole("button", { name: "Configurer l’espace", exact: true })
     .click();
-  await dialog.getByLabel("Espace parent", { exact: true }).selectOption("");
+  await dialog
+    .getByRole("combobox", { name: "Espace parent", exact: true })
+    .selectOption("");
   await dialog
     .getByRole("button", { name: "Enregistrer", exact: true })
     .click();
