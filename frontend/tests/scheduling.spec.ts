@@ -472,3 +472,33 @@ test("ajout rapide avec composition et intervalle en lettres", async ({
   expect(task.recurrence.rrule).toBe("FREQ=WEEKLY;BYDAY=MO;INTERVAL=2");
   expect(task.recurrence.max_occurrences).toBeNull();
 });
+
+test("ajout rapide mobile : des plantes chaque vendredi", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await setup(page, "dark");
+  await page.getByRole("button", { name: "Fermer", exact: true }).click();
+  await page.locator(".quick-add").first().click();
+  await page
+    .getByLabel("Nom de la tâche")
+    .fill("S’occuper des plantes tous les vendredis");
+  await expect(page.locator(".schedule-recognition")).toContainText("vendredi");
+  const saved = page.waitForResponse(
+    (r) => r.url().endsWith("/api/v1/tasks") && r.request().method() === "POST",
+  );
+  await page.getByRole("button", { name: "Ajouter", exact: true }).click();
+  const response = await saved;
+  expect(response.ok()).toBeTruthy();
+  const task = await response.json();
+  expect(task.title).toBe("S’occuper des plantes");
+  expect(task.due_date).toBe("2027-01-29");
+  expect(task.recurrence.rrule).toBe("FREQ=WEEKLY;BYDAY=FR");
+  await expect(
+    page.getByRole("checkbox", { name: "Terminer : S’occuper des plantes", exact: true }),
+  ).toBeVisible();
+  await page.reload();
+  await expect(
+    page.getByRole("checkbox", { name: "Terminer : S’occuper des plantes", exact: true }),
+  ).toBeVisible();
+  const persisted = await (await page.request.get(`/api/v1/tasks/${task.id}`)).json();
+  expect(persisted.recurrence.rrule).toBe("FREQ=WEEKLY;BYDAY=FR");
+});

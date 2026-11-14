@@ -561,8 +561,16 @@ class Grammar:
                 self.pos += 1
             self.bound("start")
             return True
-        if self.take("des"):
+        if self.peek() == "des":
+            # Accent folding must not turn the article in "des plantes" into "dès".
+            # Keep accentless date bounds when a date actually follows.
+            explicit = self.tokens[self.pos].original == "dès"
+            previous_directive = self.directive
             self.directive = True
+            if not explicit and not read_date(self.tokens, self.pos + 1, self.today):
+                self.directive = previous_directive
+                return None
+            self.pos += 1
             self.bound("start")
             return True
         if self.take("jusqu"):
