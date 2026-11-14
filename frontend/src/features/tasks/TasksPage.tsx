@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { allTasks, api, ApiError, setApiSession } from "./api";
+import { useLocalToday } from "./dates";
+import { AgendaView } from "./components/AgendaView";
 import {
   defaultView,
   type Label,
@@ -26,6 +28,10 @@ import { workspaceTree } from "./workspaceTree";
 import "./tasks.css";
 
 export function TasksPage() {
+  const today = useLocalToday();
+  const [agenda, setAgenda] = useState(
+    !new URLSearchParams(window.location.search).has("space"),
+  );
   const [session, setSession] = useState<Session | null>(null);
   const [checking, setChecking] = useState(true);
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
@@ -56,6 +62,7 @@ export function TasksPage() {
   const [editor, setEditor] = useState<Task | "new" | null>(null);
   const [moving, setMoving] = useState<Task | null>(null);
   const [reloadTasks, setReloadTasks] = useState(0);
+  const focusSearch = useRef(false);
   const selectedRef = useRef(workspaceId);
   const viewRef = useRef(view);
   const viewWrites = useRef<Promise<unknown>>(Promise.resolve());
@@ -80,6 +87,7 @@ export function TasksPage() {
       setStatuses([]);
       setLabels([]);
       setWorkspaceId("");
+      setAgenda(true);
       setEditor(null);
       setMoving(null);
       setSettingsTab(null);
@@ -167,7 +175,14 @@ export function TasksPage() {
     setSearch(savedView.search);
   }, []);
   useEffect(() => {
-    if (!session || !workspaceId) return;
+    if (!session) return;
+    if (agenda) {
+      setLoading(false);
+      setTaskLoading(false);
+      window.history.replaceState(null, "", "/tasks?view=agenda");
+      return;
+    }
+    if (!workspaceId) return;
     const controller = new AbortController();
     setLoading(true);
     setError("");
@@ -188,12 +203,13 @@ export function TasksPage() {
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, [workspaceId, session?.user_id, loadSpace]);
+  }, [workspaceId, session?.user_id, loadSpace, agenda]);
   useEffect(() => {
-    if (!session || !workspaceId || loading || !statuses.length) return;
+    if (!session || agenda || !workspaceId || loading || !statuses.length)
+      return;
     const controller = new AbortController();
     setTaskLoading(true);
-    allTasks(workspaceId, view, false, controller.signal)
+    allTasks(workspaceId, view, false, controller.signal, today)
       .then((page) => setTasks(page.items))
       .catch((error) => {
         if (!controller.signal.aborted) {
@@ -207,6 +223,8 @@ export function TasksPage() {
     return () => controller.abort();
   }, [
     workspaceId,
+    agenda,
+    today,
     view,
     reloadTasks,
     loading,
@@ -230,15 +248,35 @@ export function TasksPage() {
     [loading, spacesLoading],
   );
   useEffect(() => {
-    if (!workspaceId || loading || search === viewRef.current.search) return;
+    if (agenda || !workspaceId || loading || search === viewRef.current.search)
+      return;
     const timer = setTimeout(() => changeView({ search }), 300);
     return () => clearTimeout(timer);
-  }, [search, workspaceId, loading, changeView]);
+  }, [search, workspaceId, loading, changeView, agenda]);
+  useEffect(() => {
+    if (!agenda && !loading && focusSearch.current) {
+      const field = document.getElementById("task-search");
+      if (field) {
+        field.focus();
+        focusSearch.current = false;
+      }
+    }
+  }, [agenda, loading]);
+  function searchTasks() {
+    focusSearch.current = true;
+    setAgenda(false);
+    setSidebarOpen(false);
+    const field = document.getElementById("task-search");
+    if (field) {
+      field.focus();
+      focusSearch.current = false;
+    }
+  }
   useEffect(() => {
     const shortcut = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
-        document.getElementById("task-search")?.focus();
+        searchTasks();
       }
       if (event.key === "Escape") {
         setSidebarOpen(false);
@@ -421,6 +459,7 @@ export function TasksPage() {
           className="sidebar-add"
           disabled={!workspace || loading}
           onClick={() => {
+            setAgenda(false);
             setEditor("new");
             setSidebarOpen(false);
           }}
@@ -430,15 +469,22 @@ export function TasksPage() {
           </span>
           Ajouter une tâche
         </button>
-        <button
-          className="sidebar-search"
-          onClick={() => {
-            setSidebarOpen(false);
-            document.getElementById("task-search")?.focus();
-          }}
-        >
+        <button className="sidebar-search" onClick={searchTasks}>
           <Icon name="search" />
           Rechercher<kbd>⌘ K</kbd>
+        </button>
+        <button
+          className={`workspace-link agenda-link ${agenda ? "is-active" : ""}`}
+          aria-current={agenda ? "page" : undefined}
+          onClick={() => {
+            setAgenda(true);
+            setSidebarOpen(false);
+            setNotice("");
+            setError("");
+          }}
+        >
+          <Icon name="calendar" size={18} />
+          <span>À venir</span>
         </button>
         <div className="sidebar-divider" />
         <div className="sidebar-label">
@@ -458,9 +504,12 @@ export function TasksPage() {
               style={{ paddingInlineStart: 12 + Math.min(depth, 6) * 16 }}
               title={path}
               aria-label={depth ? `# ${path}` : undefined}
-              className={`workspace-link ${workspaceId === space.id ? "is-active" : ""}`}
-              aria-current={workspaceId === space.id ? "page" : undefined}
+              className={`workspace-link ${!agenda && workspaceId === space.id ? "is-active" : ""}`}
+              aria-current={
+                !agenda && workspaceId === space.id ? "page" : undefined
+              }
               onClick={() => {
+                setAgenda(false);
                 setWorkspaceId(space.id);
                 setSidebarOpen(false);
               }}
@@ -469,7 +518,9 @@ export function TasksPage() {
                 #
               </span>
               <span>{space.name}</span>
-              {workspaceId === space.id && <Icon name="chevron" size={14} />}
+              {!agenda && workspaceId === space.id && (
+                <Icon name="chevron" size={14} />
+              )}
             </button>
           ))}
         </nav>
@@ -534,11 +585,10 @@ export function TasksPage() {
             >
               <Icon name="menu" />
             </button>
-            <span>Mes espaces</span>
+            <span>{agenda ? "Mes tâches" : "Mes espaces"}</span>
             <Icon name="chevron" size={12} />
             <strong>
-              {spaceTree.find(({ space }) => space.id === workspaceId)?.path ??
-                "Bienvenue"}
+              {agenda ? "À venir" : (spaceTree.find(({ space }) => space.id === workspaceId)?.path ?? "Bienvenue")}
             </strong>
           </div>
           <span className="topbar-date">
@@ -564,7 +614,22 @@ export function TasksPage() {
               </button>
             </p>
           )}
-          {!workspace ? (
+          {agenda ? (
+            spacesLoading ? (
+              <p role="status">Chargement des espaces…</p>
+            ) : (
+              <AgendaView
+                key={session.user_id}
+                workspaces={workspaces}
+                today={today}
+                writes={viewWrites}
+                onWorkspace={(id) => {
+                  setWorkspaceId(id);
+                  setAgenda(false);
+                }}
+              />
+            )
+          ) : !workspace ? (
             <section className="empty-workspace">
               <span className="empty-symbol">
                 <Icon name="folder" size={32} />
@@ -872,6 +937,7 @@ export function TasksPage() {
               ) : (
                 <TaskViews
                   tasks={tasks}
+                  today={today}
                   sections={sections.filter((section) => !section.archived_at)}
                   statuses={statuses}
                   labels={labels}
@@ -894,6 +960,7 @@ export function TasksPage() {
           onClose={() => setCreateSpace(false)}
           onCreated={(space) => {
             setCreateSpace(false);
+            setAgenda(false);
             void loadWorkspaces(space.id).catch((error) =>
               setError(error.message),
             );
@@ -916,7 +983,7 @@ export function TasksPage() {
           }}
         />
       )}
-      {workspace && editor && (
+      {!agenda && !loading && statuses.length > 0 && workspace && editor && (
         <TaskEditor
           key={editor === "new" ? "new" : `${editor.id}:${editor.version}`}
           task={editor === "new" ? undefined : editor}

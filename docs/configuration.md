@@ -41,3 +41,5 @@ Le script d'initialisation PostgreSQL crée le rôle `life` propriétaire de sa 
 | PostgreSQL en production | `5432`, réseau privé Compose `database`, aucun port hôte |
 
 Les secrets sont des paramètres serveur. Les noms, couleurs, ordres, filtres et thèmes sont des **données métier**, modifiables via l'[API](api.md), jamais via des variables frontend.
+
+Les réglages de la vue **À venir** sont propres au compte : période (jour/demain/semaine/personnalisée), horizon de 1 à 90 jours, inclusion des retards et des tâches terminées. Ils passent par `/api/v1/agenda/view` ; aucun nouveau paramètre d’environnement n’est nécessaire.

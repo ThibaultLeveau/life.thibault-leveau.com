@@ -63,12 +63,13 @@ export async function allTasks(
   view: ViewSettings,
   archived = false,
   signal?: AbortSignal,
+  today = localDate(),
 ) {
   const params = new URLSearchParams({
     workspace_id: workspaceId,
     limit: "200",
     sort: view.sort,
-    today: localDate(),
+    today,
     archived: String(archived),
   });
   if (!archived) {

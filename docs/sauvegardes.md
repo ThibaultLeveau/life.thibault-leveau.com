@@ -16,7 +16,7 @@ Le déploiement crée une sauvegarde avant chaque migration, y compris un dump v
 
 ## Tester une restauration sans toucher à Life
 
-Les commandes de `make test-container` créent une base isolée `life_restored` dans un PostgreSQL jetable. Elles génèrent le SQL du dump sans propriétaires/ACL, puis restaurent avec `psql --single-transaction --set ON_ERROR_STOP=1`, comme le script d'exploitation. Elles vérifient les événements, la suppression des objets absents du dump, la révocation des sessions, l'annulation complète en cas d'erreur, la migration et le trigger d'immuabilité. Elles n'utilisent aucune donnée réelle.
+Les commandes de `make test-container` créent une base isolée `life_restored` dans un PostgreSQL jetable. Elles génèrent le SQL du dump sans propriétaires/ACL, puis restaurent avec `psql --single-transaction --set ON_ERROR_STOP=1`, comme le script d'exploitation. Elles vérifient les préférences d’agenda, les événements, la suppression des objets absents du dump, la révocation des sessions, l'annulation complète en cas d'erreur, la migration et le trigger d'immuabilité. Elles n'utilisent aucune donnée réelle.
 
 Pour une sauvegarde réelle, préparer un PostgreSQL **séparé**, sur la même version majeure, avec un rôle `life` propriétaire d'une base vide. Restaurer une copie de confiance et vérifier comptes, espaces, tâches, dates, événements et contraintes. Ne pas afficher leurs contenus dans des journaux publics. Un simple `pg_restore --list` confirme le format, pas la restauration complète.
 
@@ -58,6 +58,10 @@ docker compose --env-file .env.production run --rm --no-deps web life migrate
 Alembic applique les migrations jusqu'à `head`. Elles font partie de l'image, restent explicites et ne sont pas exécutées par chaque worker. La migration initiale crée le schéma et les protections du journal ; elle ne crée aucun compte.
 
 La migration initiale possède un `downgrade` pour les tests, qui **supprime toutes les tables métier**. Ce n'est pas une procédure de récupération de production. Pour une future évolution, tester le changement sur une copie et documenter sa compatibilité. Privilégier la correction en avant ou la restauration d'un dump connu.
+
+La migration `0003_agenda` crée la table de préférences d’agenda, sans modifier les tâches, les événements ou les comptes existants. Elle est additive : l’ancienne application peut continuer à écrire ses tables pendant la migration, mais sa sonde de version ne reconnaît pas la nouvelle révision ; terminer le déploiement avec la nouvelle image. Sauvegarder avant migration, comme le fait `deploy.sh`.
+
+Son aller/retour est testé avec tâches, échéances et résolutions existantes : le downgrade retire uniquement les préférences d’agenda, puis l’upgrade rétablit les valeurs par défaut. Ce downgrade perd les réglages et n’est pas un retour arrière automatique de production ; privilégier une correction en avant ou restaurer le dump compatible. Après restauration, vérifier aussi la période personnalisée et les options d’agenda, en plus des dates et événements.
 
 Le retour à une image précédente ne restaure aucune donnée. `deploy.sh --rollback` vérifie que l'image reconnaît exactement la révision courante ; il s'arrête si elle ne la reconnaît pas. Un retour au socle antérieur à PostgreSQL nécessite une procédure spécifique à cette ancienne version ; les données doivent rester sauvegardées et le volume conservé.
 
