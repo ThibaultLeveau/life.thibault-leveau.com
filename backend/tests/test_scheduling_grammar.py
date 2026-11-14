@@ -5,6 +5,7 @@ from itertools import permutations
 
 import pytest
 
+from life_app.features.tasks.recurrence import dates
 from life_app.features.tasks.scheduling import parse_schedule
 
 TODAY = date(2026, 11, 14)
@@ -178,6 +179,59 @@ def test_exclusion_does_not_reanchor_the_interval_and_iso_week_parity_is_explici
 
 
 @pytest.mark.parametrize(
+    ("expression", "exception", "weekdays", "months"),
+    [
+        ("tous les trois jours", "sauf le week-end", {5, 6}, set()),
+        ("toutes les trois semaines le samedi et le lundi", "sauf le samedi", {5}, set()),
+        ("tous les trois mois les 1er et 21", "sauf le week-end", {5, 6}, set()),
+        ("tous les mois", "sauf le dimanche", {6}, set()),
+        ("tous les mois le 21", "sauf le week-end", {5, 6}, set()),
+        ("tous les ans", "sauf en août", set(), {8}),
+        ("tous les ans", "sauf le week-end", {5, 6}, set()),
+        ("tous les ans le 21", "sauf en août", set(), {8}),
+        ("tous les ans le 21", "sauf le week-end", {5, 6}, set()),
+        ("tous les ans en décembre", "sauf le dimanche", {6}, set()),
+        ("tous les ans le centième jour", "sauf le week-end", {5, 6}, set()),
+        (
+            "tous les deux ans les premiers lundis de janvier et juillet",
+            "sauf en janvier",
+            set(),
+            {1},
+        ),
+    ],
+)
+def test_calendar_exclusions_only_remove_dates_and_preserve_the_original_interval(
+    expression, exception, weekdays, months
+):
+    original = parsed(expression)["recurrence"]
+    candidates = dates(original, TODAY, inclusive=True, limit=60)
+    expected = [d for d in candidates if d.weekday() not in weekdays and d.month not in months][:6]
+    assert len(expected) == 6
+    result = parsed(expression + " " + exception)
+    assert result["recurrence"].start_date == original.start_date
+    assert result["dates"] == expected
+
+
+def test_yearly_and_monthly_ordinals_follow_the_period_with_either_clause_order():
+    for expression in ["chaque dernier jour annuellement", "annuellement le dernier jour"]:
+        result = parsed(expression)
+        assert result["dates"][:2] == [date(2026, 12, 31), date(2027, 12, 31)]
+    result = parsed("tous les ans le centième jour")
+    assert result["dates"][:2] == [date(2027, 4, 10), date(2028, 4, 9)]
+    result = parsed("chaque dernier jour en juin annuellement")
+    assert result["dates"][:2] == [date(2027, 6, 30), date(2028, 6, 30)]
+    for expression in ["tous les 21 mensuellement", "mensuellement le 21"]:
+        assert parsed(expression)["dates"][:2] == [date(2026, 11, 21), date(2026, 12, 21)]
+
+
+def test_weekday_filters_precede_positions_but_explicit_dates_are_removed_afterwards():
+    result = parsed("chaque dernier jour ouvré du mois sauf les vendredis")
+    assert result["dates"][:3] == [date(2026, 11, 30), date(2026, 12, 31), date(2027, 1, 28)]
+    result = parsed("chaque dernier jour ouvré du mois sauf le 30 novembre 2026")
+    assert result["dates"][:2] == [date(2026, 12, 31), date(2027, 1, 29)]
+
+
+@pytest.mark.parametrize(
     "expression",
     [
         "tous les mercredis toutes les",
@@ -227,6 +281,8 @@ def test_live_incomplete_compositions_never_apply_a_valid_prefix(expression):
         "tous les jours sauf les jours fériés",
         "tous les lundis courir tous les jeudis",
         "tous les jours sauf du 01/01/2027 au 31/12/2028",
+        "tous les ans le premier lundi sauf en août",
+        "les lundis et le dernier vendredi de chaque mois",
     ],
 )
 def test_conflicts_and_nonrepresentable_meanings_are_explained_without_a_partial_schedule(
@@ -250,6 +306,7 @@ def test_conflicts_and_nonrepresentable_meanings_are_explained_without_a_partial
         "Un monde de lendemains",
         "Relire « tous les mercredis toutes les trois semaines »",
         'Lire "tous les jours"',
+        "Comparer les surfaces en m² et m³",
     ],
 )
 def test_ordinary_numbers_and_quoted_recurrences_stay_literal(text):
@@ -265,6 +322,7 @@ def test_unicode_and_surrounding_title_survive_composition_and_written_relative_
     assert text[result["start"] : result["end"]] == result["matched_text"]
     assert result["recurrence"].timezone == "Pacific/Auckland"
     assert parsed("dans vingt et un jours")["due_date"] == date(2026, 12, 5)
+    assert parsed("l’année prochaine")["due_date"] == date(2027, 1, 1)
 
 
 @pytest.mark.parametrize(

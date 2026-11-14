@@ -96,6 +96,12 @@ class CalendarSpec:
             else "WEEKLY"
         )
         frequency, interval = self.cadence or (inferred, 1)
+        weekdays = selected.get("BYDAY", set())
+        if any(len(day) > 2 for day in weekdays) and any(len(day) == 2 for day in weekdays):
+            raise ScheduleError(
+                "Ces jours avec et sans position forment des calendriers différents. "
+                "Précisez une position pour chaque jour ou utilisez des tâches distinctes."
+            )
         if "BYWEEKNO" in selected:
             if self.cadence and self.cadence not in {("WEEKLY", 1), ("YEARLY", 1)}:
                 raise ScheduleError(
@@ -106,7 +112,9 @@ class CalendarSpec:
         if "ORDINALDAY" in selected:
             key = (
                 "BYYEARDAY"
-                if "YEARLY" in self.scopes and "MONTHLY" not in self.scopes
+                if frequency == "YEARLY"
+                and "MONTHLY" not in self.scopes
+                and "BYMONTH" not in selected
                 else "BYMONTHDAY"
             )
             selected.setdefault(key, set()).update(selected.pop("ORDINALDAY"))
@@ -127,56 +135,76 @@ class CalendarSpec:
                     "Précisez les jours correspondant au nombre de fois demandé, "
                     "par exemple « deux fois par semaine le lundi et le jeudi »."
                 )
+        if frequency == "YEARLY" and "BYMONTHDAY" in selected and "BYMONTH" not in selected:
+            selected["BYMONTH"] = {start.month}
+        if self.completion and (selected or self.excluded_days or self.excluded_months):
+            raise ScheduleError(
+                "Après résolution utilise un délai seul. "
+                "Retirez les jours fixes ou choisissez un calendrier fixe."
+            )
+
+        def make_rule(selection, step, anchor):
+            parts = {"FREQ": frequency}
+            if step != 1 or self.cadence:
+                parts["INTERVAL"] = str(step)
+            for key, values in selection.items():
+                ordered = (
+                    sorted(values, key=lambda value: (WEEKDAYS.index(value[-2:]), value[:-2]))
+                    if key == "BYDAY"
+                    else sorted(values)
+                )
+                parts[key] = ",".join(map(str, ordered))
+            return Recurrence(
+                rrule=";".join(f"{key}={value}" for key, value in parts.items()),
+                start_date=anchor,
+                timezone=timezone,
+                mode="completion" if self.completion else "scheduled",
+                end_date=end,
+                max_occurrences=self.count,
+            )
+
+        # The first positive selection anchors the interval. Neither a weekday,
+        # month nor explicit date exclusion may move that phase.
+        anchor = start
+        if selected and interval > 1:
+            first = dates(make_rule(selected, 1, start), start, inclusive=True, limit=1)
+            if not first:
+                raise ScheduleError(
+                    "Ces réglages ne donnent aucune date. Vérifiez les jours et la fin."
+                )
+            anchor = first[0]
+
+        # Adding BYDAY/BYMONTH disables some RFC defaults. Materialize those
+        # defaults first, so an exclusion never expands a monthly/annual date.
+        if (
+            self.excluded_days
+            and frequency in {"MONTHLY", "YEARLY"}
+            and not ({"BYDAY", "BYMONTHDAY", "BYYEARDAY", "BYWEEKNO"} & selected.keys())
+        ):
+            selected["BYMONTHDAY"] = {anchor.day}
+        if frequency == "YEARLY" and "BYMONTH" not in selected:
+            if self.excluded_months and any(len(d) > 2 for d in selected.get("BYDAY", [])):
+                raise ScheduleError(
+                    "Une position dans l’année et un mois exclu ne se combinent pas dans "
+                    "une seule règle. Précisez un mois pour cette position ou excluez des dates."
+                )
+            if "BYMONTHDAY" in selected or (
+                self.excluded_months and not {"BYDAY", "BYYEARDAY", "BYWEEKNO"} & selected.keys()
+            ):
+                selected["BYMONTH"] = {anchor.month}
         if self.excluded_days:
             if any(len(d) > 2 for d in selected.get("BYDAY", [])):
                 selected["BYDAY"] = {
                     d for d in selected["BYDAY"] if d[-2:] not in self.excluded_days
                 }
             else:
-                default = set(WEEKDAYS) if frequency == "DAILY" else {WEEKDAYS[start.weekday()]}
+                default = {WEEKDAYS[anchor.weekday()]} if frequency == "WEEKLY" else set(WEEKDAYS)
                 selected["BYDAY"] = selected.get("BYDAY", default) - self.excluded_days
         if self.excluded_months:
             selected["BYMONTH"] = selected.get("BYMONTH", set(range(1, 13))) - self.excluded_months
         if any(not values for values in selected.values()):
             raise ScheduleError("Les exclusions retirent tous les jours ou mois sélectionnés.")
-        if frequency == "YEARLY" and "BYMONTHDAY" in selected and "BYMONTH" not in selected:
-            selected["BYMONTH"] = {start.month}
-        if self.completion and selected:
-            raise ScheduleError(
-                "Après résolution utilise un délai seul. "
-                "Retirez les jours fixes ou choisissez un calendrier fixe."
-            )
-        parts = {"FREQ": frequency}
-        if interval != 1 or self.cadence:
-            parts["INTERVAL"] = str(interval)
-        for key, values in selected.items():
-            ordered = (
-                sorted(values, key=lambda value: (WEEKDAYS.index(value[-2:]), value[:-2]))
-                if key == "BYDAY"
-                else sorted(values)
-            )
-            parts[key] = ",".join(map(str, ordered))
-        rule = Recurrence(
-            rrule=";".join(f"{key}={value}" for key, value in parts.items()),
-            start_date=start,
-            timezone=timezone,
-            mode="completion" if self.completion else "scheduled",
-            end_date=end,
-            max_occurrences=self.count,
-        )
-        # Natural language names the first eligible date, not a partial first period.
-        # Align before exclusions: excluding that first date must not change the cadence.
-        if selected and interval > 1:
-            initial = Recurrence.model_validate(
-                rule.model_dump()
-                | {"rrule": rule.rrule.replace(f"INTERVAL={interval}", "INTERVAL=1")}
-            )
-            first = dates(initial, start, inclusive=True, limit=1)
-            if not first:
-                raise ScheduleError(
-                    "Ces réglages ne donnent aucune date. Vérifiez les jours et la fin."
-                )
-            rule.start_date = first[0]
+        rule = make_rule(selected, interval, anchor)
         exclusions = set()
         for first_tokens, last_tokens in self.excluded_dates:
             first = read_date(first_tokens, 0, start)[0]
@@ -294,6 +322,8 @@ class Grammar:
             self.pos += 1
             self.intent = True
             self.calendar_evidence = True
+            if value[0] in {"MONTHLY", "YEARLY"}:
+                self.pending_day = False
             return value
         amount = number(self.tokens, self.pos)
         end = amount[1] if amount else self.pos

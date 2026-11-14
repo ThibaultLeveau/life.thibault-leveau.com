@@ -141,7 +141,7 @@ def unit(tokens, index):
 
 def number(tokens: list[Token], index: int) -> tuple[int, int] | None:
     """Read a cardinal, not a sum of unrelated words ('deux trois' is not five)."""
-    if word(tokens, index).isdigit():
+    if word(tokens, index).isdecimal():
         return int(word(tokens, index)), index + 1
 
     def below_hundred(i):
@@ -235,6 +235,8 @@ def read_date(tokens: list[Token], index: int, today: date) -> tuple[date, int] 
     start = index
     if word(tokens, index) in {"le", "la"}:
         index += 1
+    elif word(tokens, index) == "l" and word(tokens, index + 1) == "'":
+        index += 2
     value = word(tokens, index)
     tail = [t.value for t in tokens[index : index + 4]]
     if value == "demain":
@@ -255,7 +257,13 @@ def read_date(tokens: list[Token], index: int, today: date) -> tuple[date, int] 
             "an": {"years": 1},
             "annee": {"years": 1},
         }[value]
-        anchor = today if value == "semaine" else today.replace(day=1)
+        anchor = (
+            today
+            if value == "semaine"
+            else today.replace(day=1)
+            if value == "mois"
+            else today.replace(month=1, day=1)
+        )
         return anchor + relativedelta(**delta), index + 2
     if value == "dans":
         amount = number(tokens, index + 1)
