@@ -117,7 +117,145 @@ def history(client, item):
     return response.json()["items"]
 
 
-def test_schema_matches_models_and_migration_roundtrip(engine):
+def test_recurring_task_complete_undo_end_and_history(client, monkeypatch):
+    from datetime import UTC, datetime
+
+    from life_app.features.tasks import service
+
+    monkeypatch.setattr(service, "utcnow", lambda: datetime(2026, 11, 14, 12, tzinfo=UTC))
+    space, _ = create_space(client)
+    item = create_task(
+        client,
+        space,
+        recurrence={"rrule": "FREQ=DAILY", "start_date": "2026-11-14", "max_occurrences": 2},
+    )
+    assert item["due_date"] == "2026-11-14"
+    advanced = mutate(client, item, "complete")
+    assert advanced["due_date"] == "2026-11-15"
+    assert advanced["completed_at"] is None
+    assert advanced["recurrence_completed"] == 1
+    assert advanced["version"] == item["version"] + 1
+    assert (
+        client.post(
+            f"/api/v1/tasks/{item['id']}/complete", json={"expected_version": item["version"]}
+        ).status_code
+        == 409
+    )
+    events = history(client, item)
+    assert [event["kind"] for event in events] == ["created", "completed", "rescheduled"]
+    assert events[1]["context"]["before"]["due_date"] == "2026-11-14"
+    assert events[1]["context"]["after"]["completed_at"] is not None
+    assert events[2]["context"]["completion_event_id"] == events[1]["id"]
+    undone = mutate(client, advanced, "undo-complete")
+    assert undone["due_date"] == "2026-11-14"
+    assert undone["recurrence_completed"] == 0
+    assert history(client, item)[-1]["kind"] == "completion_undone"
+    assert (
+        client.post(
+            f"/api/v1/tasks/{item['id']}/undo-complete",
+            json={"expected_version": undone["version"]},
+        ).status_code
+        == 409
+    )
+    advanced = mutate(client, undone, "complete")
+    final = mutate(client, advanced, "complete")
+    assert final["completed_at"] is not None
+    assert final["recurrence_completed"] == 2
+    assert mutate(client, final, "complete")["version"] == final["version"]
+    archived = client.patch(
+        f"/api/v1/tasks/{item['id']}", json={"expected_version": final["version"], "archived": True}
+    ).json()
+    restored = client.patch(
+        f"/api/v1/tasks/{item['id']}",
+        json={"expected_version": archived["version"], "archived": False},
+    ).json()
+    assert restored["recurrence"] == item["recurrence"]
+    assert restored["recurrence_completed"] == 2
+    assert restored["completed_at"] == final["completed_at"]
+
+
+@pytest.mark.parametrize("route", ["patch", "move"])
+def test_recurring_status_changes_use_same_transition(client, route):
+    space, statuses = create_space(client)
+    item = create_task(
+        client, space, recurrence={"rrule": "FREQ=WEEKLY;BYDAY=MO,TH", "start_date": "2090-01-01"}
+    )
+    destination = {
+        "status_id": next(s["id"] for s in statuses if s["is_completed"]),
+        "expected_version": item["version"],
+    }
+    if route == "patch":
+        response = client.patch(f"/api/v1/tasks/{item['id']}", json=destination)
+    else:
+        response = client.post(
+            f"/api/v1/tasks/{item['id']}/move", json={**destination, "workspace_id": space["id"]}
+        )
+    assert response.status_code == 200, response.text
+    result = response.json()
+    assert result["completed_at"] is None
+    assert result["due_date"] > item["due_date"]
+    assert result["recurrence_completed"] == 1
+
+
+def test_schedule_api_parity_validation_and_literal_titles(client, app):
+    payload = {"text": "Sport tous les lundis", "today": "2026-11-14", "timezone": "Europe/Paris"}
+    parsed = client.post("/api/v1/scheduling/parse", json=payload)
+    assert parsed.status_code == 200
+    parsed = parsed.json()
+    preview = client.post("/api/v1/scheduling/preview", json={"recurrence": parsed["recurrence"]})
+    assert preview.status_code == 200
+    assert preview.json()["dates"] == parsed["dates"]
+    space, _ = create_space(client)
+    item = create_task(
+        client,
+        space,
+        title=parsed["title"],
+        due_date=parsed["due_date"],
+        recurrence=parsed["recurrence"],
+    )
+    assert item["recurrence"] == parsed["recurrence"]
+    assert create_task(client, space, title="Lire demain")["due_date"] is None
+    undated = create_task(client, space, title="Commencer une série")
+    enabled = client.patch(
+        f"/api/v1/tasks/{undated['id']}",
+        json={
+            "expected_version": undated["version"],
+            "recurrence": parsed["recurrence"],
+            "due_date": parsed["due_date"],
+            "label_ids": [],
+        },
+    )
+    assert enabled.status_code == 200, enabled.text
+    for invalid in [
+        {"due_date": None},
+        {"recurrence": {**parsed["recurrence"], "rrule": "FREQ=HOURLY"}},
+        {"recurrence": {**parsed["recurrence"], "timezone": "Mars/Olympus"}},
+        {"recurrence": {**parsed["recurrence"], "end_date": "2020-01-01"}},
+    ]:
+        response = client.patch(
+            f"/api/v1/tasks/{item['id']}", json={**invalid, "expected_version": item["version"]}
+        )
+        assert response.status_code == 422, response.text
+    assert client.get(f"/api/v1/tasks/{item['id']}").json()["version"] == item["version"]
+    cleared = client.patch(
+        f"/api/v1/tasks/{item['id']}",
+        json={"recurrence": None, "due_date": None, "expected_version": item["version"]},
+    )
+    assert cleared.status_code == 200
+    assert cleared.json()["recurrence"] is None
+    with TestClient(app) as other:
+        assert other.post("/api/v1/scheduling/parse", json=payload).status_code == 401
+        login = other.post("/api/v1/auth/session", json={"username": "bob", "password": PASSWORD})
+        other.headers["X-CSRF-Token"] = login.json()["csrf_token"]
+        assert (
+            other.post(
+                f"/api/v1/tasks/{item['id']}/complete", json={"expected_version": 1}
+            ).status_code
+            == 404
+        )
+
+
+def test_schema_matches_models_and_migration_roundtrip(engine, app):
     with engine.begin() as conn:
         assert compare_metadata(MigrationContext.configure(conn), Base.metadata) == []
         config = migration_config()
@@ -125,6 +263,72 @@ def test_schema_matches_models_and_migration_roundtrip(engine):
         command.downgrade(config, "base")
         command.upgrade(config, "head")
         assert compare_metadata(MigrationContext.configure(conn), Base.metadata) == []
+
+
+def test_recurrence_migration_preserves_data_and_refuses_loss(client, engine):
+    space, _ = create_space(client)
+    item = mutate(client, create_task(client, space, due_date="2026-12-31"), "complete")
+    original_events = history(client, item)
+    with engine.begin() as connection:
+        config = migration_config()
+        config.attributes["connection"] = connection
+        command.downgrade(config, "0003_agenda")
+        assert (
+            connection.scalar(
+                text("SELECT due_date::text FROM tasks WHERE id=:id"), {"id": item["id"]}
+            )
+            == "2026-12-31"
+        )
+        command.upgrade(config, "head")
+    assert client.get(f"/api/v1/tasks/{item['id']}").json() == item
+    assert history(client, item) == original_events
+    recurring = create_task(
+        client, space, recurrence={"rrule": "FREQ=DAILY", "start_date": "2026-12-31"}
+    )
+    with pytest.raises(RuntimeError, match="Récurrences présentes"), engine.begin() as connection:
+        config = migration_config()
+        config.attributes["connection"] = connection
+        command.downgrade(config, "0003_agenda")
+    assert client.get(f"/api/v1/tasks/{recurring['id']}").json() == recurring
+    with engine.begin() as connection:
+        assert compare_metadata(MigrationContext.configure(connection), Base.metadata) == []
+
+
+def test_recurrence_constraints_and_concurrent_completion(client, app, engine):
+    space, _ = create_space(client)
+    item = create_task(
+        client, space, recurrence={"rrule": "FREQ=DAILY", "start_date": "2090-01-01"}
+    )
+    for statement in [
+        "UPDATE tasks SET due_date=NULL WHERE id=:id",
+        "UPDATE tasks SET recurrence_completed=-1 WHERE id=:id",
+        "UPDATE tasks SET recurrence='[]'::jsonb WHERE id=:id",
+    ]:
+        with pytest.raises(IntegrityError), engine.begin() as connection:
+            connection.execute(text(statement), {"id": item["id"]})
+    cookie = dict(client.cookies)
+    csrf = client.headers["X-CSRF-Token"]
+
+    def complete():
+        with TestClient(app) as other:
+            other.cookies.update(cookie)
+            return other.post(
+                f"/api/v1/tasks/{item['id']}/complete",
+                headers={"X-CSRF-Token": csrf},
+                json={"expected_version": item["version"]},
+            ).status_code
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        results = list(pool.map(lambda _: complete(), range(2)))
+    assert sorted(results) == [200, 409]
+    result = client.get(f"/api/v1/tasks/{item['id']}").json()
+    assert result["due_date"] == "2090-01-02"
+    assert result["recurrence_completed"] == 1
+    assert [event["kind"] for event in history(client, item)] == [
+        "created",
+        "completed",
+        "rescheduled",
+    ]
 
 
 def test_complete_reopen_history_and_idempotency(client):

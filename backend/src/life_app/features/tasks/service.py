@@ -1,6 +1,7 @@
 """Ownership, ordering and atomic task transitions. Routes own the final commit."""
 
 from datetime import date, timedelta
+from uuid import UUID, uuid4
 
 from fastapi import HTTPException
 from sqlalchemy import delete, func, or_, select
@@ -8,6 +9,7 @@ from sqlalchemy import delete, func, or_, select
 from life_app.core.database import utcnow
 from life_app.features.tasks import models as m
 from life_app.features.tasks import schemas as s
+from life_app.features.tasks.recurrence import Recurrence, dates, next_due
 
 
 def workspace(db, user, workspace_id, *, active=False):
@@ -221,24 +223,30 @@ def context(db, item):
         "status_id": str(status.id),
         "status_name": status.name,
         "is_completed": status.is_completed,
+        "due_date": item.due_date.isoformat() if item.due_date else None,
+        "recurrence": item.recurrence,
+        "recurrence_completed": item.recurrence_completed,
+        "completed_at": item.completed_at.isoformat() if item.completed_at else None,
+        "version": item.version,
     }
 
 
-def event(db, item, kind, previous=None):
+def event(db, item, kind, previous=None, **details):
     current = context(db, item)
-    db.add(
-        m.TaskEvent(
-            task_id=item.id,
-            workspace_id=item.workspace_id,
-            section_id=item.section_id,
-            status_id=item.status_id,
-            previous_status_id=previous["status_id"] if previous else None,
-            kind=kind,
-            was_completed=previous["is_completed"] if previous else False,
-            is_completed=current["is_completed"],
-            context={"before": previous, "after": current},
-        )
+    record = m.TaskEvent(
+        id=uuid4(),
+        task_id=item.id,
+        workspace_id=item.workspace_id,
+        section_id=item.section_id,
+        status_id=item.status_id,
+        previous_status_id=previous["status_id"] if previous else None,
+        kind=kind,
+        was_completed=previous["is_completed"] if previous else False,
+        is_completed=current["is_completed"],
+        context={"before": previous, "after": current, **details},
     )
+    db.add(record)
+    return record
 
 
 def touch(item):
@@ -264,7 +272,66 @@ def transition(db, item, target, previous):
     item.status_id = target.id
     if target.is_completed != was_completed:
         item.completed_at = utcnow() if target.is_completed else None
-        event(db, item, "completed" if target.is_completed else "reopened", previous)
+        if target.is_completed and item.recurrence:
+            item.recurrence_completed += 1
+        completion = event(db, item, "completed" if target.is_completed else "reopened", previous)
+        if target.is_completed and item.recurrence:
+            rule = Recurrence.model_validate(item.recurrence)
+            due = next_due(rule, item.due_date, item.completed_at, item.recurrence_completed)
+            if due is not None:
+                resolved = context(db, item)
+                open_status = db.get(m.Status, UUID(previous["status_id"]))
+                if open_status.workspace_id != item.workspace_id or open_status.is_completed:
+                    open_status = db.scalar(
+                        select(m.Status)
+                        .where(
+                            m.Status.workspace_id == item.workspace_id,
+                            m.Status.is_completed.is_(False),
+                        )
+                        .order_by(m.Status.position, m.Status.id)
+                        .limit(1)
+                    )
+                item.status_id = open_status.id
+                item.due_date = due
+                item.completed_at = None
+                event(db, item, "rescheduled", resolved, completion_event_id=str(completion.id))
+
+
+def apply_schedule(item, values):
+    """Validate the merged patch, keep the anchor on date-only rescheduling."""
+    rule_data = values.pop("recurrence", item.recurrence)
+    if rule_data is not None:
+        rule = Recurrence.model_validate(rule_data)
+        rule_data = rule.model_dump(mode="json")
+        changed = rule_data != item.recurrence
+        due = values.get("due_date", item.due_date)
+        if due is None and "due_date" in values:
+            raise HTTPException(
+                422, "Une tâche récurrente exige une échéance. Retirez aussi sa récurrence."
+            )
+        if changed:
+            upcoming = dates(rule, rule.start_date, inclusive=True, limit=1)
+            if not upcoming:
+                raise HTTPException(
+                    422, "Cette règle ne produit aucune date. Vérifiez jours, exclusions et fin."
+                )
+            if "due_date" not in values:
+                due = upcoming[0]
+        if due is None:
+            raise HTTPException(422, "Une tâche récurrente exige une échéance.")
+        if due < rule.start_date or (rule.end_date and due > rule.end_date):
+            raise HTTPException(
+                422, "L’échéance doit être comprise entre le début et la fin de la récurrence."
+            )
+        if due in rule.excluded_dates:
+            raise HTTPException(422, "Cette échéance est une date exclue de la récurrence.")
+        values["due_date"] = due
+    if rule_data != item.recurrence:
+        item.recurrence_completed = 0
+    item.recurrence = rule_data
+    # Later label queries can autoflush: never expose a recurrence without its date.
+    if "due_date" in values:
+        item.due_date = values["due_date"]
 
 
 def create_task(db, user, payload):
@@ -278,13 +345,27 @@ def create_task(db, user, payload):
             .limit(1)
         )
     target = validate_destination(db, user, payload.workspace_id, payload.section_id, status_id)
+    if payload.recurrence and target.is_completed:
+        raise HTTPException(
+            422, "Créez la série dans un statut ouvert avant de terminer sa première occurrence."
+        )
     validate_labels(db, payload.workspace_id, payload.label_ids)
+    values = payload.model_dump(exclude={"label_ids", "status_id", "recurrence"})
     item = m.Task(
-        **payload.model_dump(exclude={"label_ids", "status_id"}),
+        **values,
+        recurrence_completed=0,
         status_id=target.id,
         position=next_position(db, m.Task, m.Task.workspace_id == payload.workspace_id),
         completed_at=utcnow() if target.is_completed else None,
     )
+    schedule = {
+        "recurrence": payload.recurrence.model_dump(mode="json") if payload.recurrence else None
+    }
+    if payload.due_date is not None:
+        schedule["due_date"] = payload.due_date
+    apply_schedule(item, schedule)
+    if "due_date" in schedule:
+        item.due_date = schedule["due_date"]
     db.add(item)
     db.flush()
     replace_labels(db, item, payload.label_ids)
@@ -303,8 +384,8 @@ def patch_task(db, user, item, payload):
     section_id = values.pop("section_id", item.section_id)
     status_id = values.pop("status_id", item.status_id)
     destination = validate_destination(db, user, item.workspace_id, section_id, status_id)
+    apply_schedule(item, values)
     item.section_id = section_id
-    transition(db, item, destination, previous)
     kind = (
         "moved"
         if previous["section_id"] != (str(section_id) if section_id else None)
@@ -321,6 +402,8 @@ def patch_task(db, user, item, payload):
     for field, value in values.items():
         setattr(item, field, value)
     touch(item)
+    # Completion snapshots the due date/rule actually being resolved, after this edit.
+    transition(db, item, destination, context(db, item))
     event(db, item, kind, previous)
     return item
 
@@ -341,6 +424,40 @@ def complete_task(db, user, item, payload, completed):
         raise HTTPException(409, "Aucun statut compatible.")
     touch(item)
     transition(db, item, target, previous)
+    return item
+
+
+def undo_complete(db, user, item, payload):
+    check_version(item, payload.expected_version)
+    check_active(db, user, item)
+    record = db.scalar(
+        select(m.TaskEvent)
+        .where(
+            m.TaskEvent.task_id == item.id,
+            m.TaskEvent.kind == "completed",
+        )
+        .order_by(m.TaskEvent.occurred_at.desc(), m.TaskEvent.id.desc())
+        .limit(1)
+    )
+    before = record.context.get("before") if record else None
+    if (
+        not before
+        or record.context["after"].get("version") != item.version
+        or before["workspace_id"] != str(item.workspace_id)
+    ):
+        raise HTTPException(
+            409, "La tâche a changé depuis sa résolution ; cette annulation n’est plus disponible."
+        )
+    previous = context(db, item)
+    destination = member(db, m.Status, UUID(before["status_id"]), item.workspace_id)
+    if destination.is_completed:
+        raise HTTPException(409, "Le statut précédent ne permet plus cette annulation.")
+    item.status_id = destination.id
+    item.completed_at = None
+    item.due_date = date.fromisoformat(before["due_date"]) if before["due_date"] else None
+    item.recurrence_completed = before["recurrence_completed"]
+    touch(item)
+    event(db, item, "completion_undone", previous, completion_event_id=str(record.id))
     return item
 
 

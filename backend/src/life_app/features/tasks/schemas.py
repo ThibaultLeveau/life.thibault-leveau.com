@@ -4,6 +4,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from life_app.features.tasks.recurrence import Recurrence
+
 Name = Annotated[str, Field(min_length=1, max_length=120)]
 Color = Annotated[str, Field(pattern=r"^#[0-9a-fA-F]{6}$")]
 Description = Annotated[str, Field(max_length=20000)]
@@ -16,7 +18,7 @@ class Schema(BaseModel):
 class Patch(Schema):
     @model_validator(mode="after")
     def reject_null_required_fields(self):
-        for field in self.model_fields_set - {"section_id", "due_date", "parent_id"}:
+        for field in self.model_fields_set - {"section_id", "due_date", "parent_id", "recurrence"}:
             if getattr(self, field) is None:
                 raise ValueError(f"{field} ne peut pas être null")
         return self
@@ -121,6 +123,7 @@ class TaskCreate(Schema):
     description: Description = ""
     priority: int = Field(default=4, ge=1, le=4)
     due_date: date | None = None
+    recurrence: Recurrence | None = None
     label_ids: list[UUID] = Field(default_factory=list, max_length=100)
 
 
@@ -132,6 +135,7 @@ class TaskPatch(Patch):
     description: Description | None = None
     priority: int | None = Field(default=None, ge=1, le=4)
     due_date: date | None = None
+    recurrence: Recurrence | None = None
     label_ids: list[UUID] | None = Field(default=None, max_length=100)
     archived: bool | None = None
 
@@ -156,6 +160,8 @@ class TaskOutput(Schema):
     description: str
     priority: int
     due_date: date | None
+    recurrence: Recurrence | None
+    recurrence_completed: int
     label_ids: list[UUID] = Field(default_factory=list)
     position: int
     version: int
@@ -204,3 +210,33 @@ class EventPage(Schema):
     total: int
     offset: int
     limit: int
+
+
+class ScheduleParseInput(Schema):
+    text: str = Field(max_length=1000)
+    today: date = Field(description="Date locale du client, base des expressions relatives.")
+    timezone: str = Field(default="Europe/Paris", max_length=100)
+
+
+class ScheduleParseOutput(Schema):
+    title: str
+    due_date: date | None
+    recurrence: Recurrence | None
+    matched_text: str | None
+    start: int | None
+    end: int | None
+    label: str | None
+    dates: list[date]
+
+
+class SchedulePreviewInput(Schema):
+    recurrence: Recurrence
+    after: date | None = Field(default=None, description="Borne inclusive ; début si omise.")
+    limit: int = Field(default=6, ge=1, le=12)
+    completed: int = Field(default=0, ge=0, le=10000)
+
+
+class SchedulePreviewOutput(Schema):
+    label: str
+    dates: list[date]
+    explanation: str

@@ -76,6 +76,10 @@ agenda_query="SELECT string_agg(user_id::text || settings::text, ',' ORDER BY us
 source_agenda=$(docker exec "$db" psql -U life -d life -Atc "$agenda_query")
 restored_agenda=$(docker exec "$db" psql -U life -d life_restored -Atc "$agenda_query")
 [[ -n "$source_agenda" && "$source_agenda" == "$restored_agenda" ]]
+recurrence_query="SELECT string_agg(id::text || recurrence::text || recurrence_completed::text || due_date::text, ',' ORDER BY id) FROM tasks WHERE recurrence IS NOT NULL"
+source_recurrence=$(docker exec "$db" psql -U life -d life -Atc "$recurrence_query")
+restored_recurrence=$(docker exec "$db" psql -U life -d life_restored -Atc "$recurrence_query")
+[[ -n "$source_recurrence" && "$source_recurrence" == "$restored_recurrence" ]]
 [[ $(docker exec "$db" psql -U life -d life_restored -Atc 'SELECT count(*) FROM login_sessions') == 0 ]]
 [[ -z $(docker exec "$db" psql -U life -d life_restored -Atc "SELECT to_regclass('public.obsolete_data')") ]]
 docker exec "$db" psql -U life -d life_restored -c 'CREATE TABLE rollback_marker (id integer)' >/dev/null

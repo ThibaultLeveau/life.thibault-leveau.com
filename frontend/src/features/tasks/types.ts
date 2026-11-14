@@ -49,6 +49,8 @@ export interface Task {
   description: string;
   priority: number;
   due_date: string | null;
+  recurrence: Recurrence | null;
+  recurrence_completed: number;
   label_ids: string[];
   position: number;
   version: number;
@@ -56,6 +58,32 @@ export interface Task {
   updated_at: string;
   completed_at: string | null;
   archived_at: string | null;
+}
+export interface Recurrence {
+  rrule: string;
+  start_date: string;
+  timezone: string;
+  mode: "scheduled" | "completion";
+  end_date: string | null;
+  max_occurrences: number | null;
+  excluded_dates: string[];
+}
+export interface Schedule {
+  due_date: string | null;
+  recurrence: Recurrence | null;
+}
+export interface ScheduleSuggestion extends Schedule {
+  title: string;
+  matched_text: string | null;
+  start: number | null;
+  end: number | null;
+  label: string | null;
+  dates: string[];
+}
+export interface SchedulePreview {
+  label: string;
+  dates: string[];
+  explanation: string;
 }
 export interface ViewSettings {
   layout: "list" | "board";
@@ -86,6 +114,8 @@ interface Context {
   workspace_name: string;
   section_name: string | null;
   status_name: string;
+  due_date?: string | null;
+  recurrence?: Recurrence | null;
 }
 export const defaultView: ViewSettings = {
   layout: "list",

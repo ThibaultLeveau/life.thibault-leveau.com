@@ -12,6 +12,8 @@ const paths = {
   check: "m5 12 4 4L19 6",
   x: "m6 6 12 12M18 6 6 18",
   calendar: "M4 5h16v16H4zM4 10h16M8 3v4M16 3v4",
+  repeat:
+    "m17 2 4 4-4 4M3 11V8a2 2 0 0 1 2-2h16M7 22l-4-4 4-4m14-1v3a2 2 0 0 1-2 2H3",
   flag: "M5 21V3l7 2 7-2v10l-7 2-7-2",
   grip: "M9 5h.01M15 5h.01M9 12h.01M15 12h.01M9 19h.01M15 19h.01",
   arrow: "M4 12h16m-6-6 6 6-6 6",

@@ -2,7 +2,7 @@ from datetime import date
 from typing import Annotated, Literal
 from uuid import UUID
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import delete, func, select
 
 from life_app.core.database import Database
@@ -10,6 +10,8 @@ from life_app.features.auth.service import CurrentUser
 from life_app.features.tasks import models as m
 from life_app.features.tasks import schemas as s
 from life_app.features.tasks import service as svc
+from life_app.features.tasks.recurrence import Recurrence, dates, describe
+from life_app.features.tasks.scheduling import parse_schedule
 
 router = APIRouter(tags=["Tâches"])
 
@@ -25,6 +27,48 @@ def committed_task(db, item):
     result = svc.output(db, item)
     db.commit()
     return result
+
+
+@router.post("/scheduling/parse", response_model=s.ScheduleParseOutput)
+def parse_scheduling(payload: s.ScheduleParseInput, user: CurrentUser):
+    """Analyser le français sans écrire de tâche ; texte reconnu et indices Unicode renvoyés.
+
+    Dates relatives à today, fuseau IANA pour les récurrences. Texte entre guillemets
+    conservé. Une expression inconnue renvoie matched_text=null et le titre intact.
+    """
+    try:
+        Recurrence.valid_timezone(payload.timezone)
+    except ValueError as error:
+        raise HTTPException(422, str(error)) from error
+    return parse_schedule(payload.text, payload.today, payload.timezone)
+
+
+@router.post("/scheduling/preview", response_model=s.SchedulePreviewOutput)
+def preview_scheduling(payload: s.SchedulePreviewInput, user: CurrentUser):
+    """Prévisualiser jusqu’à 12 dates sans écriture ; mêmes règles que la résolution.
+
+    En mode completion, aperçu indicatif supposant chaque résolution à l’échéance.
+    Les dates inexistantes sont sautées selon RFC 5545. Fin inclusive et exclusions.
+    """
+    rule = payload.recurrence
+    upcoming = dates(
+        rule,
+        payload.after or rule.start_date,
+        inclusive=True,
+        limit=payload.limit,
+        completed=payload.completed,
+    )
+    if not upcoming:
+        raise HTTPException(
+            422, "Aucune occurrence pour ces réglages. Vérifiez les jours et la fin."
+        )
+    return s.SchedulePreviewOutput(
+        label=describe(rule),
+        dates=upcoming,
+        explanation="Dates indicatives : le délai repart de chaque résolution."
+        if rule.mode == "completion"
+        else "Calendrier fixe. Les dates inexistantes et exclues sont sautées.",
+    )
 
 
 @router.get("/agenda/view", response_model=s.AgendaSettings)
@@ -347,6 +391,16 @@ def reopen_task(task_id: UUID, payload: s.VersionInput, user: CurrentUser, db: D
     return committed_task(
         db, svc.complete_task(db, user, svc.task(db, user, task_id), payload, False)
     )
+
+
+@router.post("/tasks/{task_id}/undo-complete", response_model=s.TaskOutput)
+def undo_complete(task_id: UUID, payload: s.VersionInput, user: CurrentUser, db: Database):
+    """Annuler la dernière résolution sans effacer le journal, avant toute nouvelle modification.
+
+    Restaure la date, le statut ouvert et le compteur précédents. L’événement compensateur
+    référence la résolution annulée. Une version périmée ou un changement ultérieur donne 409.
+    """
+    return committed_task(db, svc.undo_complete(db, user, svc.task(db, user, task_id), payload))
 
 
 @router.get("/tasks/{task_id}/events", response_model=s.EventPage)

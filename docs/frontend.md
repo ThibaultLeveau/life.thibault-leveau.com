@@ -4,6 +4,10 @@ React, TypeScript et Vite conservent l'outillage du socle. `App.tsx` sélectionn
 
 ## Module tâches
 
+`SchedulePicker` réunit le calendrier accessible (`ScheduleCalendar`) et les réglages (`RecurrenceFields`) dans le flux du dialogue. `useScheduleRecognition` interroge `/scheduling/parse` après 180 ms de pause ; les requêtes précédentes sont annulées et seules les réponses correspondant au texte et à la date courants sont présentées. La sauvegarde attend l’analyse la plus récente, même si on valide immédiatement. `ScheduleRecognition` montre le texte détecté et permet de le garder littéral. Le même comportement équipe l’éditeur et l’ajout rapide.
+
+Les règles et dates restent des données API. Les brouillons du planificateur ne sont appliqués qu’après sélection de date ou validation de l’aperçu serveur. Les erreurs conservent la saisie ; Échap referme le planificateur avant le dialogue. Aucun contenu de tâche n’est enregistré dans localStorage.
+
 | Fichier / composant | Rôle |
 | --- | --- |
 | `TasksPage.tsx` | Session, espaces, état de chargement, filtres et assemblage |

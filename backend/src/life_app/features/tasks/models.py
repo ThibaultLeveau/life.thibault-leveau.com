@@ -94,6 +94,11 @@ class Task(Base):
         CheckConstraint("priority BETWEEN 1 AND 4"),
         CheckConstraint("position >= 0"),
         CheckConstraint("version > 0"),
+        CheckConstraint("recurrence_completed >= 0", name="ck_tasks_recurrence_completed"),
+        CheckConstraint(
+            "recurrence IS NULL OR (jsonb_typeof(recurrence) = 'object' AND due_date IS NOT NULL)",
+            name="ck_tasks_recurrence_due",
+        ),
         Index("ix_tasks_workspace_section_position", "workspace_id", "section_id", "position"),
         Index("ix_tasks_workspace_status", "workspace_id", "status_id"),
         Index("ix_tasks_completed_at", "completed_at"),
@@ -107,6 +112,8 @@ class Task(Base):
     description: Mapped[str] = mapped_column(Text, default="")
     priority: Mapped[int] = mapped_column(default=4)
     due_date: Mapped[date | None] = mapped_column(Date)
+    recurrence: Mapped[dict | None] = mapped_column(JSONB(none_as_null=True))
+    recurrence_completed: Mapped[int] = mapped_column(default=0, server_default="0")
     position: Mapped[int] = mapped_column(default=0)
     version: Mapped[int] = mapped_column(default=1)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
@@ -132,7 +139,9 @@ class TaskEvent(Base):
     __tablename__ = "task_events"
     __table_args__ = (
         CheckConstraint(
-            "kind IN ('created','updated','moved','completed','reopened','archived','restored')"
+            "kind IN ('created','updated','moved','completed','reopened','archived','restored',"
+            "'rescheduled','completion_undone')",
+            name="ck_task_events_kind",
         ),
         Index("ix_task_events_task_time", "task_id", "occurred_at"),
         Index("ix_task_events_resolution", "workspace_id", "kind", "occurred_at"),

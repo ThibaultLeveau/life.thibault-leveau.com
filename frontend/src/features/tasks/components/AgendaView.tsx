@@ -43,6 +43,7 @@ export function AgendaView({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [undoTask, setUndoTask] = useState<Task | null>(null);
   const [reload, setReload] = useState(0);
   const [editor, setEditor] = useState<Task | null>(null);
   const [moving, setMoving] = useState<Task | null>(null);
@@ -139,14 +140,23 @@ export function AgendaView({
     setBusy(true);
     setError("");
     try {
-      await api(
+      const result = await api<Task>(
         `/tasks/${task.id}/${task.completed_at ? "reopen" : "complete"}`,
         "POST",
         {
           expected_version: task.version,
         },
       );
-      setNotice(task.completed_at ? "Tâche rouverte." : "Tâche terminée.");
+      setUndoTask(task.completed_at ? null : result);
+      setNotice(
+        task.completed_at
+          ? "Tâche rouverte."
+          : result.recurrence && !result.completed_at
+            ? `Occurrence terminée. Prochaine : ${relativeDate(result.due_date!, today).full}.`
+            : result.recurrence
+              ? "Dernière occurrence terminée."
+              : "Tâche terminée.",
+      );
       setReload((value) => value + 1);
     } catch (error) {
       setError((error as Error).message);
@@ -158,6 +168,7 @@ export function AgendaView({
     setEditor(null);
     setMoving(null);
     setNotice("Tâche enregistrée.");
+    setUndoTask(null);
     setReload((value) => value + 1);
   }
   const spacePaths = new Map(
@@ -272,6 +283,32 @@ export function AgendaView({
       {notice && (
         <p className="notice" role="status">
           {notice}
+          {undoTask && (
+            <button
+              className="text-button"
+              disabled={busy}
+              onClick={async () => {
+                setBusy(true);
+                setError("");
+                try {
+                  await api(`/tasks/${undoTask.id}/undo-complete`, "POST", {
+                    expected_version: undoTask.version,
+                  });
+                  setNotice(
+                    "Résolution annulée. L’échéance précédente est restaurée.",
+                  );
+                  setUndoTask(null);
+                  setReload((v) => v + 1);
+                } catch (error) {
+                  setError((error as Error).message);
+                } finally {
+                  setBusy(false);
+                }
+              }}
+            >
+              Annuler la résolution
+            </button>
+          )}
         </p>
       )}
       {loading ? (

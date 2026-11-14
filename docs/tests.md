@@ -31,6 +31,7 @@ La suite vérifie notamment :
 - Hiérarchie des espaces, cycles et propriétaires, archives/restaurations, concurrence rattachement/rattachement et création/archivage, migration 0002 aller/retour avec données et historique conservés.
 - Agenda global : bornes inclusives, retards, archives, accès par compte, pagination, année bissextile et changement d’année ; migration additive sur tâches/historique existants.
 - Résolutions/réouvertures, idempotence, déplacements entre espaces et snapshots historiques.
+- Récurrences : reconnaissance française et texte littéral, plusieurs jours, positions mensuelles, exclusions, années bissextiles, fins de mois, fuseaux et bornes ; parité analyse/aperçu/création ; résolution, annulation compensatrice, fin de série, archives et conflits de version ; contraintes et migration additive 0004.
 - Archives parentes/individuelles et configuration des statuts sans fausse résolution.
 - Contraintes de base, rollback après erreur et immuabilité des événements.
 - Conflits de version et deux résolutions concurrentes, dont une seule est acceptée.
@@ -52,6 +53,8 @@ Le script crée un réseau privé, un PostgreSQL et un conteneur applicatif jeta
 Le smoke test vérifie routes publiques, disponibilité de la base, absence d'accès anonyme aux tâches, bundles, recherche MkDocs et vraies 404. Playwright exerce les formulaires de configuration, le cycle complet d'une tâche, le glisser-déposer entre lignes/colonnes, l'ordre en liste, les thèmes persistants, le mobile 320/375 px, le clavier, le déplacement inter-espaces et un conflit d'édition simulé. La création de sous-espaces, le déplacement d'un sous-arbre, le retour à la racine, l'ordre des frères, la navigation mobile et la restauration parents avant enfants sont également couverts, avec vérification par API et après rechargement. L’agenda est vérifié sur plusieurs espaces : périodes, réglages conservés, actions et parité API, dates liste/kanban, passage à minuit local, changement d’heure et erreurs de sauvegarde. Des captures couvrent aussi ses thèmes et formats mobiles. Les couleurs calculées du thème sombre sont contrôlées sur le bundle compilé.
 
 Enfin, le script restaure un dump dans une seconde base, compare les événements et les liens parent-enfant, vérifie la révocation des sessions, les objets retirés et l'annulation sur erreur, puis revérifie migrations/immutabilité. Le nettoyage retire uniquement les ressources créées par ce script, sans toucher aux projets de développement ou de production.
+
+`scheduling.spec.ts` vérifie la reconnaissance en direct dans l’éditeur et l’ajout rapide, l’enregistrement immédiat, le refus de reconnaissance, la personnalisation mensuelle avec exceptions, la persistance API, la résolution/annulation et le calendrier au clavier sur mobile dans les deux thèmes. Les captures et mesures de débordement portent sur le bundle compilé.
 
 Pour cibler une autre image locale :
 
