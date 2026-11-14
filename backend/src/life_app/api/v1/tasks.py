@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Literal
+from typing import Annotated, Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Query
@@ -25,6 +25,40 @@ def committed_task(db, item):
     result = svc.output(db, item)
     db.commit()
     return result
+
+
+@router.get("/agenda/view", response_model=s.AgendaSettings)
+def agenda_view(user: CurrentUser, db: Database):
+    """Réglages globaux du compte ; valeurs par défaut avant le premier enregistrement."""
+    return svc.agenda_settings(db, user)
+
+
+@router.put("/agenda/view", response_model=s.AgendaSettings)
+def update_agenda_view(payload: s.AgendaSettings, user: CurrentUser, db: Database):
+    """Remplacer les réglages du compte ; champs omis remis au défaut, sans modifier les tâches."""
+    svc.save_agenda_settings(db, user, payload)
+    db.commit()
+    return payload
+
+
+@router.get("/agenda/tasks", response_model=s.AgendaPage)
+def agenda_tasks(
+    user: CurrentUser,
+    db: Database,
+    today: Annotated[
+        date | None, Query(description="Date locale du client ; date serveur si omise.")
+    ] = None,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=200),
+):
+    """Tâches de tous les espaces actifs selon /agenda/view, triées par échéance.
+
+    today : jour courant ; tomorrow : lendemain ; week : aujourd'hui et les six jours
+    suivants ; custom : custom_days jours dès aujourd'hui (1–90). Bornes inclusives.
+    include_overdue ajoute les tâches non terminées antérieures à today.
+    Les tâches sans date et les archives (espace, section ou tâche) sont exclues.
+    """
+    return svc.agenda_tasks(db, user, today or date.today(), offset, limit)
 
 
 @router.get("/workspaces", response_model=list[s.WorkspaceOutput])

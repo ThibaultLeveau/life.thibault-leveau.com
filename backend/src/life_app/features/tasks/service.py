@@ -1,6 +1,6 @@
 """Ownership, ordering and atomic task transitions. Routes own the final commit."""
 
-from datetime import date
+from datetime import date, timedelta
 
 from fastapi import HTTPException
 from sqlalchemy import delete, func, or_, select
@@ -424,6 +424,9 @@ def list_tasks(
     archived=False,
     due="all",
     today=None,
+    due_start=None,
+    due_end=None,
+    include_overdue=False,
     sort="manual",
     offset=0,
     limit=100,
@@ -464,6 +467,11 @@ def list_tasks(
             m.Task.completed_at.is_not(None) if completed else m.Task.completed_at.is_(None)
         )
     today = today or date.today()
+    if due_start is not None and due_end is not None:
+        period = m.Task.due_date.between(due_start, due_end)
+        if include_overdue:
+            period = or_(period, (m.Task.due_date < today) & m.Task.completed_at.is_(None))
+        query = query.where(period)
     if due == "overdue":
         query = query.where(m.Task.due_date < today, m.Task.completed_at.is_(None))
     elif due == "today":
@@ -482,3 +490,41 @@ def list_tasks(
         query.order_by(order, m.Task.position, m.Task.id).offset(offset).limit(limit)
     ).all()
     return s.TaskPage(items=outputs(db, items), total=total, offset=offset, limit=limit)
+
+
+def agenda_settings(db, user):
+    item = db.get(m.AgendaPreference, user.id)
+    return s.AgendaSettings.model_validate(item.settings if item else {})
+
+
+def save_agenda_settings(db, user, payload):
+    item = db.get(m.AgendaPreference, user.id)
+    if item is None:
+        item = m.AgendaPreference(user_id=user.id)
+        db.add(item)
+    item.settings = payload.model_dump(mode="json")
+
+
+def agenda_tasks(db, user, today, offset, limit):
+    settings = agenda_settings(db, user)
+    days = settings.custom_days if settings.period == "custom" else 7
+    try:
+        start = today + timedelta(days=1 if settings.period == "tomorrow" else 0)
+        end = start + timedelta(days=days - 1 if settings.period in {"week", "custom"} else 0)
+    except OverflowError as error:
+        raise HTTPException(
+            422, "La période dépasse les dates calendaires prises en charge."
+        ) from error
+    page = list_tasks(
+        db,
+        user,
+        today=today,
+        due_start=start,
+        due_end=end,
+        include_overdue=settings.include_overdue,
+        completed=None if settings.show_completed else False,
+        sort="due_date",
+        offset=offset,
+        limit=limit,
+    )
+    return s.AgendaPage(**page.model_dump(), today=today, start_date=start, end_date=end)

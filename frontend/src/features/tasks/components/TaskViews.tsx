@@ -14,8 +14,6 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core";
 import {
-  formatDate,
-  localDate,
   type Label,
   type Section,
   type Status,
@@ -23,6 +21,7 @@ import {
   type ViewSettings,
 } from "../types";
 import { Icon } from "./Icon";
+import { TaskContents } from "./TaskContents";
 
 export interface Destination {
   section_id: string | null;
@@ -31,6 +30,7 @@ export interface Destination {
 }
 interface Props {
   tasks: Task[];
+  today: string;
   sections: Section[];
   statuses: Status[];
   labels: Label[];
@@ -49,6 +49,7 @@ interface Props {
 
 function TaskCard({
   task,
+  today,
   labels,
   board,
   disabled,
@@ -57,6 +58,7 @@ function TaskCard({
   onComplete,
 }: {
   task: Task;
+  today: string;
   labels: Label[];
   board: boolean;
   disabled: boolean;
@@ -94,62 +96,14 @@ function TaskCard({
       >
         <Icon name="grip" size={14} />
       </button>
-      <button
-        role="checkbox"
-        aria-checked={completed}
-        className={`task-checkbox priority-${task.priority}`}
-        onClick={onComplete}
-        aria-label={`${completed ? "Rouvrir" : "Terminer"} : ${task.title}`}
-        disabled={busy}
-      >
-        {completed && <Icon name="check" size={13} />}
-      </button>
-      <div className="task-content">
-        <button className="task-title" onClick={onOpen} disabled={busy}>
-          {task.title}
-        </button>
-        {task.description && (
-          <p className="task-description">{task.description}</p>
-        )}
-        {(task.due_date || task.priority < 4 || task.label_ids.length > 0) && (
-          <div className="task-meta">
-            {task.due_date && (
-              <span
-                className={`task-date ${!completed && task.due_date < localDate() ? "is-overdue" : ""}`}
-              >
-                <Icon name="calendar" size={13} />
-                {task.due_date === localDate()
-                  ? "Aujourd’hui"
-                  : formatDate(task.due_date)}
-              </span>
-            )}
-            {task.priority < 4 && (
-              <span className={`task-priority priority-${task.priority}`}>
-                <Icon name="flag" size={12} />P{task.priority}
-              </span>
-            )}
-            {labels
-              .filter((label) => task.label_ids.includes(label.id))
-              .map((label) => (
-                <span className="task-label" key={label.id}>
-                  <span
-                    className="color-dot"
-                    style={{ background: label.color }}
-                  />
-                  {label.name}
-                </span>
-              ))}
-          </div>
-        )}
-      </div>
-      <button
-        className="task-more icon-button"
-        aria-label={`Détails : ${task.title}`}
-        disabled={busy}
-        onClick={onOpen}
-      >
-        <Icon name="more" size={18} />
-      </button>
+      <TaskContents
+        task={task}
+        today={today}
+        labels={labels}
+        busy={busy}
+        onOpen={onOpen}
+        onComplete={onComplete}
+      />
     </article>
   );
 }
@@ -255,6 +209,7 @@ function Cell({
         <TaskCard
           key={task.id}
           task={task}
+          today={props.today}
           labels={props.labels}
           board={!!statusId}
           disabled={disabled}

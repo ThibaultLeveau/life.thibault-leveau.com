@@ -44,9 +44,12 @@ assert json.loads(body) == {'status': 'ok'}, 'Réponse de santé inattendue'
 get('/tasks')
 get('/api/v1/health/ready')
 get('/api/v1/tasks', 401)
+get('/api/v1/agenda/view', 401)
+get('/api/v1/agenda/tasks', 401)
 get('/api/docs')
 body, _ = get('/api/openapi.json')
-assert '/api/v1/health' in json.loads(body)['paths'], 'Schéma OpenAPI incomplet'
+for path in ('/api/v1/health', '/api/v1/agenda/view', '/api/v1/agenda/tasks'):
+    assert path in json.loads(body)['paths'], f'Schéma OpenAPI incomplet : {path}'
 get('/favicon.svg')
 get('/documentation/')
 body, _ = get('/documentation/search/search_index.json')

@@ -77,6 +77,42 @@ Archiver un espace ayant un enfant actif renvoie 409 : archiver ou déplacer les
 
 Valeurs : `layout` list/board, `density` comfortable/compact, `sort` manual/priority/due_date, `due` all/overdue/today/upcoming/none. La priorité optionnelle vaut 1 à 4, la recherche au plus 500 caractères. Statut et étiquette référencés doivent appartenir à l'espace. Le défaut de disposition est `list`, les autres défauts figurent dans cet exemple. Ces réglages ne changent jamais le cycle de vie.
 
+## Agenda global
+
+| Méthode et chemin | Contrat |
+| --- | --- |
+| `GET /agenda/view` | Préférences du compte, ou valeurs par défaut |
+| `PUT /agenda/view` | Remplacement des préférences ; champs omis remis au défaut |
+| `GET /agenda/tasks?today=2026-12-31&offset=0&limit=200` | Tâches de tous les espaces actifs selon les préférences enregistrées |
+
+```json
+{"period":"today","custom_days":14,"include_overdue":true,"show_completed":false}
+```
+
+`period` accepte `today`, `tomorrow`, `week`, `custom`. `custom_days` est un entier entre 1 et 90, conservé aussi dans les autres périodes. `week` couvre aujourd’hui et les six jours suivants ; `custom` couvre `custom_days` jours dès aujourd’hui. `tomorrow` couvre uniquement le lendemain. Les bornes sont inclusives. `include_overdue` ajoute les échéances antérieures à `today` seulement si la tâche est ouverte. `show_completed` inclut les tâches terminées dans la période. Le tri est échéance croissante, puis position et UUID pour un ordre stable.
+
+La réponse contient `items`, `total`, `offset`, `limit`, ainsi que `today`, `start_date` et `end_date` (`YYYY-MM-DD`). Les champs de chaque tâche sont ceux de `/tasks`. `offset` est positif ou nul ; `limit` vaut 1 à 200 (100 par défaut). `today` est la date locale du client ; son omission utilise la date du serveur. Une période dépassant l’année 9999 retourne 422, comme une date, un réglage ou une pagination invalide.
+
+La requête exclut les tâches sans échéance, les archives directes et les tâches dans une section/espace archivé. Elle ignore la visibilité liste/tableau des sections. Aucun identifiant de propriétaire n’est accepté : chaque lecture/écriture utilise le compte de la session, avec 401 sans session et 403 sans CSRF ou avec origine invalide pour PUT. Le réglage ne modifie ni dates, ni versions, ni événements de tâches. Les actions sur ces résultats utilisent les routes `/tasks/{id}` existantes.
+
+Exemple indépendant de l’interface, après obtention du cookie et du jeton CSRF (voir l’exemple de connexion plus bas) :
+
+```python
+# client = httpx.Client authentifié, base_url se termine par /api/v1,
+# client.headers contient X-CSRF-Token, comme dans l’exemple complet ci-dessous.
+response = client.put("/agenda/view", json={
+    "period": "custom", "custom_days": 10,
+    "include_overdue": True, "show_completed": False,
+})
+response.raise_for_status()
+response = client.get("/agenda/tasks", params={
+    "today": "2026-12-31", "offset": 0, "limit": 200,
+})
+response.raise_for_status()
+agenda = response.json()
+# Continuer avec offset += len(agenda["items"]) jusqu’au total.
+```
+
 ## Tâches
 
 | Méthode et chemin | Contrat |

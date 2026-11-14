@@ -727,3 +727,202 @@ def test_workspace_parent_migration_preserves_existing_data(client, engine):
         ).status_code
         == 200
     )
+
+
+def test_agenda_periods_and_global_visibility(client, app):
+    first, _ = create_space(client, "Maison")
+    second = child_space(client, first, "Travail")
+    hidden = create_section(client, second, visibility="board")
+    dates = ["2026-12-30", "2026-12-31", "2027-01-01", "2027-01-02", "2027-01-06", "2027-01-07"]
+    items = [
+        create_task(
+            client,
+            first if i % 2 == 0 else second,
+            title=str(i),
+            due_date=value,
+            **({"section_id": hidden["id"]} if i % 2 else {}),
+        )
+        for i, value in enumerate(dates)
+    ]
+    create_task(client, first, title="Sans échéance")
+    completed = mutate(client, create_task(client, first, due_date=dates[1]), "complete")
+    mutate(client, create_task(client, first, due_date=dates[0]), "complete")
+    archived = create_task(client, first, due_date=dates[1])
+    assert (
+        client.patch(
+            f"/api/v1/tasks/{archived['id']}",
+            json={
+                "expected_version": archived["version"],
+                "archived": True,
+            },
+        ).status_code
+        == 200
+    )
+    archived_section = create_section(client, first, "Archivée")
+    create_task(client, first, due_date=dates[1], section_id=archived_section["id"])
+    assert (
+        client.patch(
+            f"/api/v1/workspaces/{first['id']}/sections/{archived_section['id']}",
+            json={"archived": True},
+        ).status_code
+        == 200
+    )
+    archived_space, _ = create_space(client, "Archivé")
+    create_task(client, archived_space, due_date=dates[1])
+    assert (
+        client.patch(
+            f"/api/v1/workspaces/{archived_space['id']}", json={"archived": True}
+        ).status_code
+        == 200
+    )
+    with TestClient(app) as bob:
+        session = bob.post("/api/v1/auth/session", json={"username": "bob", "password": PASSWORD})
+        bob.headers["X-CSRF-Token"] = session.json()["csrf_token"]
+        other, _ = create_space(bob)
+        create_task(bob, other, due_date=dates[1])
+
+    def read(**params):
+        response = client.get("/api/v1/agenda/tasks", params={"today": dates[1], **params})
+        assert response.status_code == 200, response.text
+        return response.json()
+
+    assert [task["id"] for task in read()["items"]] == [item["id"] for item in items[:2]]
+    for period, count, expected_ids, start, end in [
+        ("today", 14, [1], dates[1], dates[1]),
+        ("tomorrow", 14, [2], dates[2], dates[2]),
+        ("week", 14, [1, 2, 3, 4], dates[1], dates[4]),
+        ("custom", 2, [1, 2], dates[1], dates[2]),
+        ("custom", 1, [1], dates[1], dates[1]),
+    ]:
+        assert (
+            client.put(
+                "/api/v1/agenda/view",
+                json={
+                    "period": period,
+                    "custom_days": count,
+                    "include_overdue": False,
+                },
+            ).status_code
+            == 200
+        )
+        result = read()
+        assert [task["id"] for task in result["items"]] == [items[i]["id"] for i in expected_ids]
+        assert (result["today"], result["start_date"], result["end_date"]) == (dates[1], start, end)
+        assert result["total"] == len(expected_ids)
+
+    client.put("/api/v1/agenda/view", json={"period": "week", "show_completed": True})
+    full = read()
+    assert full["total"] == 6
+    assert completed["id"] in [item["id"] for item in full["items"]]
+    paged = [read(offset=i, limit=1)["items"][0]["id"] for i in range(6)]
+    assert paged == [item["id"] for item in full["items"]]
+    # Merely viewing or changing preferences never changes task dates/history.
+    assert client.get(f"/api/v1/tasks/{items[1]['id']}").json() == items[1]
+    assert len(history(client, items[1])) == 1
+    reopened = mutate(client, completed, "reopen")
+    assert reopened["due_date"] == dates[1]
+    assert [event["kind"] for event in history(client, reopened)] == [
+        "created",
+        "completed",
+        "reopened",
+    ]
+
+
+@pytest.mark.parametrize(
+    "today,end",
+    [
+        ("2026-03-27", "2026-04-02"),  # daylight-saving change
+        ("2026-10-23", "2026-10-29"),
+        ("2028-02-27", "2028-03-04"),  # leap year
+    ],
+)
+def test_agenda_calendar_boundaries(client, today, end):
+    client.put("/api/v1/agenda/view", json={"period": "week"})
+    result = client.get("/api/v1/agenda/tasks", params={"today": today}).json()
+    assert result["start_date"] == today
+    assert result["end_date"] == end
+
+
+def test_agenda_preferences_validation_and_access(client, app):
+    defaults = {
+        "period": "today",
+        "custom_days": 14,
+        "include_overdue": True,
+        "show_completed": False,
+    }
+    assert client.get("/api/v1/agenda/view").json() == defaults
+    settings = {
+        "period": "custom",
+        "custom_days": 90,
+        "include_overdue": False,
+        "show_completed": True,
+    }
+    assert client.put("/api/v1/agenda/view", json=settings).json() == settings
+    assert client.get("/api/v1/agenda/view").json() == settings
+    with TestClient(app) as other:
+        for path in ("/agenda/view", "/agenda/tasks"):
+            assert other.get("/api/v1" + path).status_code == 401
+        assert other.put("/api/v1/agenda/view", json={}).status_code == 401
+        login = other.post("/api/v1/auth/session", json={"username": "bob", "password": PASSWORD})
+        assert other.get("/api/v1/agenda/view").json() == defaults
+        assert other.put("/api/v1/agenda/view", json=settings).status_code == 403
+        other.headers["X-CSRF-Token"] = login.json()["csrf_token"]
+        assert (
+            other.put(
+                "/api/v1/agenda/view", json={}, headers={"Origin": "https://invalid.example"}
+            ).status_code
+            == 403
+        )
+        # Preference changes are scoped to the logged-in account.
+        assert other.put("/api/v1/agenda/view", json={"period": "tomorrow"}).status_code == 200
+    assert client.get("/api/v1/agenda/view").json() == settings
+    for invalid in [
+        {"period": "year"},
+        {"custom_days": 0},
+        {"custom_days": 91},
+        {"custom_days": 1.5},
+        {"period": None},
+        {"owner_id": str(uuid4())},
+    ]:
+        assert client.put("/api/v1/agenda/view", json=invalid).status_code == 422
+    for invalid in [
+        {"today": "not-a-date"},
+        {"limit": 201},
+        {"offset": -1},
+        {"today": "9999-12-31"},
+    ]:
+        assert client.get("/api/v1/agenda/tasks", params=invalid).status_code == 422
+    assert client.put("/api/v1/agenda/view", json={}).json() == defaults
+    schema = client.get("/api/openapi.json").json()
+    assert "AgendaSettings" in schema["components"]["schemas"]
+    assert "get" in schema["paths"]["/api/v1/agenda/tasks"]
+
+
+def test_agenda_migration_preserves_existing_data(client, engine):
+    root, _ = create_space(client)
+    space = child_space(client, root)
+    item = create_task(client, space, due_date="2026-12-31")
+    completed = mutate(client, item, "complete")
+    events = history(client, completed)
+    client.put("/api/v1/agenda/view", json={"period": "week"})
+    with engine.begin() as conn:
+        config = migration_config()
+        config.attributes["connection"] = conn
+        command.downgrade(config, "0002")
+        command.upgrade(config, "head")
+        assert compare_metadata(MigrationContext.configure(conn), Base.metadata) == []
+    assert client.get(f"/api/v1/tasks/{item['id']}").json() == completed
+    assert history(client, item) == events
+    assert client.get(f"/api/v1/workspaces/{space['id']}").json()["parent_id"] == root["id"]
+    assert client.get("/api/v1/agenda/view").json()["period"] == "today"
+    # A preference row must reference a real account, and each account has one row.
+    with engine.begin() as conn, pytest.raises(IntegrityError):
+        conn.execute(
+            text("INSERT INTO agenda_preferences VALUES (:id, '{}'::jsonb)"), {"id": uuid4()}
+        )
+
+    client.put("/api/v1/agenda/view", json={"period": "week"})
+    with engine.begin() as conn, pytest.raises(IntegrityError):
+        conn.execute(
+            text("INSERT INTO agenda_preferences SELECT user_id, settings FROM agenda_preferences")
+        )

@@ -172,6 +172,19 @@ class TaskPage(Schema):
     limit: int
 
 
+class AgendaSettings(Schema):
+    period: Literal["today", "tomorrow", "week", "custom"] = "today"
+    custom_days: int = Field(default=14, ge=1, le=90)
+    include_overdue: bool = True
+    show_completed: bool = False
+
+
+class AgendaPage(TaskPage):
+    today: date
+    start_date: date
+    end_date: date
+
+
 class EventOutput(Schema):
     id: UUID
     task_id: UUID

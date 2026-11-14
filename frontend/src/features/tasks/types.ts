@@ -104,9 +104,14 @@ export function localDate() {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
-export function formatDate(value: string) {
-  return new Intl.DateTimeFormat("fr-FR", {
-    day: "numeric",
-    month: "short",
-  }).format(new Date(`${value}T12:00:00`));
+export interface AgendaSettings {
+  period: "today" | "tomorrow" | "week" | "custom";
+  custom_days: number;
+  include_overdue: boolean;
+  show_completed: boolean;
+}
+export interface AgendaPage extends Page<Task> {
+  today: string;
+  start_date: string;
+  end_date: string;
 }

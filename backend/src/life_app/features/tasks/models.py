@@ -154,3 +154,9 @@ class ViewPreference(Base):
     __tablename__ = "view_preferences"
     workspace_id: Mapped[UUID] = mapped_column(ForeignKey("workspaces.id"), primary_key=True)
     settings: Mapped[dict] = mapped_column(JSONB, default=dict)
+
+
+class AgendaPreference(Base):
+    __tablename__ = "agenda_preferences"
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    settings: Mapped[dict] = mapped_column(JSONB, default=dict)
