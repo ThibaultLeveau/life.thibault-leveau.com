@@ -110,18 +110,21 @@ export function ValuesFields({
   value,
   onChange,
   required = false,
+  compact = false,
 }: {
   kind: KindDefinition;
   value: Values;
   onChange: (v: Values) => void;
   required?: boolean;
+  compact?: boolean;
 }) {
   return (
     <div className="sport-value-fields">
       {kind.fields.map((field) => (
         <label key={field.key}>
-          {field.label} ({field.unit})
+          {compact ? field.unit : `${field.label} (${field.unit})`}
           <input
+            aria-label={compact ? `${field.label} (${field.unit})` : undefined}
             type="number"
             inputMode={field.key === "reps" ? "numeric" : "decimal"}
             min={field.minimum}

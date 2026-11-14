@@ -211,10 +211,16 @@ export function ActiveTraining({
         enregistrées seront proposées au prochain entraînement.
       </p>
       {training.entries.map((entry, i) => (
-        <section className="sport-session-exercise" key={i}>
+        <section
+          className="sport-session-exercise"
+          key={i}
+          aria-labelledby={`sport-exercise-${i}`}
+        >
           <div className="sport-section-heading">
-            <h2>
-              <span className="sport-order">{i + 1}</span>
+            <h2 id={`sport-exercise-${i}`}>
+              <span className="sport-order" aria-hidden="true">
+                {i + 1}
+              </span>
               {entry.name}
             </h2>
             <span className="muted small-text">
@@ -266,12 +272,34 @@ export function ActiveTraining({
                   }}
                 >
                   <fieldset className="sport-set-fields" disabled={action.busy}>
-                    <legend>
+                    <legend className="sr-only">Série {j + 1}</legend>
+                    <div className="sport-set-row">
                       <span className="sport-set-number" aria-hidden="true">
-                        {record ? <Icon name="check" size={16} /> : j + 1}
+                        {j + 1}
                       </span>
-                      <strong>Série {j + 1}</strong>
+                      <ValuesFields
+                        kind={kind}
+                        value={values}
+                        onChange={(v) =>
+                          setDrafts((old) => ({ ...old, [key]: v }))
+                        }
+                        required
+                        compact
+                      />
+                      <button
+                        className={
+                          record ? "secondary-button" : "primary-button"
+                        }
+                        aria-label={
+                          record ? "Corriger la série" : "Valider la série"
+                        }
+                      >
+                        {record ? "Corriger" : "Valider"}
+                      </button>
+                    </div>
+                    <div className="sport-set-actions">
                       <span className="sport-set-state">
+                        {record && <Icon name="check" size={14} />}
                         {drafts[key]
                           ? "Saisie à enregistrer"
                           : record
@@ -280,23 +308,6 @@ export function ActiveTraining({
                               ? "Derniers résultats"
                               : "À valider"}
                       </span>
-                    </legend>
-                    <ValuesFields
-                      kind={kind}
-                      value={values}
-                      onChange={(v) =>
-                        setDrafts((old) => ({ ...old, [key]: v }))
-                      }
-                      required
-                    />
-                    <div className="sport-set-actions">
-                      <button
-                        className={
-                          record ? "secondary-button" : "primary-button"
-                        }
-                      >
-                        {record ? "Corriger la série" : "Valider la série"}
-                      </button>
                       {record && (
                         <button
                           type="button"
