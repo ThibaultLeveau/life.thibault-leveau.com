@@ -16,7 +16,23 @@ def test_applications_have_matching_manifests_and_standard_structure():
     assert len(ids) == len(APPLICATIONS)
     assert len({item.path for item in APPLICATIONS}) == len(ids)
     assert all(re.fullmatch(r"/[a-z][a-z0-9_-]*", item.path) for item in APPLICATIONS)
-    assert not {item.path for item in APPLICATIONS} & {"/applications", "/documentation", "/api"}
+    assert not {item.path for item in APPLICATIONS} & {
+        "/applications",
+        "/documentation",
+        "/api",
+        "/assets",
+    }
+    assert all(re.fullmatch(r"[a-z][a-z0-9_]{0,49}", item.id) for item in APPLICATIONS)
+    operations = set()
+    for item in APPLICATIONS:
+        for route in item.router.routes:
+            for method in route.methods:
+                operation = (method, route.path)
+                assert operation not in operations, "Collision entre routes métier"
+                assert not route.path.startswith(
+                    ("/auth/", "/preferences", "/applications", "/health")
+                )
+                operations.add(operation)
     for base in (BACKEND, FRONTEND):
         assert {
             p.name for p in (base / "apps").iterdir() if p.is_dir() and p.name != "__pycache__"

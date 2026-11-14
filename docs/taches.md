@@ -2,10 +2,9 @@
 
 Tâches est une application de LifeOS, activée par défaut. Retrouvez-la sur l’accueil ou réactivez-la dans la [bibliothèque](applications.md). Une désactivation bloque son accès sans changer les données ni l’historique.
 
-
 ## Se connecter et créer un espace
 
-Ouvrir **Tâches** dans la navigation et utiliser le compte créé par l'opérateur. La page de connexion présente les champs **Identifiant** et **Mot de passe**, puis le bouton **Se connecter**. Les erreurs s’affichent dans le formulaire. La déconnexion se trouve à côté du profil. Une session expirée demande une nouvelle connexion ; les données déjà enregistrées restent conservées.
+Se connecter avec le compte créé par l'opérateur, puis choisir **Ouvrir** sur la carte **Tâches** de l’accueil ou de la bibliothèque. La page de connexion présente les champs **Identifiant** et **Mot de passe**, puis le bouton **Se connecter**. Les erreurs s’affichent dans le formulaire. La déconnexion se trouve à côté du profil. Une session expirée demande une nouvelle connexion ; les données déjà enregistrées restent conservées.
 
 Un espace peut représenter Personnel, Travail ou un projet. **Nouvel espace** définit son nom, sa description, sa couleur et, si souhaité, son **Espace parent**. Les trois colonnes initiales sont À faire, En cours et Terminé. Les réglages `…` à côté du titre permettent de les adapter. L'icône près de **Mes espaces** permet de réordonner les espaces ayant le même parent avec les flèches.
 

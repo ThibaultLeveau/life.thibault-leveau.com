@@ -33,6 +33,10 @@ test("bibliothèque, accueil, conservation et réactivation depuis les formulair
   await page.getByLabel("Mot de passe").fill(credentials.password);
   await page.getByRole("button", { name: "Se connecter" }).click();
   await expect(page.getByRole("heading", { name: /Bonjour/ })).toBeVisible();
+  await page
+    .getByRole("combobox", { name: "Apparence", exact: true })
+    .selectOption("light");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   await page.getByRole("link", { name: "Ouvrir Tâches", exact: true }).click();
   await page
     .getByRole("button", { name: "Nouvel espace", exact: true })
@@ -53,6 +57,9 @@ test("bibliothèque, accueil, conservation et réactivation depuis les formulair
     .getByRole("dialog")
     .getByRole("button", { name: "Ajouter la tâche", exact: true })
     .click();
+  await expect(
+    page.getByRole("button", { name: "Préserver ma tâche", exact: true }),
+  ).toBeVisible();
   const workspaces: Workspace[] = await (
     await page.request.get("/api/v1/workspaces")
   ).json();
@@ -114,9 +121,25 @@ test("bibliothèque, accueil, conservation et réactivation depuis les formulair
 test("thème partagé, navigation et bibliothèque à 320 px", async ({
   page,
 }, testInfo) => {
-  await login(page);
+  const headers = await login(page);
+  expect(
+    (
+      await page.request.put("/api/v1/preferences", {
+        headers,
+        data: { theme: "light" },
+      })
+    ).ok(),
+  ).toBeTruthy();
   await page.goto("/applications");
-  await page.getByLabel("Apparence", { exact: true }).selectOption("dark");
+  const themeSaved = page.waitForResponse(
+    (response) =>
+      response.url().endsWith("/api/v1/preferences") &&
+      response.request().method() === "PUT",
+  );
+  await page
+    .getByRole("combobox", { name: "Apparence", exact: true })
+    .selectOption("dark");
+  expect((await themeSaved).ok()).toBeTruthy();
   await page.reload();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   for (const width of [1440, 375, 320]) {
@@ -148,7 +171,9 @@ test("thème partagé, navigation et bibliothèque à 320 px", async ({
     });
     await page.getByRole("link", { name: "Bibliothèque", exact: true }).click();
   }
-  await page.getByLabel("Apparence", { exact: true }).selectOption("system");
+  await page
+    .getByRole("combobox", { name: "Apparence", exact: true })
+    .selectOption("system");
   await page.getByRole("button", { name: "Se déconnecter" }).click();
   await expect(
     page.getByRole("heading", { name: "Connexion", exact: true }),

@@ -1,11 +1,13 @@
 """Account activation, HTTP access parity, preservation, constraints and migration."""
 
+from concurrent.futures import ThreadPoolExecutor
+from threading import Event
 from uuid import UUID, uuid4
 
 import pytest
 from alembic import command
 from fastapi.testclient import TestClient
-from sqlalchemy import select, text
+from sqlalchemy import event, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from test_tasks import create_space, create_task, history, mutate
@@ -13,6 +15,7 @@ from test_tasks import create_space, create_task, history, mutate
 from life_app.apps.registry import APPLICATIONS
 from life_app.cli import migration_config
 from life_app.platform.applications.models import ApplicationPreference
+from life_app.platform.auth.models import User
 
 
 @pytest.fixture
@@ -80,8 +83,11 @@ def test_activation_auth_validation_and_owner_isolation(client, app):
 
 
 def test_every_registered_business_route_is_guarded(client):
-    toggle(client, False)
     for definition in APPLICATIONS:
+        assert (
+            client.put(f"/api/v1/applications/{definition.id}", json={"enabled": False}).status_code
+            == 200
+        )
         for route in definition.router.routes:
             path = route.path
             for name in route.param_convertors:
@@ -89,7 +95,7 @@ def test_every_registered_business_route_is_guarded(client):
             for method in route.methods:
                 response = client.request(method, "/api/v1" + path, json={})
                 assert response.status_code == 403, (method, path, response.text)
-                assert response.headers["X-Life-Application-Disabled"] == "tasks"
+                assert response.headers["X-Life-Application-Disabled"] == definition.id
     assert client.get("/api/v1/preferences").status_code == 200
     assert client.get("/api/v1/auth/session").status_code == 200
     assert client.get("/api/v1/health/ready").status_code == 200
@@ -153,3 +159,43 @@ def test_activation_database_constraints(client, engine):
         connection.execute(
             text("INSERT INTO application_preferences SELECT * FROM application_preferences")
         )
+    with pytest.raises(IntegrityError), engine.begin() as connection:
+        connection.execute(text("UPDATE application_preferences SET updated_at=NULL"))
+
+
+def test_business_write_waits_for_activation_transaction(client, engine, app):
+    """A write queued behind deactivation sees the new state after acquiring the owner lock."""
+    user_id = UUID(client.get("/api/v1/auth/session").json()["user_id"])
+    waiting = Event()
+
+    def before_execute(conn, cursor, statement, parameters, context, executemany):
+        if "FROM users" in statement and "FOR UPDATE" in statement:
+            waiting.set()
+
+    def create_after_lock():
+        with TestClient(app) as other:
+            other.cookies.update(dict(client.cookies))
+            return other.post(
+                "/api/v1/workspaces",
+                json={"name": "Écriture bloquée"},
+                headers={"X-CSRF-Token": client.headers["X-CSRF-Token"]},
+            )
+
+    with Session(engine) as db:
+        db.scalar(select(User).where(User.id == user_id).with_for_update())
+        db.add(ApplicationPreference(user_id=user_id, application_id="tasks", enabled=False))
+        db.flush()
+        event.listen(engine, "before_cursor_execute", before_execute)
+        try:
+            with ThreadPoolExecutor(max_workers=1) as pool:
+                future = pool.submit(create_after_lock)
+                try:
+                    assert waiting.wait(10), "La requête doit atteindre le verrou utilisateur"
+                    assert not future.done()
+                finally:
+                    db.commit()
+                assert future.result(timeout=10).status_code == 403
+        finally:
+            event.remove(engine, "before_cursor_execute", before_execute)
+    toggle(client, True)
+    assert client.get("/api/v1/workspaces").json() == []

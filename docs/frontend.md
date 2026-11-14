@@ -23,7 +23,7 @@ La détection affiche le libellé et les trois premières dates retournées par 
 | `TaskEditor`, `MoveDialog` | Édition atomique, conflits, historique et déplacement accessible |
 | `WorkspaceSettings`, `WorkspaceDialog` | Propriétés, ordre, sections, colonnes, étiquettes et archives |
 | `shared/ui/Dialog`, `platform/auth/LoginPanel` | Dialogue partagé et connexion commune |
-| `styles.css` | Présentation et tokens spécifiques à la fonctionnalité |
+| `styles.css` | Présentation métier utilisant les tokens communs |
 
 `@dnd-kit/core` fournit les capteurs pointeur/clavier et les cibles de dépôt. Le serveur calcule l'ordre final. Un tri automatique désactive les poignées ; la commande de déplacement reste disponible. Les sections sont filtrées selon leur visibilité ; les statuts définissent les colonnes, sans les confondre avec les sections.
 

@@ -56,6 +56,9 @@ done
 LIFE_E2E_USERNAME=browser-test LIFE_E2E_PASSWORD=synthetic-browser-password npm --prefix frontend run test:e2e
 
 # Persist a disabled application through the public contract before testing the dump.
+# Start a separate acceptance phase after the browser suite's 30 login attempts.
+# This database is disposable; production rate limits stay unchanged.
+docker exec "$db" psql -U life -d life -c 'DELETE FROM login_limits' >/dev/null
 python3 - "$LIFE_E2E_URL" <<'PY'
 import http.cookiejar
 import json
