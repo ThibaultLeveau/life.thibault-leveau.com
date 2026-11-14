@@ -173,7 +173,11 @@ def get_session(session_id: UUID, user: CurrentUser, db: Database):
 
 @router.post("/sessions", response_model=s.TrainingOutput, status_code=201)
 def start_session(payload: s.SessionStart, user: CurrentUser, db: Database):
-    """Démarrer un instantané ; un seul entraînement actif par compte (409 sinon)."""
+    """Démarrer avec les derniers résultats proposés par série, sans les valider.
+
+    Les propositions sont figées dans entries[].suggested_values et les objectifs restent
+    inchangés. Un seul entraînement actif par compte (409 sinon).
+    """
     return commit(db, svc.start(db, user, payload), svc.training_output)
 
 

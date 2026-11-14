@@ -137,6 +137,9 @@ def test_each_type_can_plan_train_and_produce_statistics(client, kind, values):
     stats = call(client, "GET", "/statistics")
     assert stats["completed_sessions"] == 1 and stats["total_sets"] == 1
     assert stats["sessions"][0]["id"] == done["id"]
+    next_session = start(client, w)
+    assert next_session["sets"] == [] and next_session["rest_until"] is None
+    assert next_session["entries"][0]["suggested_values"] == [done["sets"][0]["values"]]
 
 
 def test_recovery_versions_correction_restart_and_snapshot(client):
@@ -201,6 +204,128 @@ def test_recovery_versions_correction_restart_and_snapshot(client):
         409,
     )
     assert call(client, "GET", "/sessions/active") is None
+
+
+def test_suggestions_keep_latest_recorded_values_per_set_and_preserve_history(client, engine):
+    ex = exercise(client)
+    w = workout(client, ex, sets=3, target={"weight_kg": 20, "reps": 12})
+    first = start(client, w)
+    assert first["entries"][0]["suggested_values"] == [None, None, None]
+    for i, weight in enumerate([30, 35, 40]):
+        first = record(client, first, {"weight_kg": weight, "reps": 12 - i}, index=i)
+    first = finish(client, first)
+    # Previously published snapshots have no suggested_values key; they still supply results.
+    with Session(engine) as db:
+        old = db.get(Training, UUID(first["id"]))
+        old.entries = [{k: v for k, v in e.items() if k != "suggested_values"} for e in old.entries]
+        db.commit()
+    first = call(client, "GET", f"/sessions/{first['id']}")
+    assert first["entries"][0]["suggested_values"] == []
+    second = start(client, w)
+    assert second["entries"][0]["suggested_values"] == [s["values"] for s in first["sets"]]
+    second = record(client, second, {"weight_kg": 45, "reps": 9}, index=1)
+    second = record(client, second, {"weight_kg": 47.5, "reps": 8}, index=1)
+    second = record(client, second, {"weight_kg": 100, "reps": 2}, index=2)
+    second = call(
+        client,
+        "DELETE",
+        f"/sessions/{second['id']}/sets/0/2",
+        {"expected_version": second["version"]},
+    )
+    second = finish(client, second, "cancelled")
+    # An empty abandoned training must not erase recorded results or promote suggestions.
+    finish(client, start(client, w), "cancelled")
+    current = start(client, w)
+    expected = [first["sets"][0]["values"], second["sets"][0]["values"], first["sets"][2]["values"]]
+    assert current["entries"][0]["suggested_values"] == expected
+    assert current["entries"][0]["target"] == w["entries"][0]["target"]
+    assert current["sets"] == [] and current["rest_until"] is None
+    assert current["score"] is None and current["metrics"] == []
+    assert call(client, "GET", f"/workouts/{w['id']}") == w
+    client.put("/api/v1/applications/sport", json={"enabled": False})
+    client.put("/api/v1/applications/sport", json={"enabled": True})
+    assert call(client, "GET", "/sessions/active")["entries"] == current["entries"]
+    for old in [first, second]:
+        reloaded = call(client, "GET", f"/sessions/{old['id']}")
+        assert {k: v for k, v in reloaded.items() if k != "server_now"} == {
+            k: v for k, v in old.items() if k != "server_now"
+        }
+
+
+def test_suggestions_match_reordered_exercises_occurrences_and_types(client):
+    a, b = exercise(client), exercise(client, "reps")
+    w = call(
+        client,
+        "POST",
+        "/workouts",
+        {
+            "name": "Doublons",
+            "entries": [
+                {"exercise_id": a["id"], "sets": 2},
+                {"exercise_id": b["id"], "sets": 1},
+                {"exercise_id": a["id"], "sets": 1},
+            ],
+        },
+        201,
+    )
+    t = record(client, start(client, w), {"weight_kg": 20, "reps": 10})
+    t = record(client, t, {"weight_kg": 25, "reps": 8}, index=1)
+    t = record(client, t, {"reps": 30}, entry=1)
+    t = finish(client, record(client, t, {"weight_kg": 5, "reps": 20}, entry=2))
+    w = call(
+        client,
+        "PUT",
+        f"/workouts/{w['id']}",
+        {
+            "name": w["name"],
+            "expected_version": w["version"],
+            "entries": [
+                {"exercise_id": b["id"], "sets": 2},
+                {"exercise_id": a["id"], "sets": 3},
+                {"exercise_id": a["id"], "sets": 1},
+            ],
+        },
+    )
+    next_session = start(client, w)
+    assert [e["suggested_values"] for e in next_session["entries"]] == [
+        [t["sets"][2]["values"], None],
+        [t["sets"][0]["values"], t["sets"][1]["values"], None],
+        [t["sets"][3]["values"]],
+    ]
+    finish(client, next_session, "cancelled")
+    call(
+        client,
+        "PUT",
+        f"/exercises/{a['id']}",
+        {
+            "name": a["name"],
+            "kind": "reps",
+            "expected_version": a["version"],
+        },
+    )
+    next_session = start(client, w)
+    assert next_session["entries"][1]["kind"] == "reps"
+    assert next_session["entries"][1]["suggested_values"] == [None, None, None]
+    assert next_session["entries"][2]["suggested_values"] == [None]
+
+
+def test_suggestions_do_not_cross_programs_or_owners(client, app):
+    ex = call(client, "GET", "/exercises?kind=weight_reps&limit=1")["items"][0]
+    w = workout(client, ex)
+    finish(client, record(client, start(client, w), {"weight_kg": 50, "reps": 10}))
+    assert start(client, workout(client, ex))["entries"][0]["suggested_values"] == [None]
+    with TestClient(app) as bob:
+        result = bob.post(
+            "/api/v1/auth/session",
+            json={
+                "username": "bob",
+                "password": "synthetic-test-password",
+            },
+        )
+        bob.headers["X-CSRF-Token"] = result.json()["csrf_token"]
+        bob.put("/api/v1/applications/sport", json={"enabled": True})
+        call(bob, "POST", "/sessions", {"workout_id": w["id"], "expected_version": 1}, 404)
+        assert start(bob, workout(bob, ex))["entries"][0]["suggested_values"] == [None]
 
 
 def test_server_rejects_wrong_type_missing_values_and_invalid_numbers(client):

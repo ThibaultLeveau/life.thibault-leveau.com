@@ -153,7 +153,9 @@ test("Sport : bibliothèque, séance mixte, repos, mensurations et statistiques 
     .getByLabel("Temps de repos entre les séries (secondes)")
     .fill("120");
   await page.getByRole("button", { name: "Enregistrer les réglages" }).click();
-  await expect(page.getByRole("status")).toHaveText("Réglages enregistrés.");
+  await expect(page.locator(".sport-settings").getByRole("status")).toHaveText(
+    "Réglages enregistrés.",
+  );
   await tab(page, "Programmes");
   await page
     .getByRole("button", { name: "Nouveau programme", exact: true })
@@ -197,20 +199,16 @@ test("Sport : bibliothèque, séance mixte, repos, mensurations et statistiques 
     { "Répétitions (rép.)": "20" },
   ];
   for (let i = 0; i < 4; i++) {
-    await page
+    const row = page
       .locator(".sport-session-exercise")
       .nth(i)
-      .getByRole("button")
-      .click();
+      .locator(".sport-set");
     for (const [label, value] of Object.entries(values[i]))
-      await page
-        .getByRole("dialog")
-        .getByLabel(label, { exact: true })
-        .fill(value!);
-    await page
-      .getByRole("dialog")
+      await row.getByLabel(label, { exact: true }).fill(value!);
+    await row
       .getByRole("button", { name: "Valider la série", exact: true })
       .click();
+    await expect(row).toHaveClass(/is-complete/);
     await expect(page.getByRole("dialog")).toHaveCount(0);
     await expect(page.getByRole("timer")).not.toHaveText("00:00");
     if (i === 0) {
@@ -373,7 +371,6 @@ test("Sport : création personnelle, mobile, clavier, archives et validation en 
     .filter({ hasText: w.name })
     .getByRole("button", { name: /Démarrer l’entraînement/ })
     .click();
-  await page.locator(".sport-set").click();
   await page.getByLabel("Répétitions (rép.)").fill("12");
   await page.route("**/api/v1/sport/sessions/*/sets/0/0", (route) =>
     route.abort("failed"),
@@ -415,7 +412,9 @@ test("Sport : création personnelle, mobile, clavier, archives et validation en 
     .getByLabel("Temps de repos entre les séries (secondes)")
     .fill("30");
   await page.getByRole("button", { name: "Enregistrer les réglages" }).click();
-  await expect(page.getByRole("status")).toHaveText("Réglages enregistrés.");
+  await expect(page.locator(".sport-settings").getByRole("status")).toHaveText(
+    "Réglages enregistrés.",
+  );
   await page.getByRole("button", { name: "Ouvrir la navigation" }).click();
   await page
     .getByRole("dialog")
@@ -431,6 +430,306 @@ test("Sport : création personnelle, mobile, clavier, archives et validation en 
   await expect(
     page.getByRole("heading", { name: "Historique", exact: true }),
   ).toBeVisible();
+});
+
+async function weightedTraining(page: Page, sets: number) {
+  const catalogue: ExercisePage = await (
+    await page.request.get("/api/v1/sport/exercises?kind=weight_reps&limit=1")
+  ).json();
+  const response = await page.request.post("/api/v1/sport/workouts", {
+    headers,
+    data: {
+      name: `Séries directes ${Date.now()}`,
+      entries: [
+        {
+          exercise_id: catalogue.items[0].id,
+          sets,
+          target: { weight_kg: 20, reps: 10 },
+        },
+      ],
+    },
+  });
+  expect(response.ok()).toBeTruthy();
+  const workout: Workout = await response.json();
+  const started = await page.request.post("/api/v1/sport/sessions", {
+    headers,
+    data: { workout_id: workout.id, expected_version: workout.version },
+  });
+  expect(started.ok()).toBeTruthy();
+  return { workout, training: (await started.json()) as Training };
+}
+
+test("Sport : saisie directe, brouillons, conflit, correction et séance suivante", async ({
+  page,
+}) => {
+  const { workout, training } = await weightedTraining(page, 2);
+  await page.goto("/sport?tab=training");
+  const first = page.locator(".sport-set").nth(0);
+  const second = page.locator(".sport-set").nth(1);
+  const weight = (row: typeof first) => row.getByLabel("Charge totale (kg)");
+  const reps = (row: typeof first) => row.getByLabel("Répétitions (rép.)");
+  await expect(weight(first)).toHaveValue("20");
+  await expect(weight(second)).toHaveValue("20");
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await weight(second).fill("42.5");
+  await reps(second).fill("8");
+  await weight(first).fill("40");
+  // Native validation remains available; neither invalid nor empty sets are saved.
+  await reps(first).fill("");
+  await first
+    .getByRole("button", { name: "Valider la série", exact: true })
+    .click();
+  await expect(first).not.toHaveClass(/is-complete/);
+  await reps(first).fill("12");
+  await reps(first).press("Enter");
+  await expect(first).toHaveClass(/is-complete/);
+  await expect(weight(second)).toHaveValue("42.5");
+  await expect(reps(second)).toHaveValue("8");
+  await expect(page.getByRole("progressbar")).toHaveCount(0);
+  await expect(first.locator("strong")).toHaveCSS(
+    "text-decoration-line",
+    "none",
+  );
+  const saved: Training = await (
+    await page.request.get(`/api/v1/sport/sessions/${training.id}`)
+  ).json();
+  // A direct API edit on another device produces a real optimistic-lock conflict.
+  expect(
+    (
+      await page.request.put(`/api/v1/sport/sessions/${training.id}/sets/0/0`, {
+        headers,
+        data: {
+          expected_version: saved.version,
+          values: { weight_kg: 41, reps: 12 },
+        },
+      })
+    ).ok(),
+  ).toBeTruthy();
+  await second
+    .getByRole("button", { name: "Valider la série", exact: true })
+    .click();
+  await expect(second.getByRole("alert")).toContainText("a changé");
+  await expect(weight(second)).toHaveValue("42.5");
+  await page.getByRole("button", { name: "Actualiser l’entraînement" }).click();
+  await expect(weight(first)).toHaveValue("41");
+  await expect(weight(second)).toHaveValue("42.5");
+  let release!: () => void;
+  let captured!: () => void;
+  const pending = new Promise<void>((resolve) => (release = resolve));
+  const ready = new Promise<void>((resolve) => (captured = resolve));
+  await page.route("**/api/v1/sport/sessions/active", async (route) => {
+    const response = await route.fetch();
+    captured();
+    await pending;
+    await route.fulfill({ response });
+  });
+  await page.getByRole("button", { name: "Actualiser l’entraînement" }).click();
+  await ready;
+  await second
+    .getByRole("button", { name: "Valider la série", exact: true })
+    .click();
+  await expect(second).toHaveClass(/is-complete/);
+  release();
+  await expect(page.getByText("Chargement…", { exact: true })).toHaveCount(0);
+  await expect(page.locator(".sport-set.is-complete")).toHaveCount(2);
+  await page.unroute("**/api/v1/sport/sessions/active");
+  const before: Training = await (
+    await page.request.get(`/api/v1/sport/sessions/${training.id}`)
+  ).json();
+  await weight(first).fill("45");
+  await expect(
+    page.getByRole("button", { name: "Terminer l’entraînement", exact: true }),
+  ).toBeDisabled();
+  await first.getByRole("button", { name: "Corriger la série" }).click();
+  await expect(first.getByText("Validée", { exact: true })).toBeVisible();
+  const corrected: Training = await (
+    await page.request.get(`/api/v1/sport/sessions/${training.id}`)
+  ).json();
+  expect(corrected.sets[0].values.weight_kg).toBe(45);
+  expect(corrected.sets[0].completed_at).toBe(before.sets[0].completed_at);
+  expect(corrected.rest_until).toBe(before.rest_until);
+  await second.getByRole("button", { name: "Annuler la validation" }).click();
+  await expect(second).not.toHaveClass(/is-complete/);
+  await expect(weight(second)).toHaveValue("42.5");
+  await expect(page.getByRole("timer")).toHaveText("00:00");
+  await second
+    .getByRole("button", { name: "Valider la série", exact: true })
+    .click();
+  await expect(second).toHaveClass(/is-complete/);
+  await page.reload();
+  await expect(weight(first)).toHaveValue("45");
+  await expect(reps(second)).toHaveValue("8");
+  await page
+    .getByRole("button", { name: "Terminer l’entraînement", exact: true })
+    .click();
+  await page.getByRole("button", { name: "Enregistrer les résultats" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Historique", exact: true }),
+  ).toBeVisible();
+  await tab(page, "Programmes");
+  await page
+    .locator(".sport-workout")
+    .filter({ hasText: workout.name })
+    .getByRole("button", { name: /Démarrer/ })
+    .click();
+  await expect(weight(first)).toHaveValue("45");
+  await expect(reps(first)).toHaveValue("12");
+  await expect(weight(second)).toHaveValue("42.5");
+  await expect(reps(second)).toHaveValue("8");
+  await expect(page.locator(".sport-set.is-complete")).toHaveCount(0);
+  await expect(page.getByRole("timer")).toHaveText("00:00");
+  const next: Training = await (
+    await page.request.get("/api/v1/sport/sessions/active")
+  ).json();
+  expect(next.sets).toEqual([]);
+  expect(next.entries[0].suggested_values.map((v) => v?.weight_kg)).toEqual([
+    45, 42.5,
+  ]);
+  await page.reload();
+  await expect(weight(second)).toHaveValue("42.5");
+  await first
+    .getByRole("button", { name: "Valider la série", exact: true })
+    .click();
+  await expect(first).toHaveClass(/is-complete/);
+  await tab(page, "Exercices");
+  await expect(page.getByRole("timer")).toBeInViewport();
+  await expect(page.getByRole("timer")).not.toHaveText("00:00");
+  await page.getByRole("button", { name: "Passer le repos" }).click();
+  await expect(page.getByRole("timer")).toHaveText("00:00");
+  await tab(page, "Entraînement");
+  await expect(first).toHaveClass(/is-complete/);
+  expect(
+    (await (await page.request.get("/api/v1/sport/sessions/active")).json())
+      .rest_until,
+  ).toBeNull();
+});
+
+test("Sport : récupération fixée en bas, défilement, thèmes et clavier mobile", async ({
+  page,
+  browser,
+}, testInfo) => {
+  test.setTimeout(120_000);
+  const { training } = await weightedTraining(page, 12);
+  await page.request.put("/api/v1/sport/settings", {
+    headers,
+    data: { rest_seconds: 120 },
+  });
+  const recorded = await page.request.put(
+    `/api/v1/sport/sessions/${training.id}/sets/0/0`,
+    {
+      headers,
+      data: {
+        expected_version: training.version,
+        values: { weight_kg: 30, reps: 12 },
+      },
+    },
+  );
+  expect(recorded.ok()).toBeTruthy();
+  for (const width of [320, 375, 1440]) {
+    const mobile = width < 800;
+    const context = await browser.newContext({
+      baseURL: process.env.LIFE_E2E_URL ?? "http://127.0.0.1:18106",
+      viewport: { width, height: 850 },
+      hasTouch: mobile,
+      isMobile: mobile,
+    });
+    await context.addCookies(cookies);
+    const screen = await context.newPage();
+    if (mobile)
+      await screen.addInitScript(() => {
+        const viewport = Object.assign(new EventTarget(), {
+          height: 850,
+          offsetTop: 0,
+          scale: 1,
+        });
+        Object.defineProperty(window, "visualViewport", {
+          configurable: true,
+          value: viewport,
+        });
+        window.addEventListener("test-viewport", (event) => {
+          Object.assign(viewport, (event as CustomEvent).detail);
+          viewport.dispatchEvent(new Event("resize"));
+        });
+      });
+    await screen.goto("/sport?tab=training");
+    const bar = screen.locator(".sport-rest");
+    const assertBar = async (bottom = 850) => {
+      await expect(bar).toHaveCSS("position", "fixed");
+      await expect
+        .poll(async () =>
+          Math.abs(
+            (await bar.boundingBox())!.y +
+              (await bar.boundingBox())!.height -
+              bottom,
+          ),
+        )
+        .toBeLessThan(2);
+      expect((await bar.boundingBox())!.y).toBeGreaterThan(0);
+      await expect(screen.getByRole("timer")).toBeInViewport();
+      const skip = screen.getByRole("button", { name: "Passer le repos" });
+      if (await skip.isVisible()) {
+        const time = (await screen.getByRole("timer").boundingBox())!;
+        expect(time.x + time.width).toBeLessThanOrEqual(
+          (await skip.boundingBox())!.x - 6,
+        );
+      }
+    };
+    for (const theme of ["light", "dark"]) {
+      // Change only the rendering theme; persistence is covered by the existing theme journey.
+      await screen.evaluate(
+        (value) => (document.documentElement.dataset.theme = value),
+        theme,
+      );
+      await assertBar();
+      await screen.evaluate(() => {
+        window.scrollTo(0, document.body.scrollHeight);
+        const shell = document.querySelector(".sport-shell")!;
+        shell.scrollTop = shell.scrollHeight;
+      });
+      await assertBar();
+      const last = screen.getByRole("button", {
+        name: "Terminer l’entraînement",
+        exact: true,
+      });
+      await expect(last).toBeInViewport();
+      expect(
+        (await last.boundingBox())!.y + (await last.boundingBox())!.height,
+      ).toBeLessThan((await bar.boundingBox())!.y);
+      expect(
+        await screen.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBe(true);
+      await screen.screenshot({
+        path: testInfo.outputPath(`sport-series-${width}-${theme}.png`),
+      });
+    }
+    if (mobile) {
+      const field = screen
+        .locator(".sport-set")
+        .last()
+        .getByLabel("Charge totale (kg)");
+      await field.focus();
+      await screen.evaluate(() =>
+        window.dispatchEvent(
+          new CustomEvent("test-viewport", { detail: { height: 430 } }),
+        ),
+      );
+      await field.fill("32.5");
+      await assertBar(430);
+      await expect(field).toHaveCSS("font-size", "16px");
+      await expect
+        .poll(
+          async () =>
+            (await field.boundingBox())!.y +
+              (await field.boundingBox())!.height <
+            (await bar.boundingBox())!.y,
+        )
+        .toBe(true);
+      await expect(field).toHaveValue("32.5");
+    }
+    await context.close();
+  }
 });
 
 test("Sport : réponse obsolète, déconnexion et erreur de chargement", async ({

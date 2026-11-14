@@ -95,6 +95,18 @@ class SnapshotEntry(TemplateEntry):
     kind: Kind
 
 
+class TrainingEntry(SnapshotEntry):
+    suggested_values: list[Values | None] = Field(
+        default_factory=list,
+        description=(
+            "Derniers résultats enregistrés par série du même programme, exercice, type et "
+            "occurrence, y compris les entraînements abandonnés. Figés au démarrage ; "
+            "null sans résultat antérieur, liste vide pour les anciens instantanés. "
+            "Ce sont des propositions, jamais des séries validées."
+        ),
+    )
+
+
 class WorkoutInput(Contract):
     name: Name
     notes: str = Field("", max_length=4000)
@@ -163,7 +175,7 @@ class TrainingOutput(Contract):
     id: UUID
     workout_id: UUID
     name: str
-    entries: list[SnapshotEntry]
+    entries: list[TrainingEntry]
     sets: list[SetOutput]
     status: Literal["active", "completed", "cancelled"]
     version: int

@@ -90,7 +90,7 @@ export interface Training {
   id: string;
   workout_id: string;
   name: string;
-  entries: Entry[];
+  entries: (Entry & { suggested_values: (Values | null)[] })[];
   sets: SetRecord[];
   status: "active" | "completed" | "cancelled";
   version: number;

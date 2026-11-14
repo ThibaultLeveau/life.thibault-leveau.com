@@ -4,12 +4,12 @@ import { useSession } from "../../platform/auth/SessionProvider";
 import { Dialog } from "../../shared/ui/Dialog";
 import { Icon, type IconName } from "../../shared/ui/Icon";
 import { sportApi } from "./api";
-import { LoadState, useResource } from "./components/common";
+import { LoadState, useAction, useResource } from "./components/common";
 import { Exercises } from "./components/Exercises";
 import { Measurements } from "./components/Measurements";
 import { Settings } from "./components/Settings";
 import { Statistics } from "./components/Statistics";
-import { ActiveTraining, History } from "./components/Training";
+import { ActiveTraining, History, RestTimer } from "./components/Training";
 import { ProgramEditor } from "./components/ProgramEditor";
 import { Workouts } from "./components/Workouts";
 import type { Training } from "./types";
@@ -48,10 +48,21 @@ export function Page() {
   }, []);
   const [navigation, setNavigation] = useState(false);
   const [active, setActive] = useState<Training | null>();
+  const trainingAction = useAction();
+  const [trainingScope, setTrainingScope] = useState("");
+  const activeRevision = useRef(0);
+  const changeActive = (training: Training | null) => {
+    activeRevision.current += 1;
+    setActive(training);
+  };
   const kinds = useResource(sportApi.kinds, []);
-  const activeResource = useResource(sportApi.active, []);
+  const activeResource = useResource(async (signal) => {
+    const revision = activeRevision.current;
+    return { training: await sportApi.active(signal), revision };
+  }, []);
   useEffect(() => {
-    if (activeResource.data !== undefined) setActive(activeResource.data);
+    if (activeResource.data?.revision === activeRevision.current)
+      setActive(activeResource.data.training);
   }, [activeResource.data]);
   useEffect(() => {
     index.current = history.state?.sportIndex ?? 0;
@@ -124,7 +135,10 @@ export function Page() {
     </nav>
   );
   return (
-    <div ref={shell} className="ui-scope sport-shell">
+    <div
+      ref={shell}
+      className={`ui-scope sport-shell ${active ? "has-active-training" : ""}`}
+    >
       <a
         className="sport-skip"
         href="#sport-main"
@@ -243,18 +257,23 @@ export function Page() {
                   onEdit={(id) => choose("workouts", id, archived)}
                   active={active}
                   onStarted={(t) => {
-                    if (t) setActive(t);
+                    if (t) changeActive(t);
                     choose("training");
                   }}
                 />
               )}
               {tab === "training" && (
                 <ActiveTraining
+                  key={active?.id ?? "empty"}
                   training={active}
+                  registerGuard={registerGuard}
+                  action={trainingAction}
+                  scope={trainingScope}
+                  setScope={setTrainingScope}
                   kinds={kinds.data}
-                  onChanged={setActive}
+                  onChanged={changeActive}
                   onFinished={() => {
-                    setActive(null);
+                    changeActive(null);
                     activeResource.reload();
                     choose("history");
                   }}
@@ -269,6 +288,22 @@ export function Page() {
           )}
         </div>
       </main>
+      {active && (
+        <RestTimer
+          key={active.id}
+          training={active}
+          busy={trainingAction.busy}
+          error={trainingScope === "rest" ? trainingAction.error : ""}
+          onSkip={() =>
+            void trainingAction.run(() => {
+              setTrainingScope("rest");
+              return sportApi.write<Training>(`/sessions/${active.id}/rest`, {
+                expected_version: active.version,
+              });
+            }, changeActive)
+          }
+        />
+      )}
       {navigation && (
         <Dialog
           title="Navigation Sport"

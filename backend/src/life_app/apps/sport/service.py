@@ -109,6 +109,44 @@ def training_output(item):
     )
 
 
+def entry_keys(entries):
+    """Match reordered exercises; repeated occurrences remain separate."""
+    occurrences = {}
+    for entry in entries:
+        identity = (entry["exercise_id"], entry["kind"])
+        occurrence = occurrences.get(identity, 0)
+        occurrences[identity] = occurrence + 1
+        yield (*identity, occurrence)
+
+
+def suggest_previous_values(db, user, workout, entries):
+    suggestions = {
+        key: [None] * entry["sets"] for key, entry in zip(entry_keys(entries), entries, strict=True)
+    }
+    remaining = sum(len(values) for values in suggestions.values())
+    history = db.scalars(
+        select(m.Training)
+        .where(
+            m.Training.owner_id == user.id,
+            m.Training.workout_id == workout.id,
+            m.Training.status != "active",
+        )
+        .order_by(m.Training.finished_at.desc(), m.Training.id)
+    ).yield_per(50)
+    for previous in history:
+        keys = list(entry_keys(previous.entries))
+        for record in previous.sets:
+            values = suggestions.get(keys[record["entry_index"]])
+            index = record["set_index"]
+            if values is not None and index < len(values) and values[index] is None:
+                values[index] = dict(record["values"])
+                remaining -= 1
+        if not remaining:
+            break
+    for entry, values in zip(entries, suggestions.values(), strict=True):
+        entry["suggested_values"] = values
+
+
 def start(db, user, payload):
     workout = owned(db, m.Workout, user, payload.workout_id)
     version(workout, payload.expected_version)
@@ -135,6 +173,7 @@ def start(db, user, payload):
             [(e["exercise_id"], e["kind"], e["sets"]) for e in entries], separators=(",", ":")
         ).encode()
     ).hexdigest()
+    suggest_previous_values(db, user, workout, entries)
     item = m.Training(
         owner_id=user.id,
         workout_id=workout.id,
