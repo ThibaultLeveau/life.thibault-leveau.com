@@ -113,7 +113,7 @@ def start(db, user, payload):
     workout = owned(db, m.Workout, user, payload.workout_id)
     version(workout, payload.expected_version)
     if workout.archived_at:
-        raise HTTPException(409, "Restaurez cette séance avant de la lancer.")
+        raise HTTPException(409, "Restaurez ce programme avant de démarrer un entraînement.")
     active = db.scalar(
         select(m.Training.id).where(m.Training.owner_id == user.id, m.Training.status == "active")
     )
@@ -218,7 +218,7 @@ def finish(db, user, id, payload):
     item = active_session(db, user, id, payload.expected_version)
     if payload.outcome == "completed":
         if len(item.sets) != sum(e["sets"] for e in item.entries):
-            raise HTTPException(409, "Validez toutes les séries avant de terminer la séance.")
+            raise HTTPException(409, "Validez toutes les séries avant de terminer l’entraînement.")
         item.metrics = metrics(item)
         baseline = db.scalar(
             select(m.Training)

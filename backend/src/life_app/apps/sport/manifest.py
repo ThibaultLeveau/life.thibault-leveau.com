@@ -7,5 +7,5 @@ application = ApplicationDefinition(
     path="/sport",
     icon="flag",
     router=router,
-    description="Préparez vos séances, suivez vos entraînements et mesurez votre progression.",
+    description="Composez vos programmes, suivez vos entraînements et mesurez votre progression.",
 )

@@ -1,6 +1,6 @@
 # Sport
 
-Sport est disponible dans la [bibliothèque LifeOS](applications.md). Activez **Sport**, puis ouvrez l’application. Elle partage la connexion, le thème et les commandes accessibles de LifeOS. Sa navigation latérale reprend l’organisation de Tâches ; sur mobile, le bouton de navigation ouvre les mêmes onglets.
+Sport est disponible dans la [bibliothèque LifeOS](applications.md). Activez **Sport**, puis ouvrez l’application. Elle partage la connexion, le thème et les commandes accessibles de LifeOS. Sa navigation latérale reprend l’organisation de Tâches ; sur mobile, le bouton de navigation ouvre les mêmes onglets. Chaque rubrique possède son titre et son URL ; la navigation replace le contenu en haut de page et le focus sur le titre. Les commandes tactiles, les champs et les graphiques s’adaptent aux écrans étroits, en thème clair ou sombre.
 
 ## Exercices prêts à utiliser
 
@@ -23,11 +23,15 @@ Le catalogue fournit **680 exercices en français**, couvrant musculation, poids
 
 Les types décrivent des **mesures**, pas une liste fermée de sports. Un même mouvement peut avoir plusieurs variantes de saisie. Les calories sont celles affichées par la machine : aucune estimation physiologique n’est calculée. Les champs inadaptés à un type sont refusés par le serveur. Utiliser la **charge totale**, barre comprise et deux haltères additionnés ; noter l’assistance affichée pour une machine assistée. Pour un élastique sans assistance chiffrable, choisir le type répétitions et préciser la résistance dans les notes.
 
-## Préparer et lancer une séance
+## Préparer un programme et démarrer un entraînement
 
-Dans **Séances**, choisir **Nouvelle séance**, donner un nom, ajouter des exercices et indiquer leur nombre de séries. Les cibles par série sont facultatives. Les flèches changent l’ordre ; la croix retire un exercice du brouillon. Une séance accepte jusqu’à 50 exercices et 300 séries au total, avec 1 à 30 séries par exercice.
+Dans **Programmes**, choisir **Nouveau programme**, donner un nom, ajouter des exercices et indiquer leur nombre de séries. Les cibles par série sont facultatives. Les flèches changent l’ordre ; la croix retire un exercice du brouillon. Un programme accepte jusqu’à 50 exercices et 300 séries au total, avec 1 à 30 séries par exercice.
 
-**Lancer la séance** démarre un entraînement avec un instantané des exercices, types et cibles. Un compte ne peut avoir qu’un entraînement actif. **Reprendre** ou l’onglet **Entraînement** ramène aux séries. Le brouillon d’un formulaire n’est enregistré qu’à sa validation.
+La création et la modification ouvrent une **page dédiée**, sans fenêtre modale. **Tous les programmes** ou **Annuler** ramène à la liste ; quitter un brouillon modifié demande confirmation. Les boutons précédent/suivant du navigateur fonctionnent aussi. L’URL `/sport?tab=workouts&program=new` ouvre la création ; `program=<uuid>` ouvre un programme enregistré, y compris après rechargement. Le filtre `archived=true` conserve le retour vers les archives.
+
+**Ajouter un exercice** ouvre le catalogue dans la page. La recherche reçoit le focus ; après un choix, le nombre de séries du nouvel exercice reçoit le focus. Les exercices s’ajoutent à la suite et les flèches conservent les champs et valeurs associés. Le compteur affiche les limites et explique un dépassement. **Enregistrer le programme** utilise l’API ; une erreur réseau ou un conflit laisse les champs intacts pour permettre une correction ou une nouvelle tentative. Le brouillon reste temporaire : il n’est pas sauvegardé en cas de rechargement confirmé ou de fin de session.
+
+**Démarrer l’entraînement** démarre un entraînement avec un instantané des exercices, types et cibles. Un compte ne peut avoir qu’un entraînement actif. **Reprendre** ou l’onglet **Entraînement** ramène aux séries. Le brouillon d’un formulaire n’est enregistré qu’à sa validation.
 
 1. Ouvrir une série, saisir le résultat réellement effectué et choisir **Valider la série**.
 2. Le repos démarre automatiquement. Sa durée se règle dans **Réglages**, entre 0 et 3 600 secondes ; le défaut est 90 secondes. Une nouvelle durée concerne la prochaine validation, sans modifier un repos en cours.
@@ -35,7 +39,7 @@ Dans **Séances**, choisir **Nouvelle séance**, donner un nom, ajouter des exer
 4. Une série validée peut être corrigée sans relancer le repos ni changer sa date de validation. **Annuler la validation** retire son résultat et arrête le repos. Les valeurs de la série précédente servent de proposition pour la suivante.
 5. Après toutes les séries, **Terminer l’entraînement** enregistre les résultats et calcule le score. Les notes accueillent le ressenti. **Abandonner** conserve les séries dans l’historique, sans statistiques ni score.
 
-Une session terminée ou abandonnée est conservée et ne se modifie plus. Modifier ou archiver la séance d’origine ne change pas les sessions existantes. Avant un nouveau lancement, les exercices personnels doivent être actifs ; si leur type a changé, retirer puis ajouter à nouveau l’exercice dans la séance pour saisir ses nouveaux objectifs. Le bouton **Actualiser l’entraînement** permet de retrouver la version serveur après une modification depuis un autre appareil. Une version obsolète produit un conflit explicite, sans écraser les données.
+Une session terminée ou abandonnée est conservée et ne se modifie plus. Modifier ou archiver le programme d’origine ne change pas les sessions existantes. Avant un nouveau lancement, les exercices personnels doivent être actifs ; si leur type a changé, retirer puis ajouter à nouveau l’exercice dans le programme pour saisir ses nouveaux objectifs. Le bouton **Actualiser l’entraînement** permet de retrouver la version serveur après une modification depuis un autre appareil. Une version obsolète produit un conflit explicite, sans écraser les données.
 
 ## Mensurations
 
@@ -43,9 +47,9 @@ Dans **Mensurations**, ajouter un relevé daté : poids, masse grasse, cou, épa
 
 ## Statistiques et score
 
-**Statistiques** présente les sessions terminées, le nombre de séries, le volume réellement soulevé (kg × répétitions) et la distance totale. Choisir la période, une mensuration, un exercice et une famille de séances comparables. Les graphiques proposent aussi un tableau de valeurs, utilisable au clavier et par lecteur d’écran. L’axe horizontal suit les observations dans leur ordre chronologique ; leur espacement n’exprime pas une durée. La période est inclusive et utilise les dates UTC des entraînements, sur un an par défaut et dix ans au maximum.
+**Statistiques** présente les sessions terminées, le nombre de séries, le volume réellement soulevé (kg × répétitions) et la distance totale. Choisir la période, une mensuration, un exercice et un programme et sa référence de comparaison. Les graphiques proposent aussi un tableau de valeurs, utilisable au clavier et par lecteur d’écran. L’axe horizontal suit les observations dans leur ordre chronologique ; leur espacement n’exprime pas une durée. La période est inclusive et utilise les dates UTC des entraînements, sur un an par défaut et dix ans au maximum.
 
-Le score est un indicateur descriptif, **pas une note de santé ou de technique**. La première session terminée d’une séance vaut **100**. Les suivantes calculent, pour chaque exercice, le rapport entre la performance actuelle et la référence, puis la moyenne de ces rapports × 100. Chaque exercice a le même poids. Par exemple, 120 et 80 représentent une progression ou une baisse moyenne de 20 % selon ces mesures.
+Le score est un indicateur descriptif, **pas une note de santé ou de technique**. La première session terminée d’un programme vaut **100**. Les suivantes calculent, pour chaque exercice, le rapport entre la performance actuelle et la référence, puis la moyenne de ces rapports × 100. Chaque exercice a le même poids. Par exemple, 120 et 80 représentent une progression ou une baisse moyenne de 20 % selon ces mesures.
 
 | Type | Performance comparée |
 | --- | --- |
@@ -62,13 +66,13 @@ Le score est un indicateur descriptif, **pas une note de santé ou de technique*
 
 Le `+ 1` permet de comparer les charges ou assistances nulles ; ces valeurs sont des points de comparaison, distincts du volume réel en kg. Une vitesse supérieure sur une distance plus courte peut augmenter le score cardio : consulter aussi les distances. Une durée d’étirement plus longue ne signifie pas un meilleur exercice pour la santé.
 
-Une référence n’est partagée que par les sessions d’une même séance, avec les mêmes identifiants d’exercices, types, ordre et nombres de séries. Changer les cibles ne change pas la famille. Changer la structure crée une autre référence. Les scores et leurs métriques sont enregistrés à la fin et ne sont pas recalculés rétroactivement. Aucun score n’est attribué à une session abandonnée.
+Une référence n’est partagée que par les sessions d’un même programme, avec les mêmes identifiants d’exercices, types, ordre et nombres de séries. Changer les cibles ne change pas la famille. Changer la structure crée une autre référence. Les scores et leurs métriques sont enregistrés à la fin et ne sont pas recalculés rétroactivement. Aucun score n’est attribué à une session abandonnée.
 
 ## Conservation et limites
 
-Désactiver Sport conserve séances, exercices personnels, séries, échéances de repos, historique, réglages et mensurations. Réactiver restitue ces données ; un repos écoulé apparaît terminé. L’archivage est réversible et aucune suppression définitive n’est proposée. Les données restent privées au compte.
+Désactiver Sport conserve programmes, exercices personnels, séries, échéances de repos, historique, réglages et mensurations. Réactiver restitue ces données ; un repos écoulé apparaît terminé. L’archivage est réversible et aucune suppression définitive n’est proposée. Les données restent privées au compte.
 
-Le catalogue est embarqué, sans images, vidéos, coaching ou requête réseau externe. Les données métier passent exclusivement par l’API ; pas de stockage métier dans le navigateur, de mode hors ligne ou de synchronisation instantanée entre appareils. Les listes d’exercices et de sessions sont paginées ; séances et mensurations sont chargées intégralement. La statistique sur dix ans peut être volumineuse pour un très grand historique.
+Le catalogue est embarqué, sans images, vidéos, coaching ou requête réseau externe. Les données métier passent exclusivement par l’API ; pas de stockage métier dans le navigateur, de mode hors ligne ou de synchronisation instantanée entre appareils. Les listes d’exercices et de sessions sont paginées ; programmes et mensurations sont chargés intégralement. La statistique sur dix ans peut être volumineuse pour un très grand historique.
 
 ## Catalogue et provenance
 

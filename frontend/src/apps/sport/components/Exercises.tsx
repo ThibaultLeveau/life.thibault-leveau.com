@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Dialog, ErrorMessage } from "../../../shared/ui/Dialog";
+import { Icon } from "../../../shared/ui/Icon";
 import { sportApi } from "../api";
 import type { Exercise, KindDefinition } from "../types";
 import { Empty, LoadState, useAction, useResource } from "./common";
@@ -11,6 +12,10 @@ export function ExercisePicker({
   onPick: (ex: Exercise) => void;
   kinds: KindDefinition[];
 }) {
+  const search = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    search.current?.focus();
+  }, []);
   const [query, setQuery] = useState("");
   const [kind, setKind] = useState("");
   const resource = useResource(
@@ -29,9 +34,13 @@ export function ExercisePicker({
         <label>
           Rechercher un exercice
           <input
+            ref={search}
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") e.preventDefault();
+            }}
             placeholder="Développé, course, farmer…"
           />
         </label>
@@ -276,11 +285,16 @@ export function Exercises({ kinds }: { kinds: KindDefinition[] }) {
         {resource.data?.items.map((ex) => (
           <article key={ex.id} className="sport-exercise">
             <div className="sport-exercise-mark" aria-hidden="true">
-              {ex.kind === "distance_duration"
-                ? "↗"
-                : ex.kind.includes("duration")
-                  ? "◷"
-                  : "↟"}
+              <Icon
+                name={
+                  ex.kind === "distance_duration"
+                    ? "arrow"
+                    : ex.kind.includes("duration")
+                      ? "repeat"
+                      : "flag"
+                }
+                size={22}
+              />
             </div>
             <div className="sport-grow">
               <h2>{ex.name}</h2>

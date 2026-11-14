@@ -174,4 +174,8 @@ Après publication, comparer le SHA de l’image exécutée avec `main`, vérifi
 
 ### Livraison Sport
 
-Appliquer `0006_sport` via le script habituel, après sauvegarde. La migration est additive ; aucun secret ni service supplémentaire. Vérifier `/sport`, `/documentation/sport/`, `/documentation/sport-api/`, OpenAPI et les sondes. Sport apparaît désactivée par défaut dans la bibliothèque. Sur un compte de recette isolé : activer, rechercher le catalogue, créer une séance, valider une série avec repos, recharger, terminer, relever une mensuration, consulter score/statistiques, désactiver/réactiver et vérifier la conservation. Comparer l’image réellement exécutée au SHA fusionné et consigner les résultats dans l’issue.
+Appliquer `0006_sport` via le script habituel, après sauvegarde. La migration est additive ; aucun secret ni service supplémentaire. Vérifier `/sport`, `/documentation/sport/`, `/documentation/sport-api/`, OpenAPI et les sondes. Sport apparaît désactivée par défaut dans la bibliothèque. Sur un compte de recette isolé : activer, rechercher le catalogue, créer un programme, valider une série avec repos, recharger, terminer, relever une mensuration, consulter score/statistiques, désactiver/réactiver et vérifier la conservation. Comparer l’image réellement exécutée au SHA fusionné et consigner les résultats dans l’issue.
+
+### Pages de programmes Sport
+
+Le renommage en programmes et les pages de création/modification conservent `0006_sport`, les routes API et les tables. Publier avec la sauvegarde habituelle ; aucune migration nouvelle ni variable supplémentaire. Vérifier sur mobile et ordinateur `/sport?tab=workouts&program=new`, la création, la modification via `program=<uuid>`, le retour, les onglets, les erreurs et la conservation des programmes/entraînements existants. L’image précédente reste compatible avec les données.

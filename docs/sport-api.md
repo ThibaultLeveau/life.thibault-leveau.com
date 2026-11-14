@@ -1,5 +1,7 @@
 # API Sport
 
+Les programmes sont les modèles réutilisables (`Workout`), et les entraînements sont leurs exécutions (`Training`). Les identifiants techniques `/workouts`, `workout_id` et les contrats JSON restent stables. La création et la modification en page utilisent les mêmes POST/PUT ; aucune migration ni conversion de données n’est nécessaire.
+
 Toutes les routes sont sous `/api/v1/sport`, avec session, propriétaire et activation Sport obligatoires. Les mutations utilisent l’origine autorisée et `X-CSRF-Token`, comme les [autres API](api.md). OpenAPI décrit les champs, bornes et réponses à `/api/docs`.
 
 | Méthode | Route | Opération |
@@ -11,12 +13,12 @@ Toutes les routes sont sous `/api/v1/sport`, avec session, propriétaire et acti
 | PUT | `/exercises/{uuid}` | Remplacer l’exercice personnel avec `expected_version` |
 | PUT | `/exercises/{uuid}/archive` | `{expected_version, archived}` ; restauration avec `false` |
 | GET / PUT | `/settings` | `{rest_seconds}` (0–3600, défaut 90) |
-| GET | `/workouts` | Séances actives, ou `archived=true` |
-| GET | `/workouts/{uuid}` | Séance, même archivée |
+| GET | `/workouts` | Programmes actifs, ou `archived=true` |
+| GET | `/workouts/{uuid}` | Programme, même archivé |
 | POST | `/workouts` | Créer nom, notes et liste ordonnée `entries` |
-| PUT | `/workouts/{uuid}` | Remplacer la séance et son ordre, avec `expected_version` |
+| PUT | `/workouts/{uuid}` | Remplacer le programme et son ordre, avec `expected_version` |
 | PUT | `/workouts/{uuid}/archive` | Archiver/restaurer sans changer les sessions |
-| POST | `/sessions` | Démarrer `{workout_id, expected_version}` (version de la séance) |
+| POST | `/sessions` | Démarrer `{workout_id, expected_version}` (version du programme) |
 | GET | `/sessions` | Historique paginé (`offset`, `limit` 1–100) |
 | GET | `/sessions/active` | Session active ou `null` |
 | GET | `/sessions/{uuid}` | Instantané, séries, dates, score et référence |
@@ -30,7 +32,7 @@ Toutes les routes sont sous `/api/v1/sport`, avec session, propriétaire et acti
 | PUT | `/measurements/{uuid}/archive` | Archiver/restaurer |
 | GET | `/statistics` | `since` / `until` inclusifs, un an par défaut et dix ans maximum |
 
-Les entrées de séance sont `{exercise_id, sets, target}`. Les objectifs sont facultatifs, mais les mesures d’une série validée doivent toutes être présentes et conformes au type de `/kinds`. Les indices des exercices et séries commencent à **0**. Les identifiants des exercices fournis sont des chaînes stables, ceux des objets privés sont des UUID. L’ordre des `entries` est l’ordre de la séance ; conserver les noms/types retournés uniquement pour affichage, les entrées d’écriture n’acceptent que les trois champs ci-dessus.
+Les entrées de programme sont `{exercise_id, sets, target}`. Les objectifs sont facultatifs, mais les mesures d’une série validée doivent toutes être présentes et conformes au type de `/kinds`. Les indices des exercices et séries commencent à **0**. Les identifiants des exercices fournis sont des chaînes stables, ceux des objets privés sont des UUID. L’ordre des `entries` est l’ordre du programme ; conserver les noms/types retournés uniquement pour affichage, les entrées d’écriture n’acceptent que les trois champs ci-dessus.
 
 Une session renvoie `server_now` et `rest_until` UTC : le client affiche `max(0, rest_until - server_now - temps écoulé depuis la réponse)`. Une correction de série conserve son `completed_at` et ne relance pas le repos. Les dates et données de l’instantané persistent après modification ou archivage du modèle. Les sessions terminées sont immuables via API ; les résultats, `metrics`, `score` et `baseline_id` restent lisibles. Les [formules et limites du score](sport.md#statistiques-et-score) s’appliquent aussi aux clients indépendants.
 
@@ -38,7 +40,7 @@ Les lectures ne créent ni objets ni copies du catalogue en base. Les écritures
 
 ## Exemple complet en Python
 
-Installer `httpx`, définir `LIFE_URL`, `LIFE_USERNAME` et `LIFE_PASSWORD` dans l’environnement privé du client. L’exemple crée volontairement une séance et ses résultats sur le compte connecté.
+Installer `httpx`, définir `LIFE_URL`, `LIFE_USERNAME` et `LIFE_PASSWORD` dans l’environnement privé du client. L’exemple crée volontairement un programme et ses résultats sur le compte connecté.
 
 ```python
 import os
@@ -62,7 +64,7 @@ with httpx.Client(base_url=base + '/api/v1', headers={'Origin': base}) as client
         'q': 'développé couché à la barre', 'kind': 'weight_reps',
     })['items'][0]
     workout = request('POST', '/sport/workouts', json={
-        'name': 'Séance API',
+        'name': 'Programme API',
         'entries': [{'exercise_id': exercise['id'], 'sets': 1,
                      'target': {'weight_kg': 40, 'reps': 10}}],
     })
@@ -88,7 +90,7 @@ Mensuration : `POST /sport/measurements` avec `{"measured_on":"2026-11-14","weig
 - **401** : session absente ou expirée.
 - **403** : origine/CSRF incorrect ou Sport désactivée ; dans ce dernier cas, en-tête `X-Life-Application-Disabled: sport`.
 - **404** : objet inconnu, indice de série absent ou objet d’un autre compte.
-- **409** : version obsolète, session déjà active/terminée, séance ou exercice archivé, série manquante avant fin, date de mensuration déjà utilisée.
+- **409** : version obsolète, session déjà active/terminée, programme ou exercice archivé, série manquante avant fin, date de mensuration déjà utilisée.
 - **422** : champ inconnu, type invalide, bornes dépassées, champs incompatibles, mensuration vide/future ou période incorrecte.
 
 Les compteurs et graphiques excluent les abandons et les relevés archivés. Les périodes de sessions utilisent `started_at` UTC, les relevés leur date civile enregistrée. L’accès aux données des autres comptes ne révèle pas leur existence.

@@ -32,7 +32,9 @@ function Chart({
   const low = min - spread * 0.1;
   const high = max + spread * 0.1;
   const x = (i: number) =>
-    50 + (i / Math.max(1, points.length - 1)) * (width - 70);
+    points.length === 1
+      ? (width + 30) / 2
+      : 50 + (i / (points.length - 1)) * (width - 70);
   const y = (v: number) => 175 - ((v - low) / (high - low)) * 145;
   const last = points.at(-1)!;
   const first = points[0];
@@ -95,12 +97,18 @@ function Chart({
             </title>
           </circle>
         ))}
-        <text x="50" y="205">
+        <text
+          x={points.length === 1 ? x(0) : 50}
+          y="205"
+          textAnchor={points.length === 1 ? "middle" : "start"}
+        >
           {first.label}
         </text>
-        <text x={width - 20} y="205" textAnchor="end">
-          {last.label}
-        </text>
+        {points.length > 1 && (
+          <text x={width - 20} y="205" textAnchor="end">
+            {last.label}
+          </text>
+        )}
       </svg>
       <details>
         <summary>Voir les valeurs</summary>
@@ -262,7 +270,7 @@ export function Statistics({ kinds }: { kinds: KindDefinition[] }) {
                 </select>
               </label>
               <Chart
-                title={performance?.name ?? "Performance en séance"}
+                title={performance?.name ?? "Performance à l’entraînement"}
                 unit={performance?.unit ?? ""}
                 points={stats.sessions.flatMap((s) =>
                   s.metrics
@@ -280,13 +288,13 @@ export function Statistics({ kinds }: { kinds: KindDefinition[] }) {
             </section>
           </div>
           <label className="sport-chart-select">
-            Séances comparables
+            Programmes et références
             <select
               value={selectedWorkout ?? ""}
               onChange={(e) => setWorkout(e.target.value)}
             >
               <option value="" disabled>
-                Choisir une séance
+                Choisir un programme
               </option>
               {comparable.map(([id, name], i) => (
                 <option value={id} key={id}>
@@ -296,7 +304,7 @@ export function Statistics({ kinds }: { kinds: KindDefinition[] }) {
             </select>
           </label>
           <Chart
-            title="Score de séance"
+            title="Score de l’entraînement"
             unit="points"
             points={stats.sessions
               .filter((s) => (s.baseline_id ?? s.id) === selectedWorkout)
@@ -305,14 +313,14 @@ export function Statistics({ kinds }: { kinds: KindDefinition[] }) {
           <details className="sport-score-explained">
             <summary>Comment est calculé le score ?</summary>
             <p>
-              La première session terminée d’une séance vaut 100. Les suivantes
-              comparent la performance de chaque exercice à cette référence,
-              puis font la moyenne des rapports, avec le même poids pour chaque
-              exercice. 110 représente une hausse moyenne de 10 % selon ces
-              mesures.
+              La première session terminée d’un programme vaut 100. Les
+              suivantes comparent la performance de chaque exercice à cette
+              référence, puis font la moyenne des rapports, avec le même poids
+              pour chaque exercice. 110 représente une hausse moyenne de 10 %
+              selon ces mesures.
             </p>
             <p>
-              Seules les sessions d’une même séance, avec les mêmes exercices,
+              Seules les sessions d’un même programme, avec les mêmes exercices,
               types, ordre et nombres de séries, partagent une référence. Les
               objectifs peuvent évoluer. Les entraînements abandonnés ne
               comptent pas.

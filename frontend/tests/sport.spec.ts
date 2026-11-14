@@ -96,7 +96,7 @@ test("Sport : bibliothèque, séance mixte, repos, mensurations et statistiques 
   await expect(toggle).toBeChecked();
   await page.getByRole("link", { name: "Ouvrir Sport", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "Séances", exact: true }),
+    page.getByRole("heading", { name: "Programmes", exact: true }),
   ).toBeVisible();
   await tab(page, "Réglages");
   await page
@@ -104,23 +104,23 @@ test("Sport : bibliothèque, séance mixte, repos, mensurations et statistiques 
     .fill("120");
   await page.getByRole("button", { name: "Enregistrer les réglages" }).click();
   await expect(page.getByRole("status")).toHaveText("Réglages enregistrés.");
-  await tab(page, "Séances");
+  await tab(page, "Programmes");
   await page
-    .getByRole("button", { name: "Nouvelle séance", exact: true })
+    .getByRole("button", { name: "Nouveau programme", exact: true })
     .click();
-  const dialog = page.getByRole("dialog");
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  const dialog = page.getByRole("form", { name: "Nouveau programme" });
   const name = `Séance mixte ${Date.now()}`;
-  await dialog.getByLabel("Nom de la séance").fill(name);
+  await dialog.getByLabel("Nom du programme").fill(name);
   for (const [i, query] of [
     "Développé couché à la barre",
     "Course sur tapis",
     "Marche du fermier",
     "Burpees",
   ].entries()) {
-    if (i)
-      await dialog
-        .getByRole("button", { name: "Ajouter un exercice", exact: true })
-        .click();
+    await dialog
+      .getByRole("button", { name: "Ajouter un exercice", exact: true })
+      .click();
     await dialog.getByLabel("Rechercher un exercice").fill(query);
     await dialog
       .locator(".sport-picker-item")
@@ -129,12 +129,14 @@ test("Sport : bibliothèque, séance mixte, repos, mensurations et statistiques 
       .click();
     await dialog.getByLabel("Nombre de séries").nth(i).fill("1");
   }
-  await dialog.getByRole("button", { name: "Enregistrer la séance" }).click();
+  await dialog
+    .getByRole("button", { name: "Enregistrer le programme" })
+    .click();
   await expect(dialog).toHaveCount(0);
   const card = page
     .locator(".sport-workout")
     .filter({ has: page.getByRole("heading", { name, exact: true }) });
-  await card.getByRole("button", { name: /Lancer la séance/ }).click();
+  await card.getByRole("button", { name: /Démarrer l’entraînement/ }).click();
   await expect(
     page.getByRole("heading", { name: "Entraînement", exact: true }),
   ).toBeVisible();
@@ -260,6 +262,9 @@ test("Sport : bibliothèque, séance mixte, repos, mensurations et statistiques 
   await page
     .getByRole("switch", { name: "Activer Sport", exact: true })
     .click();
+  await expect(
+    page.getByRole("switch", { name: "Activer Sport", exact: true }),
+  ).not.toBeChecked();
   expect((await page.request.get("/api/v1/sport/sessions")).status()).toBe(403);
   await page.goto("/sport");
   await expect(
@@ -269,6 +274,9 @@ test("Sport : bibliothèque, séance mixte, repos, mensurations et statistiques 
   await page
     .getByRole("switch", { name: "Activer Sport", exact: true })
     .click();
+  await expect(
+    page.getByRole("switch", { name: "Activer Sport", exact: true }),
+  ).toBeChecked();
   const restored = await (
     await page.request.get(`/api/v1/sport/sessions/${stored.id}`)
   ).json();
@@ -313,7 +321,7 @@ test("Sport : création personnelle, mobile, clavier, archives et validation en 
   await page
     .locator(".sport-workout")
     .filter({ hasText: w.name })
-    .getByRole("button", { name: /Lancer/ })
+    .getByRole("button", { name: /Démarrer l’entraînement/ })
     .click();
   await page.locator(".sport-set").click();
   await page.getByLabel("Répétitions (rép.)").fill("12");

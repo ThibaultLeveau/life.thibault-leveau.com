@@ -20,6 +20,13 @@ export const sportApi = {
       undefined,
       signal,
     ),
+  workout: (id: string, signal?: AbortSignal) =>
+    api<Workout>(
+      `/sport/workouts/${encodeURIComponent(id)}`,
+      "GET",
+      undefined,
+      signal,
+    ),
   active: (signal?: AbortSignal) =>
     api<Training | null>("/sport/sessions/active", "GET", undefined, signal),
   session: (id: string, signal?: AbortSignal) =>

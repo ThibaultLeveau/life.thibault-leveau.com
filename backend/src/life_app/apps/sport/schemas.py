@@ -103,7 +103,7 @@ class WorkoutInput(Contract):
     @model_validator(mode="after")
     def limit_sets(self):
         if sum(entry.sets for entry in self.entries) > 300:
-            raise ValueError("Une séance contient au maximum 300 séries.")
+            raise ValueError("Un programme contient au maximum 300 séries.")
         return self
 
 
