@@ -42,6 +42,10 @@ for path in assets.paths:
 body, _ = get('/api/v1/health')
 assert json.loads(body) == {'status': 'ok'}, 'Réponse de santé inattendue'
 get('/tasks')
+get('/sport')
+get('/api/v1/sport/kinds', 401)
+get('/documentation/sport/')
+get('/documentation/sport-api/')
 get('/applications')
 get('/api/v1/applications', 401)
 get('/api/v1/health/ready')
@@ -50,7 +54,7 @@ get('/api/v1/agenda/view', 401)
 get('/api/v1/agenda/tasks', 401)
 get('/api/docs')
 body, _ = get('/api/openapi.json')
-for path in ('/api/v1/health', '/api/v1/agenda/view', '/api/v1/agenda/tasks', '/api/v1/applications', '/api/v1/applications/{application_id}'):
+for path in ('/api/v1/health', '/api/v1/agenda/view', '/api/v1/agenda/tasks', '/api/v1/applications', '/api/v1/applications/{application_id}', '/api/v1/sport/statistics', '/api/v1/sport/sessions'):
     assert path in json.loads(body)['paths'], f'Schéma OpenAPI incomplet : {path}'
 get('/favicon.svg')
 get('/documentation/')

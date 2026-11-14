@@ -18,7 +18,9 @@ Si toutes les applications sont désactivées, l’accueil propose d’explorer 
 
 **Tâches** est la première application livrée : [espaces, agenda, listes, kanban et récurrences](taches.md). Elle est activée par défaut, y compris pour les comptes et données existants.
 
-Le sport, les objectifs OKR, les tâches ménagères et les plantes sont des pistes futures. Ils ne sont pas encore disponibles ni activables. Une nouvelle application apparaîtra dans la bibliothèque lors de sa livraison et sera désactivée par défaut.
+**Sport** est disponible, désactivée par défaut : [exercices, séances, entraînements, mensurations et statistiques](sport.md).
+
+Les objectifs OKR, les tâches ménagères et les plantes sont des pistes futures. Ils ne sont pas encore disponibles ni activables. Une nouvelle application apparaîtra dans la bibliothèque lors de sa livraison et sera désactivée par défaut.
 
 ## Connexion et apparence
 

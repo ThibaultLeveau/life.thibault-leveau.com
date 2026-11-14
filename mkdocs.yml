@@ -54,6 +54,8 @@ nav:
   - Présentation: index.md
   - Vos applications: applications.md
   - Utiliser les tâches: taches.md
+  - Utiliser Sport: sport.md
+  - API Sport: sport-api.md
   - Développer:
       - Démarrage: demarrage.md
       - Architecture: architecture.md

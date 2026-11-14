@@ -113,6 +113,13 @@ recurrence_query="SELECT string_agg(id::text || recurrence::text || recurrence_c
 source_recurrence=$(docker exec "$db" psql -U life -d life -Atc "$recurrence_query")
 restored_recurrence=$(docker exec "$db" psql -U life -d life_restored -Atc "$recurrence_query")
 [[ -n "$source_recurrence" && "$source_recurrence" == "$restored_recurrence" ]]
+# Compare every persisted Sport field, including session snapshots, scores and recovery dates.
+for sport_table in sport_exercises sport_workouts sport_sessions sport_measurements sport_settings; do
+  sport_query="SELECT coalesce(jsonb_agg(to_jsonb(t) ORDER BY to_jsonb(t)::text), '[]'::jsonb) FROM $sport_table t"
+  source_sport=$(docker exec "$db" psql -U life -d life -Atc "$sport_query")
+  restored_sport=$(docker exec "$db" psql -U life -d life_restored -Atc "$sport_query")
+  [[ "$source_sport" != '[]' && "$source_sport" == "$restored_sport" ]]
+done
 [[ $(docker exec "$db" psql -U life -d life_restored -Atc 'SELECT count(*) FROM login_sessions') == 0 ]]
 [[ -z $(docker exec "$db" psql -U life -d life_restored -Atc "SELECT to_regclass('public.obsolete_data')") ]]
 docker exec "$db" psql -U life -d life_restored -c 'CREATE TABLE rollback_marker (id integer)' >/dev/null

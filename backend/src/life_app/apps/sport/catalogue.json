@@ -1,0 +1,6802 @@
+[
+  {
+    "id": "builtin-32cffa066d3984ebe1c5",
+    "name": "Développé couché à la barre",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-45dfa39d5e5bbbb5792b",
+    "name": "Développé incliné à la barre",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-b6b3c9bfc41a81552d94",
+    "name": "Développé décliné à la barre",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-385da8dce2b1dba65fdc",
+    "name": "Développé couché prise serrée",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-c8576a8edc2cb26bef63",
+    "name": "Développé couché prise large",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-26bcc8a63ab536187308",
+    "name": "Développé au sol à la barre",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-a467429be2d4f8c2ca50",
+    "name": "Développé couché avec pause",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-9c4f7ecb35bf75d2e5ca",
+    "name": "Développé couché Larsen",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-67a5a6637ab84482194d",
+    "name": "Développé couché Spoto",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-a261846c33cbdd76fe79",
+    "name": "Développé couché avec élastiques",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-94b6e46abe0393751e8e",
+    "name": "Développé couché avec chaînes",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-f225ca45dad46fc6350c",
+    "name": "Développé couché aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-9c068622694fd4d05e06",
+    "name": "Développé incliné aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-4c4cf8072cd20d88b9d1",
+    "name": "Développé décliné aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-40bd770cdbcba28e65f7",
+    "name": "Développé au sol aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-91462499a20659ed6943",
+    "name": "Développé couché prise neutre",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-a706974014aeae836644",
+    "name": "Développé incliné prise neutre",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-66ddd63c64f9dd68dc28",
+    "name": "Développé couché alterné",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-8557743c16d70f25069c",
+    "name": "Développé couché unilatéral",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-9609fc28a3b01462ca73",
+    "name": "Développé serré aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-c96c6a5cb8ddb72cb814",
+    "name": "Écarté couché aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-5f5d42895c7b8f4a776a",
+    "name": "Écarté incliné aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-f63c0e1f2d7168413a01",
+    "name": "Écarté décliné aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-10847b5ec1e21d59994d",
+    "name": "Pull-over avec haltère",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-c7ed453859b72ca28e81",
+    "name": "Développé assis à la machine",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-173c32edcbed78213794",
+    "name": "Développé incliné à la machine",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-53c997b4090a1e99e802",
+    "name": "Développé convergent",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-c28e52616369ead9e14d",
+    "name": "Pec deck",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-aca9c88a11857792c346",
+    "name": "Écarté à la poulie haute",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-39fed10a45d8f06c1109",
+    "name": "Écarté à la poulie basse",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-96c3a971a876dc72b424",
+    "name": "Écarté à la poulie vis-à-vis",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-e1eba8112c54e10ba5b4",
+    "name": "Écarté couché à la poulie",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-b173d5fa38c789e6d970",
+    "name": "Développé debout à la poulie",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-e06fcd2dabe47c70e506",
+    "name": "Développé unilatéral à la poulie",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-813d9d51120eac62556b",
+    "name": "Développé couché à la Smith machine",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-cccfdd57906efb3fd4f3",
+    "name": "Développé incliné à la Smith machine",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-0f5151f5c4c194335c3d",
+    "name": "Développé décliné à la Smith machine",
+    "kind": "weight_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-150d0af1c924a0c9fcc0",
+    "name": "Soulevé de terre classique",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-407085ccaf2cc350c002",
+    "name": "Soulevé de terre sumo",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-f1f1f30f890a573e0602",
+    "name": "Soulevé de terre roumain",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-8b9a6f63e0dd8e5e78c9",
+    "name": "Soulevé de terre jambes tendues",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-c581f0570dac2a52f870",
+    "name": "Soulevé de terre prise arraché",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-16307ea8d7e9e7f2fc8f",
+    "name": "Soulevé de terre avec déficit",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-e81968d674f1a19e3351",
+    "name": "Soulevé de terre sur blocs",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-fc5498e66f1b828dd63c",
+    "name": "Soulevé de terre avec pause",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-763cd2079f377e0fa6b0",
+    "name": "Soulevé de terre à la trap bar",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-b52c525a82a1ebb2230d",
+    "name": "Soulevé de terre Jefferson",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-06a4d6cea988e4f2ec82",
+    "name": "Soulevé de terre avec chaînes",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-88438166d3f525af33d5",
+    "name": "Soulevé de terre avec élastiques",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-25d04310f0c18748112a",
+    "name": "Rowing barre en pronation",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-d8020d2ccf0c22ddc100",
+    "name": "Rowing barre en supination",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-ff9360bb8ae62123e961",
+    "name": "Rowing Pendlay",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-d2134149f5d0a59f631e",
+    "name": "Rowing Yates",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-d3ee50176330350054ba",
+    "name": "Rowing à la barre en T",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-58c3176b8e033d89593e",
+    "name": "Rowing Meadows",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-961cbb2adc264fc8e998",
+    "name": "Rowing barre sur banc incliné",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-842493b1f06a81dd2185",
+    "name": "Good morning à la barre",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-d545e90bf17bad99b9eb",
+    "name": "Good morning assis",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-1a03672e1832f185a7a5",
+    "name": "Rowing unilatéral avec haltère",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-572872fa1b593026bf48",
+    "name": "Rowing buste penché aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-93a09773b003523456e2",
+    "name": "Rowing sur banc incliné aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-6435aee1dcad77e09eb1",
+    "name": "Rowing prise neutre aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-451564292a921482f0c9",
+    "name": "Rowing renégat",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-16c6e821540b9661e75e",
+    "name": "Soulevé de terre aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-d6ea8f6b5122d027590b",
+    "name": "Soulevé de terre roumain aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-2044f265d8284fb3c741",
+    "name": "Soulevé de terre roumain sur une jambe",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-ab15e0277148d6aa63df",
+    "name": "Pull-over aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-fcc1d7d6170fc8f8756b",
+    "name": "Haussement d’épaules aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-4ca34d1fd23b6446e823",
+    "name": "Tirage vertical prise large",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-394159fa698a70225a8b",
+    "name": "Tirage vertical prise serrée",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-ac40cfe423e11c4327ad",
+    "name": "Tirage vertical en supination",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-815cc4fd1ecfcf7ff16b",
+    "name": "Tirage vertical prise neutre",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-824e83dcb8ac6254dab2",
+    "name": "Tirage vertical unilatéral",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-118e76f792006e309170",
+    "name": "Tirage horizontal prise serrée",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-1d283aa883b6d0ccc9f0",
+    "name": "Tirage horizontal prise large",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-71de0b06a0047c0c3f18",
+    "name": "Tirage horizontal en supination",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-ebb133a1a3a39d63a8ed",
+    "name": "Tirage horizontal unilatéral",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-c99d69a9533f2998cc4e",
+    "name": "Tirage horizontal à la corde",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-52d5c29925c2bb50994e",
+    "name": "Tirage bras tendus à la poulie",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-1a93d4c5b8b4a8b8f815",
+    "name": "Pull-over à la machine",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-94d5622a3bc853e118c1",
+    "name": "Rowing assis à la machine",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-7480573d29b61f821f28",
+    "name": "Rowing convergent à la machine",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-895b2e37eb4368baf9db",
+    "name": "Rowing poitrine appuyée",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-06151f7f72497d645dc5",
+    "name": "Rowing à la Smith machine",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-bf8516013561136aad7e",
+    "name": "Soulevé de terre à la Smith machine",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-a4a52eee402595f1eb23",
+    "name": "Haussement d’épaules à la machine",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-c84214fdeed37681477a",
+    "name": "Haussement d’épaules à la barre",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-20ce5c5a9b7316fa1dcf",
+    "name": "Haussement d’épaules à la trap bar",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-7cc4ddb0999eb6ef8f84",
+    "name": "Développé militaire",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-9a2de04b8a23d9b8f111",
+    "name": "Développé épaules assis à la barre",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-62108632c6d959575cc5",
+    "name": "Développé poussé (push press)",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-59b9196f67fe0e0c56f6",
+    "name": "Développé landmine unilatéral",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-acfd530e0e8ec3262e82",
+    "name": "Développé landmine à deux mains",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-fa42a5c4611e6bc7fe42",
+    "name": "Tirage menton à la barre",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-12f9a04c6eb403b86139",
+    "name": "Développé Z press à la barre",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-57de48b4bdb8281729fc",
+    "name": "Développé épaules à la Smith machine",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-e7255b065f1576d07b6e",
+    "name": "Développé épaules aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-d7af54472b5f34edc35d",
+    "name": "Développé épaules assis aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-c4413f9feb7664d705d8",
+    "name": "Développé Arnold",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-ac2a587a75d7007f6f00",
+    "name": "Développé épaules alterné",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-9a1185d51cc891474210",
+    "name": "Développé épaules unilatéral",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-b5fb06026c321eb2772a",
+    "name": "Développé Z press aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-4cab4ca62535636fb3aa",
+    "name": "Élévation latérale aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-61284f17815333e55892",
+    "name": "Élévation latérale assise",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-37e36bd8715d4e95afc8",
+    "name": "Élévation latérale penchée",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-03f359d16ee448402203",
+    "name": "Élévation frontale aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-639f8db9f4f923af9412",
+    "name": "Élévation frontale alternée",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-fd962b06e5327d14fc70",
+    "name": "Élévation en Y sur banc incliné",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-a5688ded60cf4f45134e",
+    "name": "Oiseau aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-6ec6ab8ae3541cfe410b",
+    "name": "Oiseau sur banc incliné",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-40099348803a83e58d25",
+    "name": "Tirage menton aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-da9510d85a0a8b8d1428",
+    "name": "Rotation externe avec haltère",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-a5da53ba43e77de6ee58",
+    "name": "Développé cubain aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-3af716955722de74b9df",
+    "name": "Élévation latérale à la poulie",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-8b99d20477863a48f4a4",
+    "name": "Élévation latérale derrière le dos",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-082d5aa4212c9ca4f270",
+    "name": "Élévation frontale à la poulie",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-89ef4e457c80cdc1cfda",
+    "name": "Oiseau à la poulie",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-b75d9f38670120fe9999",
+    "name": "Oiseau à la machine",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-7dbad9fce7ead0290dca",
+    "name": "Face pull à la corde",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-c51ab38fc60faa43dd35",
+    "name": "Rotation externe à la poulie",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-8d1011e75f1ce1dff2fd",
+    "name": "Rotation interne à la poulie",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-2a3a37d4908a30c0d2f5",
+    "name": "Développé épaules à la machine",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-53d30d3e6de87181fdf9",
+    "name": "Élévation latérale à la machine",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-b874683bf316257987ba",
+    "name": "Tirage menton à la poulie",
+    "kind": "weight_reps",
+    "muscle_group": "Épaules",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-622f2fed3a279e3c361a",
+    "name": "Curl debout aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Biceps",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-7fca2380d2c45905c444",
+    "name": "Curl alterné aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Biceps",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-d4f4b3d0f7f625c6d488",
+    "name": "Curl incliné aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Biceps",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-14e9440e6083fe2a7e81",
+    "name": "Curl marteau",
+    "kind": "weight_reps",
+    "muscle_group": "Biceps",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-c835a85e9b828544e88c",
+    "name": "Curl marteau alterné",
+    "kind": "weight_reps",
+    "muscle_group": "Biceps",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-7d7f8a3fd65ebd03fb0a",
+    "name": "Curl marteau en travers",
+    "kind": "weight_reps",
+    "muscle_group": "Biceps",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-fffba313446036034540",
+    "name": "Curl concentré",
+    "kind": "weight_reps",
+    "muscle_group": "Biceps",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-3ddb113c5ff2e059d633",
+    "name": "Curl au pupitre avec haltère",
+    "kind": "weight_reps",
+    "muscle_group": "Biceps",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-9855a6da90113c20be3c",
+    "name": "Curl araignée aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Biceps",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-2af752b84606eb60d239",
+    "name": "Curl Zottman",
+    "kind": "weight_reps",
+    "muscle_group": "Biceps",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-f471f67759efe65924db",
+    "name": "Curl en supination sur banc",
+    "kind": "weight_reps",
+    "muscle_group": "Biceps",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-83f046ad9ffd8b16623d",
+    "name": "Curl assis aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Biceps",
+    "equipment": "Haltères",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-abf7cf3c6ec6a3255928",
+    "name": "Curl à la barre droite",
+    "kind": "weight_reps",
+    "muscle_group": "Biceps",
+    "equipment": "Barre / poulie",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-f3e4993f683cc2d2f11a",
+    "name": "Curl à la barre EZ",
+    "kind": "weight_reps",
+    "muscle_group": "Biceps",
+    "equipment": "Barre / poulie",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-cc9a7aa8be6b9aff28bf",
+    "name": "Curl à la barre prise serrée",
+    "kind": "weight_reps",
+    "muscle_group": "Biceps",
+    "equipment": "Barre / poulie",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-feebd87014d216a61f25",
+    "name": "Curl à la barre prise large",
+    "kind": "weight_reps",
+    "muscle_group": "Biceps",
+    "equipment": "Barre / poulie",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-47d90619198ad344df23",
+    "name": "Curl inversé à la barre",
+    "kind": "weight_reps",
+    "muscle_group": "Biceps",
+    "equipment": "Barre / poulie",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-0b565e210b487eb6367c",
+    "name": "Curl au pupitre à la barre EZ",
+    "kind": "weight_reps",
+    "muscle_group": "Biceps",
+    "equipment": "Barre / poulie",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-7fecbc0263723fa2eb69",
+    "name": "Curl araignée à la barre",
+    "kind": "weight_reps",
+    "muscle_group": "Biceps",
+    "equipment": "Barre / poulie",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-1574a752e47470e51262",
+    "name": "Curl traîné à la barre",
+    "kind": "weight_reps",
+    "muscle_group": "Biceps",
+    "equipment": "Barre / poulie",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-e5bf52ecb6b9a231bf49",
+    "name": "Curl à la poulie basse",
+    "kind": "weight_reps",
+    "muscle_group": "Biceps",
+    "equipment": "Barre / poulie",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-f162231e960d5d6e5a70",
+    "name": "Curl à la corde",
+    "kind": "weight_reps",
+    "muscle_group": "Biceps",
+    "equipment": "Barre / poulie",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-492ddd1f96674cd99dd2",
+    "name": "Curl haut à la poulie",
+    "kind": "weight_reps",
+    "muscle_group": "Biceps",
+    "equipment": "Barre / poulie",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-58ceba05e3122e1e03c6",
+    "name": "Curl unilatéral à la poulie",
+    "kind": "weight_reps",
+    "muscle_group": "Biceps",
+    "equipment": "Barre / poulie",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-5cbc387fc6b02839a27a",
+    "name": "Curl bayésien à la poulie",
+    "kind": "weight_reps",
+    "muscle_group": "Biceps",
+    "equipment": "Barre / poulie",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-ef676fa7da914f879d73",
+    "name": "Curl au pupitre à la machine",
+    "kind": "weight_reps",
+    "muscle_group": "Biceps",
+    "equipment": "Barre / poulie",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-28d57c67fce39dd373e1",
+    "name": "Curl inversé à la poulie",
+    "kind": "weight_reps",
+    "muscle_group": "Biceps",
+    "equipment": "Barre / poulie",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-9a4ce39330450b3191bc",
+    "name": "Curl avec élastique",
+    "kind": "weight_reps",
+    "muscle_group": "Biceps",
+    "equipment": "Barre / poulie",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-21e6ce4369a1d3ef7489",
+    "name": "Extension triceps couché à la barre EZ",
+    "kind": "weight_reps",
+    "muscle_group": "Triceps",
+    "equipment": "Haltères / barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-e97b85c72da5f4fd2258",
+    "name": "Extension triceps couché aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Triceps",
+    "equipment": "Haltères / barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-a1f46a231fd0af6a9314",
+    "name": "Extension triceps au-dessus de la tête",
+    "kind": "weight_reps",
+    "muscle_group": "Triceps",
+    "equipment": "Haltères / barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-201939f1d490f0eca600",
+    "name": "Extension triceps unilatérale au-dessus de la tête",
+    "kind": "weight_reps",
+    "muscle_group": "Triceps",
+    "equipment": "Haltères / barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-7896b5a5edd5154a62a2",
+    "name": "Extension triceps assis à la barre EZ",
+    "kind": "weight_reps",
+    "muscle_group": "Triceps",
+    "equipment": "Haltères / barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-4b21b3bd05673ac65d50",
+    "name": "Kickback avec haltère",
+    "kind": "weight_reps",
+    "muscle_group": "Triceps",
+    "equipment": "Haltères / barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-0f64dc8595e0dd85a13e",
+    "name": "Extension Tate",
+    "kind": "weight_reps",
+    "muscle_group": "Triceps",
+    "equipment": "Haltères / barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-af2267f80592808fe96b",
+    "name": "Développé JM",
+    "kind": "weight_reps",
+    "muscle_group": "Triceps",
+    "equipment": "Haltères / barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-07ceee25930cbe36c856",
+    "name": "Dips lestés",
+    "kind": "weight_reps",
+    "muscle_group": "Triceps",
+    "equipment": "Haltères / barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-6a75789cc89b8bda143c",
+    "name": "Pompes lestées",
+    "kind": "weight_reps",
+    "muscle_group": "Triceps",
+    "equipment": "Haltères / barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-565257c0891083761915",
+    "name": "Extension triceps à la corde",
+    "kind": "weight_reps",
+    "muscle_group": "Triceps",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-d7cfb96fda22e6d68fb7",
+    "name": "Extension triceps à la barre droite",
+    "kind": "weight_reps",
+    "muscle_group": "Triceps",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-be900578bda8190268d4",
+    "name": "Extension triceps à la barre en V",
+    "kind": "weight_reps",
+    "muscle_group": "Triceps",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-5a63c4359e75f7dcd80e",
+    "name": "Extension triceps prise inversée",
+    "kind": "weight_reps",
+    "muscle_group": "Triceps",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-d80303bad78a06ed9967",
+    "name": "Extension triceps unilatérale à la poulie",
+    "kind": "weight_reps",
+    "muscle_group": "Triceps",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-7b7bd65dc55345e97ce7",
+    "name": "Extension triceps haute à la corde",
+    "kind": "weight_reps",
+    "muscle_group": "Triceps",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-b1177ef01c4907b1716b",
+    "name": "Extension triceps couché à la poulie",
+    "kind": "weight_reps",
+    "muscle_group": "Triceps",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-5c61d81ed4bce2f3e7f3",
+    "name": "Kickback à la poulie",
+    "kind": "weight_reps",
+    "muscle_group": "Triceps",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-0f61ab932498577d9b08",
+    "name": "Dips à la machine",
+    "kind": "weight_reps",
+    "muscle_group": "Triceps",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-17a473a6542494aefa8e",
+    "name": "Extension triceps à la machine",
+    "kind": "weight_reps",
+    "muscle_group": "Triceps",
+    "equipment": "Poulie / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-abc5b8b5e779d64bb008",
+    "name": "Flexion des poignets à la barre",
+    "kind": "weight_reps",
+    "muscle_group": "Avant-bras",
+    "equipment": "Haltères / barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-c1c788f5237a23793b7d",
+    "name": "Extension des poignets à la barre",
+    "kind": "weight_reps",
+    "muscle_group": "Avant-bras",
+    "equipment": "Haltères / barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-c3884913f8aaa8431a70",
+    "name": "Flexion des poignets aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Avant-bras",
+    "equipment": "Haltères / barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-6b1ee352ca06a2324362",
+    "name": "Extension des poignets aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Avant-bras",
+    "equipment": "Haltères / barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-bd4d67600fe5af33c9c3",
+    "name": "Flexion des poignets derrière le dos",
+    "kind": "weight_reps",
+    "muscle_group": "Avant-bras",
+    "equipment": "Haltères / barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-52738054838ab98822ca",
+    "name": "Pronation de l’avant-bras avec haltère",
+    "kind": "weight_reps",
+    "muscle_group": "Avant-bras",
+    "equipment": "Haltères / barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-34dd60cfcdb0e8801a16",
+    "name": "Supination de l’avant-bras avec haltère",
+    "kind": "weight_reps",
+    "muscle_group": "Avant-bras",
+    "equipment": "Haltères / barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-f6e264f94f56fa946ca0",
+    "name": "Bobine d’Andrieu",
+    "kind": "weight_reps",
+    "muscle_group": "Avant-bras",
+    "equipment": "Haltères / barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-013322e898b99f73d29e",
+    "name": "Flexion des doigts à la barre",
+    "kind": "weight_reps",
+    "muscle_group": "Avant-bras",
+    "equipment": "Haltères / barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-dab80802a3920f3c2a04",
+    "name": "Squat arrière",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-b1d31ad5fcdac1281437",
+    "name": "Squat avant",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-aacae7b7fdfe751387ca",
+    "name": "Squat barre basse",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-e00e3a59b468212be82b",
+    "name": "Squat barre haute",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-1cb766052fc7311feaf1",
+    "name": "Squat avec pause",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-e69edb9d8337cf1e0e0c",
+    "name": "Squat sur boîte",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-ea024770be170bd8cb22",
+    "name": "Squat Zercher",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-79c114516ef7d96e89db",
+    "name": "Squat au-dessus de la tête",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-dbde0a98e2c7572a57d3",
+    "name": "Squat à la safety bar",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-31d121ab3ff424a1ab56",
+    "name": "Squat avec chaînes",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-c1ef1af3858567d1bfbb",
+    "name": "Squat avec élastiques",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-c037ed8b4fa5690ef3a8",
+    "name": "Fente à la barre",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-59f0b524a8f99e30b68c",
+    "name": "Fente arrière à la barre",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-2d0ab78c7d1fdf4f72f8",
+    "name": "Fente latérale à la barre",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-043dbc0f0ce5317d552c",
+    "name": "Fente bulgare à la barre",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-13cf10a1104e8bb556d5",
+    "name": "Montée sur banc à la barre",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-7ef203280ef1a41416c5",
+    "name": "Squat à la Smith machine",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-042d1117097c40abf277",
+    "name": "Fente à la Smith machine",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-08928a7477a8c6c34b32",
+    "name": "Squat hack à la barre",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-e1e041d4ddf7718b1f4a",
+    "name": "Squat landmine",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-4f640f56c08e67d897e9",
+    "name": "Squat gobelet",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Haltères / kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-dac8331ab07c67f83186",
+    "name": "Squat aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Haltères / kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-7ec8d9f575c990cb7040",
+    "name": "Squat sumo avec haltère",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Haltères / kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-9dbdd6a7b1f08e87b5a2",
+    "name": "Fente avant aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Haltères / kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-172cd8208af47f110cfb",
+    "name": "Fente arrière aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Haltères / kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-a49b3c6f163a611e5066",
+    "name": "Fente latérale aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Haltères / kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-b15dd51804a704ceab21",
+    "name": "Fente croisée aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Haltères / kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-02bf3e5f3878e03bbd2c",
+    "name": "Fente marchée aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Haltères / kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-e7ed8d8bc67ed99d1479",
+    "name": "Fente bulgare aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Haltères / kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-515437cce9aab24a9671",
+    "name": "Montée sur banc aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Haltères / kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-bbec81aa30da0133513a",
+    "name": "Descente de marche lestée",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Haltères / kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-05548161aa5ce609323d",
+    "name": "Squat sur une jambe lesté",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Haltères / kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-a4d774ee886b4fb5c406",
+    "name": "Squat gobelet talons surélevés",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Haltères / kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-0c4633c91c1a8dae6657",
+    "name": "Squat cycliste aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Haltères / kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-74d1f40d1c6447057144",
+    "name": "Squat cosaque lesté",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Haltères / kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-0cbdb2d052086101341c",
+    "name": "Presse à cuisses inclinée",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-be37257e8e79f3768d5a",
+    "name": "Presse à cuisses horizontale",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-42a088c45dabce4d5e3c",
+    "name": "Presse à cuisses verticale",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-f99ebd5091eeab824a4d",
+    "name": "Presse à cuisses unilatérale",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-507432e27ab7a859a04f",
+    "name": "Presse à cuisses pieds hauts",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-06986246fc630780f17a",
+    "name": "Presse à cuisses pieds bas",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-7130211655fd5508b932",
+    "name": "Presse à cuisses pieds larges",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-f46548782fb7207c27fc",
+    "name": "Hack squat",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-d9d870f264ae1b901f1b",
+    "name": "Hack squat inversé",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-d5588ba1deacdfc7c54c",
+    "name": "Squat pendulaire",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-c80f028df3876194a86a",
+    "name": "Belt squat",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-de5561cf975975bd4dc9",
+    "name": "Extension des jambes à la machine",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-cb0f96395f4b68171e03",
+    "name": "Extension unilatérale des jambes",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-a6bc822a5369ff77cbfb",
+    "name": "Flexion des jambes couché",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-35b35d7773f4eb916373",
+    "name": "Flexion des jambes assis",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-90cb1a2b95f06dd68e73",
+    "name": "Flexion des jambes debout",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-d3d51abe6ffe9b8e094d",
+    "name": "Flexion unilatérale des jambes",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-c26c28486d34038b91b1",
+    "name": "Adduction des hanches à la machine",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-c860a0c67a40327daf19",
+    "name": "Abduction des hanches à la machine",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-dd6840fdb7e426cd95e2",
+    "name": "Mollets à la presse",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-ec64770507cb52ace90f",
+    "name": "Mollets debout à la machine",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-cfd0941afdc9a029dcc4",
+    "name": "Mollets assis à la machine",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-5913dae70255e9995096",
+    "name": "Mollets debout à la Smith machine",
+    "kind": "weight_reps",
+    "muscle_group": "Jambes",
+    "equipment": "Machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-34536ac1deab3788c269",
+    "name": "Hip thrust à la barre",
+    "kind": "weight_reps",
+    "muscle_group": "Fessiers",
+    "equipment": "Barre / haltères / poulie",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-2591ba3aabb78b3fdc4e",
+    "name": "Hip thrust à la machine",
+    "kind": "weight_reps",
+    "muscle_group": "Fessiers",
+    "equipment": "Barre / haltères / poulie",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-6b9ed52060a9f058c6a3",
+    "name": "Hip thrust avec haltère",
+    "kind": "weight_reps",
+    "muscle_group": "Fessiers",
+    "equipment": "Barre / haltères / poulie",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-62451a605338686dfb1f",
+    "name": "Hip thrust unilatéral lesté",
+    "kind": "weight_reps",
+    "muscle_group": "Fessiers",
+    "equipment": "Barre / haltères / poulie",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-4c1b8aecc86755d06d95",
+    "name": "Pont fessier à la barre",
+    "kind": "weight_reps",
+    "muscle_group": "Fessiers",
+    "equipment": "Barre / haltères / poulie",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-38ac5088ce7f3e5288bd",
+    "name": "Pont fessier avec haltère",
+    "kind": "weight_reps",
+    "muscle_group": "Fessiers",
+    "equipment": "Barre / haltères / poulie",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-952bc118bccf0b5111ab",
+    "name": "Extension de hanche à la poulie",
+    "kind": "weight_reps",
+    "muscle_group": "Fessiers",
+    "equipment": "Barre / haltères / poulie",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-197cfd4e5b48af0e2426",
+    "name": "Abduction de hanche à la poulie",
+    "kind": "weight_reps",
+    "muscle_group": "Fessiers",
+    "equipment": "Barre / haltères / poulie",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-162ee7cc3cefa5de15f2",
+    "name": "Adduction de hanche à la poulie",
+    "kind": "weight_reps",
+    "muscle_group": "Fessiers",
+    "equipment": "Barre / haltères / poulie",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-4902e7269b144c9a37dc",
+    "name": "Pull-through à la poulie",
+    "kind": "weight_reps",
+    "muscle_group": "Fessiers",
+    "equipment": "Barre / haltères / poulie",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-8bb4e0bbdaf6be4cbdc8",
+    "name": "Extension du dos lestée",
+    "kind": "weight_reps",
+    "muscle_group": "Fessiers",
+    "equipment": "Barre / haltères / poulie",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-f4c5a8b6089aacdd0aae",
+    "name": "Reverse hyper à la machine",
+    "kind": "weight_reps",
+    "muscle_group": "Fessiers",
+    "equipment": "Barre / haltères / poulie",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-96610a7b5fba344a25b0",
+    "name": "Mollets debout avec haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Fessiers",
+    "equipment": "Barre / haltères / poulie",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-eb311edc573d3d19ae20",
+    "name": "Mollets unilatéraux avec haltère",
+    "kind": "weight_reps",
+    "muscle_group": "Fessiers",
+    "equipment": "Barre / haltères / poulie",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-dc8cc49df3a126f6c8d1",
+    "name": "Mollets assis avec haltère",
+    "kind": "weight_reps",
+    "muscle_group": "Fessiers",
+    "equipment": "Barre / haltères / poulie",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-8738ffecf41ebbc72e27",
+    "name": "Crunch à la poulie",
+    "kind": "weight_reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poulie / lest",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-0289a3217fc7856e8217",
+    "name": "Crunch à la machine",
+    "kind": "weight_reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poulie / lest",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-6f7030d0cef4185fc722",
+    "name": "Crunch lesté",
+    "kind": "weight_reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poulie / lest",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-f8ef4313018051a784df",
+    "name": "Crunch décliné lesté",
+    "kind": "weight_reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poulie / lest",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-3be94f7047fad8639e54",
+    "name": "Rotation russe lestée",
+    "kind": "weight_reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poulie / lest",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-53704701a25e23635439",
+    "name": "Rotation du buste à la poulie",
+    "kind": "weight_reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poulie / lest",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-b98e815e7c7f9e28d87b",
+    "name": "Bûcheron à la poulie haute",
+    "kind": "weight_reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poulie / lest",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-27d82df82eed499698f8",
+    "name": "Bûcheron à la poulie basse",
+    "kind": "weight_reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poulie / lest",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-8ea1fe0ea1e9fc001766",
+    "name": "Flexion latérale avec haltère",
+    "kind": "weight_reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poulie / lest",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-56ab3ca71bdbb0619ef2",
+    "name": "Relevé de jambes lesté",
+    "kind": "weight_reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poulie / lest",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-f9828641d74299bf8675",
+    "name": "Pallof press à la poulie",
+    "kind": "weight_reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poulie / lest",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-d335d79019964dda3f0c",
+    "name": "Rotation landmine",
+    "kind": "weight_reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poulie / lest",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-7528881c17f2a8c99743",
+    "name": "Épaulé",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-9bf03503175646724635",
+    "name": "Épaulé en puissance",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-a305963b5a0e226f521e",
+    "name": "Épaulé suspendu",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-06843a2167bc874fa46f",
+    "name": "Épaulé depuis les blocs",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-f681aa32febbeb7d07ee",
+    "name": "Épaulé-jeté",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-3b5ccffc3c5cdfacb103",
+    "name": "Jeté en fente",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-9395ca759efa758a6126",
+    "name": "Jeté en puissance",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-0a071b3c46985a4c46e9",
+    "name": "Arraché",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-3ddb5599a1a0d53c9b89",
+    "name": "Arraché en puissance",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-f203cabd2ab05cec9580",
+    "name": "Arraché suspendu",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-cb28a4d58e51e0c10ffd",
+    "name": "Arraché depuis les blocs",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-592b259bcf069a57563e",
+    "name": "Tirage haut d’épaulé",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-c2751eb329646738d183",
+    "name": "Tirage haut d’arraché",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-a6f6779fde08d5f3986d",
+    "name": "Tirage d’épaulé",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-c4e2dd74449ea88d66d6",
+    "name": "Tirage d’arraché",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-8f01b3553fad0882dece",
+    "name": "Thruster à la barre",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-a3cc2d6cf9be70bf51f4",
+    "name": "Épaulé muscle",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-6018e980cfff23c63006",
+    "name": "Arraché muscle",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-7bd912ffadf60c10e82d",
+    "name": "Épaulé avec essieu",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-749b32f150f653d0ee0f",
+    "name": "Épaulé-jeté avec bûche",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-edcb15094ca98ee18453",
+    "name": "Soulevé de pierre Atlas",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-7b9495f067316e3a064e",
+    "name": "Retournement de pneu",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-4893d7e2afbce5fcb725",
+    "name": "Balancement de kettlebell à deux mains",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-924b9ea1926a832bea26",
+    "name": "Balancement de kettlebell à un bras",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-d70d855f289f993ad609",
+    "name": "Balancement alterné de kettlebell",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-7f6c5b4aaa23620a3d7c",
+    "name": "Épaulé avec kettlebell",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-ea4c97e8e20018969e08",
+    "name": "Épaulé avec deux kettlebells",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-54428759efb4c7c2b269",
+    "name": "Arraché avec kettlebell",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-882a72bfa3b5a48c1e3d",
+    "name": "Développé avec kettlebell",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-f9321eca109b22a494a0",
+    "name": "Développé avec deux kettlebells",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-b7c353f067465f71cd03",
+    "name": "Développé kettlebell fond vers le haut",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-fff5ff6dde59cd513ac0",
+    "name": "Relevé turc",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-95b3a60bcd8512823da9",
+    "name": "Moulin à vent avec kettlebell",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-e1de4d606765671a0907",
+    "name": "Squat avant avec deux kettlebells",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-b167b58eb39a9a71fbf3",
+    "name": "Thruster avec kettlebell",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-03587aaecd184f702b25",
+    "name": "Thruster avec deux kettlebells",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-70035dbfbb6836af634a",
+    "name": "Rowing avec kettlebell",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-7b1d7fe9fbab862328ad",
+    "name": "Rowing avec deux kettlebells",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-249e4b492eb23ab7a698",
+    "name": "Soulevé de terre avec kettlebell",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-1adad44030b56719cfd2",
+    "name": "Soulevé de terre sumo avec kettlebell",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-db77251e4f3f6c1d5355",
+    "name": "Halo avec kettlebell",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-6b0a889eefb6b59b472f",
+    "name": "Figure en huit avec kettlebell",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-a1bd532c141740a3cc6b",
+    "name": "Fente avec kettlebell",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-82b704589cc92887d3e5",
+    "name": "Développé couché avec kettlebell",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Kettlebell",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-f3f2619137e0cd00f651",
+    "name": "Thruster aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Haltères / médecine-ball",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-2d79085ca28c1038a31b",
+    "name": "Arraché avec haltère",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Haltères / médecine-ball",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-8c9aeaa43a38e126247b",
+    "name": "Épaulé avec haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Haltères / médecine-ball",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-cb93070f461d38873ee0",
+    "name": "Épaulé et développé aux haltères",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Haltères / médecine-ball",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-0e3bfb06409f3961cc80",
+    "name": "Épaulé avec sac de sable",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Haltères / médecine-ball",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-9a3d26652692f85841fb",
+    "name": "Squat avec sac de sable",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Haltères / médecine-ball",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-662a27bf09177ceb6d6e",
+    "name": "Épaulé sur l’épaule avec sac",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Haltères / médecine-ball",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-1496ac9e626a73a11b6c",
+    "name": "Lancer de médecine-ball au mur",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Haltères / médecine-ball",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-42e27dfd1e89bf695136",
+    "name": "Lancer de médecine-ball au sol",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Haltères / médecine-ball",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-f794f0ad4b5c867ecb29",
+    "name": "Lancer rotatif de médecine-ball",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Haltères / médecine-ball",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-4db620fecb99872cb3d6",
+    "name": "Lancer de médecine-ball en arrière",
+    "kind": "weight_reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Haltères / médecine-ball",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-af117ff8c4b7d458f0f9",
+    "name": "Pompes classiques",
+    "kind": "reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-5659210102e1372ec4fd",
+    "name": "Pompes sur les genoux",
+    "kind": "reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-dd16177a2f461743b9af",
+    "name": "Pompes inclinées",
+    "kind": "reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-7832989da65b167b59b4",
+    "name": "Pompes déclinées",
+    "kind": "reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-979883f781c771bc67e9",
+    "name": "Pompes prise large",
+    "kind": "reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-c09077f441bd8c1b9f23",
+    "name": "Pompes diamant",
+    "kind": "reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-5961ded6bf8fcdec6c10",
+    "name": "Pompes serrées",
+    "kind": "reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-9d4fce6dda4e4aafec0e",
+    "name": "Pompes archer",
+    "kind": "reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-57856b05f15a49fa8b5e",
+    "name": "Pompes sur un bras",
+    "kind": "reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-b3363c5b2a8b4b7c224d",
+    "name": "Pompes sur poignées",
+    "kind": "reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-078fff84cd266f5fe6bb",
+    "name": "Pompes sur anneaux",
+    "kind": "reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-b27de4e0243ebbf221c6",
+    "name": "Pompes avec suspension",
+    "kind": "reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-c88947785b1c5a8e90b4",
+    "name": "Pompes avec pause",
+    "kind": "reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-c417cf6b67c20a8fc722",
+    "name": "Pompes lentes",
+    "kind": "reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-00d3ca19de45628f1f91",
+    "name": "Pompes claquées",
+    "kind": "reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-dc86391b547cd3e4c176",
+    "name": "Pompes explosives",
+    "kind": "reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-79fcbeb6bf8b2c874bda",
+    "name": "Pompes hindoues",
+    "kind": "reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-4ee1d30069a0c1526c54",
+    "name": "Dips aux barres parallèles",
+    "kind": "reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-4db117dd7eac2af04fce",
+    "name": "Dips sur anneaux",
+    "kind": "reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-eacdfc6d154e99d11db4",
+    "name": "Dips sur banc",
+    "kind": "reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-05a08037eb6d4dbc4914",
+    "name": "Tractions en pronation",
+    "kind": "reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre de traction / anneaux",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-a5a858232e3067e58f98",
+    "name": "Tractions en supination",
+    "kind": "reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre de traction / anneaux",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-d1b7f7bc7c57e845eb55",
+    "name": "Tractions prise neutre",
+    "kind": "reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre de traction / anneaux",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-3a94f0ce1425c6cee341",
+    "name": "Tractions prise large",
+    "kind": "reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre de traction / anneaux",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-f560544b3c43def12df2",
+    "name": "Tractions prise serrée",
+    "kind": "reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre de traction / anneaux",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-8aef002b5e5004696cb1",
+    "name": "Tractions sternum à la barre",
+    "kind": "reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre de traction / anneaux",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-5328e683b33e8b51b808",
+    "name": "Tractions archer",
+    "kind": "reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre de traction / anneaux",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-d21e842972f28173c98e",
+    "name": "Tractions commando",
+    "kind": "reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre de traction / anneaux",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-925cc1b32fb331f48026",
+    "name": "Tractions négatives",
+    "kind": "reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre de traction / anneaux",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-91aa342158332e70b35f",
+    "name": "Tractions scapulaires",
+    "kind": "reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre de traction / anneaux",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-d3a8894822e238958cbd",
+    "name": "Tractions aux anneaux",
+    "kind": "reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre de traction / anneaux",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-f9efce3e396b20624c35",
+    "name": "Tractions australiennes",
+    "kind": "reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre de traction / anneaux",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-472761da3cbc7b5934d9",
+    "name": "Tractions australiennes prise neutre",
+    "kind": "reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre de traction / anneaux",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-7448fbe4a7235f93b773",
+    "name": "Tractions australiennes pieds surélevés",
+    "kind": "reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre de traction / anneaux",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-bf804f813d9b0d24ecd5",
+    "name": "Muscle-up à la barre",
+    "kind": "reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre de traction / anneaux",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-8d07cca8ad873c548287",
+    "name": "Muscle-up aux anneaux",
+    "kind": "reps",
+    "muscle_group": "Dos",
+    "equipment": "Barre de traction / anneaux",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-4ff8bb101c90a960ea72",
+    "name": "Tractions lestées en pronation",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Lest",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-b3bfcc09fbeb821450e3",
+    "name": "Tractions lestées en supination",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Lest",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-13c033d8f3316fa25ad7",
+    "name": "Tractions lestées prise neutre",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Lest",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-0f6c1a5ce3377084117f",
+    "name": "Muscle-up lesté",
+    "kind": "weight_reps",
+    "muscle_group": "Dos",
+    "equipment": "Lest",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-1a63f94e89ae80b9c92a",
+    "name": "Tractions assistées en pronation",
+    "kind": "assisted_reps",
+    "muscle_group": "Dos",
+    "equipment": "Machine à assistance",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-ba5c4617c62dcc8416d6",
+    "name": "Tractions assistées en supination",
+    "kind": "assisted_reps",
+    "muscle_group": "Dos",
+    "equipment": "Machine à assistance",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-ef1db94e43be722b854c",
+    "name": "Tractions assistées prise neutre",
+    "kind": "assisted_reps",
+    "muscle_group": "Dos",
+    "equipment": "Machine à assistance",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-bdb88a6926d81604da94",
+    "name": "Tractions assistées prise large",
+    "kind": "assisted_reps",
+    "muscle_group": "Dos",
+    "equipment": "Machine à assistance",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-fd8bdbc7a200b28458d6",
+    "name": "Dips assistés",
+    "kind": "assisted_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Machine à assistance",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-5f83a1c0407d98f764d7",
+    "name": "Pompes assistées",
+    "kind": "assisted_reps",
+    "muscle_group": "Pectoraux",
+    "equipment": "Machine à assistance",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-73db299c7c58fe4cc62f",
+    "name": "Squat au poids du corps",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-b65c30df7e24476988d2",
+    "name": "Squat sumo au poids du corps",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-ab3d0ea462f54019f171",
+    "name": "Squat avec pause au poids du corps",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-36453a2eb3011df548f8",
+    "name": "Squat sur une jambe",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-aac0fd6a50260e076d78",
+    "name": "Squat cosaque",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-be9ff8a92aa649188912",
+    "name": "Squat du patineur",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-7d47f92ed27ce67cc12e",
+    "name": "Sissy squat",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-fe0acba31804f80cf4ac",
+    "name": "Fente avant",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-db670cad7e4f38babd97",
+    "name": "Fente arrière",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-f25040f8dfce5c81259e",
+    "name": "Fente latérale",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-17c4ba6f8ee62502d58e",
+    "name": "Fente croisée",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-b515035f738f29b30e44",
+    "name": "Fente marchée",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-e1f1a2219a623a6ace45",
+    "name": "Fente bulgare",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-3bebd7c64051a0d5c852",
+    "name": "Montée sur banc",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-65f8c507211cac182931",
+    "name": "Descente de marche",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-d47e62cfe16d578d8069",
+    "name": "Pont fessier",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-248e0c4efeb363947a93",
+    "name": "Pont fessier unilatéral",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-13292ecfd66163dccd7d",
+    "name": "Hip thrust au poids du corps",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-ff419e6552ed3d6aed7a",
+    "name": "Abduction de hanche allongé",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-eeaab25988fbd4501bf7",
+    "name": "Coquillage",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-314f1bba769a384cac73",
+    "name": "Extension de hanche à quatre pattes",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-8112d705d435e7a377ca",
+    "name": "Ouverture de hanche à quatre pattes",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-afdbbf4d68deefbc7e4a",
+    "name": "Flexion nordique des jambes",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-4ccf7409016eb5003f68",
+    "name": "Flexion des jambes sur ballon",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-138f509fe294a8cb11db",
+    "name": "Flexion des jambes avec serviette",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-7666ef04ceb2100019b4",
+    "name": "Mollets debout",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-6944d4d8e157d3d140b0",
+    "name": "Mollets sur une jambe",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-3e98896c0e4c46627c4d",
+    "name": "Relevé de pointes de pieds",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-b10df09149f808a942ab",
+    "name": "Extension du dos",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-8fdd0696321cb3d608ff",
+    "name": "Extension inversée des hanches",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-7d7019a245e1775534d7",
+    "name": "Crunch",
+    "kind": "reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-5723024621c29623294b",
+    "name": "Crunch inversé",
+    "kind": "reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-abc8e1101216ee7b80c8",
+    "name": "Crunch bicyclette",
+    "kind": "reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-b428e34972bf15c8c30f",
+    "name": "Crunch pieds au sol",
+    "kind": "reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-13fed95c618b2646be36",
+    "name": "Crunch jambes verticales",
+    "kind": "reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-a2e78c5b7d6640109c05",
+    "name": "Crunch sur ballon",
+    "kind": "reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-07d7d4ec37410b1edfd5",
+    "name": "Relevé de buste",
+    "kind": "reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-53a6ef8bee4d7dac61d0",
+    "name": "Relevé de buste décliné",
+    "kind": "reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-28105d775a11fa3e1925",
+    "name": "Relevé de buste partiel",
+    "kind": "reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-3c20a4e26cc06212ddd1",
+    "name": "Relevé de jambes allongé",
+    "kind": "reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-0b3059155da8e8d1824e",
+    "name": "Relevé de genoux suspendu",
+    "kind": "reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-28e5eaa5a279b38669c0",
+    "name": "Relevé de jambes suspendu",
+    "kind": "reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-3a04f36d939f91c39d9f",
+    "name": "Pieds à la barre",
+    "kind": "reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-4582972b1f10c42f0967",
+    "name": "Essuie-glaces suspendu",
+    "kind": "reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-2db09b04d71f76857425",
+    "name": "Relevé de bassin",
+    "kind": "reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-7be0bbe6cd996a2d7a67",
+    "name": "Rotation russe",
+    "kind": "reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-e9e407d66f7c0483970e",
+    "name": "Toucher des talons",
+    "kind": "reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-b4c1d97fb82700361360",
+    "name": "V-up",
+    "kind": "reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-7c1915c0b13f911139be",
+    "name": "Ciseaux",
+    "kind": "reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-844f28dfa83f3732a454",
+    "name": "Battements de jambes",
+    "kind": "reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-9dbe177588c09b2e685e",
+    "name": "Dead bug",
+    "kind": "reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-f6c91bdfda75728acb2f",
+    "name": "Bird dog",
+    "kind": "reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-bbd0a8da275b9e832c4a",
+    "name": "Roue abdominale à genoux",
+    "kind": "reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-cf1135b015a1037c7cc1",
+    "name": "Roue abdominale debout",
+    "kind": "reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-4df7b93c542f18b075aa",
+    "name": "Dragon flag",
+    "kind": "reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-e4f60fadca5e29c4e867",
+    "name": "Mountain climbers",
+    "kind": "reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-c4906b7b7876706f3542",
+    "name": "Planche avec toucher d’épaule",
+    "kind": "reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-f76c3e0b3d5af87017fe",
+    "name": "Planche montée-descente",
+    "kind": "reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-af36c0eb5e13771b7064",
+    "name": "Planche avec rotation",
+    "kind": "reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-27d5233ddd8968526735",
+    "name": "Superman",
+    "kind": "reps",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-8afcb514c6c12a3b4302",
+    "name": "Pompes en V",
+    "kind": "reps",
+    "muscle_group": "Épaules",
+    "equipment": "Poids du corps / élastique",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-dac2439d5c5ddf3193a6",
+    "name": "Pompes verticales contre un mur",
+    "kind": "reps",
+    "muscle_group": "Épaules",
+    "equipment": "Poids du corps / élastique",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-ac9d725e07430e763337",
+    "name": "Pompes verticales libres",
+    "kind": "reps",
+    "muscle_group": "Épaules",
+    "equipment": "Poids du corps / élastique",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-00975d28a0d7154b0829",
+    "name": "Élévation scapulaire en appui",
+    "kind": "reps",
+    "muscle_group": "Épaules",
+    "equipment": "Poids du corps / élastique",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-c1275891578b71c3ca46",
+    "name": "Glissade des bras au mur",
+    "kind": "reps",
+    "muscle_group": "Épaules",
+    "equipment": "Poids du corps / élastique",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-3fd24ea62a59cc3e8171",
+    "name": "Écartement avec élastique",
+    "kind": "reps",
+    "muscle_group": "Épaules",
+    "equipment": "Poids du corps / élastique",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-f4af22549c78854f723d",
+    "name": "Rotation externe avec élastique",
+    "kind": "reps",
+    "muscle_group": "Épaules",
+    "equipment": "Poids du corps / élastique",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-27b8f784a9651fa5f6ce",
+    "name": "Face pull avec élastique",
+    "kind": "reps",
+    "muscle_group": "Épaules",
+    "equipment": "Poids du corps / élastique",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-14c66c6f436bf58ec47d",
+    "name": "Développé épaules avec élastique",
+    "kind": "reps",
+    "muscle_group": "Épaules",
+    "equipment": "Poids du corps / élastique",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-26ed656d79d65986d62d",
+    "name": "Élévation latérale avec élastique",
+    "kind": "reps",
+    "muscle_group": "Épaules",
+    "equipment": "Poids du corps / élastique",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-0ffa8eb3ad13f2402ba8",
+    "name": "Élévation frontale avec élastique",
+    "kind": "reps",
+    "muscle_group": "Épaules",
+    "equipment": "Poids du corps / élastique",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-da58389200492dce2c7d",
+    "name": "Burpees",
+    "kind": "reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-5baab9a9e0b98f9659c7",
+    "name": "Burpees avec pompe",
+    "kind": "reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-89cd2a681f3922f1180a",
+    "name": "Burpees avec saut par-dessus une barre",
+    "kind": "reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-52ca9ad4963a2dacfe41",
+    "name": "Burpees avec traction",
+    "kind": "reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-063236f263a38547218c",
+    "name": "Sauts étoile",
+    "kind": "reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-63633006ddd44bbf226a",
+    "name": "Squats sautés",
+    "kind": "reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-29b28d7a9d0541467974",
+    "name": "Fentes sautées",
+    "kind": "reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-24754cfa4e021a02eff0",
+    "name": "Sauts sur boîte",
+    "kind": "reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-78e6fa7dc2473b57ad27",
+    "name": "Sauts depuis une boîte",
+    "kind": "reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-87b79de432d64ea071fa",
+    "name": "Sauts groupés",
+    "kind": "reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-2f62258f3884bc1b93fd",
+    "name": "Sauts latéraux",
+    "kind": "reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-12d4009824269399be87",
+    "name": "Sauts de patineur",
+    "kind": "reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-cf9cd76bd45fe78ee4df",
+    "name": "Sauts sur une jambe",
+    "kind": "reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-382408f4065cad370d71",
+    "name": "Sauts de grenouille",
+    "kind": "reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-26c15b2cdf4ede632327",
+    "name": "Montées de genoux",
+    "kind": "reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-a9992d9b055d378eec74",
+    "name": "Talons-fesses",
+    "kind": "reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-96902f10439102a965fb",
+    "name": "Pas chassés",
+    "kind": "reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-b9a968347d7d57cf5af6",
+    "name": "Corde à sauter — sauts simples",
+    "kind": "reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-49b53a4f832b4dd0f721",
+    "name": "Corde à sauter — doubles sauts",
+    "kind": "reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-c82f29dc3a3c90b78cee",
+    "name": "Corde à sauter — triples sauts",
+    "kind": "reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-0237b92598da8b7dbd00",
+    "name": "Inchworm",
+    "kind": "reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-3111fc9125569fed88e0",
+    "name": "Marche de l’ours — pas",
+    "kind": "reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-b25b6f8709507de8aa8a",
+    "name": "Marche du crabe — pas",
+    "kind": "reps",
+    "muscle_group": "Corps entier",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-8f9ad8b549cf1bd1a05d",
+    "name": "Planche sur les avant-bras",
+    "kind": "duration",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-06ed439d421e69dbb3f9",
+    "name": "Planche bras tendus",
+    "kind": "duration",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-6b3b92da87ba424a029b",
+    "name": "Planche latérale gauche",
+    "kind": "duration",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-467f27aa80debbab1bb9",
+    "name": "Planche latérale droite",
+    "kind": "duration",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-2fafa467be11dba0bbe6",
+    "name": "Planche inversée",
+    "kind": "duration",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-42d3f6f9f0c845c93d9a",
+    "name": "Planche sur ballon",
+    "kind": "duration",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-80900bc43fb41ac32261",
+    "name": "Planche à trois appuis",
+    "kind": "duration",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-7ec5eb8300a091b9e9f4",
+    "name": "Hollow hold",
+    "kind": "duration",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-ccdea7d2d5bd02505d2c",
+    "name": "Superman statique",
+    "kind": "duration",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-8c87476274ecf763050e",
+    "name": "L-sit",
+    "kind": "duration",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-9b5c256d26d6af9b90c5",
+    "name": "V-sit",
+    "kind": "duration",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-832bb8b0909f35936362",
+    "name": "Maintien dragon flag",
+    "kind": "duration",
+    "muscle_group": "Abdominaux",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-926868bee589024eaebe",
+    "name": "Chaise au mur",
+    "kind": "duration",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-62730d0dce0ac79eae98",
+    "name": "Chaise sur une jambe",
+    "kind": "duration",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-4e312b634204d6590014",
+    "name": "Squat isométrique",
+    "kind": "duration",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-736277592b100b71206a",
+    "name": "Fente isométrique",
+    "kind": "duration",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-3f71fa976dae94a25dc5",
+    "name": "Pont fessier isométrique",
+    "kind": "duration",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-15be9b9f9d4d651d3fe8",
+    "name": "Équilibre sur une jambe",
+    "kind": "duration",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-88fad6d598c9c080cd90",
+    "name": "Équilibre sur plateau",
+    "kind": "duration",
+    "muscle_group": "Jambes",
+    "equipment": "Poids du corps",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-b1879eb11832eb16904c",
+    "name": "Suspension passive",
+    "kind": "duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre / anneaux / sol",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-0587c9cea21349d53af3",
+    "name": "Suspension active",
+    "kind": "duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre / anneaux / sol",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-6dc8148d0a6b8dd1d5fd",
+    "name": "Maintien en traction haute",
+    "kind": "duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre / anneaux / sol",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-1ef1bb90a9abab81b48b",
+    "name": "Équilibre sur les mains",
+    "kind": "duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre / anneaux / sol",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-b84489d642a0a3e774af",
+    "name": "Équilibre sur les mains au mur",
+    "kind": "duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre / anneaux / sol",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-cf700299adb15eb0aec4",
+    "name": "Appui aux anneaux",
+    "kind": "duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre / anneaux / sol",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-c456bc123e38efca962e",
+    "name": "Drapeau humain",
+    "kind": "duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre / anneaux / sol",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-b519a0ad114f4bfdbbc4",
+    "name": "Front lever",
+    "kind": "duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre / anneaux / sol",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-67151b47d9beecba26d9",
+    "name": "Back lever",
+    "kind": "duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre / anneaux / sol",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-807bcb658f4038457a3b",
+    "name": "Planche de gymnastique",
+    "kind": "duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre / anneaux / sol",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-4797dc257db24db51a90",
+    "name": "Respiration allongée",
+    "kind": "duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre / anneaux / sol",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-1ab8abbdf26cec3ec13e",
+    "name": "Salutation au soleil",
+    "kind": "duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Barre / anneaux / sol",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-e7c60fe7469e538d60a8",
+    "name": "Étirement du cou latéral",
+    "kind": "duration",
+    "muscle_group": "Cou",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-02e15737c7bea73751c6",
+    "name": "Étirement du trapèze supérieur",
+    "kind": "duration",
+    "muscle_group": "Cou",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-dab0ac2271d10869c9c6",
+    "name": "Rotation douce du cou",
+    "kind": "duration",
+    "muscle_group": "Cou",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-68ec6748eae4fab28bb4",
+    "name": "Étirement de l’épaule bras croisé",
+    "kind": "duration",
+    "muscle_group": "Épaules",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-23b85353fdf78ae4a591",
+    "name": "Étirement des épaules au mur",
+    "kind": "duration",
+    "muscle_group": "Épaules",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-e990f3e7b44ac413f03f",
+    "name": "Étirement des épaules mains jointes",
+    "kind": "duration",
+    "muscle_group": "Épaules",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-077cb626de86b049616b",
+    "name": "Étirement des épaules en suspension",
+    "kind": "duration",
+    "muscle_group": "Épaules",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-26d2434d209d0ef15d83",
+    "name": "Posture du chiot",
+    "kind": "duration",
+    "muscle_group": "Épaules",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-884f7d3f0fc32d043cc2",
+    "name": "Étirement des pectoraux dans une porte",
+    "kind": "duration",
+    "muscle_group": "Pectoraux",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-3c00d899f4330ae9650b",
+    "name": "Étirement des pectoraux au mur",
+    "kind": "duration",
+    "muscle_group": "Pectoraux",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-8effe926c00dce541ef4",
+    "name": "Étirement des pectoraux au sol",
+    "kind": "duration",
+    "muscle_group": "Pectoraux",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-fdd226431f8719441566",
+    "name": "Ouverture thoracique sur rouleau",
+    "kind": "duration",
+    "muscle_group": "Pectoraux",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-85f3356768c780da62a0",
+    "name": "Posture de l’enfant",
+    "kind": "duration",
+    "muscle_group": "Dos",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-33e9dcf2ee6af5fa2001",
+    "name": "Étirement du grand dorsal au banc",
+    "kind": "duration",
+    "muscle_group": "Dos",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-a9806f28fe75fb8050d0",
+    "name": "Étirement du dos en suspension",
+    "kind": "duration",
+    "muscle_group": "Dos",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-ee1da2e4c7655eeded8c",
+    "name": "Posture du cobra",
+    "kind": "duration",
+    "muscle_group": "Dos",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-78326f64dbc00794c88c",
+    "name": "Posture du sphinx",
+    "kind": "duration",
+    "muscle_group": "Dos",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-b80d5492817d625d331d",
+    "name": "Rotation thoracique allongé",
+    "kind": "duration",
+    "muscle_group": "Dos",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-848fba55927d1397ea17",
+    "name": "Rotation thoracique à quatre pattes",
+    "kind": "duration",
+    "muscle_group": "Dos",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-660695db126df8c1e964",
+    "name": "Étirement du triceps",
+    "kind": "duration",
+    "muscle_group": "Bras",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-b156028c0acf45463416",
+    "name": "Étirement du biceps au mur",
+    "kind": "duration",
+    "muscle_group": "Bras",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-eeeb801be198164aa955",
+    "name": "Étirement des fléchisseurs du poignet",
+    "kind": "duration",
+    "muscle_group": "Bras",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-9c52c099db349417e314",
+    "name": "Étirement des extenseurs du poignet",
+    "kind": "duration",
+    "muscle_group": "Bras",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-e20b02eed348618fd948",
+    "name": "Étirement du fléchisseur de hanche",
+    "kind": "duration",
+    "muscle_group": "Hanches",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-7638e18819202a75130f",
+    "name": "Étirement du psoas en fente",
+    "kind": "duration",
+    "muscle_group": "Hanches",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-3a252790248cc8145430",
+    "name": "Posture du pigeon",
+    "kind": "duration",
+    "muscle_group": "Hanches",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-502b5eab17b5701f49a8",
+    "name": "Étirement du piriforme allongé",
+    "kind": "duration",
+    "muscle_group": "Hanches",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-d63ee5828e4e41116d19",
+    "name": "Étirement des hanches 90/90",
+    "kind": "duration",
+    "muscle_group": "Hanches",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-78c033433a9ca8aaecd2",
+    "name": "Étirement papillon",
+    "kind": "duration",
+    "muscle_group": "Hanches",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-9d581d8c559accb697a0",
+    "name": "Étirement des adducteurs en grenouille",
+    "kind": "duration",
+    "muscle_group": "Hanches",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-ef5e3ecde13ce38601b5",
+    "name": "Étirement des adducteurs latéral",
+    "kind": "duration",
+    "muscle_group": "Hanches",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-e432685a4e2979f75118",
+    "name": "Squat profond maintenu",
+    "kind": "duration",
+    "muscle_group": "Hanches",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-b68b030911c3a30bedb3",
+    "name": "Rotation de hanche assise",
+    "kind": "duration",
+    "muscle_group": "Hanches",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-9a3ed1321f5f27abfbf3",
+    "name": "Étirement du quadriceps debout",
+    "kind": "duration",
+    "muscle_group": "Jambes",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-28cbdb1cb50df807c287",
+    "name": "Étirement du quadriceps couché",
+    "kind": "duration",
+    "muscle_group": "Jambes",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-8b4e957a7d910ead038d",
+    "name": "Étirement du quadriceps sur banc",
+    "kind": "duration",
+    "muscle_group": "Jambes",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-e0b4412c10cbc11ad651",
+    "name": "Étirement des ischio-jambiers assis",
+    "kind": "duration",
+    "muscle_group": "Jambes",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-981419bdda460fde4c18",
+    "name": "Étirement des ischio-jambiers debout",
+    "kind": "duration",
+    "muscle_group": "Jambes",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-3b35ce6853c0de75d8ae",
+    "name": "Étirement des ischio-jambiers allongé",
+    "kind": "duration",
+    "muscle_group": "Jambes",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-4530399312c40139a05a",
+    "name": "Étirement des ischio-jambiers avec sangle",
+    "kind": "duration",
+    "muscle_group": "Jambes",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-bff5f46c62be6fa1e7b2",
+    "name": "Étirement du mollet jambe tendue",
+    "kind": "duration",
+    "muscle_group": "Jambes",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-48c93442c5de66b16cf6",
+    "name": "Étirement du mollet genou fléchi",
+    "kind": "duration",
+    "muscle_group": "Jambes",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-38358e74dd38695b6a80",
+    "name": "Étirement du mollet sur marche",
+    "kind": "duration",
+    "muscle_group": "Jambes",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-cc7aae153844c91c7364",
+    "name": "Mobilité de cheville contre un mur",
+    "kind": "duration",
+    "muscle_group": "Jambes",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-3a7977bba4dafac299dd",
+    "name": "Étirement de la plante du pied",
+    "kind": "duration",
+    "muscle_group": "Jambes",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-1ec6f81b3fa981ccfd54",
+    "name": "Étirement des fessiers assis",
+    "kind": "duration",
+    "muscle_group": "Jambes",
+    "equipment": "Sans matériel",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-5da925e2aa6cadb2f5ca",
+    "name": "Automassage des quadriceps",
+    "kind": "duration",
+    "muscle_group": "Mobilité",
+    "equipment": "Rouleau de massage",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-63434df841e3c9e1fb43",
+    "name": "Automassage des ischio-jambiers",
+    "kind": "duration",
+    "muscle_group": "Mobilité",
+    "equipment": "Rouleau de massage",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-587a86b00046e666a554",
+    "name": "Automassage des mollets",
+    "kind": "duration",
+    "muscle_group": "Mobilité",
+    "equipment": "Rouleau de massage",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-200b1ae6e7846f5bed06",
+    "name": "Automassage des fessiers",
+    "kind": "duration",
+    "muscle_group": "Mobilité",
+    "equipment": "Rouleau de massage",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-b9d125fbf1e0c5909715",
+    "name": "Automassage du haut du dos",
+    "kind": "duration",
+    "muscle_group": "Mobilité",
+    "equipment": "Rouleau de massage",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-917ffd790129048e653c",
+    "name": "Automassage des dorsaux",
+    "kind": "duration",
+    "muscle_group": "Mobilité",
+    "equipment": "Rouleau de massage",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-1f30b1237eb0abfe22e4",
+    "name": "Automassage des adducteurs",
+    "kind": "duration",
+    "muscle_group": "Mobilité",
+    "equipment": "Rouleau de massage",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-448285965ad1c667e259",
+    "name": "Automassage de la voûte plantaire",
+    "kind": "duration",
+    "muscle_group": "Mobilité",
+    "equipment": "Rouleau de massage",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-da98dd6929927833d279",
+    "name": "Course sur tapis",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Tapis / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-f9b2229948b585216749",
+    "name": "Course sur tapis incliné",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Tapis / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-50ca54bc6c056f6048d9",
+    "name": "Marche sur tapis",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Tapis / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-ad124ad27a660fdf6abd",
+    "name": "Marche sur tapis incliné",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Tapis / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-bf06bcaf7e293aee1e44",
+    "name": "Course sur route",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Tapis / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-a18e39ef61d3ed0eb867",
+    "name": "Course sur piste",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Tapis / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-64c6ffca11015a66207b",
+    "name": "Course en côte",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Tapis / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-e2c8d39b7458f4027752",
+    "name": "Trail",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Tapis / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-bd12cecf61596eae34f1",
+    "name": "Marche rapide",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Tapis / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-849292e3c0b603d3a67f",
+    "name": "Randonnée",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Tapis / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-65609f07d62e2b23c5a1",
+    "name": "Marche nordique",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Tapis / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-f5c07f82da1222705a29",
+    "name": "Course avec poussette",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Tapis / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-a2f7e5d44f11432ab674",
+    "name": "Course sur sable",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Tapis / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-fd04788626e5f87b3b22",
+    "name": "Sprint",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Tapis / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-aa8fbf5bb1a985d91b0b",
+    "name": "Sprint en côte",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Tapis / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-9501872fd47315dddc98",
+    "name": "Marche en escaliers",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Tapis / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-9fa26e9abb0f976976f9",
+    "name": "Course en escaliers",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Tapis / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-d99ac6cf1a2aca6e7346",
+    "name": "Marche arrière sur tapis",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Tapis / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-380c943ae1cb0f74a8bb",
+    "name": "Vélo d’appartement",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Vélo / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-c4108cbd16300b78b8f4",
+    "name": "Vélo elliptique",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Vélo / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-4f3434faea8e1638e816",
+    "name": "Vélo de spinning",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Vélo / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-2d6a2d3571964eac749a",
+    "name": "Air bike",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Vélo / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-ad09d14dfc0bc8daa9b3",
+    "name": "Vélo couché",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Vélo / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-63189e499c415fbe51a1",
+    "name": "Vélo de route",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Vélo / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-c42519c1088957dfb25f",
+    "name": "VTT",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Vélo / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-d4700254bd8866f377e1",
+    "name": "Vélo gravel",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Vélo / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-5efeafa5e6dcfee6cc13",
+    "name": "Rameur",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Vélo / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-752a7e2a8ad0edef0d8c",
+    "name": "SkiErg",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Vélo / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-d455e53ead1a2494258a",
+    "name": "Stepper",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Vélo / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-e33cceccfd0f5ee77067",
+    "name": "Escalier mécanique",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Vélo / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-4858564e35157614c55e",
+    "name": "Vélo à bras",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Vélo / machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-1f4d57ab5d4a5c23e98d",
+    "name": "Natation crawl",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Piscine / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-95b7e14422bb162f5cef",
+    "name": "Natation brasse",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Piscine / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-ed0dae230ba548c14bd4",
+    "name": "Natation dos crawlé",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Piscine / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-9c3d655d0b9407545c6f",
+    "name": "Natation papillon",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Piscine / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-e7d0a3f56d3ec5cf16a0",
+    "name": "Natation quatre nages",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Piscine / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-56564be8eb64256285ff",
+    "name": "Natation en eau libre",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Piscine / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-586c8b475c4633af3678",
+    "name": "Natation avec palmes",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Piscine / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-4a3ada427b92cd3284f5",
+    "name": "Natation avec planche",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Piscine / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-1c4787c5d00c18ad313f",
+    "name": "Natation avec pull-buoy",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Piscine / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-63be02b6b34a975efb41",
+    "name": "Aviron",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Piscine / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-2ddffe14f22f63d33a7f",
+    "name": "Kayak",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Piscine / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-06cd4d8c955032092194",
+    "name": "Canoë",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Piscine / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-b83ffcfbd30fc634c74a",
+    "name": "Stand-up paddle",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Piscine / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-ebe6d1846e3716819fcb",
+    "name": "Ski de fond classique",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Piscine / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-8c22d9cd56defe67a58f",
+    "name": "Ski de fond skating",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Piscine / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-65e539f86420755f87dd",
+    "name": "Ski de randonnée",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Piscine / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-65800fa57533c565f138",
+    "name": "Raquettes à neige",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Piscine / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-4c5811fcb4a6d2d1809d",
+    "name": "Roller",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Piscine / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-a3d9b8159218576aa6b6",
+    "name": "Patinage",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Piscine / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-00a922eb59052cd8b8ae",
+    "name": "Course d’orientation",
+    "kind": "distance_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Piscine / extérieur",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-cb2a1a478d5c3289053f",
+    "name": "Marche du fermier (farmer carry)",
+    "kind": "weight_distance",
+    "muscle_group": "Corps entier",
+    "equipment": "Charges",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-9fafd8f63e090f874f9c",
+    "name": "Marche valise (suitcase carry)",
+    "kind": "weight_distance",
+    "muscle_group": "Corps entier",
+    "equipment": "Charges",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-01cef8a26398e72a7b77",
+    "name": "Marche avec charge au-dessus de la tête",
+    "kind": "weight_distance",
+    "muscle_group": "Corps entier",
+    "equipment": "Charges",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-e3fdfc9b34b2c773afbd",
+    "name": "Marche avec haltères en position frontale",
+    "kind": "weight_distance",
+    "muscle_group": "Corps entier",
+    "equipment": "Charges",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-eb0a6d01593edc22f766",
+    "name": "Marche avec kettlebells en position frontale",
+    "kind": "weight_distance",
+    "muscle_group": "Corps entier",
+    "equipment": "Charges",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-08d2344d5f8dcf4eb25f",
+    "name": "Marche avec sac de sable",
+    "kind": "weight_distance",
+    "muscle_group": "Corps entier",
+    "equipment": "Charges",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-4b4ef606cc0a579588d6",
+    "name": "Marche avec sac à dos lesté",
+    "kind": "weight_distance",
+    "muscle_group": "Corps entier",
+    "equipment": "Charges",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-a10a7489a12ff658af1d",
+    "name": "Marche avec joug",
+    "kind": "weight_distance",
+    "muscle_group": "Corps entier",
+    "equipment": "Charges",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-76807070cc3448bdd713",
+    "name": "Poussée de traîneau",
+    "kind": "weight_distance",
+    "muscle_group": "Corps entier",
+    "equipment": "Charges",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-bd525576a2be5ac5e90c",
+    "name": "Tirage de traîneau",
+    "kind": "weight_distance",
+    "muscle_group": "Corps entier",
+    "equipment": "Charges",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-160f1079c06d9540a358",
+    "name": "Tirage de traîneau en marche arrière",
+    "kind": "weight_distance",
+    "muscle_group": "Corps entier",
+    "equipment": "Charges",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-a7bcd555020d5b99fefc",
+    "name": "Tirage de traîneau latéral",
+    "kind": "weight_distance",
+    "muscle_group": "Corps entier",
+    "equipment": "Charges",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-bf95ff33ac67636c2dd0",
+    "name": "Porté de pierre Atlas",
+    "kind": "weight_distance",
+    "muscle_group": "Corps entier",
+    "equipment": "Charges",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-3e6e2904c0b546f97905",
+    "name": "Porté de médecine-ball",
+    "kind": "weight_distance",
+    "muscle_group": "Corps entier",
+    "equipment": "Charges",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-eeeac099c1313217b943",
+    "name": "Porté de bûche",
+    "kind": "weight_distance",
+    "muscle_group": "Corps entier",
+    "equipment": "Charges",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-84c37b890d5a0ec785e7",
+    "name": "Fentes marchées — distance lestée",
+    "kind": "weight_distance",
+    "muscle_group": "Corps entier",
+    "equipment": "Charges",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-40e5629bb005863fb646",
+    "name": "Maintien du fermier",
+    "kind": "weight_duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Charges",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-8537d91cfd4c842fb5cc",
+    "name": "Maintien valise",
+    "kind": "weight_duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Charges",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-641dc407cf069bcfdbe6",
+    "name": "Maintien au-dessus de la tête",
+    "kind": "weight_duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Charges",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-646824aedb8b0d356ca6",
+    "name": "Maintien en position frontale",
+    "kind": "weight_duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Charges",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-fd209315cc7db97a946d",
+    "name": "Suspension lestée",
+    "kind": "weight_duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Charges",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-77a5e50bc2d70b91d534",
+    "name": "Planche lestée",
+    "kind": "weight_duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Charges",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-13e59967c76492d01da7",
+    "name": "Chaise lestée",
+    "kind": "weight_duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Charges",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-8e342d8aa02428b2e649",
+    "name": "Maintien de disque avec les doigts",
+    "kind": "weight_duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Charges",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-0904271b214ee4de9796",
+    "name": "Maintien de barre épaisse",
+    "kind": "weight_duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Charges",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-8d3a1cf319c7aced53ed",
+    "name": "Maintien de sac de sable",
+    "kind": "weight_duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Charges",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-1b9f786c679cbb3694e7",
+    "name": "Burpees chronométrés",
+    "kind": "reps_duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Matériel varié",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-e78dff5c763c21401e50",
+    "name": "Pompes chronométrées",
+    "kind": "reps_duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Matériel varié",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-919ff98ddfad306c5875",
+    "name": "Squats chronométrés",
+    "kind": "reps_duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Matériel varié",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-63700688fc6f94acb076",
+    "name": "Tractions chronométrées",
+    "kind": "reps_duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Matériel varié",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-633127569e9ffb9ca3af",
+    "name": "Relevés de buste chronométrés",
+    "kind": "reps_duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Matériel varié",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-93588508b4c4737bcb8f",
+    "name": "Sauts étoile chronométrés",
+    "kind": "reps_duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Matériel varié",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-1d6fcea9dbc3a103f4e7",
+    "name": "Montées sur banc chronométrées",
+    "kind": "reps_duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Matériel varié",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-f6c0f59bb7b5eecaf0a6",
+    "name": "Corde à sauter chronométrée",
+    "kind": "reps_duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Matériel varié",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-e156023feeb1929fd8e0",
+    "name": "Doubles sauts chronométrés",
+    "kind": "reps_duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Matériel varié",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-b73afb2bd0ea974f228b",
+    "name": "Mountain climbers chronométrés",
+    "kind": "reps_duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Matériel varié",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-9c1b6fb0e14a95fb101a",
+    "name": "Coups de poing au sac",
+    "kind": "reps_duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Matériel varié",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-ecc1fd984d758d904441",
+    "name": "Coups de pied au sac",
+    "kind": "reps_duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Matériel varié",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-20b3396f4ccd9dfb70f4",
+    "name": "Vagues de cordes ondulatoires",
+    "kind": "reps_duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Matériel varié",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-a53708aebfc869b9022f",
+    "name": "Lancers de ballon chronométrés",
+    "kind": "reps_duration",
+    "muscle_group": "Corps entier",
+    "equipment": "Matériel varié",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-ae95fc82032ddea6a446",
+    "name": "Boxe au sac — durée",
+    "kind": "duration",
+    "muscle_group": "Cardio",
+    "equipment": "Matériel varié",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-a69c1431878d2120b1c0",
+    "name": "Shadow-boxing",
+    "kind": "duration",
+    "muscle_group": "Cardio",
+    "equipment": "Matériel varié",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-bda135d3ea852357fb06",
+    "name": "Corde à sauter — durée",
+    "kind": "duration",
+    "muscle_group": "Cardio",
+    "equipment": "Matériel varié",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-c64a6f86c897e623f95e",
+    "name": "Cordes ondulatoires — durée",
+    "kind": "duration",
+    "muscle_group": "Cardio",
+    "equipment": "Matériel varié",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-8aee58387789100b0e8b",
+    "name": "Danse",
+    "kind": "duration",
+    "muscle_group": "Cardio",
+    "equipment": "Matériel varié",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-c6a27f6469903d0c2025",
+    "name": "Aquagym",
+    "kind": "duration",
+    "muscle_group": "Cardio",
+    "equipment": "Matériel varié",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-b49d7e8de3c7f289515c",
+    "name": "Yoga",
+    "kind": "duration",
+    "muscle_group": "Cardio",
+    "equipment": "Matériel varié",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-23941c7be811ac64b687",
+    "name": "Pilates",
+    "kind": "duration",
+    "muscle_group": "Cardio",
+    "equipment": "Matériel varié",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-00524749fd1e2d7d8d4b",
+    "name": "Mobilité générale",
+    "kind": "duration",
+    "muscle_group": "Cardio",
+    "equipment": "Matériel varié",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-3af4740f9221b63fa4a0",
+    "name": "Échauffement articulaire",
+    "kind": "duration",
+    "muscle_group": "Cardio",
+    "equipment": "Matériel varié",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-1674b54fc697d1c5da5b",
+    "name": "Retour au calme",
+    "kind": "duration",
+    "muscle_group": "Cardio",
+    "equipment": "Matériel varié",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-abaf723c635bebfdae58",
+    "name": "Escalade — durée",
+    "kind": "duration",
+    "muscle_group": "Cardio",
+    "equipment": "Matériel varié",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-472310bc6649c5dd0d69",
+    "name": "Saut en longueur sans élan",
+    "kind": "distance",
+    "muscle_group": "Corps entier",
+    "equipment": "Extérieur / salle",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-84f9ec91c802e228e304",
+    "name": "Triple saut sans élan",
+    "kind": "distance",
+    "muscle_group": "Corps entier",
+    "equipment": "Extérieur / salle",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-7091fe87f028502e7d6b",
+    "name": "Lancer de médecine-ball — distance",
+    "kind": "distance",
+    "muscle_group": "Corps entier",
+    "equipment": "Extérieur / salle",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-8724bca29d0f57fcf57b",
+    "name": "Marche sur les mains",
+    "kind": "distance",
+    "muscle_group": "Corps entier",
+    "equipment": "Extérieur / salle",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-226cd35e6141a3bb93c2",
+    "name": "Marche de l’ours — distance",
+    "kind": "distance",
+    "muscle_group": "Corps entier",
+    "equipment": "Extérieur / salle",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-63df7bf7ba4eaec00226",
+    "name": "Marche du crabe — distance",
+    "kind": "distance",
+    "muscle_group": "Corps entier",
+    "equipment": "Extérieur / salle",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-9b336d726ade6f095d8e",
+    "name": "Fentes marchées — distance",
+    "kind": "distance",
+    "muscle_group": "Corps entier",
+    "equipment": "Extérieur / salle",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-dab93a22b1073b9ac17a",
+    "name": "Montée de corde — distance",
+    "kind": "distance",
+    "muscle_group": "Corps entier",
+    "equipment": "Extérieur / salle",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-9401020f1125e009ed23",
+    "name": "Escalade — distance",
+    "kind": "distance",
+    "muscle_group": "Corps entier",
+    "equipment": "Extérieur / salle",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-c49bea0e1f510c95bf3c",
+    "name": "Air bike — calories",
+    "kind": "calories_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-98c7be457148881a086b",
+    "name": "Rameur — calories",
+    "kind": "calories_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-dacec809968796c81305",
+    "name": "SkiErg — calories",
+    "kind": "calories_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-e1643352dbc546ce746e",
+    "name": "Vélo elliptique — calories",
+    "kind": "calories_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-18bd7e746d7ea27c5526",
+    "name": "Escalier mécanique — calories",
+    "kind": "calories_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-691e3fa9fa7c15d9dfa6",
+    "name": "Vélo d’appartement — calories",
+    "kind": "calories_duration",
+    "muscle_group": "Cardio",
+    "equipment": "Machine",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-49da5fc8f30d786c79f0",
+    "name": "Curl avec bande élastique",
+    "kind": "reps",
+    "muscle_group": "Biceps",
+    "equipment": "Élastique",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-b3c11472c4375cfb05da",
+    "name": "Curl unilatéral avec bande élastique",
+    "kind": "reps",
+    "muscle_group": "Biceps",
+    "equipment": "Élastique",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-05a7cdf9648d845c6836",
+    "name": "Rowing avec bande élastique",
+    "kind": "reps",
+    "muscle_group": "Dos",
+    "equipment": "Élastique",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-be9e9bbe84db3d18b411",
+    "name": "Rowing unilatéral avec bande élastique",
+    "kind": "reps",
+    "muscle_group": "Dos",
+    "equipment": "Élastique",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-3a72280bd56b4609ae05",
+    "name": "Extension triceps avec bande élastique",
+    "kind": "reps",
+    "muscle_group": "Triceps",
+    "equipment": "Élastique",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-33890e8a0e965c1af509",
+    "name": "Extension triceps unilatéral avec bande élastique",
+    "kind": "reps",
+    "muscle_group": "Triceps",
+    "equipment": "Élastique",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-c932c9364cc07c4d722f",
+    "name": "Squat avec bande élastique",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Élastique",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-89546417e285dfc09c75",
+    "name": "Squat unilatéral avec bande élastique",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Élastique",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-34fea90baa4220679db6",
+    "name": "Soulevé de terre avec bande élastique",
+    "kind": "reps",
+    "muscle_group": "Dos",
+    "equipment": "Élastique",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-031b33198b53dfaf59ae",
+    "name": "Soulevé de terre unilatéral avec bande élastique",
+    "kind": "reps",
+    "muscle_group": "Dos",
+    "equipment": "Élastique",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-83321e34eb8a256a0f0e",
+    "name": "Pont fessier avec bande élastique",
+    "kind": "reps",
+    "muscle_group": "Fessiers",
+    "equipment": "Élastique",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-da393751cc621d266653",
+    "name": "Pont fessier unilatéral avec bande élastique",
+    "kind": "reps",
+    "muscle_group": "Fessiers",
+    "equipment": "Élastique",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-e9bd84f847b6e4b04576",
+    "name": "Abduction de hanche avec bande élastique",
+    "kind": "reps",
+    "muscle_group": "Fessiers",
+    "equipment": "Élastique",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-2c2a6f2581dfc4b50a3c",
+    "name": "Abduction de hanche unilatéral avec bande élastique",
+    "kind": "reps",
+    "muscle_group": "Fessiers",
+    "equipment": "Élastique",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-9687ce997d5ac5431b19",
+    "name": "Adduction de hanche avec bande élastique",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Élastique",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  },
+  {
+    "id": "builtin-4549bd8f52035a8816be",
+    "name": "Adduction de hanche unilatéral avec bande élastique",
+    "kind": "reps",
+    "muscle_group": "Jambes",
+    "equipment": "Élastique",
+    "notes": "",
+    "builtin": true,
+    "aliases": []
+  }
+]
