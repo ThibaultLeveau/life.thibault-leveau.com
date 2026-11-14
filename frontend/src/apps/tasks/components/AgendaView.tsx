@@ -60,7 +60,6 @@ export function AgendaView({
     const controller = new AbortController();
     const signal = controller.signal;
     setLoading(true);
-    setPage(null);
     setError("");
     async function load() {
       await writes.current;
@@ -312,14 +311,16 @@ export function AgendaView({
           )}
         </p>
       )}
-      {loading ? (
+      {loading && !page ? (
         <p role="status">Chargement des échéances…</p>
       ) : (
         page && (
           <>
             <div className="task-summary" role="status">
               <span>
-                {page.items.length} tâche{page.items.length !== 1 ? "s" : ""}
+                {loading
+                  ? "Actualisation des échéances…"
+                  : `${page.items.length} tâche${page.items.length !== 1 ? "s" : ""}`}
               </span>
               <span>
                 {new Date(`${page.start_date}T12:00:00`).toLocaleDateString(
@@ -349,7 +350,7 @@ export function AgendaView({
               tasks={page.items}
               workspaces={workspaces}
               today={today}
-              busy={busy}
+              busy={busy || loading}
               onEdit={setEditor}
               onRefresh={(message) => {
                 if (message) {
@@ -399,7 +400,7 @@ export function AgendaView({
                           task={task}
                           today={today}
                           labels={data?.labels ?? []}
-                          busy={busy}
+                          busy={busy || loading}
                           onOpen={() => setEditor(task)}
                           onComplete={() => complete(task)}
                           context={

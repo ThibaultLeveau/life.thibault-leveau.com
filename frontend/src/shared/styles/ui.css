@@ -92,6 +92,12 @@
 .app-dialog textarea {
   font: inherit;
 }
+.ui-scope :is(input, select, textarea),
+.auth-page :is(input, select, textarea),
+.app-dialog :is(input, select, textarea) {
+  font-size: var(--ui-input-size, inherit);
+  scroll-margin-block: 16px;
+}
 .ui-scope button,
 .auth-page button,
 .app-dialog button {
@@ -265,7 +271,7 @@
   background: transparent;
   color: var(--ui-muted);
   padding: 6px 0;
-  font-size: 11px;
+  font-size: var(--ui-input-size, 11px);
   cursor: pointer;
 }
 .theme-select option {
@@ -317,6 +323,7 @@
   border-radius: 12px;
   box-shadow: 0 20px 90px #0004;
   overflow-y: auto;
+  scroll-padding-block: 76px 24px;
 }
 .app-dialog::backdrop {
   background: #11191477;
@@ -379,7 +386,7 @@
   border-radius: 6px;
   background: var(--ui-paper);
   color: var(--ui-text);
-  font-size: 13px;
+  font-size: var(--ui-input-size, 13px);
   font-weight: 400;
 }
 .stack-form textarea {
@@ -479,5 +486,25 @@
   .auth-page { padding: 32px 20px; }
   .login-card { width: min(100%, 380px); padding: 24px; }
   .app-dialog { max-width: calc(100vw - 24px); padding: 0; }
-  .app-dialog input, .app-dialog select, .auth-page input { font-size: 16px; }
+}
+
+/* A single field-size token also wins in the more specific form rules. */
+@media (max-width: 800px), (pointer: coarse) {
+  .ui-scope, .auth-page, .app-dialog { --ui-input-size: 16px; }
+}
+
+@media (pointer: coarse) {
+  .auth-page {
+    height: var(--ui-viewport-height, 100dvh);
+    min-height: 0;
+    overflow-y: auto;
+    scroll-padding-block: 16px;
+  }
+  .app-dialog {
+    position: fixed;
+    top: var(--ui-viewport-top, 0px);
+    bottom: auto;
+    margin-block: 12px;
+    max-height: calc(var(--ui-viewport-height, 100svh) - 24px);
+  }
 }

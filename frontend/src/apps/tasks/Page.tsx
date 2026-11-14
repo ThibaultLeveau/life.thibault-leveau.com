@@ -216,10 +216,11 @@ export function Page() {
     const controller = new AbortController();
     setTaskLoading(true);
     allTasks(workspaceId, view, false, controller.signal, today)
-      .then((page) => setTasks(page.items))
+      .then((page) => {
+        if (!controller.signal.aborted) setTasks(page.items);
+      })
       .catch((error) => {
         if (!controller.signal.aborted) {
-          setTasks([]);
           setError(error.message);
         }
       })
@@ -595,6 +596,18 @@ export function Page() {
         </header>
         <div className="task-page-content">
           <ErrorMessage message={error} />
+          {error && !agenda && statuses.length > 0 && (
+            <button
+              className="text-button"
+              disabled={busy || loading || taskLoading}
+              onClick={() => {
+                setError("");
+                setReloadTasks((value) => value + 1);
+              }}
+            >
+              Réessayer
+            </button>
+          )}
           {notice && (
             <p className="notice" role="status">
               <Icon name="check" size={14} />

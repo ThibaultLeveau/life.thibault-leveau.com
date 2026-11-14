@@ -29,6 +29,8 @@ La détection affiche le libellé et les trois premières dates retournées par 
 
 Le client recharge les données après mutation. Les préférences de vue sont écrites dans l'ordre et la recherche attend 300 ms après la saisie. Les requêtes de lecture obsolètes sont annulées lors d'un changement d'espace. Les contrôles de disposition attendent le chargement de la configuration pour éviter qu'une réponse tardive écrase le choix de l'utilisateur.
 
+L’actualisation conserve les lignes et groupes déjà affichés, notamment dans l’agenda : le chargement ne démonte plus la liste et ne ramène plus son défilement en haut. Les commandes de tâche attendent la fin de la lecture pour utiliser les versions actualisées. Une erreur conserve les derniers résultats et propose **Réessayer**. Les filtres et récurrences peuvent toujours retirer ou déplacer une tâche après la réponse serveur ; aucune résolution optimiste ni nouvelle persistance locale n’est introduite.
+
 ## Thèmes et accessibilité
 
 Les tokens globaux de l'accueil restent dans `styles/tokens.css`. Les tokens communs `--ui-*` sont définis dans `shared/styles/ui.css` au niveau racine, avec variantes explicites `data-theme=light/dark` et média système ; ce choix évite une transformation partielle de `light-dark()` dans le CSS compilé. Le thème du compte est chargé depuis l'API, sans secret ni donnée métier dans localStorage.
@@ -36,6 +38,10 @@ Les tokens globaux de l'accueil restent dans `styles/tokens.css`. Les tokens com
 Inter est servi localement. Les icônes sont des SVG décoratifs avec des noms accessibles sur leurs boutons. Les dialogues natifs retiennent le focus, se ferment avec Échap, donnent le focus au premier champ et le rendent au déclencheur. Les onglets acceptent flèches, Début et Fin. Chaque tâche dispose d'une commande de déplacement utilisable sans geste de glisser-déposer.
 
 Le menu se replie sous 800 px. Le kanban défile horizontalement à l'intérieur de sa zone ; la page et les dialogues restent utilisables à 320 px. Les erreurs d'enregistrement et les succès utilisent des annonces accessibles. Une interface vide ne contient pas de fausses tâches de démonstration.
+
+Les tailles des champs utilisent le token `--ui-input-size` : 16 px sous 800 px ou avec un pointeur tactile, y compris les sélecteurs plus spécifiques des réglages. Chaque règle conserve sa taille habituelle sur ordinateur. Le viewport HTML permet toujours le zoom volontaire.
+
+`shared/ui/useMobileFormViewport`, monté une fois par le shell, adapte la hauteur disponible sur écran tactile via `visualViewport.height` et `offsetTop`. Tâches et les dialogues consomment ces mesures CSS ; sans cette API, la hauteur de fenêtre sert de repli. Au focus ou au redimensionnement, un champ masqué défile dans la zone visible, avec des marges pour les en-têtes et commandes. Le défilement ordinaire ne replace pas le champ ; le zoom manuel suspend l’adaptation. Les écouteurs et propriétés CSS sont retirés au démontage. Il ne s’agit pas d’une détection universelle du clavier : un navigateur ou clavier flottant qui n’expose aucun changement de zone visible conserve son comportement natif. Voir [VisualViewport](https://developer.mozilla.org/en-US/docs/Web/API/VisualViewport).
 
 ## Contrats et limites
 
