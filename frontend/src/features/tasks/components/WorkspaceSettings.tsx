@@ -9,6 +9,7 @@ import {
   type Workspace,
 } from "../types";
 import { Dialog, ErrorMessage } from "./Dialog";
+import { WorkspaceParentSelect } from "./WorkspaceParentSelect";
 import { Icon } from "./Icon";
 
 export type SettingsTab =
@@ -127,6 +128,7 @@ function EntityForm({
 
 export function WorkspaceSettings({
   workspace,
+  workspaces,
   sections,
   statuses,
   labels,
@@ -136,6 +138,7 @@ export function WorkspaceSettings({
   onArchived,
 }: {
   workspace: Workspace;
+  workspaces: Workspace[];
   sections: Section[];
   statuses: Status[];
   labels: Label[];
@@ -198,11 +201,11 @@ export function WorkspaceSettings({
   }
   async function saveSpace(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    await run(
-      base,
-      "PATCH",
-      Object.fromEntries(new FormData(event.currentTarget)),
-    );
+    const values = new FormData(event.currentTarget);
+    await run(base, "PATCH", {
+      ...Object.fromEntries(values),
+      parent_id: values.get("parent_id") || null,
+    });
   }
   async function archiveSpace() {
     setBusy(true);
@@ -291,6 +294,10 @@ export function WorkspaceSettings({
                   defaultValue={workspace.name}
                 />
               </label>
+              <WorkspaceParentSelect
+                workspaces={workspaces}
+                workspace={workspace}
+              />
               <label>
                 Description
                 <textarea
@@ -319,7 +326,8 @@ export function WorkspaceSettings({
                 <strong>Archiver cet espace</strong>
                 <p className="muted small-text">
                   Vous pourrez le restaurer depuis les archives. Les tâches et
-                  leur historique sont conservés.
+                  leur historique sont conservés. Archivez ou déplacez d’abord
+                  les sous-espaces actifs.
                 </p>
               </div>
               <button

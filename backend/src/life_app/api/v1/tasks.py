@@ -41,7 +41,11 @@ def workspaces(user: CurrentUser, db: Database, archived: bool = False):
 
 @router.post("/workspaces", response_model=s.WorkspaceOutput, status_code=201)
 def create_workspace(payload: s.WorkspaceCreate, user: CurrentUser, db: Database):
-    """Créer un espace avec trois statuts initiaux et des préférences de vue."""
+    """Créer un espace racine ou enfant d'un parent actif du même propriétaire.
+
+    Parent absent/étranger : 404 ; parent archivé : 409.
+    Trois statuts initiaux et des préférences propres sont créés.
+    """
     return committed(db, svc.create_workspace(db, user, payload), s.WorkspaceOutput)
 
 
@@ -60,8 +64,13 @@ def get_workspace(workspace_id: UUID, user: CurrentUser, db: Database):
 
 @router.patch("/workspaces/{workspace_id}", response_model=s.WorkspaceOutput)
 def patch_workspace(workspace_id: UUID, payload: s.WorkspacePatch, user: CurrentUser, db: Database):
+    """Modifier un espace, le rattacher ou le remettre à la racine avec parent_id=null.
+
+    Parent absent/étranger : 404. Cycle, parent archivé lors d'un rattachement ou
+    d'une restauration, archivage avec enfants actifs : 409. Les tâches restent inchangées.
+    """
     item = svc.workspace(db, user, workspace_id)
-    svc.patch_entity(item, payload)
+    svc.patch_workspace(db, user, item, payload)
     return committed(db, item, s.WorkspaceOutput)
 
 

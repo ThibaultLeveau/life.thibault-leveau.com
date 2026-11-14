@@ -545,3 +545,185 @@ def test_reset_password_revokes_existing_sessions(client, engine, monkeypatch):
         ).status_code
         == 200
     )
+
+
+def child_space(client, parent, name="Sous-espace"):
+    response = client.post("/api/v1/workspaces", json={"name": name, "parent_id": parent["id"]})
+    assert response.status_code == 201, response.text
+    return response.json()
+
+
+def test_workspace_tree_reparenting_preserves_tasks_and_history(client):
+    root, _ = create_space(client)
+    child = child_space(client, root)
+    leaf = child_space(client, child, "Troisième niveau")
+    destination, _ = create_space(client, "Autre racine")
+    item = mutate(client, create_task(client, leaf), "complete")
+    events = history(client, item)
+    assert root["parent_id"] is None
+    assert leaf["parent_id"] == child["id"]
+    path = f"/api/v1/workspaces/{child['id']}"
+    assert client.patch(path, json={"parent_id": destination["id"]}).status_code == 200
+    assert client.get(path).json()["parent_id"] == destination["id"]
+    assert client.get(f"/api/v1/workspaces/{leaf['id']}").json()["parent_id"] == child["id"]
+    assert client.get(f"/api/v1/tasks/{item['id']}").json() == item
+    assert history(client, item) == events
+    assert client.get("/api/v1/tasks", params={"workspace_id": child["id"]}).json()["total"] == 0
+    assert client.patch(path, json={"parent_id": None}).json()["parent_id"] is None
+    assert client.patch(path, json={"name": "Renommé"}).json()["parent_id"] is None
+    ids = [leaf["id"], child["id"], root["id"], destination["id"]]
+    assert client.put("/api/v1/workspaces/order", json={"ids": ids}).status_code == 204
+    assert [space["id"] for space in client.get("/api/v1/workspaces").json()] == ids
+    assert client.get(f"/api/v1/workspaces/{leaf['id']}").json()["parent_id"] == child["id"]
+
+
+def test_workspace_parent_validation_and_owner_isolation(client, app):
+    root, _ = create_space(client)
+    child = child_space(client, root)
+    leaf = child_space(client, child)
+    path = f"/api/v1/workspaces/{root['id']}"
+    for parent_id in [root["id"], child["id"], leaf["id"]]:
+        assert (
+            client.patch(path, json={"parent_id": parent_id, "name": "Invalid"}).status_code == 409
+        )
+        assert client.get(path).json() == root
+    bob = TestClient(app)
+    login = bob.post("/api/v1/auth/session", json={"username": "bob", "password": PASSWORD})
+    bob.headers["X-CSRF-Token"] = login.json()["csrf_token"]
+    foreign, _ = create_space(bob)
+    for parent_id in [str(uuid4()), foreign["id"]]:
+        assert client.patch(path, json={"parent_id": parent_id}).status_code == 404
+        assert (
+            client.post(
+                "/api/v1/workspaces", json={"name": "X", "parent_id": parent_id}
+            ).status_code
+            == 404
+        )
+    for value in ["invalid", "", 12]:
+        assert client.patch(path, json={"parent_id": value}).status_code == 422
+    assert len(client.get("/api/v1/workspaces").json()) == 3
+    section = create_section(client, root)
+    assert (
+        client.patch(f"{path}/sections/{section['id']}", json={"parent_id": root["id"]}).status_code
+        == 422
+    )
+    schemas = client.get("/api/openapi.json").json()["components"]["schemas"]
+    assert "parent_id" in schemas["WorkspaceOutput"]["properties"]
+    assert "parent_id" not in schemas["SectionPatch"]["properties"]
+
+
+def test_workspace_tree_archive_restore_and_atomic_reparent(client):
+    root, _ = create_space(client)
+    child = child_space(client, root)
+    leaf = child_space(client, child)
+    item = mutate(client, create_task(client, leaf), "complete")
+    events = history(client, item)
+    paths = [f"/api/v1/workspaces/{space['id']}" for space in [root, child, leaf]]
+    for path in paths[:2]:
+        assert client.patch(path, json={"archived": True}).status_code == 409
+    for path in reversed(paths):
+        assert client.patch(path, json={"archived": True}).status_code == 200
+    assert client.get("/api/v1/workspaces").json() == []
+    assert len(client.get("/api/v1/workspaces?archived=true").json()) == 3
+    assert client.get("/api/v1/tasks").json()["total"] == 0
+    for path in paths[1:]:
+        assert client.patch(path, json={"archived": False}).status_code == 409
+    assert (
+        client.post("/api/v1/workspaces", json={"name": "X", "parent_id": root["id"]}).status_code
+        == 409
+    )
+    other, _ = create_space(client, "Racine active")
+    assert (
+        client.patch(
+            f"/api/v1/workspaces/{other['id']}", json={"parent_id": root["id"]}
+        ).status_code
+        == 409
+    )
+    for path in paths:
+        assert client.patch(path, json={"archived": False}).status_code == 200
+    assert client.get(f"/api/v1/tasks/{item['id']}").json() == item
+    assert history(client, item) == events
+    for path in reversed(paths):
+        assert client.patch(path, json={"archived": True}).status_code == 200
+    # Restore and detach in one request, without first restoring the old parent.
+    restored = client.patch(paths[1], json={"archived": False, "parent_id": None})
+    assert restored.status_code == 200 and restored.json()["parent_id"] is None
+    assert client.patch(paths[2], json={"archived": False}).status_code == 200
+
+
+def test_concurrent_workspace_parent_changes_cannot_create_cycle(client, app):
+    a, _ = create_space(client)
+    b, _ = create_space(client)
+
+    def reparent(pair):
+        item, parent = pair
+        with TestClient(app, cookies=client.cookies, headers=dict(client.headers)) as request:
+            return request.patch(
+                f"/api/v1/workspaces/{item['id']}", json={"parent_id": parent["id"]}
+            ).status_code
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        assert sorted(pool.map(reparent, [(a, b), (b, a)])) == [200, 409]
+
+
+def test_concurrent_archive_and_child_creation_preserve_tree(client, app):
+    root, _ = create_space(client)
+
+    def change(archive):
+        with TestClient(app, cookies=client.cookies, headers=dict(client.headers)) as request:
+            if archive:
+                return request.patch(
+                    f"/api/v1/workspaces/{root['id']}", json={"archived": True}
+                ).status_code
+            return request.post(
+                "/api/v1/workspaces", json={"name": "Child", "parent_id": root["id"]}
+            ).status_code
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        results = list(pool.map(change, [True, False]))
+    assert results in ([200, 409], [409, 201])
+
+
+def test_workspace_parent_database_constraints(client, app, engine):
+    root, _ = create_space(client)
+    with Session(engine) as db:
+        bob_id = db.scalar(select(User.id).where(User.username == "bob"))
+    for assignment, params in [
+        ("parent_id = id", {}),
+        ("parent_id = :missing", {"missing": uuid4()}),
+    ]:
+        with engine.begin() as conn, pytest.raises(IntegrityError):
+            conn.execute(
+                text(f"UPDATE workspaces SET {assignment} WHERE id = :id"),
+                {"id": UUID(root["id"]), **params},
+            )
+    child = child_space(client, root)
+    with engine.begin() as conn, pytest.raises(IntegrityError):
+        conn.execute(
+            text("UPDATE workspaces SET owner_id = :owner WHERE id = :id"),
+            {"owner": bob_id, "id": UUID(child["id"])},
+        )
+
+
+def test_workspace_parent_migration_preserves_existing_data(client, engine):
+    root, _ = create_space(client)
+    child = child_space(client, root)
+    item = mutate(client, create_task(client, child), "complete")
+    events = history(client, item)
+    with engine.begin() as conn:
+        config = migration_config()
+        config.attributes["connection"] = conn
+        command.downgrade(config, "0001")
+        assert conn.scalar(text("SELECT count(*) FROM workspaces")) == 2
+        assert conn.scalar(text("SELECT count(*) FROM task_events")) == len(events)
+        command.upgrade(config, "head")
+        assert compare_metadata(MigrationContext.configure(conn), Base.metadata) == []
+    assert all(space["parent_id"] is None for space in client.get("/api/v1/workspaces").json())
+    assert client.get(f"/api/v1/tasks/{item['id']}").json() == item
+    assert history(client, item) == events
+    assert (
+        client.patch(
+            f"/api/v1/workspaces/{child['id']}", json={"parent_id": root["id"]}
+        ).status_code
+        == 200
+    )

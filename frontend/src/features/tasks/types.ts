@@ -8,6 +8,7 @@ export interface Session {
 }
 export interface Workspace {
   id: string;
+  parent_id: string | null;
   name: string;
   description: string;
   color: string;

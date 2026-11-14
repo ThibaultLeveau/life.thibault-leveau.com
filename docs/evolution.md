@@ -2,7 +2,7 @@
 
 ## État actuel
 
-Le socle comprend la gestion privée des tâches, PostgreSQL, les sessions personnelles et une API complète. L'[issue #3](https://github.com/ThibaultLeveau/life.thibault-leveau.com/issues/3), la [spécification](taches-specification.md) et l'[ADR 002](decisions/002-gestion-taches.md) définissent cette première fonctionnalité persistante. Les domaines sport et objectifs restent futurs.
+Le socle comprend la gestion privée des tâches, PostgreSQL, les sessions personnelles et une API complète. L'[issue #3](https://github.com/ThibaultLeveau/life.thibault-leveau.com/issues/3), la [spécification](taches-specification.md) et l'[ADR 002](decisions/002-gestion-taches.md) définissent cette première fonctionnalité persistante. La hiérarchie parent-enfant des espaces est disponible via `parent_id` et la migration `0002` ; elle reste dans les modules existants. Les domaines sport et objectifs restent futurs.
 
 ## Organisation par fonctionnalité
 

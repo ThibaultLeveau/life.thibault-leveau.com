@@ -67,6 +67,10 @@ docker exec -i "$db" psql -U life -d life_restored --single-transaction --set ON
 source_count=$(docker exec "$db" psql -U life -d life -Atc 'SELECT count(*) FROM task_events')
 restored_count=$(docker exec "$db" psql -U life -d life_restored -Atc 'SELECT count(*) FROM task_events')
 [[ "$source_count" -gt 0 && "$source_count" == "$restored_count" ]]
+source_parents=$(docker exec "$db" psql -U life -d life -Atc 'SELECT id, parent_id FROM workspaces WHERE parent_id IS NOT NULL ORDER BY id')
+restored_parents=$(docker exec "$db" psql -U life -d life_restored -Atc 'SELECT id, parent_id FROM workspaces WHERE parent_id IS NOT NULL ORDER BY id')
+[[ -n "$source_parents" && "$source_parents" == "$restored_parents" ]]
+
 [[ $(docker exec "$db" psql -U life -d life_restored -Atc 'SELECT count(*) FROM login_sessions') == 0 ]]
 [[ -z $(docker exec "$db" psql -U life -d life_restored -Atc "SELECT to_regclass('public.obsolete_data')") ]]
 docker exec "$db" psql -U life -d life_restored -c 'CREATE TABLE rollback_marker (id integer)' >/dev/null

@@ -25,9 +25,9 @@ Dans les chemins ci-dessous, `{w}`, `{s}`, `{c}` et `{l}` sont des UUID d'espace
 | Méthode et chemin | Opération / réponse |
 | --- | --- |
 | `GET /workspaces?archived=false` | Liste ordonnée des espaces actifs ; `true` donne les archives |
-| `POST /workspaces` | `{name,description?,color?}` → espace, 201, trois statuts initiaux |
+| `POST /workspaces` | `{name,description?,color?,parent_id?}` → espace, 201, trois statuts initiaux |
 | `GET /workspaces/{w}` | Espace autorisé, même archivé |
-| `PATCH /workspaces/{w}` | Nom, description, couleur, `archived` → espace |
+| `PATCH /workspaces/{w}` | Nom, description, couleur, `parent_id`, `archived` → espace |
 | `PUT /workspaces/order` | `{ids:[...]}` ordre complet, archives incluses, 204 |
 | `GET /workspaces/{w}/sections?archived=false` | Sections ordonnées ; archives séparées via `true` |
 | `POST /workspaces/{w}/sections` | Nom, description, couleur, `visibility` → section, 201 |
@@ -50,6 +50,14 @@ Les noms d'espace et section ont 1 à 120 caractères, les statuts 1 à 80, les 
 Les espaces, sections et tâches s'archivent via PATCH `{archived:true}` et se restaurent via `{archived:false}`. Ils n'ont pas de DELETE définitif. Les tâches d'un parent archivé ne sont plus modifiables ; restaurer d'abord le parent. Renommer un parent ne modifie pas les événements historiques.
 
 Un espace conserve au moins un statut ouvert et un terminé. Changer `is_completed` sur un statut utilisé est refusé. Le retrait d'un statut utilisé exige `replacement_id` appartenant au même espace et du même type, archives comprises. Il conserve les dates de résolution.
+
+### Hiérarchie des espaces
+
+Chaque réponse espace inclut `parent_id` (UUID ou null). À la création, son omission ou null crée une racine. Dans PATCH, l'omission le conserve, null détache l'espace et un UUID le rattache à ce parent. Le parent doit être actif et appartenir au compte connecté : 404 s'il est absent ou étranger, 409 s'il est archivé. Un UUID mal formé renvoie 422. Un espace ne peut devenir son propre parent ni un descendant de lui-même (409), même avec des écritures simultanées.
+
+GET reste une liste plate triée par `position` puis UUID : reconstruire l'arbre avec `parent_id`. L'ordre global de `PUT /workspaces/order` reste inchangé et contient toutes les archives ; il définit l'ordre relatif dans chaque groupe de frères. Réordonner ne change jamais les parents. Un déplacement conserve la position de l'espace ; ses descendants le suivent, sans déplacer leurs tâches. Les requêtes de tâches filtrées par espace n'incluent pas celles de ses descendants.
+
+Archiver un espace ayant un enfant actif renvoie 409 : archiver ou déplacer les enfants d'abord. Restaurer un enfant sous un parent archivé renvoie 409. Une restauration peut être combinée avec `parent_id:null` ou un autre parent actif. Aucune cascade ne change les archives individuelles ou les événements des tâches. Les règles de session, propriétaire, origine et CSRF s'appliquent à toutes ces mutations.
 
 ### Préférences de vue
 
@@ -136,6 +144,16 @@ with httpx.Client(base_url="http://127.0.0.1:8100/api/v1", timeout=20) as client
     })
     client.headers["X-CSRF-Token"] = session["csrf_token"]
     space = call("POST", "/workspaces", json={"name": "Exemple API"})
+    child = call("POST", "/workspaces", json={
+        "name": "Sous-projet", "parent_id": space["id"],
+    })
+    call("PATCH", f"/workspaces/{child['id']}", json={"parent_id": None})
+    call("PATCH", f"/workspaces/{child['id']}", json={"parent_id": space["id"]})
+    # Archiver les enfants avant leur parent, puis restaurer dans l'ordre inverse.
+    call("PATCH", f"/workspaces/{child['id']}", json={"archived": True})
+    call("PATCH", f"/workspaces/{space['id']}", json={"archived": True})
+    call("PATCH", f"/workspaces/{space['id']}", json={"archived": False})
+    call("PATCH", f"/workspaces/{child['id']}", json={"archived": False})
     section = call("POST", f"/workspaces/{space['id']}/sections", json={
         "name": "À préparer", "visibility": "both",
     })

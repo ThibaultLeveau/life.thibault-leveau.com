@@ -7,6 +7,7 @@ import {
   type Task,
   type Workspace,
 } from "../types";
+import { workspaceTree } from "../workspaceTree";
 import { Dialog, ErrorMessage } from "./Dialog";
 
 export function MoveDialog({
@@ -103,9 +104,9 @@ export function MoveDialog({
             value={spaceId}
             onChange={(event) => setSpaceId(event.target.value)}
           >
-            {workspaces.map((space) => (
+            {workspaceTree(workspaces).map(({ space, path }) => (
               <option key={space.id} value={space.id}>
-                {space.name}
+                {path}
               </option>
             ))}
           </select>

@@ -60,3 +60,13 @@ Alembic applique les migrations jusqu'à `head`. Elles font partie de l'image, r
 La migration initiale possède un `downgrade` pour les tests, qui **supprime toutes les tables métier**. Ce n'est pas une procédure de récupération de production. Pour une future évolution, tester le changement sur une copie et documenter sa compatibilité. Privilégier la correction en avant ou la restauration d'un dump connu.
 
 Le retour à une image précédente ne restaure aucune donnée. `deploy.sh --rollback` vérifie que l'image reconnaît exactement la révision courante ; il s'arrête si elle ne la reconnaît pas. Un retour au socle antérieur à PostgreSQL nécessite une procédure spécifique à cette ancienne version ; les données doivent rester sauvegardées et le volume conservé.
+
+## Migration 0002 : parents des espaces
+
+`0002` ajoute seulement la relation nullable `parent_id`, son index et ses contraintes. Les données existantes deviennent des racines ; tâches, résolutions, événements et archives sont conservés. Sauvegarder avant migration comme le fait `deploy.sh`. Aucun nouveau secret, volume ou paramètre n'est requis.
+
+Les écritures de l'ancienne image restent compatibles pendant l'ajout (elles ne renseignent pas le parent). La DDL peut brièvement verrouiller la table. Sa sonde de disponibilité détectera toutefois la différence de révision jusqu'au démarrage de la nouvelle image : ne pas considérer cela comme une migration sans interruption garantie. Après création d'une hiérarchie, ne pas réutiliser une ancienne image qui ignore ses règles d'archive ; le rollback automatique refuse la révision inconnue.
+
+Le downgrade `0002 → 0001`, réservé aux tests ou à une intervention préparée hors service, conserve espaces et tâches mais **supprime tous les liens parent-enfant**. Le réupgrade les laisse à la racine. Préférer une correction en avant ; pour un retour complet, restaurer la sauvegarde avec l'image compatible selon la procédure ci-dessus.
+
+Les dumps comprennent `parent_id` et les contraintes. Le test de restauration isolée compare les couples espace/parent avant et après restauration, en plus des événements et des sessions révoquées. Sur une copie réelle, vérifier également l'arbre, les enfants archivés, la navigation et les refus de cycles/rattachements inter-comptes, sans exposer les données dans les journaux.

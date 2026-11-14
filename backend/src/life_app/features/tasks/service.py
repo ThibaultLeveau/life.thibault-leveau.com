@@ -61,6 +61,8 @@ def patch_entity(item, payload):
 
 
 def create_workspace(db, user, payload):
+    if payload.parent_id is not None:
+        workspace(db, user, payload.parent_id, active=True)
     item = m.Workspace(
         owner_id=user.id,
         **payload.model_dump(),
@@ -88,6 +90,27 @@ def create_workspace(db, user, payload):
         m.ViewPreference(workspace_id=item.id, settings=s.ViewSettings().model_dump(mode="json"))
     )
     return item
+
+
+def patch_workspace(db, user, item, payload):
+    """Validate the tree under the existing owner mutation lock, then apply atomically."""
+    fields = payload.model_fields_set
+    parent_id = payload.parent_id if "parent_id" in fields else item.parent_id
+    if parent_id is not None and ("parent_id" in fields or payload.archived is False):
+        parent = workspace(db, user, parent_id, active=True)
+        visited = {item.id}
+        while parent is not None:
+            if parent.id in visited:
+                raise HTTPException(409, "Un espace ne peut pas être son propre ancêtre.")
+            visited.add(parent.id)
+            parent = workspace(db, user, parent.parent_id) if parent.parent_id else None
+    if payload.archived is True and db.scalar(
+        select(m.Workspace.id)
+        .where(m.Workspace.parent_id == item.id, m.Workspace.archived_at.is_(None))
+        .limit(1)
+    ):
+        raise HTTPException(409, "Archivez ou déplacez d’abord les sous-espaces actifs.")
+    patch_entity(item, payload)
 
 
 def ensure_status_groups(db, workspace_id, excluded_id=None, changed=None):
