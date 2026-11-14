@@ -278,3 +278,48 @@ Les réponses privées portent `Cache-Control: no-store`, erreurs comprises. Une
 `GET /api/v1/health` retourne `{"status":"ok"}` si le processus répond. `GET /api/v1/health/ready` vérifie la connexion PostgreSQL et la révision Alembic attendue : 200 ou 503, sans détail de connexion. Docker utilise cette seconde sonde.
 
 `/`, `/tasks`, `/favicon.svg`, `/assets/...`, `/documentation/...`, `/api/docs` et `/api/openapi.json` sont publics. Le shell `/tasks` ne contient aucune donnée privée. Un chemin inconnu reste 404, sans fallback HTML. `/documentation` redirige vers `/documentation/`.
+
+## Dupliquer et agir sur un lot
+
+`POST /tasks/{id}/duplicate` reçoit `{expected_version: 3}` et retourne une nouvelle `TaskOutput` (201). La source doit être active dans un espace et une section actifs. La copie conserve titre, description, priorité, étiquettes, échéance et récurrence ; son UUID, ses dates de création/modification et son historique sont indépendants. Elle est ouverte, non archivée, de version 1 et de compteur récurrent nul. Elle garde le statut source s’il est ouvert, sinon le premier statut ouvert de l’espace, et se place en fin de liste. Aucun événement de résolution n’est copié.
+
+`POST /tasks/bulk` reçoit un objet discriminé par `action`, avec `tasks: [{id, expected_version}, …]` : 1 à 500 UUID distincts. La réponse 200 est un tableau de `TaskOutput` dans l’ordre de la requête. Tous les changements et événements sont enregistrés dans **une transaction** ; une erreur annule le lot complet, même si elle concerne sa dernière tâche.
+
+| `action` | Autres champs | Comportement |
+| --- | --- | --- |
+| `reschedule` | `due_date` obligatoire, `YYYY-MM-DD` ou null | Modifie la date courante, conserve récurrence, compteur et état. Null est refusé si une tâche est récurrente ; bornes et exceptions s’appliquent. |
+| `move` | `workspace_id`, `section_id` optionnel/null | Place en fin de section dans l’ordre fourni. Dans le même espace, conserve chaque statut ; entre espaces, choisit le premier statut du même type ouvert/terminé. Étiquettes reprises par nom, dates de résolution conservées. |
+| `archive` | Aucun | Suppression réversible de la vue active, avec conservation des dates/règles/compteurs/événements. Restauration individuelle via PATCH existant. |
+
+Les champs d’une autre action sont refusés. Chaque version est contrôlée avant le traitement ; les changements d’ordre internes au lot ne créent pas de faux conflits. Recharger les versions retournées avant une autre mutation. Les règles de session, propriétaire, origine et CSRF sont identiques aux mutations individuelles : 401 sans session, 403 sans CSRF ou origine autorisée, 404 pour tâche/destination inaccessible, 409 pour version périmée ou archive, 422 pour lot/calendrier invalide. Ces codes ne justifient aucun retry automatique avec une version remplacée silencieusement.
+
+Exemple avec le client authentifié décrit plus haut :
+
+```python
+source = client.get(f"/tasks/{task_id}").json()
+response = client.post(f"/tasks/{task_id}/duplicate", json={
+    "expected_version": source["version"],
+})
+response.raise_for_status()
+copy = response.json()
+response = client.post("/tasks/bulk", json={
+    "action": "reschedule",
+    "tasks": [{"id": t["id"], "expected_version": t["version"]}
+              for t in [source, copy]],
+    "due_date": "2026-12-15",
+})
+response.raise_for_status()
+planned = response.json()
+response = client.post("/tasks/bulk", json={
+    "action": "move", "workspace_id": destination_id, "section_id": None,
+    "tasks": [{"id": t["id"], "expected_version": t["version"]}
+              for t in planned],
+})
+response.raise_for_status()
+response = client.post("/tasks/bulk", json={
+    "action": "archive",
+    "tasks": [{"id": t["id"], "expected_version": t["version"]}
+              for t in response.json()],
+})
+response.raise_for_status()
+```

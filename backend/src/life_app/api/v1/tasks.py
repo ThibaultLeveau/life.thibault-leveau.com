@@ -366,6 +366,53 @@ def create_task(payload: s.TaskCreate, user: CurrentUser, db: Database):
     return committed_task(db, svc.create_task(db, user, payload))
 
 
+@router.post(
+    "/tasks/bulk",
+    response_model=list[s.TaskOutput],
+    responses={
+        401: {"description": "Session requise."},
+        403: {"description": "Origine ou jeton CSRF invalide."},
+        404: {"description": "Tâche ou destination inaccessible."},
+        409: {"description": "Version périmée ou élément archivé ; lot entièrement annulé."},
+        422: {"description": "Lot ou calendrier invalide ; lot entièrement annulé."},
+    },
+)
+def bulk_tasks(payload: s.BulkInput, user: CurrentUser, db: Database):
+    """Appliquer un lot atomique de 1 à 500 tâches distinctes, dans l’ordre fourni.
+
+    Chaque tâche exige sa version courante. 401 sans session, 403 sans CSRF/origine
+    valide, 404 hors propriétaire ou destination inconnue, 409 si version périmée
+    ou archive, 422 si lot/calendrier invalide. Toute erreur annule le lot entier.
+    reschedule conserve règles et compteurs ; move conserve ouvert/terminé et dates
+    de résolution, place en fin de section et reprend les étiquettes ; archive
+    est une suppression réversible, sans effacement de l’historique.
+    """
+    result = svc.bulk_tasks(db, user, payload)
+    db.commit()
+    return result
+
+
+@router.post(
+    "/tasks/{task_id}/duplicate",
+    response_model=s.TaskOutput,
+    status_code=201,
+    responses={
+        401: {"description": "Session requise."},
+        403: {"description": "Origine ou jeton CSRF invalide."},
+        404: {"description": "Tâche inaccessible."},
+        409: {"description": "Version périmée ou tâche/espace/section archivé."},
+    },
+)
+def duplicate_task(task_id: UUID, payload: s.VersionInput, user: CurrentUser, db: Database):
+    """Copier une tâche active dans son espace/section, en fin de liste.
+
+    Version exigée ; mêmes accès et erreurs que les mutations individuelles.
+    Copie du titre, description, priorité, étiquettes et calendrier. Nouveau cycle
+    ouvert, nouvel UUID et dates de création, compteur nul et historique indépendant.
+    """
+    return committed_task(db, svc.duplicate_task(db, user, svc.task(db, user, task_id), payload))
+
+
 @router.get("/tasks/{task_id}", response_model=s.TaskOutput)
 def get_task(task_id: UUID, user: CurrentUser, db: Database):
     return svc.output(db, svc.task(db, user, task_id))

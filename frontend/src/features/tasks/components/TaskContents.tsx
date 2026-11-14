@@ -3,6 +3,7 @@ import { relativeDate } from "../dates";
 import type { Label, Task } from "../types";
 import { Icon } from "./Icon";
 import { shortRecurrence } from "../scheduling";
+import { useTaskActions } from "./TaskActions";
 
 export function TaskContents({
   task,
@@ -21,22 +22,35 @@ export function TaskContents({
   onComplete: () => void;
   context?: ReactNode;
 }) {
+  const actions = useTaskActions();
+  const selecting = actions?.selecting ?? false;
+  const selected = actions?.selected.has(task.id) ?? false;
   const completed = !!task.completed_at;
   const date = task.due_date ? relativeDate(task.due_date, today) : null;
   return (
     <>
       <button
         role="checkbox"
-        aria-checked={completed}
-        className={`task-checkbox priority-${task.priority}`}
-        onClick={onComplete}
-        aria-label={`${completed ? "Rouvrir" : "Terminer"} : ${task.title}`}
-        disabled={busy}
+        aria-checked={selecting ? selected : completed}
+        className={
+          selecting
+            ? "task-checkbox task-select"
+            : `task-checkbox priority-${task.priority}`
+        }
+        onClick={() => (selecting ? actions?.toggle(task.id) : onComplete())}
+        aria-label={`${selecting ? (selected ? "Désélectionner" : "Sélectionner") : completed ? "Rouvrir" : "Terminer"} : ${task.title}`}
+        disabled={busy || actions?.busy}
       >
-        {completed && <Icon name="check" size={13} />}
+        {(selecting ? selected : completed) && (
+          <Icon name="check" size={13} />
+        )}
       </button>
       <div className="task-content">
-        <button className="task-title" onClick={onOpen} disabled={busy}>
+        <button
+          className="task-title"
+          onClick={onOpen}
+          disabled={busy || actions?.busy}
+        >
           {task.title}
         </button>
         {task.description && (
@@ -95,9 +109,11 @@ export function TaskContents({
       </div>
       <button
         className="task-more icon-button"
-        aria-label={`Détails : ${task.title}`}
-        disabled={busy}
-        onClick={onOpen}
+        aria-label={`Actions : ${task.title}`}
+        aria-haspopup="menu"
+        aria-expanded={actions?.menuId === task.id}
+        disabled={busy || actions?.busy}
+        onClick={(event) => actions?.openMenu(task, event)}
       >
         <Icon name="more" size={18} />
       </button>

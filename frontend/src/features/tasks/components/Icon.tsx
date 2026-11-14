@@ -1,4 +1,8 @@
 const paths = {
+  edit: "m16 3 5 5-12 12-6 1 1-6L16 3M13 6l5 5",
+  copy: "M8 8h13v13H8zM16 8V3H3v13h5",
+  trash: "M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7",
+  select: "M4 4h16v16H4zM8 12l3 3 5-6",
   plus: "M12 5v14M5 12h14",
   search: "m21 21-5-5M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0",
   list: "M9 6h12M9 12h12M9 18h12M3 6h.01M3 12h.01M3 18h.01",

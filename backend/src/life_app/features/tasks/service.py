@@ -297,7 +297,7 @@ def transition(db, item, target, previous):
                 event(db, item, "rescheduled", resolved, completion_event_id=str(completion.id))
 
 
-def apply_schedule(item, values):
+def apply_schedule(item, values, *, copying=False):
     """Validate the merged patch, keep the anchor on date-only rescheduling."""
     rule_data = values.pop("recurrence", item.recurrence)
     if rule_data is not None:
@@ -323,7 +323,11 @@ def apply_schedule(item, values):
         # when the first (future-dated) occurrence is finished early.
         lower_bound = (
             rule.start_date
-            if changed or rule.mode == "scheduled" or not item.recurrence_completed
+            if rule.mode == "scheduled"
+            or (
+                not copying
+                and (changed or (not item.recurrence_completed and due != item.due_date))
+            )
             else date.min
         )
         if due < lower_bound or (rule.end_date and due > rule.end_date):
@@ -341,7 +345,7 @@ def apply_schedule(item, values):
         item.due_date = values["due_date"]
 
 
-def create_task(db, user, payload):
+def create_task(db, user, payload, *, copying=False):
     workspace(db, user, payload.workspace_id, active=True)
     status_id = payload.status_id
     if status_id is None:
@@ -370,7 +374,7 @@ def create_task(db, user, payload):
     }
     if payload.due_date is not None:
         schedule["due_date"] = payload.due_date
-    apply_schedule(item, schedule)
+    apply_schedule(item, schedule, copying=copying)
     if "due_date" in schedule:
         item.due_date = schedule["due_date"]
     db.add(item)
@@ -532,6 +536,72 @@ def move_task(db, user, item, payload):
     transition(db, item, target, previous)
     event(db, item, "moved", previous)
     return item
+
+
+def duplicate_task(db, user, item, payload):
+    check_version(item, payload.expected_version)
+    check_active(db, user, item)
+    source = output(db, item)
+    # A copy starts a new lifecycle, with no resolutions inherited from its source.
+    values = source.model_dump(
+        include={
+            "workspace_id",
+            "section_id",
+            "title",
+            "description",
+            "priority",
+            "due_date",
+            "recurrence",
+            "label_ids",
+        }
+    )
+    if not item.completed_at:
+        values["status_id"] = item.status_id
+    return create_task(db, user, s.TaskCreate(**values), copying=True)
+
+
+def bulk_tasks(db, user, payload):
+    # Validate the entire snapshot before any ordering operation changes other versions.
+    items = [task(db, user, reference.id) for reference in payload.tasks]
+    for item, reference in zip(items, payload.tasks, strict=True):
+        check_version(item, reference.expected_version)
+        check_active(db, user, item)
+    for item in items:
+        if isinstance(payload, s.BulkMove):
+            status_id = item.status_id
+            if item.workspace_id != payload.workspace_id:
+                workspace(db, user, payload.workspace_id, active=True)
+                status_id = db.scalar(
+                    select(m.Status.id)
+                    .where(
+                        m.Status.workspace_id == payload.workspace_id,
+                        m.Status.is_completed == bool(item.completed_at),
+                    )
+                    .order_by(m.Status.position, m.Status.id)
+                    .limit(1)
+                )
+                if status_id is None:
+                    raise HTTPException(409, "Aucun statut compatible dans l’espace cible.")
+            move_task(
+                db,
+                user,
+                item,
+                s.MoveInput(
+                    expected_version=item.version,
+                    workspace_id=payload.workspace_id,
+                    section_id=payload.section_id,
+                    status_id=status_id,
+                ),
+            )
+        else:
+            changes = (
+                {"due_date": payload.due_date}
+                if isinstance(payload, s.BulkReschedule)
+                else {"archived": True}
+            )
+            patch_task(db, user, item, s.TaskPatch(expected_version=item.version, **changes))
+    db.flush()
+    return outputs(db, items)
 
 
 def list_tasks(

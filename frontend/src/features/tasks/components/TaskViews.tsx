@@ -25,6 +25,7 @@ import { Icon } from "./Icon";
 import { TaskContents } from "./TaskContents";
 import { useScheduleRecognition } from "../scheduling";
 import { ScheduleRecognition } from "./ScheduleRecognition";
+import { useTaskActions } from "./TaskActions";
 
 export interface Destination {
   section_id: string | null;
@@ -70,6 +71,8 @@ function TaskCard({
   onOpen: () => void;
   onComplete: () => void;
 }) {
+  const actions = useTaskActions();
+  disabled = disabled || !!actions?.selecting || !!actions?.busy;
   const drag = useDraggable({ id: task.id, data: { task }, disabled });
   const drop = useDroppable({
     id: `before:${task.id}`,
@@ -240,7 +243,8 @@ function Cell({
       <QuickAdd
         sectionId={sectionId}
         statusId={
-          statusId ?? props.statuses.find((status) => !status.is_completed)!.id
+          statusId ??
+          props.statuses.find((status) => !status.is_completed)!.id
         }
         onAdd={props.onAdd}
       />
@@ -263,7 +267,8 @@ export function TaskViews(props: Props) {
   const board = props.view.layout === "board";
   const sections = props.sections.filter(
     (section) =>
-      section.visibility === "both" || section.visibility === props.view.layout,
+      section.visibility === "both" ||
+      section.visibility === props.view.layout,
   );
   const groups: {
     id: string | null;
@@ -297,7 +302,7 @@ export function TaskViews(props: Props) {
       accessibility={{
         screenReaderInstructions: {
           draggable:
-            "Appuyez sur Espace pour saisir une tâche, utilisez les flèches puis Espace pour la déposer. Échap annule. Le bouton Détails propose aussi une commande Déplacer.",
+            "Appuyez sur Espace pour saisir une tâche, utilisez les flèches puis Espace pour la déposer. Échap annule. Le titre ouvre aussi les détails et la commande Déplacer.",
         },
       }}
     >
