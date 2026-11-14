@@ -33,7 +33,7 @@ def test_catalogue_defaults_and_idempotence(client, engine):
     response = client.get("/api/v1/applications")
     assert response.status_code == 200
     assert response.headers["cache-control"] == "no-store"
-    assert [(a["id"], a["enabled"]) for a in response.json()] == [("tasks", True)]
+    assert [(a["id"], a["enabled"]) for a in response.json()] == [("tasks", True), ("sport", False)]
     assert response.json()[0]["updated_at"] is None
     off = toggle(client, False)
     assert not off["enabled"] and off["updated_at"]

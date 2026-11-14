@@ -1,6 +1,6 @@
 # Documentation de Life
 
-LifeOS propose un [accueil personnel et une bibliothèque d’applications](applications.md). Activez ou désactivez vos applications sans perdre leurs données. Tâches est disponible ; sport, OKR, ménage et plantes restent futurs.
+LifeOS propose un [accueil personnel et une bibliothèque d’applications](applications.md). Activez ou désactivez vos applications sans perdre leurs données. Tâches et [Sport](sport.md) sont disponibles ; OKR, ménage et plantes restent futurs.
 
 Life organise vos tâches dans des espaces et des sections, en liste à cocher ou en tableau kanban. Une section devient une liste ou une ligne du tableau selon sa visibilité ; les colonnes représentent les statuts. Les données restent privées derrière une connexion personnelle.
 
@@ -15,7 +15,7 @@ Life organise vos tâches dans des espaces et des sections, en liste à cocher o
 - PostgreSQL 17, migrations explicites, sauvegardes et restauration documentées.
 - Tests HTTP et navigateur sur l'image livrée ; déploiement manuel derrière Caddy.
 
-Les statistiques visuelles, le sport, les objectifs, les récurrences et la collaboration ne font pas partie de cette livraison. La disponibilité sur le domaine dépend du déploiement du commit et de la création du compte.
+Sport propose entraînements, repos, mensurations et statistiques. Tâches propose les récurrences. Les objectifs, les statistiques de tâches et la collaboration restent futurs. La disponibilité sur le domaine dépend du déploiement du commit et de la création du compte.
 
 | Besoin | Guide |
 | --- | --- |

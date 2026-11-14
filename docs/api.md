@@ -360,3 +360,7 @@ response = client.post("/tasks/bulk", json={
 })
 response.raise_for_status()
 ```
+
+## Sport
+
+L’application Sport expose exercices, séances, entraînements/séries/repos, réglages, mensurations et statistiques sous `/api/v1/sport`. Voir les [routes, contrats et exemple client complet](sport-api.md). Le garde d’activation commun couvre tout le routeur, et les objets privés sont isolés par propriétaire.

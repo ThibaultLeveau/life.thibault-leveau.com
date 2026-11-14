@@ -15,6 +15,8 @@ def test_applications_have_matching_manifests_and_standard_structure():
     ids = {item.id for item in APPLICATIONS}
     assert len(ids) == len(APPLICATIONS)
     assert len({item.path for item in APPLICATIONS}) == len(ids)
+    # ADR 003: only the migrated Tasks application is enabled without user consent.
+    assert {item.id for item in APPLICATIONS if item.default_enabled} == {"tasks"}
     assert all(re.fullmatch(r"/[a-z][a-z0-9_-]*", item.path) for item in APPLICATIONS)
     assert not {item.path for item in APPLICATIONS} & {
         "/applications",

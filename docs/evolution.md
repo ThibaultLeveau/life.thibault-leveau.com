@@ -2,7 +2,7 @@
 
 ## État disponible
 
-LifeOS possède un socle commun, une bibliothèque avec activation par compte et une première application **Tâches**. Sport, objectifs OKR, ménage et plantes restent des pistes futures. L’[ADR 003](decisions/003-applications-lifeos.md) décrit l’organisation approuvée ; les ADR précédents conservent l’historique du socle et de la persistance.
+LifeOS possède un socle commun, une bibliothèque avec activation par compte et les applications **Tâches** et **Sport**. Objectifs OKR, ménage et plantes restent des pistes futures. L’[ADR 003](decisions/003-applications-lifeos.md) décrit l’organisation approuvée ; les ADR précédents conservent l’historique du socle et de la persistance.
 
 Toutes les applications suivent les mêmes conventions et isolent leur métier. Les dossiers ne sont pas des copies de Tâches : ils réutilisent connexion, transport API, activation, thème et composants accessibles du socle.
 

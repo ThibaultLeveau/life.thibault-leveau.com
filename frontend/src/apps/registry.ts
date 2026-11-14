@@ -1,3 +1,5 @@
 import { application as tasks } from "./tasks/manifest";
 
-export const applications = [tasks];
+import { application as sport } from "./sport/manifest";
+
+export const applications = [tasks, sport];
