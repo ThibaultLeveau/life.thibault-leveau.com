@@ -171,6 +171,9 @@ test("configuration mensuelle, dernier jour ouvré, exclusion et aperçu", async
   expect(task.recurrence?.rrule).toContain("BYSETPOS=-1");
   expect(task.recurrence?.excluded_dates).toEqual(["2027-01-29"]);
   expect(task.due_date).toBe("2027-02-26");
+  await expect(
+    page.getByLabel("Récurrence : Chaque mois · dernier jour ouvré"),
+  ).toBeVisible();
 });
 
 test("ajout rapide avec récurrence et dernière saisie prioritaire", async ({
@@ -257,6 +260,26 @@ test("intervalle annuel après résolution et navigation entre mois inégaux", a
   const task = await save(page);
   expect(task.recurrence?.mode).toBe("completion");
   expect(task.recurrence?.rrule).toBe("FREQ=YEARLY;INTERVAL=2");
+});
+
+test("le choix manuel conserve le titre nettoyé sans nouvelle interprétation", async ({
+  page,
+}) => {
+  await setup(page);
+  await page
+    .getByLabel("Titre", { exact: true })
+    .fill("Préparer demain pour lundi");
+  await expect(page.locator(".schedule-detected")).toContainText("demain");
+  await page.locator(".schedule-trigger").click();
+  await page
+    .getByRole("button", { name: "vendredi 29 janvier 2027", exact: true })
+    .click();
+  await expect(page.locator(".schedule-recognition")).toContainText(
+    "Ces mots resteront dans le titre",
+  );
+  const task = await save(page);
+  expect(task.title).toBe("Préparer pour lundi");
+  expect(task.due_date).toBe("2027-01-29");
 });
 
 for (const theme of ["light", "dark"])

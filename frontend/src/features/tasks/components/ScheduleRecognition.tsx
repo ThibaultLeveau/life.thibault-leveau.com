@@ -32,7 +32,7 @@ export function ScheduleRecognition({
             className="icon-button"
             aria-label="Garder ces mots dans le titre"
             title="Garder ces mots dans le titre"
-            onClick={dismiss}
+            onClick={() => dismiss()}
           >
             <Icon name="x" size={14} />
           </button>
@@ -51,7 +51,7 @@ export function ScheduleRecognition({
             <button
               type="button"
               className="text-button"
-              onClick={ignored ? restore : dismiss}
+              onClick={() => (ignored ? restore() : dismiss())}
             >
               {ignored ? "Reconnaître la date" : "Garder le texte"}
             </button>

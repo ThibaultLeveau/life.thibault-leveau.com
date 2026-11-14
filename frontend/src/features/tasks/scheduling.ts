@@ -70,7 +70,11 @@ export function shortRecurrence(rule: Recurrence) {
     interval === 1
       ? labels[parts.FREQ] || "Récurrence personnalisée"
       : `Tous les ${interval} ${units[parts.FREQ]}`;
-  if (parts.BYDAY)
+  const groupedPosition =
+    parts.BYSETPOS && ["MO,TU,WE,TH,FR", "SA,SU"].includes(parts.BYDAY);
+  if (groupedPosition)
+    label += ` · ${parts.BYSETPOS === "-1" ? "dernier" : parts.BYSETPOS === "-2" ? "avant-dernier" : `${parts.BYSETPOS}ᵉ`} ${parts.BYDAY === "SA,SU" ? "jour du week-end" : "jour ouvré"}`;
+  else if (parts.BYDAY)
     label += ` · ${parts.BYDAY.split(",")
       .map((day) => {
         const position = day.slice(0, -2);
@@ -130,7 +134,7 @@ export function useScheduleRecognition(text: string, enabled = true) {
     pending: active && !current && !error,
     error,
     ignored: ignored === key,
-    dismiss: () => setIgnored(key),
+    dismiss: (literal = text) => setIgnored(`${today}:${literal}`),
     restore: () => setIgnored(null),
     resolve: async () =>
       active ? (current ?? (await parseSchedule(text, today))) : null,

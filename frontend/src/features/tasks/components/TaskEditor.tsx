@@ -189,8 +189,9 @@ export function TaskEditor({
           completed={task?.recurrence_completed ?? 0}
           onEditingChange={setScheduleOpen}
           onChange={(value) => {
-            recognition.dismiss();
-            if (recognition.suggestion) setTitle(recognition.suggestion.title);
+            const literal = recognition.suggestion?.title ?? title;
+            recognition.dismiss(literal);
+            setTitle(literal);
             setSchedule(value);
           }}
         />
