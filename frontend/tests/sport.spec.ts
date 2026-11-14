@@ -75,6 +75,56 @@ async function createApiWorkout(page: Page, name: string) {
   return (await response.json()) as Workout;
 }
 
+test("Sport : ouvrir la navigation mobile sans activer le thème", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/sport");
+  await expect(
+    page.getByRole("heading", { name: "Programmes", exact: true }),
+  ).toBeVisible();
+  const opener = page.getByRole("button", {
+    name: "Ouvrir la navigation",
+    exact: true,
+  });
+  const dialog = page.getByRole("dialog", { name: "Navigation Sport" });
+  const close = dialog.getByRole("button", { name: "Fermer", exact: true });
+  const theme = dialog.getByRole("combobox", { name: "Apparence" });
+  for (const method of ["pointer", "keyboard"] as const) {
+    await opener.focus();
+    if (method === "pointer") await opener.click();
+    else await page.keyboard.press("Enter");
+    await expect(close).toBeFocused();
+    await expect(theme).not.toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(
+      dialog.getByRole("button", { name: "Programmes", exact: true }),
+    ).toBeFocused();
+    if (method === "pointer") await close.click();
+    else await page.keyboard.press("Escape");
+    await expect(dialog).toHaveCount(0);
+    await expect(opener).toBeFocused();
+  }
+  await opener.click();
+  const previousTheme = await theme.inputValue();
+  await theme.selectOption(previousTheme === "dark" ? "light" : "dark");
+  await expect(theme).toBeEnabled();
+  await expect(page.locator("html")).toHaveAttribute(
+    "data-theme",
+    previousTheme === "dark" ? "light" : "dark",
+  );
+  await theme.selectOption(previousTheme);
+  await expect(theme).toBeEnabled();
+  await close.click();
+  await opener.click();
+  await expect(close).toBeFocused();
+  await dialog.getByRole("button", { name: "Exercices", exact: true }).click();
+  await expect(dialog).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { name: "Exercices", exact: true }),
+  ).toBeFocused();
+});
+
 test("Sport : bibliothèque, séance mixte, repos, mensurations et statistiques par interface", async ({
   page,
 }, testInfo) => {

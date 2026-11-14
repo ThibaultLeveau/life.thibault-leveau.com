@@ -270,7 +270,11 @@ export function Page() {
         </div>
       </main>
       {navigation && (
-        <Dialog title="Navigation Sport" onClose={() => setNavigation(false)}>
+        <Dialog
+          title="Navigation Sport"
+          initialFocus="close"
+          onClose={() => setNavigation(false)}
+        >
           <div className="dialog-body sport-mobile-nav">
             {nav}
             <a href="/applications">Bibliothèque des applications</a>
