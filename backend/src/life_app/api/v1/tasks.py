@@ -51,12 +51,14 @@ def preview_scheduling(payload: s.SchedulePreviewInput, user: CurrentUser):
     Les dates inexistantes sont sautées selon RFC 5545. Fin inclusive et exclusions.
     """
     rule = payload.recurrence
+    after = payload.after or rule.start_date
     upcoming = dates(
         rule,
-        payload.after or rule.start_date,
+        after,
         inclusive=True,
         limit=payload.limit,
         completed=payload.completed,
+        anchor=after if rule.mode == "completion" else None,
     )
     if not upcoming:
         raise HTTPException(

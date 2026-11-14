@@ -187,6 +187,8 @@ Sans correspondance, l’analyse retourne le texte intact, `matched_text:null` e
 
 Une création sans date explicite prend la première occurrence à partir de l’ancre. Une date explicite peut reporter l’occurrence hors du calendrier régulier, mais doit rester dans les bornes et hors des exclusions. Une création récurrente exige un statut ouvert. `recurrence_completed`, en lecture seule, compte les résolutions de la définition courante. Modifier la règle remet ce compteur à zéro ; modifier uniquement la date conserve règle, ancre et compteur. `recurrence:null` enlève la répétition ; pour retirer aussi la date envoyer `due_date:null` dans le même PATCH. Une règle omise reste inchangée.
 
+En mode `completion`, après une première résolution anticipée, la prochaine échéance peut précéder l’ancre initiale : le délai suit le jour réel de résolution. La tâche reste éditable et archivable. Le début reste la borne de création ou de changement de définition ; la fin et les exclusions restent applicables à chaque occurrence.
+
 Les titres envoyés directement à `/tasks` restent littéraux : l’analyse est explicite et ne change pas silencieusement un client API existant. Exemple autonome avec cookie et jeton acquis selon la section Session :
 
 ```bash

@@ -29,6 +29,8 @@ export function SchedulePicker({
   const today = useLocalToday();
   const id = useId();
   const trigger = useRef<HTMLButtonElement>(null);
+  const interpretation = useRef<AbortController | null>(null);
+  useEffect(() => () => interpretation.current?.abort(), []);
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<"date" | "repeat">("date");
   const [draft, setDraft] = useState<Recurrence>(
@@ -44,9 +46,11 @@ export function SchedulePicker({
   const [busy, setBusy] = useState(false);
   const unchanged = JSON.stringify(draft) === JSON.stringify(value.recurrence);
   const previewAfter =
-    value.recurrence?.start_date === draft.start_date
-      ? [draft.start_date, today, value.due_date || today].sort().at(-1)!
-      : draft.start_date;
+    unchanged && draft.mode === "completion"
+      ? value.due_date || draft.start_date
+      : value.recurrence?.start_date === draft.start_date
+        ? [draft.start_date, today, value.due_date || today].sort().at(-1)!
+        : draft.start_date;
   const remainingCompleted = unchanged ? completed : 0;
   const key = JSON.stringify({ draft, previewAfter, remainingCompleted });
   useEffect(() => {
@@ -78,6 +82,8 @@ export function SchedulePicker({
   }, [open, tab, key, draft, previewAfter, remainingCompleted]);
   const current = preview?.key === key ? preview.result : null;
   function close() {
+    interpretation.current?.abort();
+    setBusy(false);
     setOpen(false);
     onEditingChange?.(false);
     requestAnimationFrame(() => trigger.current?.focus());
@@ -89,10 +95,14 @@ export function SchedulePicker({
   }
   async function interpret() {
     if (!text.trim()) return;
+    interpretation.current?.abort();
+    const controller = new AbortController();
+    interpretation.current = controller;
     setBusy(true);
     setError("");
     try {
-      const result = await parseSchedule(text, today);
+      const result = await parseSchedule(text, today, controller.signal);
+      if (controller.signal.aborted) return;
       if (!result.matched_text || result.title) {
         setError(
           "Date non reconnue. Essayez « demain », « 25/12/2026 » ou « tous les lundis ».",
@@ -105,9 +115,9 @@ export function SchedulePicker({
       } else choose(result.due_date);
       setText("");
     } catch (error) {
-      setError((error as Error).message);
+      if (!controller.signal.aborted) setError((error as Error).message);
     } finally {
-      setBusy(false);
+      if (interpretation.current === controller) setBusy(false);
     }
   }
   return (
@@ -199,6 +209,7 @@ export function SchedulePicker({
                 Date ou récurrence
                 <input
                   value={text}
+                  disabled={busy}
                   onChange={(e) => setText(e.target.value)}
                   placeholder="Demain, 25/12/2026, tous les lundis…"
                   onKeyDown={(e) => {

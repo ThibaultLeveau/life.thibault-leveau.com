@@ -146,6 +146,13 @@ test("configuration mensuelle, dernier jour ouvré, exclusion et aperçu", async
   await page
     .getByRole("combobox", { name: "Fin de la récurrence", exact: true })
     .selectOption("count");
+  await page.getByRole("spinbutton", { name: /Nombre d’occurrences/ }).fill("");
+  await expect(
+    page.getByRole("spinbutton", { name: /Nombre d’occurrences/ }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Appliquer la récurrence" }),
+  ).toBeDisabled();
   await page
     .getByRole("spinbutton", { name: /Nombre d’occurrences/ })
     .fill("4");
@@ -250,6 +257,10 @@ for (const theme of ["light", "dark"])
     await page
       .getByRole("combobox", { name: "Unité", exact: true })
       .selectOption("YEARLY");
+    await page.getByRole("textbox", { name: /^Jours du mois/ }).fill("15");
+    await expect(
+      page.locator(".schedule-preview time").first(),
+    ).toHaveAttribute("datetime", "2028-01-15");
     await expect(page.locator(".schedule-preview time").first()).toBeVisible();
     const overflow = await page
       .getByRole("dialog")

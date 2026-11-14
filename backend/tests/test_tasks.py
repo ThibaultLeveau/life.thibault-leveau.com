@@ -202,6 +202,11 @@ def test_schedule_api_parity_validation_and_literal_titles(client, app):
     parsed = client.post("/api/v1/scheduling/parse", json=payload)
     assert parsed.status_code == 200
     parsed = parsed.json()
+    literal = "  Aucun horaire  "
+    assert (
+        client.post("/api/v1/scheduling/parse", json={**payload, "text": literal}).json()["title"]
+        == literal
+    )
     preview = client.post("/api/v1/scheduling/preview", json={"recurrence": parsed["recurrence"]})
     assert preview.status_code == 200
     assert preview.json()["dates"] == parsed["dates"]
@@ -329,6 +334,37 @@ def test_recurrence_constraints_and_concurrent_completion(client, app, engine):
         "completed",
         "rescheduled",
     ]
+
+
+def test_completion_based_series_finished_early_remains_editable(client, monkeypatch):
+    from datetime import UTC, datetime
+
+    from life_app.features.tasks import service
+
+    monkeypatch.setattr(service, "utcnow", lambda: datetime(2026, 11, 14, 12, tzinfo=UTC))
+    space, _ = create_space(client)
+    item = create_task(
+        client,
+        space,
+        recurrence={
+            "rrule": "FREQ=DAILY;INTERVAL=3",
+            "start_date": "2027-01-01",
+            "mode": "completion",
+        },
+    )
+    item = mutate(client, item, "complete")
+    assert item["due_date"] == "2026-11-17"
+    preview = client.post(
+        "/api/v1/scheduling/preview",
+        json={"recurrence": item["recurrence"], "after": item["due_date"], "limit": 2},
+    )
+    assert preview.json()["dates"] == ["2026-11-17", "2026-11-20"]
+    response = client.patch(
+        f"/api/v1/tasks/{item['id']}",
+        json={"expected_version": item["version"], "description": "Toujours éditable"},
+    )
+    assert response.status_code == 200, response.text
+    assert response.json()["recurrence_completed"] == 1
 
 
 def test_complete_reopen_history_and_idempotency(client):

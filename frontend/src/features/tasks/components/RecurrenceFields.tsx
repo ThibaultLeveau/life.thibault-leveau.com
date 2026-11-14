@@ -15,23 +15,50 @@ export function RecurrenceFields({
   );
   const anchor = rule.start_date || localDate();
   const frequency = parts.FREQ || "WEEKLY";
+  const ordinal = parts.BYDAY?.match(/^(-?\d+)(MO|TU|WE|TH|FR|SA|SU)$/);
   const [advanced, setAdvanced] = useState(
-    !!(parts.BYYEARDAY || parts.BYWEEKNO || parts.WKST),
+    !!(
+      parts.BYYEARDAY ||
+      parts.BYWEEKNO ||
+      parts.WKST ||
+      (ordinal &&
+        !["1", "2", "3", "4", "5", "-1", "-2"].includes(ordinal[1])) ||
+      (frequency === "YEARLY" &&
+        !parts.BYMONTH &&
+        (parts.BYDAY || parts.BYMONTHDAY)) ||
+      (frequency !== "YEARLY" && parts.BYMONTH) ||
+      (frequency === "DAILY" &&
+        (parts.BYDAY || parts.BYMONTHDAY || parts.BYSETPOS)) ||
+      (frequency === "WEEKLY" && parts.BYSETPOS) ||
+      (parts.BYSETPOS &&
+        !["1", "2", "3", "4", "5", "-1", "-2"].includes(parts.BYSETPOS)) ||
+      (["MONTHLY", "YEARLY"].includes(frequency) &&
+        parts.BYDAY &&
+        !ordinal &&
+        !(
+          parts.BYSETPOS && ["MO,TU,WE,TH,FR", "SA,SU"].includes(parts.BYDAY)
+        )) ||
+      (parts.BYDAY && parts.BYMONTHDAY)
+    ),
   );
   const [exclude, setExclude] = useState("");
-  const ordinal = parts.BYDAY?.match(/^(-?\d+)(MO|TU|WE|TH|FR|SA|SU)$/);
   const monthlyMode = ordinal || parts.BYSETPOS ? "weekday" : "date";
-  const endMode = rule.end_date
-    ? "date"
-    : rule.max_occurrences
-      ? "count"
-      : "never";
+  const endMode =
+    rule.end_date !== null
+      ? "date"
+      : rule.max_occurrences !== null
+        ? "count"
+        : "never";
   const set = (patch: Partial<Recurrence>) => onChange({ ...rule, ...patch });
   function editParts(patch: Record<string, string | undefined>, reset = false) {
     const next = { ...(reset ? {} : parts), ...patch };
+    // YEARLY + BYMONTHDAY/BYDAY otherwise expands across the whole year.
+    // Persist the month visibly selected by the builder, including its default.
+    if (next.FREQ === "YEARLY" && !next.BYMONTH)
+      next.BYMONTH = String(Number(anchor.slice(5, 7)));
     set({
       rrule: Object.entries(next)
-        .filter(([, value]) => value)
+        .filter(([, value]) => value !== undefined)
         .map(([key, value]) => `${key}=${value}`)
         .join(";"),
     });
@@ -205,7 +232,7 @@ export function RecurrenceFields({
                     Jours du mois
                     <input
                       value={
-                        parts.BYMONTHDAY || String(Number(anchor.slice(8)))
+                        parts.BYMONTHDAY ?? String(Number(anchor.slice(8)))
                       }
                       placeholder="1, 15, -1"
                       onChange={(e) =>

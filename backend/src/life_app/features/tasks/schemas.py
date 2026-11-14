@@ -213,12 +213,14 @@ class EventPage(Schema):
 
 
 class ScheduleParseInput(Schema):
+    model_config = ConfigDict(str_strip_whitespace=False)
     text: str = Field(max_length=1000)
     today: date = Field(description="Date locale du client, base des expressions relatives.")
     timezone: str = Field(default="Europe/Paris", max_length=100)
 
 
 class ScheduleParseOutput(Schema):
+    model_config = ConfigDict(str_strip_whitespace=False)
     title: str
     due_date: date | None
     recurrence: Recurrence | None

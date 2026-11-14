@@ -319,7 +319,14 @@ def apply_schedule(item, values):
                 due = upcoming[0]
         if due is None:
             raise HTTPException(422, "Une tâche récurrente exige une échéance.")
-        if due < rule.start_date or (rule.end_date and due > rule.end_date):
+        # Completion-based intervals can move before the original starting date
+        # when the first (future-dated) occurrence is finished early.
+        lower_bound = (
+            rule.start_date
+            if changed or rule.mode == "scheduled" or not item.recurrence_completed
+            else date.min
+        )
+        if due < lower_bound or (rule.end_date and due > rule.end_date):
             raise HTTPException(
                 422, "L’échéance doit être comprise entre le début et la fin de la récurrence."
             )
