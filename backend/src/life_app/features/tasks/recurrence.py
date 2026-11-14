@@ -241,6 +241,16 @@ def describe(rule: Recurrence) -> str:
         "-1": "dernier",
         "-2": "avant-dernier",
     }
+
+    def positioned(day, value):
+        if not value:
+            return day
+        if value in positions:
+            return positions[value] + " " + day
+        if int(value) < 0:
+            return f"{abs(int(value))}ᵉ {day} en partant de la fin"
+        return f"{value}ᵉ {day}"
+
     group = {
         "MO,TU,WE,TH,FR": "jour ouvré",
         "MO,TU,WE,TH,FR,SA": "jour ouvrable",
@@ -248,20 +258,17 @@ def describe(rule: Recurrence) -> str:
     }.get(byday)
     grouped_position = group and parts.get("BYSETPOS")
     if grouped_position:
-        label += " · " + ", ".join(
-            positions.get(p, f"{p}ᵉ") + " " + group for p in parts["BYSETPOS"].split(",")
-        )
+        label += " · " + ", ".join(positioned(group, p) for p in parts["BYSETPOS"].split(","))
     elif byday and all(day in WEEKDAYS for day in byday.split(",")):
         names = [DAY_NAMES[WEEKDAYS.index(day)] for day in byday.split(",")]
         label += " · " + ", ".join(names)
     elif byday:
         label += " · " + ", ".join(
-            positions.get(day[:-2], f"{day[:-2]}ᵉ") + " " + DAY_NAMES[WEEKDAYS.index(day[-2:])]
-            for day in byday.split(",")
+            positioned(DAY_NAMES[WEEKDAYS.index(day[-2:])], day[:-2]) for day in byday.split(",")
         )
     if "BYMONTHDAY" in parts:
         label += " · " + ", ".join(
-            "dernier jour" if d == "-1" else "avant-dernier jour" if d == "-2" else f"jour {d}"
+            positioned("jour", d) if int(d) < 0 else f"jour {d}"
             for d in parts["BYMONTHDAY"].split(",")
         )
     if "BYMONTH" in parts:

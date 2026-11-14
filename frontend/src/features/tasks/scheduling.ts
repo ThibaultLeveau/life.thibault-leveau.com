@@ -49,6 +49,22 @@ export function newRecurrence(start: string): Recurrence {
     excluded_dates: [],
   };
 }
+function positionedDay(day: string, value: string) {
+  const positions: Record<string, string> = {
+    "1": "premier",
+    "2": "deuxième",
+    "3": "troisième",
+    "4": "quatrième",
+    "5": "cinquième",
+    "-1": "dernier",
+    "-2": "avant-dernier",
+  };
+  if (!value) return day;
+  if (positions[value]) return `${positions[value]} ${day}`;
+  return Number(value) < 0
+    ? `${Math.abs(Number(value))}ᵉ ${day} en partant de la fin`
+    : `${value}ᵉ ${day}`;
+}
 export function shortRecurrence(rule: Recurrence) {
   const parts: Record<string, string> = Object.fromEntries(
     rule.rrule.split(";").map((part) => part.split("=")),
@@ -70,19 +86,28 @@ export function shortRecurrence(rule: Recurrence) {
     interval === 1
       ? labels[parts.FREQ] || "Récurrence personnalisée"
       : `${parts.FREQ === "WEEKLY" ? "Toutes les" : "Tous les"} ${interval} ${units[parts.FREQ]}`;
-  const groupedPosition =
-    parts.BYSETPOS && ["MO,TU,WE,TH,FR", "SA,SU"].includes(parts.BYDAY);
+  const group = ({
+    "MO,TU,WE,TH,FR": "jour ouvré",
+    "MO,TU,WE,TH,FR,SA": "jour ouvrable",
+    "SA,SU": "jour du week-end",
+  } as Record<string, string>)[parts.BYDAY];
+  const groupedPosition = parts.BYSETPOS && group;
   if (groupedPosition)
-    label += ` · ${parts.BYSETPOS === "-1" ? "dernier" : parts.BYSETPOS === "-2" ? "avant-dernier" : `${parts.BYSETPOS}ᵉ`} ${parts.BYDAY === "SA,SU" ? "jour du week-end" : "jour ouvré"}`;
+    label += ` · ${parts.BYSETPOS.split(",")
+      .map((value) => positionedDay(group, value))
+      .join(", ")}`;
   else if (parts.BYDAY)
     label += ` · ${parts.BYDAY.split(",")
-      .map((day) => {
-        const position = day.slice(0, -2);
-        return `${position === "-1" ? "dernier " : position ? `${position}ᵉ ` : ""}${weekdays[dayCodes.indexOf(day.slice(-2))]}`;
-      })
+      .map((day) =>
+        positionedDay(weekdays[dayCodes.indexOf(day.slice(-2))], day.slice(0, -2)),
+      )
       .join(", ")}`;
   if (parts.BYMONTHDAY)
-    label += ` · ${parts.BYMONTHDAY === "-1" ? "dernier jour" : `le ${parts.BYMONTHDAY.replaceAll(",", ", ")}`}`;
+    label += ` · ${parts.BYMONTHDAY.split(",")
+      .map((value) =>
+        Number(value) < 0 ? positionedDay("jour", value) : `le ${value}`,
+      )
+      .join(", ")}`;
   if (parts.BYMONTH)
     label += ` · ${parts.BYMONTH.split(",")
       .map((month) => months[Number(month) - 1])

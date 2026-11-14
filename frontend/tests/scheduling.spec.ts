@@ -341,6 +341,12 @@ test("composition française, nombres en lettres et aperçu immédiat", async ({
   await setup(page);
   await page
     .getByLabel("Titre", { exact: true })
+    .fill("Bilan les deux derniers jours ouvrés du mois");
+  await expect(page.locator(".schedule-trigger")).toContainText(
+    "avant-dernier jour ouvré, dernier jour ouvré",
+  );
+  await page
+    .getByLabel("Titre", { exact: true })
     .fill(
       "Bilan 2027 tous les mercredis toutes les trois semaines pour cinq fois",
     );
