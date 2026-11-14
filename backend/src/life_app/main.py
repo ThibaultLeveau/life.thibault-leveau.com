@@ -9,6 +9,7 @@ from sqlalchemy.exc import DBAPIError, IntegrityError
 
 from life_app import __version__
 from life_app.api.router import router
+from life_app.apps.registry import APPLICATIONS
 from life_app.core.config import Settings, get_settings
 from life_app.core.database import configure_database
 from life_app.core.logging import configure_logging
@@ -38,7 +39,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             code: {"description": description}
             for code, description in {
                 401: "Session absente, expirée ou invalide",
-                403: "Origine ou jeton CSRF refusé",
+                403: "Origine/jeton CSRF refusé ou application désactivée",
                 404: "Ressource absente ou inaccessible",
                 409: "Conflit de données ou de version",
                 422: "Entrée invalide",
@@ -48,6 +49,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         },
     )
     application.state.settings = settings
+    application.state.applications = APPLICATIONS
     configure_database(application, settings)
 
     @application.exception_handler(IntegrityError)

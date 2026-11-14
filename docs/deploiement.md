@@ -165,3 +165,9 @@ Si le schéma a changé, le script refuse de prétendre qu'un simple changement 
 La configuration Compose utilisée reste celle du checkout courant. Si elle a changé de façon incompatible, préparer un checkout de la version cible et examiner ses différences avant toute opération. Ne pas supprimer des volumes ou modifier les autres services du VPS pour tenter un retour arrière.
 
 La livraison des menus et sélections multiples conserve `0004_recurrence`, les variables et les services existants. La sauvegarde de publication habituelle reste requise. Vérifier sur un compte de recette isolé les routes authentifiées `POST /tasks/{id}/duplicate` et `POST /tasks/bulk`, le menu des trois points/clic droit, le rectangle souris et l’appui long mobile. La suppression utilise les archives existantes ; vérifier leur restauration et la conservation des historiques. L’image précédente reste compatible avec le même schéma.
+
+## Livraison de la bibliothèque LifeOS
+
+Appliquer `0005_applications` par le script de publication habituel, après sauvegarde. Le code est réorganisé en applications ; les routes historiques et tables métier sont conservées. Les activations sont une nouvelle table ; l’image antérieure ne reconnaît pas la révision et ignore le contrôle d’activation. Voir les [contraintes de récupération](sauvegardes.md#migration-0005-applications).
+
+Après publication, comparer le SHA de l’image exécutée avec `main`, vérifier les deux sondes, `/`, `/applications`, `/tasks`, OpenAPI et documentation en HTTPS. Sur un compte de recette isolé, contrôler connexion commune, accueil actif, désactivation, accueil vide, refus API/direct, réactivation avec données/historique retrouvés, thème et mobile. Vérifier que les données personnelles existantes n’ont pas changé. Consigner commit, sauvegarde et résultats dans l’issue. La fusion GitHub seule ne termine pas la livraison.

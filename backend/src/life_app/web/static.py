@@ -28,13 +28,14 @@ def register_static_routes(app: FastAPI, settings: Settings) -> None:
             name="documentation",
         )
 
-    @app.api_route("/", methods=["GET", "HEAD"], include_in_schema=False)
-    @app.api_route("/tasks", methods=["GET", "HEAD"], include_in_schema=False)
     async def home() -> FileResponse:
         index = frontend / "index.html"
         if not index.is_file():
             raise HTTPException(status_code=503, detail="Frontend build unavailable")
         return FileResponse(index, headers={"Cache-Control": "no-cache"})
+
+    for path in ("/", "/applications", *(item.path for item in app.state.applications)):
+        app.add_api_route(path, home, methods=["GET", "HEAD"], include_in_schema=False)
 
     @app.api_route("/favicon.svg", methods=["GET", "HEAD"], include_in_schema=False)
     async def favicon() -> FileResponse:

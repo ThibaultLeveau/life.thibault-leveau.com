@@ -35,3 +35,7 @@ Les politiques TLS/en-têtes communs appartiennent au Caddy existant. Toute poli
 Les dumps contiennent des données privées, hashes de mots de passe et sessions. Protéger leurs permissions, les copies hors serveur et leur rétention. La restauration documentée révoque les sessions avant redémarrage.
 
 En cas de fuite, révoquer les accès concernés, changer les secrets et examiner l'exposition réelle ; effacer un fichier Git ne suffit pas. La commande `life reset-password` remplace le mot de passe personnel et révoque ses sessions. Une rotation PostgreSQL nécessite de changer le rôle existant et l'URL applicative de façon coordonnée. Conserver les preuves utiles et suivre les [sauvegardes](sauvegardes.md) pour restaurer des données.
+
+## Applications désactivées
+
+L’activation appartient au compte de la session. Le serveur applique ce contrôle à chaque routeur métier lors de l’assemblage, en plus des contrôles de propriétaire existants ; masquer la carte frontend n’est pas une autorisation. Les bascules exigent CSRF/origine et utilisent le verrou utilisateur. Elles ne rendent accessibles aucune donnée d’un autre compte et ne suppriment rien. Les réponses privées du catalogue utilisent `Cache-Control: no-store`. Le HTML public du shell ne contient aucune donnée privée.

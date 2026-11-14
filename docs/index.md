@@ -1,5 +1,7 @@
 # Documentation de Life
 
+LifeOS propose un [accueil personnel et une bibliothèque d’applications](applications.md). Activez ou désactivez vos applications sans perdre leurs données. Tâches est disponible ; sport, OKR, ménage et plantes restent futurs.
+
 Life organise vos tâches dans des espaces et des sections, en liste à cocher ou en tableau kanban. Une section devient une liste ou une ligne du tableau selon sa visibilité ; les colonnes représentent les statuts. Les données restent privées derrière une connexion personnelle.
 
 [Ouvrir les tâches](https://life.thibault-leveau.com/tasks){ .md-button .md-button--primary }

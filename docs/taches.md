@@ -1,5 +1,8 @@
 # Utiliser les tâches
 
+Tâches est une application de LifeOS, activée par défaut. Retrouvez-la sur l’accueil ou réactivez-la dans la [bibliothèque](applications.md). Une désactivation bloque son accès sans changer les données ni l’historique.
+
+
 ## Se connecter et créer un espace
 
 Ouvrir **Tâches** dans la navigation et utiliser le compte créé par l'opérateur. La page de connexion présente les champs **Identifiant** et **Mot de passe**, puis le bouton **Se connecter**. Les erreurs s’affichent dans le formulaire. La déconnexion se trouve à côté du profil. Une session expirée demande une nouvelle connexion ; les données déjà enregistrées restent conservées.

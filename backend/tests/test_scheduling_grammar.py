@@ -5,8 +5,8 @@ from itertools import permutations
 
 import pytest
 
-from life_app.features.tasks.recurrence import dates
-from life_app.features.tasks.scheduling import parse_schedule
+from life_app.apps.tasks.recurrence import dates
+from life_app.apps.tasks.scheduling import parse_schedule
 
 TODAY = date(2026, 11, 14)
 

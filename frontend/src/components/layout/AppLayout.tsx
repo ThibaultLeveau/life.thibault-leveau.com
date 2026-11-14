@@ -3,7 +3,7 @@ import { Navbar } from './Navbar';
 
 export function AppLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="app-shell">
+    <div className="app-shell ui-scope">
       <a className="skip-link" href="#contenu">
         Aller au contenu
       </a>

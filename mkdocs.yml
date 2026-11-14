@@ -52,6 +52,7 @@ extra:
       name: Ouvrir Life
 nav:
   - Présentation: index.md
+  - Vos applications: applications.md
   - Utiliser les tâches: taches.md
   - Développer:
       - Démarrage: demarrage.md
@@ -72,3 +73,4 @@ nav:
       - Spécification des tâches: taches-specification.md
       - Décision initiale: decisions/001-architecture-initiale.md
       - Tâches et persistance: decisions/002-gestion-taches.md
+      - Applications LifeOS: decisions/003-applications-lifeos.md

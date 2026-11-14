@@ -9,7 +9,7 @@ import type {
   Status,
   Task,
   Workspace,
-} from "../src/features/tasks/types";
+} from "../src/apps/tasks/types";
 
 const credentials = {
   username: process.env.LIFE_E2E_USERNAME ?? "browser-test",

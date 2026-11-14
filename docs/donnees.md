@@ -10,6 +10,7 @@
 | --- | --- |
 | `users` | UUID, identifiant unique normalisé, hash Argon2, thème |
 | `login_sessions` | Hash du cookie opaque, utilisateur, hash CSRF, expiration UTC |
+| `application_preferences` | Clé composée utilisateur/application, activation booléenne et instant UTC de dernière modification |
 | `login_limits` | Clé hachée du compte ou de l'IP, compteur, expiration |
 | `workspaces` | Propriétaire, parent facultatif `parent_id`, nom, description, couleur, ordre, dates de création/archivage |
 | `sections` | Espace, nom, description, couleur, ordre, visibilité `list/board/both`, archive |
@@ -107,4 +108,14 @@ La duplication crée une tâche ouverte avec un nouvel UUID, de nouvelles dates 
 
 Les lots de 1 à 500 tâches utilisent la sérialisation par propriétaire et la transaction existantes. Toutes les versions sont vérifiées avant les mutations ; ordre, associations et événements sont annulés ensemble en cas d’erreur. La replanification ajoute `updated` et conserve règle/compteur. Le déplacement ajoute `moved` sans changer le type ouvert/terminé ni `completed_at`. Les versions des autres tâches affectées par la normalisation de l’ordre peuvent augmenter, comme pour un déplacement individuel.
 
-Le libellé **Supprimer** de l’interface utilise l’archivage existant (`archived_at` et événement `archived`). Il n’efface aucune donnée et se restaure via PATCH et les archives. La sélection est un état transitoire du navigateur, sans table ni préférence persistante. Aucune migration, contrainte ou procédure de restauration supplémentaire n’est nécessaire ; le schéma reste `0004_recurrence` et les sauvegardes existantes couvrent copies et événements de lots.
+Le libellé **Supprimer** de l’interface utilise l’archivage existant (`archived_at` et événement `archived`). Il n’efface aucune donnée et se restaure via PATCH et les archives. La sélection est un état transitoire du navigateur, sans table ni préférence persistante. Aucune migration, contrainte ou procédure de restauration supplémentaire n’est nécessaire ; cette livraison utilisait `0004_recurrence`. La bibliothèque ajoute ensuite `0005_applications`, sans changer ces opérations ; les sauvegardes couvrent copies et événements de lots.
+
+## Activations des applications
+
+La migration `0005_applications` crée uniquement `application_preferences`. Sa clé primaire `(user_id, application_id)` interdit les doublons. `user_id` référence un compte existant ; `application_id` respecte `^[a-z][a-z0-9_]{0,49}$` et 50 caractères maximum ; `enabled` et `updated_at` sont non nuls. Le catalogue est défini par les manifestes livrés : le service refuse un identifiant inconnu. Une écriture SQL administrative doit aussi respecter ce catalogue.
+
+Sans ligne, le défaut du manifeste s’applique : `true` pour Tâches, `false` par défaut pour les futures applications. Le premier PUT crée une ligne même si le choix correspond au défaut. Seule une bascule ultérieure change l’instant UTC ; répéter le même état est idempotent. Les bascules suivent le verrou du compte utilisé par les mutations métier, empêchant qu’une écriture commencée après une désactivation validée contourne ce choix.
+
+La migration ne touche pas les tables et événements métier. Désactivation/réactivation ne modifient aucune tâche, date, version, récurrence, archive ou préférence de vue. Aucun journal historique d’activation ni désinstallation/purge n’est livré : `updated_at` décrit le dernier changement, pas un historique complet. La sauvegarde PostgreSQL contient les préférences explicites ; les défauts sans ligne restent définis par le commit de l’image. Toujours conserver cette image avec son dump.
+
+Le diagramme ci-dessus présente les relations du métier Tâches ; la bibliothèque ajoute la relation un compte → plusieurs préférences d’application décrite ici.

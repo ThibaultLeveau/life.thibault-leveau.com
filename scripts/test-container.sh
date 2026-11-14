@@ -55,6 +55,24 @@ done
 ./scripts/smoke-test.sh "$LIFE_E2E_URL"
 LIFE_E2E_USERNAME=browser-test LIFE_E2E_PASSWORD=synthetic-browser-password npm --prefix frontend run test:e2e
 
+# Persist a disabled application through the public contract before testing the dump.
+python3 - "$LIFE_E2E_URL" <<'PY'
+import http.cookiejar
+import json
+import sys
+import urllib.request
+
+client = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+base = sys.argv[1] + '/api/v1'
+def request(path, data, method='POST', headers=None):
+    with client.open(urllib.request.Request(base + path, data=json.dumps(data).encode(),
+                     method=method, headers={'Content-Type': 'application/json', **(headers or {})})) as response:
+        return json.load(response)
+session = request('/auth/session', {'username': 'browser-test', 'password': 'synthetic-browser-password'})
+result = request('/applications/tasks', {'enabled': False}, 'PUT', {'X-CSRF-Token': session['csrf_token']})
+assert result['enabled'] is False
+PY
+
 # Restore into a separate throwaway database; never destroy the source under test.
 echo 'Vérification de la restauration transactionnelle…'
 docker exec "$db" pg_dump -U life -d life -Fc --no-owner --no-privileges >"$temporary/life.dump"
@@ -76,6 +94,11 @@ agenda_query="SELECT string_agg(user_id::text || settings::text, ',' ORDER BY us
 source_agenda=$(docker exec "$db" psql -U life -d life -Atc "$agenda_query")
 restored_agenda=$(docker exec "$db" psql -U life -d life_restored -Atc "$agenda_query")
 [[ -n "$source_agenda" && "$source_agenda" == "$restored_agenda" ]]
+applications_query="SELECT string_agg(user_id::text || application_id || enabled::text || updated_at::text, ',' ORDER BY user_id, application_id) FROM application_preferences"
+source_applications=$(docker exec "$db" psql -U life -d life -Atc "$applications_query")
+restored_applications=$(docker exec "$db" psql -U life -d life_restored -Atc "$applications_query")
+[[ -n "$source_applications" && "$source_applications" == "$restored_applications" ]]
+[[ $(docker exec "$db" psql -U life -d life_restored -Atc 'SELECT count(*) FROM application_preferences WHERE NOT enabled') -gt 0 ]]
 recurrence_query="SELECT string_agg(id::text || recurrence::text || recurrence_completed::text || due_date::text, ',' ORDER BY id) FROM tasks WHERE recurrence IS NOT NULL"
 source_recurrence=$(docker exec "$db" psql -U life -d life -Atc "$recurrence_query")
 restored_recurrence=$(docker exec "$db" psql -U life -d life_restored -Atc "$recurrence_query")

@@ -3,8 +3,8 @@ from datetime import UTC, date, datetime
 import pytest
 from pydantic import ValidationError
 
-from life_app.features.tasks.recurrence import Recurrence, dates, next_due
-from life_app.features.tasks.scheduling import parse_schedule
+from life_app.apps.tasks.recurrence import Recurrence, dates, next_due
+from life_app.apps.tasks.scheduling import parse_schedule
 
 
 @pytest.mark.parametrize(

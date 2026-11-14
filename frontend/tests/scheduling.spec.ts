@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import type { Task, Workspace } from "../src/features/tasks/types";
+import type { Task, Workspace } from "../src/apps/tasks/types";
 
 test.use({ timezoneId: "Europe/Paris" });
 

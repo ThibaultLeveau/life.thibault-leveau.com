@@ -5,8 +5,8 @@ import {
   type BrowserContext,
   type APIRequestContext,
 } from "@playwright/test";
-import type { Task, Workspace, Section } from "../src/features/tasks/types";
-import { localDate } from "../src/features/tasks/types";
+import type { Task, Workspace, Section } from "../src/apps/tasks/types";
+import { localDate } from "../src/apps/tasks/types";
 
 async function seed(page: Page, count = 3) {
   const login = await page.request.post("/api/v1/auth/session", {
