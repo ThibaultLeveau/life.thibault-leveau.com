@@ -18,7 +18,7 @@ Toutes les routes sont sous `/api/v1/sport`, avec session, propriétaire et acti
 | POST | `/workouts` | Créer nom, notes et liste ordonnée `entries` |
 | PUT | `/workouts/{uuid}` | Remplacer le programme et son ordre, avec `expected_version` |
 | PUT | `/workouts/{uuid}/archive` | Archiver/restaurer sans changer les sessions |
-| POST | `/sessions` | Démarrer `{workout_id, expected_version}` (version du programme) |
+| POST | `/sessions` | Démarrer `{workout_id, expected_version}` (version du programme), avec propositions issues des résultats antérieurs |
 | GET | `/sessions` | Historique paginé (`offset`, `limit` 1–100) |
 | GET | `/sessions/active` | Session active ou `null` |
 | GET | `/sessions/{uuid}` | Instantané, séries, dates, score et référence |
@@ -33,6 +33,10 @@ Toutes les routes sont sous `/api/v1/sport`, avec session, propriétaire et acti
 | GET | `/statistics` | `since` / `until` inclusifs, un an par défaut et dix ans maximum |
 
 Les entrées de programme sont `{exercise_id, sets, target}`. Les objectifs sont facultatifs, mais les mesures d’une série validée doivent toutes être présentes et conformes au type de `/kinds`. Les indices des exercices et séries commencent à **0**. Les identifiants des exercices fournis sont des chaînes stables, ceux des objets privés sont des UUID. L’ordre des `entries` est l’ordre du programme ; conserver les noms/types retournés uniquement pour affichage, les entrées d’écriture n’acceptent que les trois champs ci-dessus.
+
+Chaque entrée d’entraînement expose aussi `suggested_values`, une liste indexée à partir de 0 : `[{"weight_kg":40,"reps":12,...}, {"weight_kg":42.5,"reps":8,...}]`. Les autres mesures de `Values` valent `null`. Une position `null` signifie qu’aucune série antérieure correspondante n’a été enregistrée ; les instantanés créés avant cette fonctionnalité renvoient une liste vide. Ces propositions sont réservées aux réponses d’entraînement : ne pas les envoyer dans les entrées de programme ni les confondre avec `sets`.
+
+Au démarrage, le serveur cherche les derniers résultats conservés de chaque série du même compte/programme/exercice/type, du plus récent entraînement terminé ou abandonné au plus ancien. Des exercices réordonnés restent reconnus ; les doublons sont associés par rang d’occurrence. Une série annulée ou absente ne remplace pas une valeur plus ancienne. Les propositions sont figées dans l’instantané ; elles ne modifient ni `target`, ni `sets`, ni score, dates ou repos. Une nouvelle série sans historique peut utiliser côté client la dernière série précédente validée dans l’entraînement courant, puis `target`. Toute validation reste un PUT explicite avec `expected_version` et toutes les mesures requises.
 
 Une session renvoie `server_now` et `rest_until` UTC : le client affiche `max(0, rest_until - server_now - temps écoulé depuis la réponse)`. Une correction de série conserve son `completed_at` et ne relance pas le repos. Les dates et données de l’instantané persistent après modification ou archivage du modèle. Les sessions terminées sont immuables via API ; les résultats, `metrics`, `score` et `baseline_id` restent lisibles. Les [formules et limites du score](sport.md#statistiques-et-score) s’appliquent aussi aux clients indépendants.
 
@@ -81,6 +85,11 @@ with httpx.Client(base_url=base + '/api/v1', headers={'Origin': base}) as client
     })
     print(result['score'])  # 100 pour cette première session de référence
     print(request('GET', '/sport/statistics')['completed_sessions'])
+    next_training = request('POST', '/sport/sessions', json={
+        'workout_id': workout['id'], 'expected_version': workout['version'],
+    })
+    print(next_training['entries'][0]['suggested_values'][0])  # 40 kg, 10 répétitions
+    assert next_training['sets'] == []  # encore aucune série validée
 ```
 
 Mensuration : `POST /sport/measurements` avec `{"measured_on":"2026-11-14","weight_kg":75,"waist_cm":85}` (adapter la date). La réponse contient `id` et `version` pour une correction `PUT` ou un archivage. Les valeurs omises lors d’un remplacement reviennent à `null`, les notes à la chaîne vide.

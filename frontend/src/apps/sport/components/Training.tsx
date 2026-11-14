@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Dialog, ErrorMessage } from "../../../shared/ui/Dialog";
+import { Icon } from "../../../shared/ui/Icon";
 import { sportApi } from "../api";
 import type { KindDefinition, Training, Values } from "../types";
 import {
@@ -15,17 +16,36 @@ import {
 
 export function RestTimer({
   training,
-  onChanged,
+  onSkip,
+  busy,
+  error,
 }: {
   training: Training;
-  onChanged: (t: Training) => void;
+  onSkip: () => void;
+  busy: boolean;
+  error: string;
 }) {
   const [anchor, setAnchor] = useState({
     server: Date.parse(training.server_now),
     local: Date.now(),
   });
   const [now, setNow] = useState(Date.now());
-  const action = useAction();
+  const bar = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const element = bar.current!;
+    const shell = element.closest<HTMLElement>(".sport-shell")!;
+    const measure = () => {
+      const height = `${element.getBoundingClientRect().height}px`;
+      shell.style.setProperty("--sport-rest-height", height);
+    };
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    measure();
+    return () => {
+      observer.disconnect();
+      shell.style.removeProperty("--sport-rest-height");
+    };
+  }, []);
   useEffect(() => {
     setAnchor({ server: Date.parse(training.server_now), local: Date.now() });
   }, [training.server_now]);
@@ -45,7 +65,7 @@ export function RestTimer({
       )
     : 0;
   return (
-    <div className={`sport-rest ${left ? "is-running" : ""}`}>
+    <div ref={bar} className={`sport-rest ${left ? "is-running" : ""}`}>
       <div>
         <span className="eyebrow">RÉCUPÉRATION</span>
         <strong role="timer" aria-label="Temps de repos restant">
@@ -59,114 +79,12 @@ export function RestTimer({
         </span>
       </div>
       {left > 0 && (
-        <button
-          className="secondary-button"
-          disabled={action.busy}
-          onClick={() =>
-            void action.run(
-              () =>
-                sportApi.write<Training>(`/sessions/${training.id}/rest`, {
-                  expected_version: training.version,
-                }),
-              onChanged,
-            )
-          }
-        >
+        <button className="secondary-button" disabled={busy} onClick={onSkip}>
           Passer le repos
         </button>
       )}
-      <ErrorMessage message={action.error} />
+      <ErrorMessage message={error} />
     </div>
-  );
-}
-function SetForm({
-  training,
-  entryIndex,
-  setIndex,
-  kinds,
-  onClose,
-  onChanged,
-}: {
-  training: Training;
-  entryIndex: number;
-  setIndex: number;
-  kinds: KindDefinition[];
-  onClose: () => void;
-  onChanged: (t: Training) => void;
-}) {
-  const entry = training.entries[entryIndex];
-  const existing = training.sets.find(
-    (s) => s.entry_index === entryIndex && s.set_index === setIndex,
-  );
-  const previous = training.sets
-    .filter((s) => s.entry_index === entryIndex && s.set_index < setIndex)
-    .at(-1);
-  const [values, setValues] = useState<Values>(
-    existing?.values ?? previous?.values ?? entry.target,
-  );
-  const action = useAction();
-  return (
-    <Dialog title={`${entry.name} · série ${setIndex + 1}`} onClose={onClose}>
-      <form
-        className="dialog-body stack-form"
-        onSubmit={(e) => {
-          e.preventDefault();
-          void action.run(
-            () =>
-              sportApi.write<Training>(
-                `/sessions/${training.id}/sets/${entryIndex}/${setIndex}`,
-                { expected_version: training.version, values },
-              ),
-            (t) => {
-              onChanged(t);
-              onClose();
-            },
-          );
-        }}
-      >
-        <fieldset className="sport-fieldset" disabled={action.busy}>
-          <ValuesFields
-            kind={kinds.find((k) => k.id === entry.kind)!}
-            value={values}
-            onChange={setValues}
-            required
-          />
-          <p className="muted small-text">
-            {entry.kind.startsWith("weight")
-              ? "Saisissez la charge totale : additionnez les deux haltères et incluez la barre si nécessaire."
-              : "Saisissez ce que vous avez réellement effectué."}
-          </p>
-          <ErrorMessage message={action.error} />
-          <div className="dialog-actions">
-            {existing && (
-              <button
-                type="button"
-                className="secondary-button"
-                onClick={() =>
-                  void action.run(
-                    () =>
-                      sportApi.write<Training>(
-                        `/sessions/${training.id}/sets/${entryIndex}/${setIndex}`,
-                        { expected_version: training.version },
-                        "DELETE",
-                      ),
-                    (t) => {
-                      onChanged(t);
-                      onClose();
-                    },
-                  )
-                }
-              >
-                Annuler la validation
-              </button>
-            )}
-            <button className="primary-button">
-              {existing ? "Corriger la série" : "Valider la série"}
-            </button>
-          </div>
-        </fieldset>
-      </form>
-    </Dialog>
   );
 }
 export function TrainingDetail({
@@ -209,7 +127,10 @@ export function TrainingDetail({
             .map((s) => (
               <p key={s.set_index}>
                 Série {s.set_index + 1} ·{" "}
-                {valuesText(kinds.find((k) => k.id === entry.kind)!, s.values)}
+                {valuesText(
+                  kinds.find((k) => k.id === entry.kind)!,
+                  s.values,
+                )}
               </p>
             ))}
         </section>
@@ -223,18 +144,50 @@ export function ActiveTraining({
   kinds,
   onChanged,
   onFinished,
+  registerGuard,
+  action,
+  scope,
+  setScope,
 }: {
   training: Training | null | undefined;
   kinds: KindDefinition[];
   onChanged: (t: Training) => void;
   onFinished: () => void;
+  registerGuard: (guard: (() => boolean) | null) => void;
+  action: ReturnType<typeof useAction>;
+  scope: string;
+  setScope: (scope: string) => void;
 }) {
-  const [editing, setEditing] = useState<{ entry: number; set: number } | null>(
-    null,
-  );
+  const [drafts, setDrafts] = useState<Record<string, Values>>({});
   const [ending, setEnding] = useState<"completed" | "cancelled" | null>(null);
   const [notes, setNotes] = useState("");
-  const action = useAction();
+  const dirty = Object.keys(drafts).length > 0;
+  useEffect(() => {
+    registerGuard(
+      () =>
+        !action.busy &&
+        (!dirty ||
+          window.confirm(
+            "Quitter l’entraînement sans enregistrer les saisies en cours ?",
+          )),
+    );
+    const unload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    if (dirty || action.busy) window.addEventListener("beforeunload", unload);
+    return () => {
+      registerGuard(null);
+      window.removeEventListener("beforeunload", unload);
+    };
+  }, [dirty, action.busy, registerGuard]);
+  function clearDraft(key: string) {
+    setDrafts((current) => {
+      const next = { ...current };
+      delete next[key];
+      return next;
+    });
+  }
   if (!training)
     return (
       <Empty title="Aucun entraînement en cours">
@@ -243,23 +196,20 @@ export function ActiveTraining({
     );
   const total = training.entries.reduce((sum, e) => sum + e.sets, 0);
   return (
-    <>
+    <div className="sport-training">
       <div className="sport-toolbar">
         <div>
           <h2>{training.name}</h2>
           <p className="muted">Démarré le {moment(training.started_at)}</p>
         </div>
-        <span className="sport-tag">
+        <span className="sport-tag" aria-live="polite">
           {training.sets.length} / {total} séries
         </span>
       </div>
-      <progress
-        className="sport-progress"
-        max={total}
-        value={training.sets.length}
-        aria-label="Progression de l’entraînement"
-      />
-      <RestTimer training={training} onChanged={onChanged} />
+      <p className="muted small-text">
+        Saisissez vos résultats puis validez chaque série. Les valeurs
+        enregistrées seront proposées au prochain entraînement.
+      </p>
       {training.entries.map((entry, i) => (
         <section className="sport-session-exercise" key={i}>
           <div className="sport-section-heading">
@@ -271,34 +221,119 @@ export function ActiveTraining({
               {kinds.find((k) => k.id === entry.kind)?.name}
             </span>
           </div>
+          {entry.kind.startsWith("weight") && (
+            <p className="muted small-text">
+              Charge totale : barre comprise et deux haltères additionnés.
+            </p>
+          )}
           <div className="sport-set-list">
             {Array.from({ length: entry.sets }, (_, j) => {
               const record = training.sets.find(
                 (s) => s.entry_index === i && s.set_index === j,
               );
+              const key = `${i}/${j}`;
+              const kind = kinds.find((k) => k.id === entry.kind)!;
+              const previous = training.sets
+                .filter((s) => s.entry_index === i && s.set_index < j)
+                .at(-1);
+              const suggested = entry.suggested_values[j];
+              const values =
+                drafts[key] ??
+                record?.values ??
+                suggested ??
+                previous?.values ??
+                entry.target;
               return (
-                <button
+                <form
                   className={`sport-set ${record ? "is-complete" : ""}`}
                   key={j}
-                  onClick={() => setEditing({ entry: i, set: j })}
-                  aria-label={`${record ? "Modifier" : "Valider"} ${entry.name}, série ${j + 1}`}
+                  aria-label={`${entry.name}, série ${j + 1}`}
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    void action.run(
+                      () => {
+                        setScope(key);
+                        return sportApi.write<Training>(
+                          `/sessions/${training.id}/sets/${key}`,
+                          { expected_version: training.version, values },
+                        );
+                      },
+                      (t) => {
+                        onChanged(t);
+                        clearDraft(key);
+                      },
+                    );
+                  }}
                 >
-                  <span className="sport-set-number">
-                    {record ? "✓" : j + 1}
-                  </span>
-                  <span>
-                    <strong>Série {j + 1}</strong>
-                    <small>
-                      {valuesText(
-                        kinds.find((k) => k.id === entry.kind)!,
-                        record?.values ?? entry.target,
-                      ) || "Saisir les résultats"}
-                    </small>
-                  </span>
-                  <span className="sport-set-action">
-                    {record ? "Modifier" : "Valider"}
-                  </span>
-                </button>
+                  <fieldset className="sport-set-fields" disabled={action.busy}>
+                    <legend>
+                      <span className="sport-set-number" aria-hidden="true">
+                        {record ? <Icon name="check" size={16} /> : j + 1}
+                      </span>
+                      <strong>Série {j + 1}</strong>
+                      <span className="sport-set-state">
+                        {drafts[key]
+                          ? "Saisie à enregistrer"
+                          : record
+                            ? "Validée"
+                            : suggested
+                              ? "Derniers résultats"
+                              : "À valider"}
+                      </span>
+                    </legend>
+                    <ValuesFields
+                      kind={kind}
+                      value={values}
+                      onChange={(v) =>
+                        setDrafts((old) => ({ ...old, [key]: v }))
+                      }
+                      required
+                    />
+                    <div className="sport-set-actions">
+                      <button
+                        className={
+                          record ? "secondary-button" : "primary-button"
+                        }
+                      >
+                        {record ? "Corriger la série" : "Valider la série"}
+                      </button>
+                      {record && (
+                        <button
+                          type="button"
+                          className="text-button"
+                          onClick={() =>
+                            void action.run(
+                              () => {
+                                setScope(key);
+                                return sportApi.write<Training>(
+                                  `/sessions/${training.id}/sets/${key}`,
+                                  { expected_version: training.version },
+                                  "DELETE",
+                                );
+                              },
+                              (t) => {
+                                onChanged(t);
+                                setDrafts((old) => ({ ...old, [key]: values }));
+                              },
+                            )
+                          }
+                        >
+                          Annuler la validation
+                        </button>
+                      )}
+                      {drafts[key] && (
+                        <button
+                          type="button"
+                          className="text-button"
+                          onClick={() => clearDraft(key)}
+                        >
+                          Annuler la saisie
+                        </button>
+                      )}
+                    </div>
+                    <ErrorMessage message={scope === key ? action.error : ""} />
+                  </fieldset>
+                </form>
               );
             })}
           </div>
@@ -307,28 +342,32 @@ export function ActiveTraining({
       <div className="sport-toolbar">
         <button
           className="text-button danger"
-          onClick={() => setEnding("cancelled")}
+          disabled={action.busy}
+          onClick={() => {
+            if (
+              !dirty ||
+              window.confirm(
+                "Abandonner sans enregistrer les saisies en cours ?",
+              )
+            )
+              setEnding("cancelled");
+          }}
         >
           Abandonner l’entraînement
         </button>
         <button
           className="primary-button"
-          disabled={training.sets.length !== total}
+          disabled={action.busy || dirty || training.sets.length !== total}
           onClick={() => setEnding("completed")}
         >
           Terminer l’entraînement
         </button>
       </div>
-      {editing && (
-        <SetForm
-          training={training}
-          entryIndex={editing.entry}
-          setIndex={editing.set}
-          kinds={kinds}
-          onClose={() => setEditing(null)}
-          onChanged={onChanged}
-        />
-      )}{" "}
+      {dirty && (
+        <p className="muted small-text">
+          Validez, corrigez ou annulez les saisies en cours avant de terminer.
+        </p>
+      )}
       {ending && (
         <Dialog
           title={
@@ -343,14 +382,20 @@ export function ActiveTraining({
             onSubmit={(e) => {
               e.preventDefault();
               void action.run(
-                () =>
-                  sportApi.write<Training>(`/sessions/${training.id}/finish`, {
-                    expected_version: training.version,
-                    outcome: ending,
-                    notes,
-                  }),
+                () => {
+                  setScope("finish");
+                  return sportApi.write<Training>(
+                    `/sessions/${training.id}/finish`,
+                    {
+                      expected_version: training.version,
+                      outcome: ending,
+                      notes,
+                    },
+                  );
+                },
                 () => {
                   setEnding(null);
+                  registerGuard(null);
                   onFinished();
                 },
               );
@@ -369,7 +414,7 @@ export function ActiveTraining({
                 onChange={(e) => setNotes(e.target.value)}
               />
             </label>
-            <ErrorMessage message={action.error} />
+            <ErrorMessage message={scope === "finish" ? action.error : ""} />
             <button disabled={action.busy} className="primary-button">
               {ending === "completed"
                 ? "Enregistrer les résultats"
@@ -378,7 +423,7 @@ export function ActiveTraining({
           </form>
         </Dialog>
       )}
-    </>
+    </div>
   );
 }
 export function History({ kinds }: { kinds: KindDefinition[] }) {

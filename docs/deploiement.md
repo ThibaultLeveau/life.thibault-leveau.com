@@ -179,3 +179,9 @@ Appliquer `0006_sport` via le script habituel, après sauvegarde. La migration e
 ### Pages de programmes Sport
 
 Le renommage en programmes et les pages de création/modification conservent `0006_sport`, les routes API et les tables. Publier avec la sauvegarde habituelle ; aucune migration nouvelle ni variable supplémentaire. Vérifier sur mobile et ordinateur `/sport?tab=workouts&program=new`, la création, la modification via `program=<uuid>`, le retour, les onglets, les erreurs et la conservation des programmes/entraînements existants. L’image précédente reste compatible avec les données.
+
+### Saisie directe et reprise des séries Sport
+
+Publier avec la sauvegarde habituelle ; aucun secret, service ni migration SQL supplémentaire (`0006_sport`). Les nouvelles propositions sont conservées dans les instantanés JSONB : respecter la [compatibilité de retour arrière](sauvegardes.md#propositions-de-series-sport), qui ne se déduit pas de la seule révision Alembic.
+
+Sur un compte de recette isolé, saisir deux séries de charges/répétitions différentes directement, vérifier correction et annulation, défilement avec compteur fixe, puis terminer et relancer le programme. Vérifier les valeurs proposées et leur conservation après rechargement, avec aucune série déjà validée. Contrôler le petit écran, les thèmes, le clavier, l’accès aux dernières commandes et les erreurs/conflits. Comparer SHA exécuté, sondes, `/sport`, OpenAPI et documentation en HTTPS ; consigner sauvegarde et résultats dans l’issue.
