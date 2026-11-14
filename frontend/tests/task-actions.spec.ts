@@ -427,6 +427,16 @@ test("mobile tactile : défilement, appui long, actions et navigation à 320/375
     expect(bounds.x + bounds.width).toBeLessThanOrEqual(width);
     await page.keyboard.press("Escape");
   }
+  await page.getByRole("button", { name: "Ouvrir la navigation" }).tap();
+  await page
+    .getByRole("button", { name: "Nouvel espace", exact: true })
+    .tap();
+  await expect(page.getByRole("dialog")).toHaveCount(1);
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Fermer", exact: true })
+    .tap();
+  await expect(page.locator(".tasks-main")).toBeFocused();
   await mutate("/preferences", { theme: "dark" }, "PUT");
   await page.reload();
   await page

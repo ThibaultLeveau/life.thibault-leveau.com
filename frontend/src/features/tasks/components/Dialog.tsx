@@ -28,7 +28,12 @@ export function Dialog({
       ?.focus();
     return () => {
       element.close();
-      previous?.focus();
+      if (previous?.isConnected && previous.getClientRects().length)
+        previous.focus({ preventScroll: true });
+      else
+        document
+          .getElementById("tasks-content")
+          ?.focus({ preventScroll: true });
     };
   }, []);
   return (

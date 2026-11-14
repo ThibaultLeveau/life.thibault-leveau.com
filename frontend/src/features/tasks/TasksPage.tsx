@@ -575,7 +575,10 @@ export function TasksPage() {
           <button
             className="icon-button"
             aria-label="Gérer et réordonner les espaces"
-            onClick={() => setManageSpaces(true)}
+            onClick={() => {
+              setSidebarOpen(false);
+              setManageSpaces(true);
+            }}
           >
             <Icon name="settings" size={15} />
           </button>
@@ -612,7 +615,10 @@ export function TasksPage() {
         </nav>
         <button
           className="sidebar-new-space"
-          onClick={() => setCreateSpace(true)}
+          onClick={() => {
+            setSidebarOpen(false);
+            setCreateSpace(true);
+          }}
         >
           <Icon name="plus" size={16} />
           Nouvel espace
@@ -625,7 +631,10 @@ export function TasksPage() {
           </a>
           <button
             className="sidebar-subtle"
-            onClick={() => setManageSpaces(true)}
+            onClick={() => {
+              setSidebarOpen(false);
+              setManageSpaces(true);
+            }}
           >
             <Icon name="archive" size={17} />
             Archives des espaces
@@ -756,7 +765,10 @@ export function TasksPage() {
               </p>
               <button
                 className="primary-button"
-                onClick={() => setCreateSpace(true)}
+                onClick={() => {
+                  setSidebarOpen(false);
+                  setCreateSpace(true);
+                }}
               >
                 <Icon name="plus" />
                 Créer mon premier espace
