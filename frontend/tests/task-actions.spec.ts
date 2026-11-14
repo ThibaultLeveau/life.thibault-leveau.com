@@ -186,6 +186,14 @@ test("rectangle et actions groupées : dates, déplacement, suppression et dés�
   await page
     .getByRole("button", { name: "Replanifier", exact: true })
     .click();
+  const calendar = page.getByRole("dialog").getByRole("grid");
+  await calendar.locator('button[tabindex="0"]').focus();
+  await page.keyboard.press("PageDown");
+  const focusedDate = await page.locator(":focus").getAttribute("data-date");
+  await page.keyboard.press("Space");
+  await expect(
+    calendar.locator(`[data-date="${focusedDate}"]`),
+  ).toBeFocused();
   await page
     .getByRole("dialog")
     .getByRole("button", { name: "Demain", exact: true })
@@ -521,5 +529,18 @@ test("rectangle : défilement aux bords, annulation, Ctrl-clic et menu borné", 
   expect(bounds.y + bounds.height).toBeLessThanOrEqual(800);
   await page.getByRole("heading", { name: `# ${space.name}` }).click();
   await expect(menu).toHaveCount(0);
+  await page.setViewportSize({ width: 800, height: 180 });
+  await row(page, tasks[0]).scrollIntoViewIfNeeded();
+  await row(page, tasks[0])
+    .getByRole("button", { name: `Actions : ${tasks[0].title}`, exact: true })
+    .click();
+  const shortMenu = (await menu.boundingBox())!;
+  expect(shortMenu.y + shortMenu.height).toBeLessThanOrEqual(180);
+  await menu
+    .getByRole("menuitem", { name: "Supprimer", exact: true })
+    .scrollIntoViewIfNeeded();
+  await expect(
+    menu.getByRole("menuitem", { name: "Supprimer", exact: true }),
+  ).toBeInViewport();
   expect((await taskFromAPI(page.request, hiddenTask)).version).toBe(1);
 });

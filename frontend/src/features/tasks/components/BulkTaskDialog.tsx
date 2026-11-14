@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { api, ApiError } from "../api";
 import { relativeDate } from "../dates";
 import { plusDays } from "../scheduling";
@@ -34,6 +34,7 @@ export function BulkTaskDialog({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [conflict, setConflict] = useState(false);
+  const calendar = useRef<HTMLFieldSetElement>(null);
   const verb =
     action === "archive"
       ? "Supprimer"
@@ -138,13 +139,26 @@ export function BulkTaskDialog({
                 Sans date
               </button>
             </div>
-            <fieldset disabled={busy} className="bulk-calendar">
+            <fieldset
+              ref={calendar}
+              disabled={busy}
+              className="bulk-calendar"
+            >
               <legend className="sr-only">Nouvelle échéance</legend>
               <Calendar
                 key={date?.slice(0, 7) ?? today.slice(0, 7)}
                 value={date}
                 today={today}
-                onChange={setDate}
+                onChange={(next) => {
+                  setDate(next);
+                  requestAnimationFrame(() =>
+                    calendar.current
+                      ?.querySelector<HTMLButtonElement>(
+                        `[data-date="${next}"]`,
+                      )
+                      ?.focus({ preventScroll: true }),
+                  );
+                }}
               />
             </fieldset>
             <p role="status">

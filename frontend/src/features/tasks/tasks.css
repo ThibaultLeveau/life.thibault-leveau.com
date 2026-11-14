@@ -2229,6 +2229,8 @@
 /* Shared task menus and transient selection, in every task view. */
 .task-context-menu {
   box-sizing: border-box;
+  max-height: calc(100dvh - 16px);
+  overflow-y: auto;
   position: fixed;
   z-index: 60;
   width: 216px;
