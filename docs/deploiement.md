@@ -2,6 +2,8 @@
 
 ## Principe
 
+Le déploiement sur le VPS termine chaque changement, y compris documentaire ou portant sur `AGENTS.md`. Après la revue, la réussite de la CI et la fusion, l'agent publie le dernier `main` validé sans attendre une nouvelle demande. Il vérifie la version exécutée et les routes publiques, puis consigne les résultats dans l'issue. Un blocage de production doit être signalé explicitement ; une fusion seule ne termine pas la livraison.
+
 Life est publié sur un VPS Hostinger déjà équipé de Docker et Caddy. La livraison utilise un projet Compose dédié `life`, sur le réseau externe `multisite_proxy`. Aucun port applicatif supplémentaire n'est ouvert sur l'hôte.
 
 Le script construit l'image depuis un commit propre, démarre PostgreSQL, sauvegarde, migre explicitement puis démarre le service web. Il conserve la référence de l'image précédente ; revenir à cette image ne restaure pas les données. DNS et Caddy sont configurés une première fois, puis les livraisons courantes ne modifient que Life.
@@ -137,10 +139,11 @@ Contrôler dans un navigateur l'accueil, la connexion aux tâches, les deux vues
 
 ## Livraisons suivantes
 
-1. Préparer et tester le nouveau commit.
+1. Préparer et tester le nouveau commit, faire la revue, attendre la CI et fusionner la PR ; revenir sur `main` à jour et propre.
 2. Lancer `./scripts/deploy.sh` depuis le dossier propre sur le VPS.
 3. Exécuter le smoke test public et consulter les journaux.
 4. Garder l'image précédente le temps de valider la livraison.
+5. Vérifier que l'image exécutée correspond au commit publié, contrôler les parcours affectés et consigner les résultats dans l'issue.
 
 Les paramètres DNS et le bloc Caddy restent stables tant que le domaine, le réseau et l'alias ne changent pas. GitHub Actions vérifie les commits ; il ne déploie pas automatiquement.
 

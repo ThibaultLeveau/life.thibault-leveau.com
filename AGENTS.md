@@ -26,6 +26,7 @@ Ces règles s'appliquent à l'ensemble du dépôt et à chaque requête concerna
 5. **Ouvrir une pull request GitHub** (équivalent d'une merge request) vers `main`, liée à l'issue avec `Closes #<numéro>`. Décrire le problème, la modification, les validations effectuées et les limites ou risques éventuels.
 6. **Effectuer une code review avant la fusion.** Relire le diff complet : conformité à la demande et à l'architecture, correction, régressions, sécurité, tests et documentation. Consigner les constats et leur résolution dans la PR, en précisant s'il s'agit d'une auto-revue ou d'une revue indépendante. Corriger les problèmes relevés, relancer les validations affectées et revoir tout nouveau changement.
 7. **Fusionner après validation.** Attendre la réussite de tous les contrôles CI sur le dernier commit et la résolution des remarques de revue. Respecter les protections de branche et les approbations exigées par GitHub, sans les contourner. Fusionner la PR, vérifier la clôture de l'issue et remettre le dépôt local sur `main` à jour. Si un blocage empêche la fusion, le signaler explicitement.
+8. **Déployer sur le VPS à la fin de chaque changement**, y compris une modification de documentation ou de ces consignes. Après la fusion, publier le dernier `main` validé en suivant `docs/deploiement.md`, avec les sauvegardes et migrations nécessaires. Cette étape fait partie de la demande et ne nécessite pas une nouvelle demande de déploiement. Vérifier la version réellement exécutée, les sondes, les routes HTTPS publiques et les parcours affectés ; consigner le commit publié et les résultats dans l'issue. Ne pas déclarer le travail terminé avant ces vérifications. Si un blocage empêche le déploiement, le signaler explicitement et le consigner dans l'issue.
 
 ## Vérifications du projet
 
@@ -39,4 +40,4 @@ make build        # Compilation du frontend et de la documentation en mode stric
 
 La CI complète ces contrôles par la construction de l'image Docker et les tests HTTP du conteneur. Pour un changement de packaging ou de déploiement, vérifier également l'image et ses routes localement lorsque l'environnement le permet.
 
-La fusion et la mise en production sont deux opérations distinctes : le déploiement suit `docs/deploiement.md` lorsqu'il est demandé.
+La fusion et la mise en production sont deux opérations successives obligatoires : la fusion GitHub ne publie pas le site ; l'agent exécute ensuite le déploiement sur le VPS selon `docs/deploiement.md`.
