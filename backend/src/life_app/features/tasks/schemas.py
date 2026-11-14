@@ -221,6 +221,10 @@ class ScheduleParseInput(Schema):
 
 class ScheduleParseOutput(Schema):
     model_config = ConfigDict(str_strip_whitespace=False)
+    status: Literal["none", "recognized", "incomplete", "invalid"] = Field(
+        description="Une expression incomplète ou invalide n’applique aucune partie du calendrier."
+    )
+    diagnostic: str | None = Field(description="Explication française, sans modification du titre.")
     title: str
     due_date: date | None
     recurrence: Recurrence | None

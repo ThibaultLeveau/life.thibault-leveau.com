@@ -16,6 +16,14 @@
 | `migrations/` | Historique Alembic inclus dans le package et l'image |
 | `cli.py` | Migration, création de compte et réinitialisation du mot de passe |
 
+## Grammaire des raccourcis
+
+`scheduling_language.py` découpe le texte normalisé en jetons portant les indices originaux, lit les nombres/ordinaux français et les dates. `scheduling_grammar.py` lit des clauses avec des lecteurs de listes/plages partagés et assemble un `CalendarSpec` transitoire : cadence unique, sélections, bornes, exceptions, mode de calcul. La compilation valide les conflits avant de produire le `Recurrence` existant. Des dates annuelles liées à des jours différents ne sont jamais aplaties en produit cartésien. Les nombres isolés du titre ne deviennent pas des sélections calendaires.
+
+`scheduling.py` trouve l’expression, protège les guillemets, préserve le titre et expose les diagnostics ; le calendrier n’est calculé qu’après validation de toute la composition. L’API borne l’entrée à 1000 caractères, puis le moteur conserve ses limites de règles, dates exclues et nombre de résolutions. Aucun texte n’est persisté ou envoyé à un service tiers. Une expression inconnue reste littérale ; une expression commencée mais incomplète ou contradictoire ne fournit aucune règle partielle.
+
+Pour ajouter du vocabulaire, étendre le lexique ou un lecteur de clause, puis tester sa combinaison avec les autres clauses dans plusieurs ordres. Éviter une nouvelle expression régulière pour chaque phrase complète. Le [guide utilisateur](taches.md#composer-les-raccourcis-francais) décrit la sémantique des ancres, durées, nombres de fois et limites.
+
 ## Transactions et concurrence
 
 Les accès SQLAlchemy/psycopg synchrones sont utilisés dans les routes FastAPI synchrones. Une requête partage une session SQL et la ferme à sa fin ; un échec annule les mutations non commitées. Le routeur commite après validation des résultats. Le service enregistre la tâche et ses événements dans la même transaction.

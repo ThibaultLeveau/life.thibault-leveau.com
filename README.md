@@ -4,6 +4,8 @@ Un espace personnel pour organiser ses tâches : espaces et sous-espaces, sectio
 
 Les titres reconnaissent les dates et récurrences françaises pendant la saisie : « Lire demain », « Courir tous les lundis ». Le planificateur propose un calendrier, des récurrences personnalisées avec aperçu, des exceptions et une fin de série. Chaque résolution conserve son historique et prépare la prochaine occurrence.
 
+Les raccourcis se composent : « tous les mercredis toutes les trois semaines », « les 1er et 21 de chaque mois » ou « un jour sur deux pour cinq fois sauf demain ». Les nombres peuvent s’écrire en lettres. L’aperçu affiche les prochaines dates ; une composition incomplète ou contradictoire est expliquée avant l’enregistrement.
+
 **[Ouvrir Life](https://life.thibault-leveau.com/)** · **[Documentation](https://life.thibault-leveau.com/documentation/)** · **[Référence API](https://life.thibault-leveau.com/api/docs)**
 
 ## Architecture

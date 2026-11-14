@@ -56,6 +56,8 @@ Enfin, le script restaure un dump dans une seconde base, compare les événement
 
 `scheduling.spec.ts` vérifie la reconnaissance en direct dans l’éditeur et l’ajout rapide, l’enregistrement immédiat, le refus de reconnaissance, la personnalisation mensuelle avec exceptions, la persistance API, la résolution/annulation et le calendrier au clavier sur mobile dans les deux thèmes. Les captures et mesures de débordement portent sur le bundle compilé.
 
+`test_scheduling_grammar.py` couvre les familles de nombres/ordinaux, les listes/plages, les alternances, les positions, les bornes et exceptions, les 120 permutations de cinq clauses indépendantes, les cadences hebdomadaires dans les deux ordres, les préfixes de saisie et les faux positifs. Un corpus déterministe de vocabulaire malformé vérifie l’absence d’erreur interne. Les tests HTTP comparent analyse/aperçu/création/résolution/annulation et contrôlent les diagnostics, la taille d’entrée et le CSRF. Les parcours navigateur ajoutent les compositions écrites en lettres, la sauvegarde immédiate d’une expression incomplète, le choix littéral, les exemples du planificateur et leur affichage mobile.
+
 Pour cibler une autre image locale :
 
 ```bash

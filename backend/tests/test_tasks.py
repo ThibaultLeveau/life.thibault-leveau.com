@@ -260,6 +260,53 @@ def test_schedule_api_parity_validation_and_literal_titles(client, app):
         )
 
 
+def test_composed_french_api_preview_persistence_and_diagnostics(client, app, monkeypatch):
+    from datetime import UTC, datetime
+
+    from life_app.features.tasks import service
+
+    monkeypatch.setattr(service, "utcnow", lambda: datetime(2026, 11, 14, 12, tzinfo=UTC))
+    payload = {
+        "text": "Préparer les 21 dossiers tous les mercredis "
+        "toutes les trois semaines pour cinq fois",
+        "today": "2026-11-14",
+        "timezone": "Europe/Paris",
+    }
+    response = client.post("/api/v1/scheduling/parse", json=payload)
+    assert response.status_code == 200
+    parsed = response.json()
+    assert parsed["status"] == "recognized" and parsed["diagnostic"] is None
+    assert parsed["title"] == "Préparer les 21 dossiers"
+    assert parsed["dates"] == ["2026-11-18", "2026-12-09", "2026-12-30", "2027-01-20", "2027-02-10"]
+    preview = client.post("/api/v1/scheduling/preview", json={"recurrence": parsed["recurrence"]})
+    assert preview.json()["dates"] == parsed["dates"]
+    space, _ = create_space(client)
+    item = create_task(client, space, title=parsed["title"], recurrence=parsed["recurrence"])
+    assert item["due_date"] == parsed["due_date"]
+    advanced = mutate(client, item, "complete")
+    assert advanced["due_date"] == parsed["dates"][1]
+    undone = mutate(client, advanced, "undo-complete")
+    assert undone["due_date"] == parsed["dates"][0]
+    assert undone["recurrence"] == parsed["recurrence"]
+    for expression, status in [
+        ("Lire tous les mercredis toutes les trois", "incomplete"),
+        ("Lire tous les jours toutes les deux semaines", "invalid"),
+        ("Lire « tous les deux jours »", "none"),
+    ]:
+        result = client.post("/api/v1/scheduling/parse", json=payload | {"text": expression}).json()
+        assert result["status"] == status
+        assert result["title"] == expression and result["recurrence"] is None
+        assert bool(result["diagnostic"]) == (status != "none")
+    assert client.get(f"/api/v1/tasks/{item['id']}").json() == undone
+    assert (
+        client.post("/api/v1/scheduling/parse", json=payload | {"text": "a" * 1001}).status_code
+        == 422
+    )
+    with TestClient(app) as without_csrf:
+        without_csrf.cookies.update(dict(client.cookies))
+        assert without_csrf.post("/api/v1/scheduling/parse", json=payload).status_code == 403
+
+
 def test_schema_matches_models_and_migration_roundtrip(engine, app):
     with engine.begin() as conn:
         assert compare_metadata(MigrationContext.configure(conn), Base.metadata) == []

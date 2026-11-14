@@ -12,6 +12,7 @@ import { ErrorMessage } from "./Dialog";
 import { Icon } from "./Icon";
 import { Calendar } from "./ScheduleCalendar";
 import { RecurrenceFields } from "./RecurrenceFields";
+import { ScheduleHelp } from "./ScheduleHelp";
 
 export function SchedulePicker({
   value,
@@ -105,7 +106,8 @@ export function SchedulePicker({
       if (controller.signal.aborted) return;
       if (!result.matched_text || result.title) {
         setError(
-          "Date non reconnue. Essayez « demain », « 25/12/2026 » ou « tous les lundis ».",
+          result.diagnostic ||
+            "Date non reconnue. Essayez « demain », « 25/12/2026 » ou « tous les mercredis toutes les trois semaines ».",
         );
         return;
       }
@@ -231,6 +233,13 @@ export function SchedulePicker({
               </button>
             </div>
             <ErrorMessage message={error} />
+            <ScheduleHelp
+              disabled={busy}
+              onChoose={(example) => {
+                setText(example);
+                setError("");
+              }}
+            />
             {tab === "date" ? (
               <>
                 <div className="date-shortcuts">

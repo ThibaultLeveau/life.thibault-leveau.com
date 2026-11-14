@@ -33,8 +33,10 @@ def committed_task(db, item):
 def parse_scheduling(payload: s.ScheduleParseInput, user: CurrentUser):
     """Analyser le français sans écrire de tâche ; texte reconnu et indices Unicode renvoyés.
 
+    Nombres français, cadence et sélections calendaires composables dans différents ordres.
     Dates relatives à today, fuseau IANA pour les récurrences. Texte entre guillemets
-    conservé. Une expression inconnue renvoie matched_text=null et le titre intact.
+    conservé. status=none pour du texte littéral ; incomplete/invalid avec diagnostic
+    français sans appliquer de calendrier partiel. recognized expose l’aperçu et la règle.
     """
     try:
         Recurrence.valid_timezone(payload.timezone)

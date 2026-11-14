@@ -8,6 +8,8 @@ React, TypeScript et Vite conservent l'outillage du socle. `App.tsx` sélectionn
 
 Les règles et dates restent des données API. Les brouillons du planificateur ne sont appliqués qu’après sélection de date ou validation de l’aperçu serveur. Les erreurs conservent la saisie ; Échap referme le planificateur avant le dialogue. Aucun contenu de tâche n’est enregistré dans localStorage.
 
+La détection affiche le libellé et les trois premières dates retournées par le serveur. `status=incomplete/invalid` affiche `diagnostic` et demande une correction ou le choix explicite **Garder le texte** avant sauvegarde, y compris sur validation immédiate et dans l’ajout rapide. Le planificateur montre le même diagnostic. `ScheduleHelp` expose des exemples français ; ses boutons dans le planificateur remplissent seulement le brouillon à interpréter. L’aide est hors de la région `aria-live` pour éviter de la relire à chaque frappe.
+
 | Fichier / composant | Rôle |
 | --- | --- |
 | `TasksPage.tsx` | Session, espaces, état de chargement, filtres et assemblage |

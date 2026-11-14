@@ -69,7 +69,7 @@ export function shortRecurrence(rule: Recurrence) {
   let label =
     interval === 1
       ? labels[parts.FREQ] || "Récurrence personnalisée"
-      : `Tous les ${interval} ${units[parts.FREQ]}`;
+      : `${parts.FREQ === "WEEKLY" ? "Toutes les" : "Tous les"} ${interval} ${units[parts.FREQ]}`;
   const groupedPosition =
     parts.BYSETPOS && ["MO,TU,WE,TH,FR", "SA,SU"].includes(parts.BYDAY);
   if (groupedPosition)
@@ -83,6 +83,11 @@ export function shortRecurrence(rule: Recurrence) {
       .join(", ")}`;
   if (parts.BYMONTHDAY)
     label += ` · ${parts.BYMONTHDAY === "-1" ? "dernier jour" : `le ${parts.BYMONTHDAY.replaceAll(",", ", ")}`}`;
+  if (parts.BYMONTH)
+    label += ` · ${parts.BYMONTH.split(",")
+      .map((month) => months[Number(month) - 1])
+      .join(", ")}`;
+  if (parts.BYWEEKNO || parts.BYYEARDAY) label += " · calendrier personnalisé";
   if (rule.mode === "completion") label += " après résolution";
   return label;
 }
@@ -133,10 +138,19 @@ export function useScheduleRecognition(text: string, enabled = true) {
     suggestion: current?.matched_text ? current : null,
     pending: active && !current && !error,
     error,
+    diagnostic: current?.diagnostic ?? null,
     ignored: ignored === key,
     dismiss: (literal = text) => setIgnored(`${today}:${literal}`),
     restore: () => setIgnored(null),
-    resolve: async () =>
-      active ? (current ?? (await parseSchedule(text, today))) : null,
+    resolve: async () => {
+      const parsed = active
+        ? (current ?? (await parseSchedule(text, today)))
+        : null;
+      if (parsed?.diagnostic)
+        throw new Error(
+          `${parsed.diagnostic} Corrigez la saisie ou choisissez « Garder le texte ».`,
+        );
+      return parsed;
+    },
   };
 }

@@ -171,7 +171,9 @@ Ces routes utilisent la même session, le même jeton CSRF et le même contrôle
 | `POST /api/v1/scheduling/preview` | `recurrence`, `after` inclusif facultatif, `limit` 1–12 (6 par défaut), `completed` 0–10000 | `label`, `dates`, `explanation` |
 | `POST /api/v1/tasks/{id}/undo-complete` | `expected_version` | Tâche restaurée avant sa dernière résolution |
 
-Sans correspondance, l’analyse retourne le texte intact, `matched_text:null` et aucune date. Une date seule peut laisser un titre vide : le client doit demander un titre avant de créer la tâche. Les indices sont des points de code Unicode Python, pas des unités UTF-16 JavaScript. Une erreur de syntaxe de règle, une date impossible, un fuseau inconnu, un aperçu vide ou une échéance récurrente absente donne 422. Sans session : 401 ; sans CSRF/origine valide : 403. Les tâches d’un autre propriétaire restent 404.
+L’analyse retourne `status` (`none`, `recognized`, `incomplete`, `invalid`) et `diagnostic` (explication française nullable). `recognized` expose la règle/date et son aperçu. `none` conserve un texte littéral. `incomplete` et `invalid` conservent également le titre intact, avec `matched_text:null`, `recurrence:null`, `due_date:null`, `dates:[]` : aucune composition partielle n’est appliquée. Ces diagnostics d’interprétation sont des réponses HTTP 200 ; le client doit proposer une correction ou le choix explicite de garder le texte. Une entrée hors contrat (plus de 1000 caractères, date de référence ou fuseau invalides), une règle explicite invalide, un aperçu vide ou une échéance récurrente absente donnent 422. Sans session : 401 ; sans CSRF/origine valide : 403. Les tâches d’un autre propriétaire restent 404.
+
+Une date seule peut laisser un titre vide : le client doit demander un titre avant de créer la tâche. Les indices sont des points de code Unicode Python, pas des unités UTF-16 JavaScript. Les guillemets et le texte non reconnu restent littéraux. Les [raccourcis composables](taches.md#composer-les-raccourcis-francais) utilisent les mêmes contraintes et le même moteur que l’aperçu : nombres en lettres, cadence, sélections de jours/mois/positions, bornes et exclusions dans différents ordres. Pour un intervalle associé à une sélection calendaire, l’analyse aligne l’ancre sur la première date compatible avant d’appliquer les exclusions. Cela concerne la création par analyse ; les règles stockées et les RRULE envoyées directement restent inchangées.
 
 `TaskCreate`, `TaskPatch` et `TaskOutput` acceptent/exposent `recurrence`, objet nullable :
 
@@ -194,7 +196,7 @@ Les titres envoyés directement à `/tasks` restent littéraux : l’analyse est
 ```bash
 curl --fail -b cookies.txt -H "X-CSRF-Token: $CSRF" -H 'Content-Type: application/json' \
   https://life.thibault-leveau.com/api/v1/scheduling/parse \
-  -d '{"text":"Courir tous les lundis et jeudis","today":"2026-11-14","timezone":"Europe/Paris"}'
+  -d '{"text":"Courir tous les mercredis toutes les trois semaines pour cinq fois","today":"2026-11-14","timezone":"Europe/Paris"}'
 
 curl --fail -b cookies.txt -H "X-CSRF-Token: $CSRF" -H 'Content-Type: application/json' \
   https://life.thibault-leveau.com/api/v1/scheduling/preview \

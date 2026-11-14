@@ -334,3 +334,135 @@ for (const theme of ["light", "dark"])
     await expect(page.getByRole("dialog")).toBeVisible();
     await expect(page.locator(".schedule-trigger")).toBeFocused();
   });
+
+test("composition française, nombres en lettres et aperçu immédiat", async ({
+  page,
+}, testInfo) => {
+  await setup(page);
+  await page
+    .getByLabel("Titre", { exact: true })
+    .fill(
+      "Bilan 2027 tous les mercredis toutes les trois semaines pour cinq fois",
+    );
+  await expect(page.locator(".schedule-detected")).toContainText(
+    "Toutes les 3 semaines",
+  );
+  await expect(page.locator(".detected-dates time")).toHaveCount(3);
+  await expect(page.locator(".detected-dates time").nth(1)).toHaveAttribute(
+    "datetime",
+    "2027-02-17",
+  );
+  await page.screenshot({
+    path: testInfo.outputPath("composition-francaise.png"),
+    fullPage: true,
+  });
+  const task = await save(page);
+  expect(task.title).toBe("Bilan 2027");
+  expect(task.recurrence?.rrule).toBe("FREQ=WEEKLY;BYDAY=WE;INTERVAL=3");
+  expect(task.recurrence?.max_occurrences).toBe(5);
+  await page.getByRole("button", { name: task.title, exact: true }).click();
+  await page
+    .getByLabel("Titre", { exact: true })
+    .fill("Bilan 2027 toutes les trois semaines le mercredi pour cinq fois");
+  await page.getByRole("button", { name: "Enregistrer", exact: true }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  const saved = await (
+    await page.request.get(`/api/v1/tasks/${task.id}`)
+  ).json();
+  expect(saved.recurrence).toEqual(task.recurrence);
+  expect(saved.due_date).toBe(task.due_date);
+});
+
+test("composition inachevée ou contradictoire : aucun enregistrement partiel", async ({
+  page,
+}) => {
+  await setup(page);
+  let writes = 0;
+  page.on("request", (request) => {
+    if (request.method() === "POST" && request.url().endsWith("/api/v1/tasks"))
+      writes++;
+  });
+  const title = page.getByLabel("Titre", { exact: true });
+  await title.fill("Lire tous les mercredis toutes les trois semaines");
+  await expect(page.locator(".detected-dates time")).toHaveCount(3);
+  await title.fill("Lire tous les mercredis toutes les trois");
+  await page
+    .getByRole("button", { name: "Ajouter la tâche", exact: true })
+    .click();
+  await expect(page.getByRole("alert")).toContainText("Corrigez la saisie");
+  await expect(title).toHaveValue("Lire tous les mercredis toutes les trois");
+  expect(writes).toBe(0);
+  await title.fill("Lire tous les jours toutes les deux semaines");
+  await expect(page.locator(".schedule-recognition")).toContainText(
+    "Deux rythmes différents",
+  );
+  await page
+    .getByRole("button", { name: "Garder le texte", exact: true })
+    .click();
+  const task = await save(page);
+  expect(task.title).toBe("Lire tous les jours toutes les deux semaines");
+  expect(task.recurrence).toBeNull();
+  expect(task.due_date).toBeNull();
+});
+
+test("raccourcis français du planificateur et aide responsive", async ({
+  page,
+}, testInfo) => {
+  await page.setViewportSize({ width: 320, height: 812 });
+  await setup(page, "dark");
+  await page.getByLabel("Titre", { exact: true }).fill("Préparer le bilan");
+  await page.locator(".schedule-trigger").click();
+  const planner = page.locator(".schedule-panel");
+  await planner
+    .getByText("Les raccourcis en français", { exact: true })
+    .click();
+  await planner
+    .getByRole("button", {
+      name: "tous les mercredis toutes les trois semaines",
+      exact: true,
+    })
+    .click();
+  await expect(planner.getByLabel("Date ou récurrence")).toHaveValue(
+    "tous les mercredis toutes les trois semaines",
+  );
+  await planner.getByRole("button", { name: "Interpréter la date" }).click();
+  await expect(page.locator(".schedule-preview time").nth(1)).toHaveAttribute(
+    "datetime",
+    "2027-02-17",
+  );
+  expect(
+    await page
+      .getByRole("dialog")
+      .evaluate((dialog) => dialog.scrollWidth > dialog.clientWidth),
+  ).toBe(false);
+  await planner
+    .getByText("Les raccourcis en français", { exact: true })
+    .scrollIntoViewIfNeeded();
+  await page.screenshot({
+    path: testInfo.outputPath("raccourcis-mobile.png"),
+    fullPage: true,
+  });
+  await page.getByRole("button", { name: "Appliquer la récurrence" }).click();
+  const task = await save(page);
+  expect(task.recurrence?.rrule).toBe("FREQ=WEEKLY;BYDAY=WE;INTERVAL=3");
+});
+
+test("ajout rapide avec composition et intervalle en lettres", async ({
+  page,
+}) => {
+  await setup(page);
+  await page.getByRole("button", { name: "Fermer", exact: true }).click();
+  await page.locator(".quick-add").first().click();
+  await page
+    .getByLabel("Nom de la tâche")
+    .fill("Relire une fois toutes les deux semaines le lundi");
+  const response = page.waitForResponse(
+    (r) => r.url().endsWith("/api/v1/tasks") && r.request().method() === "POST",
+  );
+  await page.getByRole("button", { name: "Ajouter", exact: true }).click();
+  const task = await (await response).json();
+  expect(task.title).toBe("Relire");
+  expect(task.due_date).toBe("2027-02-01");
+  expect(task.recurrence.rrule).toBe("FREQ=WEEKLY;BYDAY=MO;INTERVAL=2");
+  expect(task.recurrence.max_occurrences).toBeNull();
+});
