@@ -17,6 +17,8 @@ make build
 
 `make test` démarre un PostgreSQL 17 jetable sur une adresse locale, attend sa disponibilité, exécute pytest puis supprime le conteneur et ses volumes anonymes. Avec `LIFE_TEST_DATABASE_URL`, il utilise ce serveur et crée un schéma aléatoire, supprimé à la fin. Les tests métier ne sont pas ignorés si la base manque : utiliser le script ou fournir un serveur de test. Ne pas utiliser la production.
 
+L'attente vérifie l'écoute TCP sur `127.0.0.1` : le serveur temporaire d'initialisation peut répondre sur son socket Unix avant que PostgreSQL accepte les connexions des tests.
+
 ```bash
 LIFE_TEST_DATABASE_URL=postgresql+psycopg://user:password@127.0.0.1:5432/test make test
 ```
