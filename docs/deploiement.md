@@ -141,6 +141,8 @@ Contrôler dans un navigateur l'accueil, la connexion aux tâches, les deux vues
 
 Pour la livraison des récurrences, appliquer la migration `0004_recurrence` incluse dans l’image. Elle préserve les tâches et historiques existants ; le retour à une image antérieure exige un schéma compatible. Voir les [contraintes de retour arrière](sauvegardes.md#migration-0004-recurrences). Vérifier les routes authentifiées `/api/v1/scheduling/parse` et `/preview`, ainsi que le calendrier et la saisie naturelle sur le frontend publié.
 
+L’extension de la grammaire française conserve la révision `0004_recurrence` : aucune migration ni variable supplémentaire. Suivre la même publication avec sauvegarde. Vérifier en HTTPS une composition avec nombres en lettres dans le titre et le planificateur, ses prochaines dates et un diagnostic de saisie incomplète, sur un compte de recette isolé. Vérifier aussi que les tâches et événements antérieurs restent inchangés.
+
 1. Préparer et tester le nouveau commit, faire la revue, attendre la CI et fusionner la PR ; revenir sur `main` à jour et propre.
 2. Lancer `./scripts/deploy.sh` depuis le dossier propre sur le VPS.
 3. Exécuter le smoke test public et consulter les journaux.

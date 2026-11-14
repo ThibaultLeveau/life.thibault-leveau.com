@@ -73,6 +73,8 @@ export interface Schedule {
   recurrence: Recurrence | null;
 }
 export interface ScheduleSuggestion extends Schedule {
+  status: "none" | "recognized" | "incomplete" | "invalid";
+  diagnostic: string | null;
   title: string;
   matched_text: string | null;
   start: number | null;

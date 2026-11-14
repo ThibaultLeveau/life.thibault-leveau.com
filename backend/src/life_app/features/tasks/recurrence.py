@@ -229,24 +229,47 @@ def describe(rule: Recurrence) -> str:
         "MONTHLY": ("mois", "mois"),
         "YEARLY": ("année", "ans"),
     }[frequency]
-    label = f"Tous les {interval} {plural}" if interval != 1 else f"Chaque {singular}"
+    every = "Toutes les" if frequency == "WEEKLY" else "Tous les"
+    label = f"{every} {interval} {plural}" if interval != 1 else f"Chaque {singular}"
     byday = parts.get("BYDAY", "")
-    working_day = byday == "MO,TU,WE,TH,FR" and parts.get("BYSETPOS") == "-1"
-    if working_day:
-        label += " · dernier jour ouvré"
+    positions = {
+        "1": "premier",
+        "2": "deuxième",
+        "3": "troisième",
+        "4": "quatrième",
+        "5": "cinquième",
+        "-1": "dernier",
+        "-2": "avant-dernier",
+    }
+
+    def positioned(day, value):
+        if not value:
+            return day
+        if value in positions:
+            return positions[value] + " " + day
+        if int(value) < 0:
+            return f"{abs(int(value))}ᵉ {day} en partant de la fin"
+        return f"{value}ᵉ {day}"
+
+    group = {
+        "MO,TU,WE,TH,FR": "jour ouvré",
+        "MO,TU,WE,TH,FR,SA": "jour ouvrable",
+        "SA,SU": "jour du week-end",
+    }.get(byday)
+    grouped_position = group and parts.get("BYSETPOS")
+    if grouped_position:
+        label += " · " + ", ".join(positioned(group, p) for p in parts["BYSETPOS"].split(","))
     elif byday and all(day in WEEKDAYS for day in byday.split(",")):
         names = [DAY_NAMES[WEEKDAYS.index(day)] for day in byday.split(",")]
         label += " · " + ", ".join(names)
     elif byday:
         label += " · " + ", ".join(
-            ("dernier" if day[:-2] == "-1" else f"{day[:-2]}ᵉ")
-            + " "
-            + DAY_NAMES[WEEKDAYS.index(day[-2:])]
-            for day in byday.split(",")
+            positioned(DAY_NAMES[WEEKDAYS.index(day[-2:])], day[:-2]) for day in byday.split(",")
         )
     if "BYMONTHDAY" in parts:
         label += " · " + ", ".join(
-            "dernier jour" if d == "-1" else f"jour {d}" for d in parts["BYMONTHDAY"].split(",")
+            positioned("jour", d) if int(d) < 0 else f"jour {d}"
+            for d in parts["BYMONTHDAY"].split(",")
         )
     if "BYMONTH" in parts:
         months = (
@@ -264,10 +287,19 @@ def describe(rule: Recurrence) -> str:
             "décembre",
         )
         label += " · " + ", ".join(months[int(m) - 1] for m in parts["BYMONTH"].split(","))
-    if "BYSETPOS" in parts and not working_day:
+    if "BYSETPOS" in parts and not grouped_position:
         label += " · position " + parts["BYSETPOS"]
-    if "BYYEARDAY" in parts or "BYWEEKNO" in parts:
-        label += " · calendrier personnalisé"
+    if "BYYEARDAY" in parts:
+        label += " · jour(s) de l’année : " + parts["BYYEARDAY"]
+    if "BYWEEKNO" in parts:
+        weeks = [int(w) for w in parts["BYWEEKNO"].split(",")]
+        label += (
+            " · semaines impaires"
+            if weeks == list(range(1, 54, 2))
+            else " · semaines paires"
+            if weeks == list(range(2, 54, 2))
+            else " · semaines : " + parts["BYWEEKNO"]
+        )
     if rule.mode == "completion":
         label += " après résolution"
     if rule.end_date:

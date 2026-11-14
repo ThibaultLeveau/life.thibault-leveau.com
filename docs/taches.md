@@ -87,6 +87,45 @@ Dans le titre de l’éditeur **et dans l’ajout rapide**, écrire par exemple 
 
 La détection apparaît sous le titre avant l’enregistrement et met à jour le bouton d’échéance. Les mots reconnus sont retirés du titre seulement à la sauvegarde. Le bouton **Garder ces mots dans le titre** désactive cette interprétation pour la saisie actuelle ; modifier le texte relance la reconnaissance. On peut aussi entourer une expression de guillemets doubles ou français (`Lire « demain »`). Ouvrir une tâche existante ne réinterprète pas son titre tant qu’on ne le modifie pas.
 
+### Composer les raccourcis français
+
+Combiner **un rythme**, **une sélection de jours**, puis éventuellement **un début**, **une fin** et **des exceptions**. Les clauses peuvent changer d’ordre : `tous les mercredis toutes les trois semaines` et `toutes les trois semaines le mercredi` produisent les mêmes dates. Regrouper les clauses dans une expression continue, avant ou après le reste du titre. Les mots métier et les numéros de dossier restent dans le titre.
+
+Les nombres acceptent les chiffres ou les lettres, avec espaces ou traits d’union : `deux`, `vingt et un`, `vingt-et-une`, `soixante-douze`, `quatre-vingt-dix-neuf`, `deux cent vingt et un`, `mille`. Les variantes `septante`, `huitante`, `octante` et `nonante` sont aussi reconnues. Les mêmes nombres servent aux intervalles, jours du mois, durées et nombres de résolutions ; les limites de chaque réglage restent appliquées. Accents, majuscules, espaces insécables et apostrophes typographiques sont acceptés.
+
+| Élément | Exemples combinables |
+| --- | --- |
+| Intervalle | `tous les deux jours`, `toutes les deux semaines`, `tous les mois`, `tous les trois ans` |
+| Alternance | `un jour sur deux`, `une semaine sur trois`, `un mercredi sur trois` |
+| Périodes usuelles | `chaque trimestre`, `tous les deux semestres`, `toutes les quinzaines`, `mensuellement`, `annuellement` |
+| Jours hebdomadaires | `tous les lundis et jeudis`, `du lundi au vendredi`, `du vendredi au lundi`, `les week-ends` |
+| Jours du mois | `tous les 21 du mois`, `les 1er et 21 de chaque mois`, `tous les mois du 1 au 5` |
+| Positions | `le premier et le troisième mardi de chaque trimestre`, `le premier lundi et le dernier vendredi de chaque mois`, `chaque avant-dernier dimanche du mois` |
+| Groupes de positions | `les deux derniers jours du mois`, `le dernier jour ouvré de chaque mois`, `les deux derniers jours ouvrés du mois` |
+| Début ou fin de période | `chaque fin de mois`, `tous les débuts d’année`, `chaque début de semaine` (lundi), `chaque fin de semaine` (dimanche) |
+| Mois et année | `les premiers lundis de janvier et juillet chaque année`, `tous les 1 et 15 janvier et juillet`, `tous les mois pairs le quinze`, `chaque centième jour de l’année` |
+| Semaines ISO | `les semaines impaires le mercredi`, `les semaines numéros 2 et 10 le lundi` ; la parité suit le numéro ISO, y compris autour du nouvel an |
+| Début | `à partir de demain`, `dès lundi`, `à compter du 21 janvier 2027` |
+| Fin | `jusqu’au 31 décembre 2027`, `pour cinq fois`, `pendant trois mois`, `du 1 janvier 2027 au 31 mars 2027` |
+| Exceptions | `sauf le week-end`, `sauf les lundis`, `sauf en août`, `sauf le 25 décembre`, `sauf du 24/12/2027 au 31/12/2027` |
+| Délai après résolution | `tous les trois jours après résolution`, `un mois sur deux après chaque réalisation` |
+
+`Deux fois par semaine` nécessite des jours explicites : `deux fois par semaine le lundi et le jeudi`. Le nombre doit correspondre à la sélection. De même, `deux fois par mois les 1er et 21` ou `deux fois par an les 1er janvier et 1er juillet`. `Une fois toutes les trois semaines le mercredi` définit un rythme, pas une série limitée à une résolution. Les dates inexistantes et exclusions peuvent réduire le nombre effectif d’occurrences dans une période ; l’aperçu le montre.
+
+Exemple complet : `Préparer le bilan tous les mercredis toutes les trois semaines à partir du 1 janvier 2027 pour quatre fois sauf le 27 janvier 2027` donne les 6 janvier, 17 février, 10 mars et 31 mars. Sans début explicite, la date locale du navigateur sert de borne initiale. Lorsqu’un intervalle est associé à des jours précis, la première date compatible fixe la phase : un mercredi toutes les trois semaines commence au prochain mercredi du calendrier, puis avance de trois semaines. Les exceptions ne déplacent pas cette phase. Par exemple, `tous les trois jours sauf le week-end` retire les samedis et dimanches du rythme initial sans repartir du lundi suivant. Une date annuelle ne devient pas mensuelle lorsqu’on exclut un mois.
+
+Les jours et mois exclus filtrent les candidats avant les positions : `le dernier jour ouvré du mois sauf les vendredis` retient le dernier jour du lundi au jeudi. Les **dates** exclues sont retirées après le choix des positions : exclure la date du dernier jour ouvré supprime cette occurrence sans la remplacer par la veille.
+
+Une durée de trois mois court depuis le début demandé jusqu’à la veille de cette date trois mois plus tard ; une fin écrite avec `jusqu’au` est incluse. Les dates sans année désignent leur prochaine occurrence à partir du début pour les fins et exceptions. Une fin par durée/date ne se combine pas avec une fin par nombre de résolutions. Le compteur porte toujours sur les résolutions, pas sur les retards sautés.
+
+La détection montre les trois prochaines dates. **Les raccourcis en français** ouvre l’aide dans le titre et le planificateur ; dans ce dernier, cliquer un exemple le place dans le champ à interpréter. L’analyse et l’aperçu passent par le serveur, comme les réglages manuels.
+
+Pendant une saisie comme `tous les mercredis toutes les trois`, aucune partie du calendrier n’est appliquée. Une explication demande de compléter le rythme. Deux intervalles contradictoires, une sélection entièrement exclue ou une date impossible sont également expliqués. Corriger la saisie, choisir le calendrier manuellement ou cliquer **Garder le texte** pour enregistrer les mots tels quels. Un texte ordinaire comme `Acheter les trois pommes` reste littéral.
+
+Une tâche conserve une seule règle calendaire. Des calendriers indépendants tels que `tous les 1er janvier et 15 juillet` ne sont pas transformés en quatre dates par croisement : l’analyse demande des tâches distinctes. Mélanger des jours avec et sans position (`les lundis et le dernier vendredi du mois`), ou une position dans l’année avec un mois exclu (`le premier lundi de chaque année sauf en août`), demande également des calendriers distincts ou une sélection plus précise. Même refus explicite pour `deux jours sur trois`, un intervalle comptant les seuls jours ouvrés, les heures/minutes, les jours fériés automatiques ou les expressions ambiguës telles que `bimensuel`. Ces cas n’appliquent jamais silencieusement une règle plus simple. Les répétitions calendaires usuelles et leurs compositions ci-dessus restent disponibles sans service d’IA.
+
+### Utiliser le planificateur
+
 Le planificateur **Échéance et récurrence** propose :
 
 - **Date** : aujourd’hui, demain, lundi prochain, calendrier ou saisie `25/12/2026`/`2026-12-25`. Les flèches parcourent les jours, Début/Fin la semaine, Page précédente/suivante le mois et Entrée choisit le jour. Échap referme d’abord le calendrier et rend le focus au bouton.
@@ -98,7 +137,7 @@ Choisir une date ou appliquer la règle, puis enregistrer la tâche. Tant que le
 
 **Calendrier fixe** conserve son ancre : terminer une tâche en retard prépare la première date du calendrier strictement après l’échéance et le jour local de résolution. Les retards intermédiaires ne génèrent pas de fausses résolutions. **Après résolution** calcule le prochain délai depuis le jour où la tâche est effectivement terminée ; ce mode utilise un simple intervalle, sans jours de semaine imposés. Son aperçu suppose les résolutions aux dates prévues et reste indicatif. Le fuseau initial est celui du navigateur ; le changer dans les réglages permet de garder un calendrier stable en voyage.
 
-Les dates inexistantes sont sautées : le 31 mensuel passe de janvier à mars, le 29 février annuel attend une année bissextile. Utiliser **dernier jour** (`-1`) pour couvrir tous les mois. Les jours ouvrés signifient lundi à vendredi, sans calendrier automatique des jours fériés ; les exceptions permettent de les exclure.
+Les dates inexistantes sont sautées : le 31 mensuel passe de janvier à mars, le 29 février annuel attend une année bissextile. Utiliser **dernier jour** (`-1`) pour couvrir tous les mois. Dans les raccourcis, **jours ouvrés** sélectionne lundi–vendredi et **jours ouvrables** lundi–samedi ; les week-ends sélectionnent samedi–dimanche. Ces sélections n’intègrent pas automatiquement les jours fériés ni les horaires d’une entreprise ; ajouter les dates d’exception. Voir la [distinction usuelle des termes](https://www.service-public.gouv.fr/particuliers/vosdroits/F35697). Les règles déjà enregistrées conservent leurs jours sans réinterprétation.
 
 Cocher une tâche récurrente résout son occurrence et la remet dans son statut ouvert avec sa prochaine date. Changer son statut ou la déplacer dans une colonne terminée produit le même résultat. La dernière occurrence reste terminée. Le message confirme la prochaine date et **Annuler la résolution** restaure la date précédente tant qu’aucune nouvelle modification n’est intervenue. L’historique conserve la résolution et son annulation, sans effacer de données.
 

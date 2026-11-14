@@ -49,6 +49,22 @@ export function newRecurrence(start: string): Recurrence {
     excluded_dates: [],
   };
 }
+function positionedDay(day: string, value: string) {
+  const positions: Record<string, string> = {
+    "1": "premier",
+    "2": "deuxième",
+    "3": "troisième",
+    "4": "quatrième",
+    "5": "cinquième",
+    "-1": "dernier",
+    "-2": "avant-dernier",
+  };
+  if (!value) return day;
+  if (positions[value]) return `${positions[value]} ${day}`;
+  return Number(value) < 0
+    ? `${Math.abs(Number(value))}ᵉ ${day} en partant de la fin`
+    : `${value}ᵉ ${day}`;
+}
 export function shortRecurrence(rule: Recurrence) {
   const parts: Record<string, string> = Object.fromEntries(
     rule.rrule.split(";").map((part) => part.split("=")),
@@ -69,20 +85,34 @@ export function shortRecurrence(rule: Recurrence) {
   let label =
     interval === 1
       ? labels[parts.FREQ] || "Récurrence personnalisée"
-      : `Tous les ${interval} ${units[parts.FREQ]}`;
-  const groupedPosition =
-    parts.BYSETPOS && ["MO,TU,WE,TH,FR", "SA,SU"].includes(parts.BYDAY);
+      : `${parts.FREQ === "WEEKLY" ? "Toutes les" : "Tous les"} ${interval} ${units[parts.FREQ]}`;
+  const group = ({
+    "MO,TU,WE,TH,FR": "jour ouvré",
+    "MO,TU,WE,TH,FR,SA": "jour ouvrable",
+    "SA,SU": "jour du week-end",
+  } as Record<string, string>)[parts.BYDAY];
+  const groupedPosition = parts.BYSETPOS && group;
   if (groupedPosition)
-    label += ` · ${parts.BYSETPOS === "-1" ? "dernier" : parts.BYSETPOS === "-2" ? "avant-dernier" : `${parts.BYSETPOS}ᵉ`} ${parts.BYDAY === "SA,SU" ? "jour du week-end" : "jour ouvré"}`;
+    label += ` · ${parts.BYSETPOS.split(",")
+      .map((value) => positionedDay(group, value))
+      .join(", ")}`;
   else if (parts.BYDAY)
     label += ` · ${parts.BYDAY.split(",")
-      .map((day) => {
-        const position = day.slice(0, -2);
-        return `${position === "-1" ? "dernier " : position ? `${position}ᵉ ` : ""}${weekdays[dayCodes.indexOf(day.slice(-2))]}`;
-      })
+      .map((day) =>
+        positionedDay(weekdays[dayCodes.indexOf(day.slice(-2))], day.slice(0, -2)),
+      )
       .join(", ")}`;
   if (parts.BYMONTHDAY)
-    label += ` · ${parts.BYMONTHDAY === "-1" ? "dernier jour" : `le ${parts.BYMONTHDAY.replaceAll(",", ", ")}`}`;
+    label += ` · ${parts.BYMONTHDAY.split(",")
+      .map((value) =>
+        Number(value) < 0 ? positionedDay("jour", value) : `le ${value}`,
+      )
+      .join(", ")}`;
+  if (parts.BYMONTH)
+    label += ` · ${parts.BYMONTH.split(",")
+      .map((month) => months[Number(month) - 1])
+      .join(", ")}`;
+  if (parts.BYWEEKNO || parts.BYYEARDAY) label += " · calendrier personnalisé";
   if (rule.mode === "completion") label += " après résolution";
   return label;
 }
@@ -133,10 +163,19 @@ export function useScheduleRecognition(text: string, enabled = true) {
     suggestion: current?.matched_text ? current : null,
     pending: active && !current && !error,
     error,
+    diagnostic: current?.diagnostic ?? null,
     ignored: ignored === key,
     dismiss: (literal = text) => setIgnored(`${today}:${literal}`),
     restore: () => setIgnored(null),
-    resolve: async () =>
-      active ? (current ?? (await parseSchedule(text, today))) : null,
+    resolve: async () => {
+      const parsed = active
+        ? (current ?? (await parseSchedule(text, today)))
+        : null;
+      if (parsed?.diagnostic)
+        throw new Error(
+          `${parsed.diagnostic} Corrigez la saisie ou choisissez « Garder le texte ».`,
+        );
+      return parsed;
+    },
   };
 }

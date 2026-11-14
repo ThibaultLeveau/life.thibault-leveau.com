@@ -1485,6 +1485,42 @@
   font-size: 11px;
   margin-top: -9px;
 }
+.schedule-help {
+  color: var(--task-muted);
+  font-size: 11px;
+  line-height: 1.6;
+  margin: 8px 0 12px;
+}
+.schedule-help summary {
+  cursor: pointer;
+  width: fit-content;
+  padding: 3px 0;
+}
+.schedule-help p {
+  margin: 8px 0;
+}
+.schedule-help dl {
+  margin: 8px 0;
+  padding: 10px 12px;
+  border: 1px solid var(--task-border);
+  border-radius: 7px;
+}
+.schedule-help dl > div + div {
+  margin-top: 9px;
+}
+.schedule-help dt {
+  font-weight: 600;
+}
+.schedule-help dd {
+  margin: 1px 0 0;
+  color: var(--task-text);
+  overflow-wrap: anywhere;
+}
+.schedule-help .text-button {
+  text-align: left;
+  white-space: normal;
+  line-height: 1.5;
+}
 .schedule-hint {
   display: flex;
   align-items: center;
@@ -1521,6 +1557,19 @@
   color: var(--task-muted);
   margin-top: 3px;
   line-height: 1.4;
+}
+.detected-dates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+  color: var(--task-muted);
+}
+.detected-dates time {
+  padding: 2px 6px;
+  border: 1px solid var(--task-border);
+  border-radius: 4px;
+  font-size: 10px;
 }
 .task-recurrence {
   color: var(--task-muted);
