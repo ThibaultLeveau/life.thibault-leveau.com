@@ -71,7 +71,6 @@ source_parents=$(docker exec "$db" psql -U life -d life -Atc 'SELECT id, parent_
 restored_parents=$(docker exec "$db" psql -U life -d life_restored -Atc 'SELECT id, parent_id FROM workspaces WHERE parent_id IS NOT NULL ORDER BY id')
 [[ -n "$source_parents" && "$source_parents" == "$restored_parents" ]]
 
-
 # Compare actual saved preferences, not only the existence of the new table.
 agenda_query="SELECT string_agg(user_id::text || settings::text, ',' ORDER BY user_id) FROM agenda_preferences"
 source_agenda=$(docker exec "$db" psql -U life -d life -Atc "$agenda_query")

@@ -33,6 +33,7 @@ async function setup(page: Page) {
   });
   const work = await mutate<Workspace>("/workspaces", {
     name: "Agenda travail",
+    parent_id: home.id,
   });
   const section = await mutate<Section>(`/workspaces/${work.id}/sections`, {
     name: "À préparer",
@@ -56,8 +57,8 @@ async function setup(page: Page) {
     });
   }
   const cleanup = async () => {
-    await mutate(`/workspaces/${home.id}`, { archived: true }, "PATCH");
     await mutate(`/workspaces/${work.id}`, { archived: true }, "PATCH");
+    await mutate(`/workspaces/${home.id}`, { archived: true }, "PATCH");
   };
   await page.goto("/tasks");
   await expect(
@@ -98,7 +99,7 @@ test("agenda global : périodes, réglages persistants et cycle de tâche", asyn
       "Demain",
     );
     await expect(card(page, tasks["Demain agenda"])).toContainText(
-      "Agenda travail / À préparer",
+      "Agenda maison / Agenda travail / À préparer",
     );
     await expect(card(page, tasks["Jour agenda"])).toHaveCount(0);
     await period(page, "Semaine");

@@ -588,7 +588,10 @@ export function TasksPage() {
             <span>{agenda ? "Mes tâches" : "Mes espaces"}</span>
             <Icon name="chevron" size={12} />
             <strong>
-              {agenda ? "À venir" : (spaceTree.find(({ space }) => space.id === workspaceId)?.path ?? "Bienvenue")}
+              {agenda
+                ? "À venir"
+                : (spaceTree.find(({ space }) => space.id === workspaceId)
+                    ?.path ?? "Bienvenue")}
             </strong>
           </div>
           <span className="topbar-date">

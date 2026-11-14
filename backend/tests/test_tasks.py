@@ -731,7 +731,7 @@ def test_workspace_parent_migration_preserves_existing_data(client, engine):
 
 def test_agenda_periods_and_global_visibility(client, app):
     first, _ = create_space(client, "Maison")
-    second, _ = create_space(client, "Travail")
+    second = child_space(client, first, "Travail")
     hidden = create_section(client, second, visibility="board")
     dates = ["2026-12-30", "2026-12-31", "2027-01-01", "2027-01-02", "2027-01-06", "2027-01-07"]
     items = [
@@ -899,7 +899,8 @@ def test_agenda_preferences_validation_and_access(client, app):
 
 
 def test_agenda_migration_preserves_existing_data(client, engine):
-    space, _ = create_space(client)
+    root, _ = create_space(client)
+    space = child_space(client, root)
     item = create_task(client, space, due_date="2026-12-31")
     completed = mutate(client, item, "complete")
     events = history(client, completed)
@@ -907,11 +908,12 @@ def test_agenda_migration_preserves_existing_data(client, engine):
     with engine.begin() as conn:
         config = migration_config()
         config.attributes["connection"] = conn
-        command.downgrade(config, "0001")
+        command.downgrade(config, "0002")
         command.upgrade(config, "head")
         assert compare_metadata(MigrationContext.configure(conn), Base.metadata) == []
     assert client.get(f"/api/v1/tasks/{item['id']}").json() == completed
     assert history(client, item) == events
+    assert client.get(f"/api/v1/workspaces/{space['id']}").json()["parent_id"] == root["id"]
     assert client.get("/api/v1/agenda/view").json()["period"] == "today"
     # A preference row must reference a real account, and each account has one row.
     with engine.begin() as conn, pytest.raises(IntegrityError):

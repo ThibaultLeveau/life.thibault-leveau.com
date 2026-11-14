@@ -16,7 +16,7 @@ Chaque espace conserve ses propres tâches, sections, colonnes, étiquettes et p
 
 ## Voir les tâches du jour et les prochaines
 
-**À venir**, dans la navigation, rassemble les échéances de tous les espaces actifs. C’est la vue ouverte par défaut sur `/tasks` ; un lien `?space=…` ouvre toujours l’espace indiqué. Les tâches sont regroupées par date, par ordre chronologique, avec le nom de leur espace et de leur section. La visibilité liste/tableau d’une section ne masque rien dans cet agenda.
+**À venir**, dans la navigation, rassemble les échéances de tous les espaces actifs. C’est la vue ouverte par défaut sur `/tasks` ; un lien `?space=…` ouvre toujours l’espace indiqué. Les tâches sont regroupées par date, par ordre chronologique, avec le chemin complet de leur espace (parents inclus) et le nom de leur section. La visibilité liste/tableau d’une section ne masque rien dans cet agenda.
 
 - **Aujourd’hui** : tâches datées du jour local.
 - **Demain** : tâches du lendemain.

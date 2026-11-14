@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type MutableRefObject } from "react";
 import { api } from "../api";
 import { relativeDate } from "../dates";
+import { workspaceTree } from "../workspaceTree";
 import type {
   AgendaPage,
   AgendaSettings,
@@ -159,6 +160,9 @@ export function AgendaView({
     setNotice("Tâche enregistrée.");
     setReload((value) => value + 1);
   }
+  const spacePaths = new Map(
+    workspaceTree(workspaces).map(({ space, path }) => [space.id, path]),
+  );
   const groups = new Map<string, Task[]>();
   for (const task of page?.items ?? []) {
     const key = task.due_date! < today ? "overdue" : task.due_date!;
@@ -354,7 +358,7 @@ export function AgendaView({
                               className="color-dot"
                               style={{ background: space?.color }}
                             />
-                            {space?.name}
+                            {spacePaths.get(task.workspace_id) ?? space?.name}
                             {section && ` / ${section.name}`}
                           </button>
                         }

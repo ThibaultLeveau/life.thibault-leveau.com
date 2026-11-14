@@ -8,6 +8,7 @@ erDiagram
     users ||--o{ workspaces : possede
     users ||--o{ login_sessions : ouvre
     users ||--o| agenda_preferences : configure
+    workspaces |o--o{ workspaces : parent
     workspaces ||--o{ sections : organise
     workspaces ||--|{ task_statuses : configure
     workspaces ||--o{ task_labels : definit
