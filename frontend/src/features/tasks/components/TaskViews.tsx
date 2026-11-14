@@ -18,10 +18,13 @@ import {
   type Section,
   type Status,
   type Task,
+  type Schedule,
   type ViewSettings,
 } from "../types";
 import { Icon } from "./Icon";
 import { TaskContents } from "./TaskContents";
+import { useScheduleRecognition } from "../scheduling";
+import { ScheduleRecognition } from "./ScheduleRecognition";
 
 export interface Destination {
   section_id: string | null;
@@ -43,6 +46,7 @@ interface Props {
     title: string,
     sectionId: string | null,
     statusId: string,
+    schedule?: Schedule,
   ) => Promise<void>;
   onConfigure: () => void;
 }
@@ -120,16 +124,27 @@ function QuickAdd({
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [title, setTitle] = useState("");
+  const recognition = useScheduleRecognition(title, open);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
-    const title = String(new FormData(form).get("title") ?? "").trim();
     if (!title) return;
     setBusy(true);
     setError("");
     try {
-      await onAdd(title, sectionId, statusId);
+      const parsed = await recognition.resolve();
+      const cleanTitle = parsed?.matched_text ? parsed.title : title;
+      if (!cleanTitle.trim())
+        throw new Error("Ajoutez un titre à côté de la date.");
+      await onAdd(
+        cleanTitle,
+        sectionId,
+        statusId,
+        parsed?.matched_text ? parsed : undefined,
+      );
       form.reset();
+      setTitle("");
       setOpen(false);
     } catch (error) {
       setError((error as Error).message);
@@ -152,14 +167,18 @@ function QuickAdd({
       <input
         id={`quick-${sectionId}-${statusId}`}
         name="title"
+        value={title}
+        onChange={(event) => setTitle(event.target.value)}
+        disabled={busy}
         autoFocus
         required
         maxLength={500}
-        placeholder="Le prochain petit pas…"
+        placeholder="Lire demain, courir tous les lundis…"
         onKeyDown={(event) => {
           if (event.key === "Escape") setOpen(false);
         }}
       />
+      <ScheduleRecognition recognition={recognition} />
       {error && (
         <p className="form-error" role="alert">
           {error}

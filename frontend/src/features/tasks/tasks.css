@@ -1129,8 +1129,437 @@
 }
 .form-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 17px;
+}
+
+/* A single in-flow planner: no clipped popup, native date overflow or nested modal. */
+.schedule-picker {
+  min-width: 0;
+}
+.schedule-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 7px;
+}
+.schedule-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid var(--task-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: var(--task-paper);
+  color: var(--task-muted);
+  text-align: left;
+}
+.schedule-trigger > span {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.schedule-trigger small {
+  display: block;
+  margin-top: 4px;
+  line-height: 1.5;
+  font-size: 11px;
+  color: var(--task-muted);
+}
+.schedule-trigger svg {
+  flex-shrink: 0;
+}
+.schedule-trigger.has-date {
+  color: var(--task-accent);
+}
+.schedule-trigger:hover,
+.schedule-trigger[aria-expanded="true"] {
+  border-color: var(--task-accent);
+}
+.schedule-panel {
+  margin-top: 8px;
+  padding: 16px;
+  border: 1px solid var(--task-border);
+  border-radius: 10px;
+  background: var(--task-paper);
+}
+.schedule-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--task-border);
+  margin-bottom: 16px;
+}
+.schedule-tabs button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: 1;
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: 10px;
+  color: var(--task-muted);
+  font-size: 13px;
+}
+.schedule-tabs button[aria-selected="true"] {
+  color: var(--task-accent);
+  border-bottom-color: var(--task-accent);
+}
+.schedule-natural {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.schedule-natural label {
+  flex: 1;
+  min-width: 0;
+}
+.schedule-natural > button {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+}
+.date-shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.date-shortcuts button {
+  border: 1px solid var(--task-border);
+  border-radius: 6px;
+  background: none;
+  color: var(--task-text);
+  padding: 8px 10px;
+  font-size: 11px;
+}
+.date-shortcuts button:hover {
+  border-color: var(--task-accent);
+  color: var(--task-accent);
+}
+.schedule-calendar {
+  margin: 14px auto;
+  max-width: 360px;
+}
+.calendar-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.rotate-180 {
+  display: flex;
+  transform: rotate(180deg);
+}
+.calendar-weekdays,
+.calendar-grid [role="row"] {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  text-align: center;
+}
+.calendar-weekdays {
+  font-size: 10px;
+  color: var(--task-muted);
+  padding: 5px 0;
+}
+.calendar-grid [role="gridcell"] {
+  min-width: 0;
+}
+.calendar-grid button {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 40px;
+  border: 2px solid transparent;
+  border-radius: 7px;
+  background: none;
+  color: var(--task-text);
+  font-size: 12px;
+}
+.calendar-grid button:hover {
+  border-color: var(--task-border);
+}
+.calendar-grid button.outside-month {
+  color: var(--task-muted);
+  opacity: 0.6;
+}
+.calendar-grid button.selected-day {
+  background: var(--task-accent);
+  color: white;
+  opacity: 1;
+}
+.calendar-grid button.today-dot::after {
+  content: "";
+  position: absolute;
+  left: calc(50% - 2px);
+  bottom: 3px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.recurrence-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.recurrence-mode {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.recurrence-mode button {
+  text-align: left;
+  border: 1px solid var(--task-border);
+  background: none;
+  color: var(--task-text);
+  padding: 11px;
+  border-radius: 7px;
+}
+.recurrence-mode button[aria-pressed="true"] {
+  border-color: var(--task-accent);
+  box-shadow: inset 0 0 0 1px var(--task-accent);
+}
+.recurrence-mode strong,
+.recurrence-mode span {
+  display: block;
+}
+.recurrence-mode strong {
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+.recurrence-mode span {
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--task-muted);
+}
+.recurrence-interval {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: 10px;
+}
+.schedule-fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.schedule-fieldset legend {
+  font-size: 12px;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+.weekday-picker {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 5px;
+}
+.month-picker {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 5px;
+}
+.weekday-picker button,
+.month-picker button {
+  border: 1px solid var(--task-border);
+  background: none;
+  color: var(--task-text);
+  border-radius: 6px;
+  padding: 9px 2px;
+  font-size: 11px;
+  min-height: 36px;
+}
+.weekday-picker button[aria-pressed="true"],
+.month-picker button[aria-pressed="true"] {
+  background: var(--task-accent);
+  border-color: var(--task-accent);
+  color: white;
+}
+.field-help {
+  font-size: 11px;
+  line-height: 1.55;
+  color: var(--task-muted);
+  font-weight: 400;
+}
+.schedule-options {
+  border-top: 1px solid var(--task-border);
+  padding-top: 12px;
+}
+.schedule-options summary {
+  font-size: 12px;
+  color: var(--task-muted);
+  cursor: pointer;
+  padding: 4px 0;
+}
+.schedule-options > label,
+.exception-add {
+  margin-top: 14px;
+}
+.exception-add {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+.exception-add label {
+  flex: 1;
+  min-width: 0;
+}
+.exception-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+.exception-list li {
+  display: flex;
+  align-items: center;
+  font-size: 11px;
+  border: 1px solid var(--task-border);
+  border-radius: 5px;
+  padding-left: 7px;
+}
+.stack-form .inline-check {
+  flex-direction: row;
+  align-items: center;
+}
+.stack-form input[type="date"] {
+  display: block;
+  min-height: 40px;
+  max-width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.stack-form input[type="date"]::-webkit-date-and-time-value {
+  text-align: left;
+  min-height: 1.3em;
+}
+.schedule-preview {
+  margin: 16px 0;
+  border: 1px solid var(--task-border);
+  border-radius: 8px;
+  padding: 13px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.schedule-preview > strong {
+  font-size: 11px;
+  color: var(--task-muted);
+}
+.schedule-preview p {
+  margin: 5px 0 10px;
+  overflow-wrap: anywhere;
+}
+.schedule-preview ol {
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.schedule-preview li {
+  padding: 4px 7px;
+  border: 1px solid var(--task-border);
+  border-radius: 5px;
+  font-size: 10px;
+}
+.schedule-preview small {
+  color: var(--task-muted);
+}
+.schedule-panel-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.schedule-recognition {
+  min-width: 0;
+  font-size: 11px;
+  margin-top: -9px;
+}
+.schedule-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  color: var(--task-muted);
+  min-height: 22px;
+  line-height: 1.5;
+}
+.schedule-detected {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--task-border);
+  border-radius: 7px;
+  padding: 7px 9px;
+  color: var(--task-accent);
+}
+.schedule-detected > span {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.schedule-detected > svg {
+  flex-shrink: 0;
+}
+.schedule-detected mark {
+  background: none;
+  color: inherit;
+  font-weight: 600;
+}
+.detected-result {
+  display: block;
+  color: var(--task-muted);
+  margin-top: 3px;
+  line-height: 1.4;
+}
+.task-recurrence {
+  color: var(--task-muted);
+  font-size: 10px;
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.quick-add-form .schedule-recognition {
+  margin: 2px 0 8px;
+}
+.quick-add-form .schedule-detected {
+  display: flex;
+  justify-content: initial;
+}
+.notice {
+  flex-wrap: wrap;
+}
+@media (max-width: 480px) {
+  .schedule-panel {
+    padding: 11px;
+  }
+  .recurrence-mode {
+    gap: 6px;
+  }
+  .recurrence-mode button {
+    padding: 9px;
+  }
+  .month-picker {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .calendar-grid button {
+    height: 38px;
+  }
+  .schedule-panel-actions > .primary-button {
+    width: 100%;
+    justify-content: center;
+  }
 }
 .stack-form .color-field {
   flex-direction: row;

@@ -70,6 +70,42 @@ Cliquer sur le titre ou sur `…` ouvre les détails. Les étiquettes se créent
 
 Cocher termine la tâche dans le premier statut terminé de l'ordre configuré. Décocher la rouvre dans le premier statut ouvert. Déplacer une carte vers une colonne terminée produit le même effet. **Historique** montre créations, modifications, déplacements, résolutions, réouvertures et archives ; les anciennes résolutions restent présentes.
 
+## Dates et récurrences
+
+Dans le titre de l’éditeur **et dans l’ajout rapide**, écrire par exemple :
+
+| Saisie | Résultat |
+| --- | --- |
+| `Acheter du pain demain` | « Acheter du pain », échéance demain |
+| `Appeler Léa après-demain` | Échéance dans deux jours |
+| `Préparer le voyage 25 décembre` | Prochain 25 décembre |
+| `Courir tous les lundis et jeudis` | Deux jours choisis chaque semaine |
+| `Arroser tous les 3 jours après résolution` | Un délai de trois jours après chaque résolution |
+| `Budget tous les 15 du mois` | Le 15 de chaque mois |
+| `Bilan chaque dernier vendredi du mois` | Le dernier vendredi mensuel |
+| `Lire tous les jours à partir de demain pour 5 fois` | Cinq résolutions à partir de demain |
+
+La détection apparaît sous le titre avant l’enregistrement et met à jour le bouton d’échéance. Les mots reconnus sont retirés du titre seulement à la sauvegarde. Le bouton **Garder ces mots dans le titre** désactive cette interprétation pour la saisie actuelle ; modifier le texte relance la reconnaissance. On peut aussi entourer une expression de guillemets doubles ou français (`Lire « demain »`). Ouvrir une tâche existante ne réinterprète pas son titre tant qu’on ne le modifie pas.
+
+Le planificateur **Échéance et récurrence** propose :
+
+- **Date** : aujourd’hui, demain, lundi prochain, calendrier ou saisie `25/12/2026`/`2026-12-25`. Les flèches parcourent les jours, Début/Fin la semaine, Page précédente/suivante le mois et Entrée choisit le jour. Échap referme d’abord le calendrier et rend le focus au bouton.
+- **Répéter** : intervalle de 1 à 1000 jours, semaines, mois ou années ; plusieurs jours hebdomadaires ; un ou plusieurs jours du mois (par exemple `1,15,-1`) ; premier, deuxième, dernier ou avant-dernier jour de semaine ; dernier jour ouvré (lundi–vendredi) ; plusieurs mois annuels.
+- **Fin** : jamais, une date incluse ou un nombre de résolutions incluant la première. Les occurrences sautées pour retard ou exclusion ne comptent pas comme résolues.
+- **Exceptions et réglages avancés** : dates exclues, fuseau horaire et règle calendaire RRULE pour des combinaisons plus spécifiques (positions, semaines ou jours de l’année). Un aperçu serveur vérifie les réglages avant **Appliquer la récurrence**.
+
+Choisir une date ou appliquer la règle, puis enregistrer la tâche. Tant que le planificateur est ouvert, le bouton de sauvegarde attend cette sélection ; recliquer son bouton le referme en abandonnant les changements non appliqués. **Ne plus répéter** conserve la date en cours ; **Sans échéance ni récurrence** retire les deux. Une série exige toujours une échéance.
+
+**Calendrier fixe** conserve son ancre : terminer une tâche en retard prépare la première date du calendrier strictement après l’échéance et le jour local de résolution. Les retards intermédiaires ne génèrent pas de fausses résolutions. **Après résolution** calcule le prochain délai depuis le jour où la tâche est effectivement terminée ; ce mode utilise un simple intervalle, sans jours de semaine imposés. Son aperçu suppose les résolutions aux dates prévues et reste indicatif. Le fuseau initial est celui du navigateur ; le changer dans les réglages permet de garder un calendrier stable en voyage.
+
+Les dates inexistantes sont sautées : le 31 mensuel passe de janvier à mars, le 29 février annuel attend une année bissextile. Utiliser **dernier jour** (`-1`) pour couvrir tous les mois. Les jours ouvrés signifient lundi à vendredi, sans calendrier automatique des jours fériés ; les exceptions permettent de les exclure.
+
+Cocher une tâche récurrente résout son occurrence et la remet dans son statut ouvert avec sa prochaine date. Changer son statut ou la déplacer dans une colonne terminée produit le même résultat. La dernière occurrence reste terminée. Le message confirme la prochaine date et **Annuler la résolution** restaure la date précédente tant qu’aucune nouvelle modification n’est intervenue. L’historique conserve la résolution et son annulation, sans effacer de données.
+
+Modifier uniquement la date reporte l’occurrence en cours en conservant l’ancre. Modifier la règle recommence son compteur de résolutions, en conservant tous les événements passés. Une règle réappliquée à l’identique conserve la date en cours. Archiver/restaurer conserve règle, compteur, date et historique ; rien ne s’exécute en arrière-plan. Les listes, le kanban et l’agenda présentent l’occurrence courante, pas une copie de toutes les dates futures.
+
+La reconnaissance est déterministe et française, sans appel à un service d’IA : une expression inconnue reste du texte. Les échéances restent des jours calendaires : les répétitions à l’heure/minute, notifications et calendriers de jours fériés ne font pas partie de cette fonction.
+
 ## Déplacer et ordonner
 
 En **ordre manuel**, saisir la poignée à gauche d'une tâche puis la déposer sur une carte pour la placer avant, ou dans une cellule pour l'ajouter à la fin. Le tableau accepte les déplacements entre colonnes et lignes. La liste permet de changer l'ordre et la section sans changer le statut.
@@ -98,4 +134,4 @@ Avant d'archiver un espace parent, archiver ou déplacer ses sous-espaces actifs
 
 Un échec de sauvegarde affiche un message et conserve le formulaire. Si la tâche a changé dans un autre onglet, le serveur refuse l'édition : **Recharger la tâche enregistrée** récupère la version actuelle ; recopier au préalable toute saisie à conserver. Les actions d'ordre ou de déplacement nécessitent également une version actuelle.
 
-La synchronisation entre onglets n'est pas instantanée : recharger pour consulter les changements externes. Aucun mode hors connexion, partage, rappel, récurrence, pièce jointe ou tableau statistique n'est inclus. Toutes les fonctions présentées sont accessibles par [API](api.md).
+La synchronisation entre onglets n'est pas instantanée : recharger pour consulter les changements externes. Aucun mode hors connexion, partage, rappel, pièce jointe ou tableau statistique n'est inclus. Toutes les fonctions présentées sont accessibles par [API](api.md).

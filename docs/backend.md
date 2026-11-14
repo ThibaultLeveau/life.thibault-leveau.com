@@ -2,6 +2,8 @@
 
 `life_app.main:create_app` assemble FastAPI, la configuration, les connexions, les routes et les fichiers statiques. L'installation `backend/src/` expose aussi la commande `life` ; aucun ajustement manuel de `PYTHONPATH` n'est nécessaire.
 
+`features/tasks/recurrence.py` valide les règles de jours/semaines/mois/années et calcule les dates avec python-dateutil. La recherche saute les phases calendaires anciennes et borne la vérification d’une règle impossible par le cycle grégorien. Les combinaisons impossibles usuelles (31 février, jour incompatible avec un intervalle de sept jours) sont rejetées sans parcourir des millénaires. `scheduling.py` analyse le français et conserve les indices du texte original, y compris accents combinés et emoji. Analyse et aperçu ne modifient pas de tâche ; résolutions, déplacements et éditions de statut partagent la même transition atomique. Voir les [invariants d’occurrence](donnees.md#recurrences-et-occurrences) et les [contrats](api.md#planification-et-recurrences).
+
 | Module | Responsabilité |
 | --- | --- |
 | `core/config.py`, `core/logging.py` | Paramètres typés, sortie standard et suppression des paramètres de requête des logs d'accès |

@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { relativeDate } from "../dates";
 import type { Label, Task } from "../types";
 import { Icon } from "./Icon";
+import { shortRecurrence } from "../scheduling";
 
 export function TaskContents({
   task,
@@ -53,12 +54,24 @@ export function TaskContents({
                 aria-label={`Échéance : ${date.full}${!completed && date.tone === "overdue" ? ", en retard" : ""}`}
                 className={`task-date is-${completed ? "completed" : date.tone}`}
               >
-                <Icon name="calendar" size={13} />
+                <Icon
+                  name={task.recurrence ? "repeat" : "calendar"}
+                  size={13}
+                />
                 {date.label}
                 {!completed && date.tone === "overdue" && (
                   <span> · En retard</span>
                 )}
               </time>
+            )}
+            {task.recurrence && (
+              <span
+                className="task-recurrence"
+                title={shortRecurrence(task.recurrence)}
+                aria-label={`Récurrence : ${shortRecurrence(task.recurrence)}`}
+              >
+                {shortRecurrence(task.recurrence)}
+              </span>
             )}
             {task.priority < 4 && (
               <span className={`task-priority priority-${task.priority}`}>

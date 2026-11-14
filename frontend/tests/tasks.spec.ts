@@ -162,7 +162,9 @@ test("connexion et cycle complet depuis les formulaires", async ({ page }) => {
   await dialog
     .getByRole("combobox", { name: "Priorité", exact: true })
     .selectOption("1");
-  await dialog.getByLabel("Échéance", { exact: true }).fill("2026-12-20");
+  await dialog.getByRole("button", { name: "Choisir une date" }).click();
+  await dialog.getByLabel("Date ou récurrence").fill("20/12/2026");
+  await dialog.getByRole("button", { name: "Interpréter la date" }).click();
   await dialog.getByLabel("important", { exact: true }).check();
   await dialog
     .getByRole("button", { name: "Ajouter la tâche", exact: true })

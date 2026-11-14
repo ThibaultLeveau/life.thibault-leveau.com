@@ -2,6 +2,8 @@
 
 Un espace personnel pour organiser ses tâches : espaces et sous-espaces, sections, listes à cocher et kanban en glisser-déposer, avec thèmes clair et sombre. Une vue **À venir** réunit les échéances de tous les espaces, avec périodes configurables et dates en langage humain. Les sections forment les listes et les **lignes** du tableau ; les statuts deviennent ses colonnes.
 
+Les titres reconnaissent les dates et récurrences françaises pendant la saisie : « Lire demain », « Courir tous les lundis ». Le planificateur propose un calendrier, des récurrences personnalisées avec aperçu, des exceptions et une fin de série. Chaque résolution conserve son historique et prépare la prochaine occurrence.
+
 **[Ouvrir Life](https://life.thibault-leveau.com/)** · **[Documentation](https://life.thibault-leveau.com/documentation/)** · **[Référence API](https://life.thibault-leveau.com/api/docs)**
 
 ## Architecture

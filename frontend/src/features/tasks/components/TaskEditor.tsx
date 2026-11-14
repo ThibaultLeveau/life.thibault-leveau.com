@@ -11,6 +11,10 @@ import type {
 } from "../types";
 import { Dialog, ErrorMessage } from "./Dialog";
 import { Icon } from "./Icon";
+import { useScheduleRecognition } from "../scheduling";
+import type { Schedule } from "../types";
+import { SchedulePicker } from "./SchedulePicker";
+import { ScheduleRecognition } from "./ScheduleRecognition";
 
 const eventNames: Record<string, string> = {
   created: "Tâche créée",
@@ -20,6 +24,8 @@ const eventNames: Record<string, string> = {
   reopened: "Tâche rouverte",
   archived: "Tâche archivée",
   restored: "Tâche restaurée",
+  rescheduled: "Prochaine occurrence planifiée",
+  completion_undone: "Résolution annulée",
 };
 
 export function TaskEditor({
@@ -53,22 +59,44 @@ export function TaskEditor({
   const [selectedLabels, setSelectedLabels] = useState(task?.label_ids ?? []);
   const [events, setEvents] = useState<TaskEvent[]>([]);
   const [historyTotal, setHistoryTotal] = useState<number | null>(null);
+  const [title, setTitle] = useState(task?.title ?? "");
+  const [schedule, setSchedule] = useState<Schedule>({
+    due_date: task?.due_date ?? null,
+    recurrence: task?.recurrence ?? null,
+  });
+  const [scheduleOpen, setScheduleOpen] = useState(false);
+  const recognition = useScheduleRecognition(
+    title,
+    !task?.archived_at && title !== task?.title,
+  );
+  const displayedSchedule = recognition.suggestion ?? schedule;
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (busy || scheduleOpen) return;
     setBusy(true);
     setError("");
     setConflict(false);
     const values = new FormData(event.currentTarget);
     const data = {
-      title: values.get("title"),
+      title,
       description: values.get("description"),
       priority: Number(values.get("priority")),
-      due_date: values.get("due_date") || null,
+      ...schedule,
       section_id: values.get("section_id") || null,
       status_id: values.get("status_id"),
       label_ids: selectedLabels,
     };
     try {
+      const parsed = await recognition.resolve();
+      if (parsed?.matched_text) {
+        if (!parsed.title.trim())
+          throw new Error(
+            "Ajoutez un titre à côté de la date, par exemple « Lire demain ».",
+          );
+        data.title = parsed.title;
+        data.due_date = parsed.due_date;
+        data.recurrence = parsed.recurrence;
+      }
       await api<Task>(
         task ? `/tasks/${task.id}` : "/tasks",
         task ? "PATCH" : "POST",
@@ -145,12 +173,40 @@ export function TaskEditor({
             name="title"
             required
             maxLength={500}
-            defaultValue={task?.title}
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
             autoFocus
-            placeholder="Que souhaitez-vous accomplir ?"
-            disabled={!!task?.archived_at}
+            placeholder="Lire demain, courir tous les lundis…"
+            disabled={busy || !!task?.archived_at}
           />
         </label>
+        {!task?.archived_at && (
+          <ScheduleRecognition recognition={recognition} />
+        )}
+        <SchedulePicker
+          value={displayedSchedule}
+          disabled={busy || !!task?.archived_at}
+          completed={task?.recurrence_completed ?? 0}
+          onEditingChange={setScheduleOpen}
+          onChange={(value) => {
+            const literal = recognition.suggestion?.title ?? title;
+            recognition.dismiss(literal);
+            setTitle(literal);
+            setSchedule(value);
+          }}
+        />
+        {task?.recurrence && (
+          <p className="field-help">
+            {task.recurrence_completed} occurrence
+            {task.recurrence_completed > 1 ? "s" : ""} terminée
+            {task.recurrence_completed > 1 ? "s" : ""}
+            {task.recurrence.max_occurrences
+              ? ` sur ${task.recurrence.max_occurrences}`
+              : ""}
+            . Modifier la règle recommence ce compteur ; l’historique reste
+            conservé.
+          </p>
+        )}
         <label>
           Description
           <textarea
@@ -195,15 +251,6 @@ export function TaskEditor({
                 </option>
               ))}
             </select>
-          </label>
-          <label>
-            Échéance
-            <input
-              name="due_date"
-              type="date"
-              defaultValue={task?.due_date ?? ""}
-              disabled={!!task?.archived_at}
-            />
           </label>
           <label>
             Priorité
@@ -275,7 +322,15 @@ export function TaskEditor({
             Annuler
           </button>
           {!task?.archived_at && (
-            <button className="primary-button" disabled={busy}>
+            <button
+              className="primary-button"
+              disabled={busy || scheduleOpen}
+              title={
+                scheduleOpen
+                  ? "Choisissez une date, appliquez la récurrence ou refermez le calendrier."
+                  : undefined
+              }
+            >
               {busy
                 ? "Enregistrement…"
                 : task
@@ -309,12 +364,30 @@ export function TaskEditor({
                 <li key={event.id}>
                   <span className="event-mark" />
                   <div>
-                    <strong>{eventNames[event.kind] ?? event.kind}</strong>
+                    <strong>
+                      {event.kind === "completed" &&
+                      event.context.after.recurrence
+                        ? "Occurrence terminée"
+                        : (eventNames[event.kind] ?? event.kind)}
+                    </strong>
                     <span>
                       {event.context.after.workspace_name} ·{" "}
                       {event.context.after.section_name ?? "Sans section"} ·{" "}
                       {event.context.after.status_name}
                     </span>
+                    {event.context.after.due_date &&
+                      [
+                        "completed",
+                        "rescheduled",
+                        "completion_undone",
+                      ].includes(event.kind) && (
+                        <span>
+                          Échéance du{" "}
+                          {new Date(
+                            `${event.context.after.due_date}T12:00:00`,
+                          ).toLocaleDateString("fr-FR")}
+                        </span>
+                      )}
                   </div>
                   <time dateTime={event.occurred_at}>
                     {new Date(event.occurred_at).toLocaleString("fr-FR", {

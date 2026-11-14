@@ -74,3 +74,13 @@ Les écritures de l'ancienne image restent compatibles pendant l'ajout (elles ne
 Le downgrade `0002 → 0001`, réservé aux tests ou à une intervention préparée hors service, conserve espaces et tâches mais **supprime tous les liens parent-enfant**. Le réupgrade les laisse à la racine. Préférer une correction en avant ; pour un retour complet, restaurer la sauvegarde avec l'image compatible selon la procédure ci-dessus.
 
 Les dumps comprennent `parent_id` et les contraintes. Le test de restauration isolée compare les couples espace/parent avant et après restauration, en plus des événements et des sessions révoquées. Sur une copie réelle, vérifier également l'arbre, les enfants archivés, la navigation et les refus de cycles/rattachements inter-comptes, sans exposer les données dans les journaux.
+
+## Migration 0004 : récurrences
+
+`0004_recurrence` ajoute `tasks.recurrence` (JSONB nullable), `tasks.recurrence_completed` (entier, défaut 0), deux contraintes et les types d’événements `rescheduled`/`completion_undone`. Aucun texte, date ou événement existant n’est réécrit. La migration est additive pour l’ancienne image pendant la publication, mais sa sonde détecte la nouvelle révision ; terminer avec la nouvelle image avant d’utiliser les séries. La DDL prend brièvement des verrous. Aucune nouvelle variable de configuration ni service n’est nécessaire.
+
+Sauvegarder avant migration via `deploy.sh`. Après publication, vérifier l’analyse, l’aperçu, la création puis la résolution d’une série sur des données de recette isolées. Les données antérieures doivent garder leurs dates, statuts et historiques.
+
+L’aller/retour est possible tant qu’aucune récurrence ni nouveau type d’événement n’existe. Le downgrade refuse explicitement de perdre ces données après utilisation. Ne pas le contourner ni supprimer des événements : privilégier une correction en avant ou restaurer un dump antérieur avec l’image compatible selon la procédure de cette page. Le rollback d’image refuse la révision inconnue.
+
+Les dumps contiennent les définitions complètes, ancres, fuseaux, exceptions, compteurs, dates courantes et tous les événements. Le test du conteneur compare les données de récurrence avant/après restauration, en plus de l’historique immuable et des préférences. Sur une copie de sauvegarde réelle, vérifier également la prochaine date calculée et une série finie ; ne pas lancer ces essais sur les données actives.

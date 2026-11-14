@@ -170,7 +170,9 @@ test("agenda global : périodes, réglages persistants et cycle de tâche", asyn
     await page
       .getByRole("button", { name: "Jour agenda", exact: true })
       .click();
-    await page.getByLabel("Échéance", { exact: true }).fill("2027-02-01");
+    await page.locator(".schedule-trigger").click();
+    await page.getByLabel("Date ou récurrence").fill("01/02/2027");
+    await page.getByRole("button", { name: "Interpréter la date" }).click();
     await page
       .getByRole("button", { name: "Enregistrer", exact: true })
       .click();

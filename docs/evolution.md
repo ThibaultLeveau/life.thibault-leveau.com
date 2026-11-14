@@ -6,6 +6,8 @@ Le socle comprend la gestion privée des tâches, PostgreSQL, les sessions perso
 
 ## Organisation par fonctionnalité
 
+Les récurrences calendaires et la saisie naturelle sont disponibles (issue #13, migration `0004_recurrence`). Elles étendent les modules tâches existants et utilisent la même transaction que les résolutions. Aucun ordonnanceur, nouveau stockage ou service n’est introduit. L’aperçu et l’analyse sont accessibles par l’API versionnée.
+
 ```text
 backend/src/life_app/
 ├── api/v1/tasks.py

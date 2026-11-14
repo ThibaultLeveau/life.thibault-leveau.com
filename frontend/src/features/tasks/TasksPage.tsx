@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { allTasks, api, ApiError, setApiSession } from "./api";
-import { useLocalToday } from "./dates";
+import { relativeDate, useLocalToday } from "./dates";
 import { AgendaView } from "./components/AgendaView";
 import {
   defaultView,
   type Label,
   type Section,
+  type Schedule,
   type Session,
   type Status,
   type Task,
@@ -53,6 +54,7 @@ export function TasksPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [undoTask, setUndoTask] = useState<Task | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [showDisplay, setShowDisplay] = useState(false);
@@ -293,16 +295,20 @@ export function TasksPage() {
     setTaskLoading(true);
     setReloadTasks((value) => value + 1);
   }
-  async function action(run: () => Promise<unknown>, message: string) {
+  async function action(
+    run: () => Promise<unknown>,
+    message: string | (() => string),
+  ) {
     setBusy(true);
     setTaskLoading(true);
     setError("");
     setNotice("");
+    setUndoTask(null);
     try {
       await run();
       setTaskLoading(true);
       setReloadTasks((value) => value + 1);
-      setNotice(message);
+      setNotice(typeof message === "function" ? message() : message);
     } catch (error) {
       setError((error as Error).message);
       setTaskLoading(true);
@@ -312,14 +318,24 @@ export function TasksPage() {
     }
   }
   async function complete(task: Task) {
+    let saved: Task;
     await action(
-      () =>
-        api(
+      async () => {
+        saved = await api<Task>(
           `/tasks/${task.id}/${task.completed_at ? "reopen" : "complete"}`,
           "POST",
           { expected_version: task.version },
-        ),
-      task.completed_at ? "Tâche rouverte." : "Un pas de plus. Tâche terminée.",
+        );
+        setUndoTask(task.completed_at ? null : saved);
+      },
+      () =>
+        task.completed_at
+          ? "Tâche rouverte."
+          : saved.recurrence && !saved.completed_at
+            ? `Occurrence terminée. Prochaine : ${relativeDate(saved.due_date!, today).full}.`
+            : saved.recurrence
+              ? "Dernière occurrence terminée."
+              : "Un pas de plus. Tâche terminée.",
     );
   }
   async function move(task: Task, destination: Destination) {
@@ -338,12 +354,16 @@ export function TasksPage() {
     title: string,
     sectionId: string | null,
     statusId: string,
+    schedule?: Schedule,
   ) {
     await api("/tasks", "POST", {
       workspace_id: workspaceId,
       title,
       section_id: sectionId,
       status_id: statusId,
+      ...(schedule
+        ? { due_date: schedule.due_date, recurrence: schedule.recurrence }
+        : {}),
     });
     setTaskLoading(true);
     setReloadTasks((value) => value + 1);
@@ -608,6 +628,23 @@ export function TasksPage() {
             <p className="notice" role="status">
               <Icon name="check" size={14} />
               {notice}
+              {undoTask && (
+                <button
+                  className="text-button"
+                  disabled={busy}
+                  onClick={() =>
+                    action(
+                      () =>
+                        api(`/tasks/${undoTask.id}/undo-complete`, "POST", {
+                          expected_version: undoTask.version,
+                        }),
+                      "Résolution annulée. L’échéance précédente est restaurée.",
+                    )
+                  }
+                >
+                  Annuler la résolution
+                </button>
+              )}
               <button
                 className="icon-button"
                 onClick={() => setNotice("")}

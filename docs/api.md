@@ -161,6 +161,50 @@ Terminer/rouvrir reçoit `{expected_version:...}` et utilise le premier statut c
 
 Les tâches et événements retournent `{items,total,offset,limit}`. L'historique utilise les mêmes bornes de pagination. Les événements exposent le contexte de la transition, sans recopier le titre ou la description de la tâche. Voir [Données](donnees.md).
 
+## Planification et récurrences
+
+Ces routes utilisent la même session, le même jeton CSRF et le même contrôle d’origine que les mutations. L’analyse et l’aperçu n’enregistrent aucune tâche et ne journalisent pas le texte soumis.
+
+| Route | Entrée | Sortie |
+| --- | --- | --- |
+| `POST /api/v1/scheduling/parse` | `text` (1000 caractères max), `today` (date locale), `timezone` (IANA, défaut Europe/Paris) | `title` nettoyé, `matched_text`, indices Unicode `start/end`, `due_date`, `recurrence`, `label`, `dates` |
+| `POST /api/v1/scheduling/preview` | `recurrence`, `after` inclusif facultatif, `limit` 1–12 (6 par défaut), `completed` 0–10000 | `label`, `dates`, `explanation` |
+| `POST /api/v1/tasks/{id}/undo-complete` | `expected_version` | Tâche restaurée avant sa dernière résolution |
+
+Sans correspondance, l’analyse retourne le texte intact, `matched_text:null` et aucune date. Une date seule peut laisser un titre vide : le client doit demander un titre avant de créer la tâche. Les indices sont des points de code Unicode Python, pas des unités UTF-16 JavaScript. Une erreur de syntaxe de règle, une date impossible, un fuseau inconnu, un aperçu vide ou une échéance récurrente absente donne 422. Sans session : 401 ; sans CSRF/origine valide : 403. Les tâches d’un autre propriétaire restent 404.
+
+`TaskCreate`, `TaskPatch` et `TaskOutput` acceptent/exposent `recurrence`, objet nullable :
+
+| Champ | Contrat |
+| --- | --- |
+| `rrule` | Jusqu’à 512 caractères. `FREQ=DAILY/WEEKLY/MONTHLY/YEARLY`, `INTERVAL` 1–1000 ; sélections `BYDAY`, `BYMONTHDAY`, `BYMONTH`, `BYSETPOS`, `BYYEARDAY`, `BYWEEKNO`, `WKST` validées selon la fréquence. Pas de DTSTART, COUNT, UNTIL, RDATE ni fréquence horaire dans cette chaîne. |
+| `start_date` | Ancre calendaire obligatoire ; lundi est le début de semaine par défaut. |
+| `timezone` | Fuseau IANA, Europe/Paris par défaut. Le navigateur fournit le sien. |
+| `mode` | `scheduled` (défaut) ou `completion`. Ce dernier accepte uniquement FREQ/INTERVAL. |
+| `end_date` | Fin incluse ou null. Doit suivre le début. |
+| `max_occurrences` | 1–10000 résolutions, première comprise, ou null. Mutuellement exclusif avec end_date. |
+| `excluded_dates` | Jusqu’à 366 dates, dédupliquées et ordonnées. |
+
+Une création sans date explicite prend la première occurrence à partir de l’ancre. Une date explicite peut reporter l’occurrence hors du calendrier régulier, mais doit rester dans les bornes et hors des exclusions. Une création récurrente exige un statut ouvert. `recurrence_completed`, en lecture seule, compte les résolutions de la définition courante. Modifier la règle remet ce compteur à zéro ; modifier uniquement la date conserve règle, ancre et compteur. `recurrence:null` enlève la répétition ; pour retirer aussi la date envoyer `due_date:null` dans le même PATCH. Une règle omise reste inchangée.
+
+En mode `completion`, après une première résolution anticipée, la prochaine échéance peut précéder l’ancre initiale : le délai suit le jour réel de résolution. La tâche reste éditable et archivable. Le début reste la borne de création ou de changement de définition ; la fin et les exclusions restent applicables à chaque occurrence.
+
+Les titres envoyés directement à `/tasks` restent littéraux : l’analyse est explicite et ne change pas silencieusement un client API existant. Exemple autonome avec cookie et jeton acquis selon la section Session :
+
+```bash
+curl --fail -b cookies.txt -H "X-CSRF-Token: $CSRF" -H 'Content-Type: application/json' \
+  https://life.thibault-leveau.com/api/v1/scheduling/parse \
+  -d '{"text":"Courir tous les lundis et jeudis","today":"2026-11-14","timezone":"Europe/Paris"}'
+
+curl --fail -b cookies.txt -H "X-CSRF-Token: $CSRF" -H 'Content-Type: application/json' \
+  https://life.thibault-leveau.com/api/v1/scheduling/preview \
+  -d '{"recurrence":{"rrule":"FREQ=MONTHLY;BYDAY=MO,TU,WE,TH,FR;BYSETPOS=-1","start_date":"2026-11-14","timezone":"Europe/Paris","max_occurrences":6}}'
+```
+
+Créer ensuite la tâche avec `workspace_id`, `title`, `due_date` et `recurrence` retournés par l’analyse, ou avec une règle construite directement. Toutes les résolutions passent par les mêmes transitions, y compris PATCH du statut et `/move`. Pour une récurrence, `/complete` avance l’occurrence dans une transaction et incrémente la version une seule fois : rejouer l’ancienne version donne 409. Une nouvelle requête avec la nouvelle version résout volontairement l’occurrence suivante. La répétition sur une série déjà terminée reste sans effet avec sa version courante.
+
+`scheduled` prend la première date strictement après `max(due_date, jour local de résolution)` ; `completion` prend la prochaine date de l’intervalle ancré sur le jour de résolution. Dates inexistantes/exclues sautées, maximum atteint ou calendrier épuisé : la tâche reste terminée. L’aperçu du mode completion est indicatif. `/undo-complete` restaure le statut ouvert, la date et le compteur précédents, en ajoutant un événement compensateur ; une modification intermédiaire ou une version périmée donne 409. `/reopen` reste une réouverture du dernier état terminé, sans effacer sa résolution historique.
+
 ## Exemple autonome Python
 
 Après création du compte et migration, exécuter depuis la racine du dépôt avec `uv run python`, ou dans un environnement doté de `httpx`. Le mot de passe est saisi sans être écrit dans l'historique du shell. Remplacer l'origine par HTTPS pour la production.
