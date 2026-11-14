@@ -151,6 +151,40 @@ class MoveInput(VersionInput):
     before_id: UUID | None = None
 
 
+class TaskReference(VersionInput):
+    id: UUID
+
+
+class BulkTasks(Schema):
+    tasks: list[TaskReference] = Field(min_length=1, max_length=500)
+
+    @model_validator(mode="after")
+    def unique_tasks(self):
+        if len({item.id for item in self.tasks}) != len(self.tasks):
+            raise ValueError("Une tâche ne peut apparaître qu’une fois dans le lot.")
+        return self
+
+
+class BulkReschedule(BulkTasks):
+    action: Literal["reschedule"]
+    due_date: date | None = Field(
+        description="Nouvelle échéance ; null la retire. Les récurrences sont conservées."
+    )
+
+
+class BulkMove(BulkTasks):
+    action: Literal["move"]
+    workspace_id: UUID
+    section_id: UUID | None = None
+
+
+class BulkArchive(BulkTasks):
+    action: Literal["archive"]
+
+
+BulkInput = Annotated[BulkReschedule | BulkMove | BulkArchive, Field(discriminator="action")]
+
+
 class TaskOutput(Schema):
     id: UUID
     workspace_id: UUID

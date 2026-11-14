@@ -18,6 +18,8 @@ La détection affiche le libellé et les trois premières dates retournées par 
 | `AgendaView` | Vue globale des échéances, périodes et réglages enregistrés par API |
 | `TaskContents` | Contenu et échéance partagés par liste, kanban et agenda |
 | `TaskViews` | Listes, lignes/colonnes du tableau, ajouts rapides et glisser-déposer |
+| `TaskActions`, `TaskMenu`, `BulkTaskDialog` | Menu partagé, sélection transitoire, confirmation et opérations API groupées |
+| `useTaskSelection` | Rectangle souris, défilement aux bords et appui long tactile annulé par le défilement |
 | `TaskEditor`, `MoveDialog` | Édition atomique, conflits, historique et déplacement accessible |
 | `WorkspaceSettings`, `WorkspaceDialog` | Propriétés, ordre, sections, colonnes, étiquettes et archives |
 | `Dialog`, `LoginPanel` | Dialogues natifs, focus et connexion |
@@ -42,3 +44,7 @@ Les données privées proviennent exclusivement de l'API. Un `expected_version` 
 Les différences entre dates calendaires sont calculées sur des minuits UTC, sans dépendre de la durée des jours de changement d’heure. Un minuteur jusqu’au prochain minuit local et les événements de focus/visibilité rafraîchissent les libellés et les requêtes. Les échéances sont formatées comme dates locales, sans conversion d'un minuit UTC susceptible de changer de jour. Les événements sont convertis depuis leurs instants UTC vers le fuseau du navigateur.
 
 Pas de mode hors connexion, service worker, synchronisation temps réel ou virtualisation. Le client lit les pages API de 200 tâches jusqu'au total pour une vue personnelle complète. Les tests de navigateur utilisent la compilation de production, afin de vérifier aussi les effets de l'optimisation CSS/JavaScript. Voir [Tests](tests.md).
+
+Les trois vues partagent le menu contextuel et les actions de sélection. Le menu est rendu dans un portail, borné au viewport et refermé au défilement, clic extérieur ou Échap. Il gère focus et navigation au clavier. La sélection souris démarre après 6 px, le maintien tactile après 450 ms et s’annule avant activation au-delà de 10 px de mouvement. Les poignées conservent le glisser-déposer individuel ; un clic simple conserve l’édition. Le rectangle et le défilement aux bords utilisent `requestAnimationFrame` ; le pointeur est suivi jusqu’au relâchement ou à l’annulation, même hors de la zone des tâches.
+
+La barre fixe présente replanification, déplacement, suppression réversible et désélection. `BulkTaskDialog` fige les versions affichées avant soumission à `/tasks/bulk`, conserve les erreurs et propose un rechargement après conflit. Le menu appelle `/duplicate` ou la même suppression groupée pour une seule tâche. Les gestes restent purement locaux ; seules les actions confirmées mutent l’API. Au changement de vue/filtre/période, la sélection est remise à zéro. Le panneau mobile bloque le contenu arrière et contient le focus ; les cibles tactiles, champs sans zoom automatique, marges de sécurité et animations réduites sont pris en compte.

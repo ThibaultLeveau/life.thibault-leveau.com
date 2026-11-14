@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { allTasks, api, ApiError, setApiSession } from "./api";
 import { relativeDate, useLocalToday } from "./dates";
 import { AgendaView } from "./components/AgendaView";
+import { TaskActions } from "./components/TaskActions";
 import {
   defaultView,
   type Label,
@@ -56,6 +57,8 @@ export function TasksPage() {
   const [notice, setNotice] = useState("");
   const [undoTask, setUndoTask] = useState<Task | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const sidebarRef = useRef<HTMLElement>(null);
+  const mainRef = useRef<HTMLElement>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [showDisplay, setShowDisplay] = useState(false);
   const [createSpace, setCreateSpace] = useState(false);
@@ -70,10 +73,57 @@ export function TasksPage() {
   const viewWrites = useRef<Promise<unknown>>(Promise.resolve());
   selectedRef.current = workspaceId;
   const spaceTree = workspaceTree(workspaces);
-  const archivedTree = workspaceTree([...workspaces, ...archivedSpaces]).filter(
-    ({ space }) => space.archived_at,
-  );
+  const archivedTree = workspaceTree([
+    ...workspaces,
+    ...archivedSpaces,
+  ]).filter(({ space }) => space.archived_at);
   const workspace = workspaces.find((space) => space.id === workspaceId);
+
+  useEffect(() => {
+    if (!sidebarOpen || !matchMedia("(max-width: 800px)").matches) return;
+    const sidebar = sidebarRef.current;
+    const main = mainRef.current;
+    if (!sidebar || !main) return;
+    const previous = document.activeElement as HTMLElement | null;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    main.inert = true;
+    sidebar.setAttribute("role", "dialog");
+    sidebar.setAttribute("aria-modal", "true");
+    sidebar.querySelector<HTMLElement>("button.mobile-only")?.focus();
+    const trap = (event: KeyboardEvent) => {
+      if (event.key !== "Tab" || document.querySelector("dialog[open]"))
+        return;
+      const items = Array.from(
+        sidebar.querySelectorAll<HTMLElement>(
+          "button:not(:disabled), a[href], select",
+        ),
+      ).filter((item) => item.getClientRects().length);
+      const index = items.indexOf(document.activeElement as HTMLElement);
+      if (event.shiftKey && index <= 0) {
+        event.preventDefault();
+        items.at(-1)?.focus();
+      } else if (!event.shiftKey && index === items.length - 1) {
+        event.preventDefault();
+        items[0]?.focus();
+      }
+    };
+    const resize = () => {
+      if (innerWidth > 800) setSidebarOpen(false);
+    };
+    window.addEventListener("keydown", trap);
+    window.addEventListener("resize", resize);
+    return () => {
+      document.body.style.overflow = overflow;
+      main.inert = false;
+      sidebar.removeAttribute("role");
+      sidebar.removeAttribute("aria-modal");
+      window.removeEventListener("keydown", trap);
+      window.removeEventListener("resize", resize);
+      if (!document.querySelector("dialog[open]"))
+        previous?.focus({ preventScroll: true });
+    };
+  }, [sidebarOpen]);
 
   function acceptSession(value: Session | null) {
     if (value?.user_id !== sessionRef.current?.user_id)
@@ -250,7 +300,12 @@ export function TasksPage() {
     [loading, spacesLoading],
   );
   useEffect(() => {
-    if (agenda || !workspaceId || loading || search === viewRef.current.search)
+    if (
+      agenda ||
+      !workspaceId ||
+      loading ||
+      search === viewRef.current.search
+    )
       return;
     const timer = setTimeout(() => changeView({ search }), 300);
     return () => clearTimeout(timer);
@@ -276,7 +331,10 @@ export function TasksPage() {
   }
   useEffect(() => {
     const shortcut = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+      if (
+        (event.metaKey || event.ctrlKey) &&
+        event.key.toLowerCase() === "k"
+      ) {
         event.preventDefault();
         searchTasks();
       }
@@ -291,9 +349,12 @@ export function TasksPage() {
   }, []);
 
   async function refreshEntities() {
-    await Promise.all([loadWorkspaces(), loadSpace(selectedRef.current)]);
     setTaskLoading(true);
-    setReloadTasks((value) => value + 1);
+    try {
+      await Promise.all([loadWorkspaces(), loadSpace(selectedRef.current)]);
+    } finally {
+      setReloadTasks((value) => value + 1);
+    }
   }
   async function action(
     run: () => Promise<unknown>,
@@ -436,7 +497,8 @@ export function TasksPage() {
       sections.some(
         (section) =>
           section.id === task.section_id &&
-          (section.visibility === "both" || section.visibility === view.layout),
+          (section.visibility === "both" ||
+            section.visibility === view.layout),
       ),
   );
   const hiddenCount = tasks.length - visibleTasks.length;
@@ -459,7 +521,11 @@ export function TasksPage() {
           aria-label="Fermer la navigation"
         />
       )}
-      <aside className="task-sidebar" aria-label="Navigation des tâches">
+      <aside
+        ref={sidebarRef}
+        className="task-sidebar"
+        aria-label="Navigation des tâches"
+      >
         <div className="sidebar-top">
           <a href="/" className="task-brand">
             <span className="task-brand-icon">
@@ -512,7 +578,10 @@ export function TasksPage() {
           <button
             className="icon-button"
             aria-label="Gérer et réordonner les espaces"
-            onClick={() => setManageSpaces(true)}
+            onClick={() => {
+              setSidebarOpen(false);
+              setManageSpaces(true);
+            }}
           >
             <Icon name="settings" size={15} />
           </button>
@@ -534,7 +603,10 @@ export function TasksPage() {
                 setSidebarOpen(false);
               }}
             >
-              <span className="workspace-symbol" style={{ color: space.color }}>
+              <span
+                className="workspace-symbol"
+                style={{ color: space.color }}
+              >
                 #
               </span>
               <span>{space.name}</span>
@@ -546,7 +618,10 @@ export function TasksPage() {
         </nav>
         <button
           className="sidebar-new-space"
-          onClick={() => setCreateSpace(true)}
+          onClick={() => {
+            setSidebarOpen(false);
+            setCreateSpace(true);
+          }}
         >
           <Icon name="plus" size={16} />
           Nouvel espace
@@ -559,13 +634,19 @@ export function TasksPage() {
           </a>
           <button
             className="sidebar-subtle"
-            onClick={() => setManageSpaces(true)}
+            onClick={() => {
+              setSidebarOpen(false);
+              setManageSpaces(true);
+            }}
           >
             <Icon name="archive" size={17} />
             Archives des espaces
           </button>
           <label className="theme-select">
-            <Icon name={session.theme === "dark" ? "moon" : "sun"} size={17} />
+            <Icon
+              name={session.theme === "dark" ? "moon" : "sun"}
+              size={17}
+            />
             <span className="sr-only">Apparence</span>
             <select
               value={session.theme}
@@ -595,7 +676,12 @@ export function TasksPage() {
           </div>
         </div>
       </aside>
-      <main className="tasks-main" id="tasks-content" tabIndex={-1}>
+      <main
+        ref={mainRef}
+        className="tasks-main"
+        id="tasks-content"
+        tabIndex={-1}
+      >
         <header className="task-topbar">
           <div className="task-breadcrumb">
             <button
@@ -677,12 +763,15 @@ export function TasksPage() {
               <p className="eyebrow">VOTRE PROCHAIN CHAPITRE</p>
               <h1>Faites de la place à vos idées.</h1>
               <p className="muted">
-                Créez un espace, organisez vos tâches et avancez une chose à la
-                fois.
+                Créez un espace, organisez vos tâches et avancez une chose à
+                la fois.
               </p>
               <button
                 className="primary-button"
-                onClick={() => setCreateSpace(true)}
+                onClick={() => {
+                  setSidebarOpen(false);
+                  setCreateSpace(true);
+                }}
               >
                 <Icon name="plus" />
                 Créer mon premier espace
@@ -920,7 +1009,9 @@ export function TasksPage() {
                     ? "Chargement des tâches…"
                     : `${visibleTasks.length} ${hasFilters ? "résultat" : "tâche"}${visibleTasks.length > 1 ? "s" : ""}`}
                   <span className="summary-dot">·</span>
-                  {visibleTasks.filter((task) => task.completed_at).length}{" "}
+                  {
+                    visibleTasks.filter((task) => task.completed_at).length
+                  }{" "}
                   terminée
                   {visibleTasks.filter((task) => task.completed_at).length > 1
                     ? "s"
@@ -975,20 +1066,40 @@ export function TasksPage() {
                   <span />
                 </div>
               ) : (
-                <TaskViews
-                  tasks={tasks}
+                <TaskActions
+                  key={`${workspaceId}:${JSON.stringify(view)}`}
+                  tasks={visibleTasks}
+                  workspaces={workspaces}
                   today={today}
-                  sections={sections.filter((section) => !section.archived_at)}
-                  statuses={statuses}
-                  labels={labels}
-                  view={view}
                   busy={busy || taskLoading}
-                  onOpen={setEditor}
-                  onComplete={complete}
-                  onMove={move}
-                  onAdd={quickAdd}
-                  onConfigure={() => setSettingsTab("sections")}
-                />
+                  onEdit={setEditor}
+                  onRefresh={(message) => {
+                    if (message) {
+                      setNotice(message);
+                      setUndoTask(null);
+                    }
+                    void refreshEntities().catch((error) =>
+                      setError(error.message),
+                    );
+                  }}
+                >
+                  <TaskViews
+                    tasks={tasks}
+                    today={today}
+                    sections={sections.filter(
+                      (section) => !section.archived_at,
+                    )}
+                    statuses={statuses}
+                    labels={labels}
+                    view={view}
+                    busy={busy || taskLoading}
+                    onOpen={setEditor}
+                    onComplete={complete}
+                    onMove={move}
+                    onAdd={quickAdd}
+                    onConfigure={() => setSettingsTab("sections")}
+                  />
+                </TaskActions>
               )}
             </>
           )}

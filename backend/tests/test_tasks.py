@@ -1213,3 +1213,255 @@ def test_agenda_migration_preserves_existing_data(client, engine):
         conn.execute(
             text("INSERT INTO agenda_preferences SELECT user_id, settings FROM agenda_preferences")
         )
+
+
+def bulk(client, items, action, **values):
+    return client.post(
+        "/api/v1/tasks/bulk",
+        json={
+            "action": action,
+            "tasks": [{"id": item["id"], "expected_version": item["version"]} for item in items],
+            **values,
+        },
+    )
+
+
+def test_duplicate_creates_independent_open_lifecycle(client):
+    space, _ = create_space(client)
+    section = create_section(client, space)
+    label = client.post(
+        f"/api/v1/workspaces/{space['id']}/labels", json={"name": "Important"}
+    ).json()
+    source = create_task(
+        client,
+        space,
+        section_id=section["id"],
+        description="Détails",
+        priority=1,
+        due_date="2026-11-20",
+        label_ids=[label["id"]],
+    )
+    source = mutate(client, source, "complete")
+    events = history(client, source)
+    response = client.post(
+        f"/api/v1/tasks/{source['id']}/duplicate", json={"expected_version": source["version"]}
+    )
+    assert response.status_code == 201, response.text
+    copied = response.json()
+    for field in (
+        "workspace_id",
+        "section_id",
+        "title",
+        "description",
+        "priority",
+        "due_date",
+        "label_ids",
+    ):
+        assert copied[field] == source[field]
+    assert copied["id"] != source["id"]
+    assert copied["created_at"] > source["created_at"]
+    assert copied["completed_at"] is None and copied["archived_at"] is None
+    assert copied["version"] == 1 and copied["recurrence_completed"] == 0
+    assert copied["position"] > source["position"]
+    assert [event["kind"] for event in history(client, copied)] == ["created"]
+    assert history(client, source) == events
+    assert client.get(f"/api/v1/tasks/{source['id']}").json() == source
+    assert (
+        client.post(
+            f"/api/v1/tasks/{source['id']}/duplicate", json={"expected_version": 1}
+        ).status_code
+        == 409
+    )
+
+
+def test_duplicate_recurring_after_early_completion(client, monkeypatch):
+    from datetime import UTC, datetime
+
+    from life_app.features.tasks import service
+
+    monkeypatch.setattr(service, "utcnow", lambda: datetime(2026, 11, 14, 12, tzinfo=UTC))
+    space, _ = create_space(client)
+    source = create_task(
+        client,
+        space,
+        recurrence={
+            "mode": "completion",
+            "rrule": "FREQ=DAILY",
+            "start_date": "2026-12-01",
+            "max_occurrences": 5,
+        },
+    )
+    source = mutate(client, source, "complete")
+    assert source["due_date"] < "2026-12-01"
+    response = client.post(
+        f"/api/v1/tasks/{source['id']}/duplicate", json={"expected_version": source["version"]}
+    )
+    assert response.status_code == 201, response.text
+    copy = response.json()
+    assert copy["due_date"] == source["due_date"] and copy["recurrence"] == source["recurrence"]
+    assert copy["recurrence_completed"] == 0
+    assert history(client, copy)[0]["context"]["after"]["due_date"] == source["due_date"]
+    edited = client.patch(
+        f"/api/v1/tasks/{copy['id']}",
+        json={"expected_version": copy["version"], "title": "Copie modifiée"},
+    )
+    assert edited.status_code == 200, edited.text
+    copy = edited.json()
+    assert mutate(client, copy, "complete")["recurrence_completed"] == 1
+
+
+def test_bulk_reschedule_archive_restore_preserves_history(client):
+    space, _ = create_space(client)
+    items = [create_task(client, space, title=f"Tâche {i}") for i in range(3)]
+    items[1] = mutate(client, items[1], "complete")
+    completion = items[1]["completed_at"]
+    response = bulk(client, items, "reschedule", due_date="2026-12-04")
+    assert response.status_code == 200, response.text
+    planned = response.json()
+    assert all(item["due_date"] == "2026-12-04" for item in planned)
+    assert planned[1]["completed_at"] == completion
+    response = bulk(client, planned, "reschedule", due_date=None)
+    assert response.status_code == 200, response.text
+    planned = response.json()
+    archived = bulk(client, planned, "archive").json()
+    assert all(item["archived_at"] and item["due_date"] is None for item in archived)
+    assert archived[1]["completed_at"] == completion
+    for original, item in zip(items, archived, strict=True):
+        restored = client.patch(
+            f"/api/v1/tasks/{item['id']}",
+            json={"expected_version": item["version"], "archived": False},
+        ).json()
+        assert restored["created_at"] == original["created_at"]
+        assert history(client, restored)[-2]["kind"] == "archived"
+        assert history(client, restored)[-1]["kind"] == "restored"
+
+
+@pytest.mark.parametrize("failure", ["version", "missing", "recurrence", "archived"])
+def test_bulk_rolls_back_entire_batch(client, failure):
+    space, _ = create_space(client)
+    one = create_task(client, space)
+    two = create_task(client, space, recurrence={"rrule": "FREQ=DAILY", "start_date": "2026-11-01"})
+    snapshot = [one, two]
+    if failure == "version":
+        two = {**two, "version": 999}
+    elif failure == "missing":
+        two = {**two, "id": str(uuid4())}
+    elif failure == "archived":
+        two = client.patch(
+            f"/api/v1/tasks/{two['id']}",
+            json={"expected_version": two["version"], "archived": True},
+        ).json()
+        snapshot[1] = two
+    events = [history(client, item) for item in snapshot]
+    response = bulk(
+        client, [one, two], "reschedule", due_date=None if failure == "recurrence" else "2026-12-01"
+    )
+    assert (
+        response.status_code
+        == {"version": 409, "missing": 404, "recurrence": 422, "archived": 409}[failure]
+    )
+    for item, previous in zip(snapshot, events, strict=True):
+        assert client.get(f"/api/v1/tasks/{item['id']}").json() == item
+        assert history(client, item) == previous
+
+
+def test_bulk_move_preserves_status_dates_labels_order_and_rolls_back(client):
+    source, statuses = create_space(client)
+    target, _ = create_space(client, "Destination")
+    section = create_section(client, target)
+    label = client.post(f"/api/v1/workspaces/{source['id']}/labels", json={"name": "Voyage"}).json()
+    items = [
+        create_task(client, source, title=f"Tâche {i}", label_ids=[label["id"]]) for i in range(3)
+    ]
+    items[1] = mutate(client, items[1], "complete")
+    # Reorder touches later versions; validating every snapshot up front avoids false conflicts.
+    response = bulk(
+        client, list(reversed(items)), "move", workspace_id=source["id"], section_id=None
+    )
+    assert response.status_code == 200, response.text
+    items = response.json()
+    response = bulk(client, items, "move", workspace_id=target["id"], section_id=section["id"])
+    assert response.status_code == 200, response.text
+    moved = response.json()
+    assert [item["position"] for item in moved] == sorted(item["position"] for item in moved)
+    for before, after in zip(items, moved, strict=True):
+        assert after["workspace_id"] == target["id"] and after["section_id"] == section["id"]
+        assert after["completed_at"] == before["completed_at"]
+        assert after["created_at"] == before["created_at"]
+        assert after["label_ids"] and after["label_ids"] != before["label_ids"]
+        assert history(client, after)[-1]["kind"] == "moved"
+        assert len(
+            [event for event in history(client, after) if event["kind"] == "completed"]
+        ) == int(bool(before["completed_at"]))
+    response = bulk(client, moved, "move", workspace_id=source["id"], section_id=section["id"])
+    assert response.status_code == 404
+    assert [client.get(f"/api/v1/tasks/{item['id']}").json() for item in moved] == moved
+
+
+def test_bulk_and_duplicate_access_validation_and_parent_archives(client, app):
+    space, _ = create_space(client)
+    task = create_task(client, space)
+    assert bulk(client, [], "archive").status_code == 422
+    assert bulk(client, [task, task], "archive").status_code == 422
+    assert bulk(client, [task] * 501, "archive").status_code == 422
+    assert bulk(client, [task], "reschedule").status_code == 422
+    assert bulk(client, [task], "archive", due_date=None).status_code == 422
+    with TestClient(app) as other:
+        assert bulk(other, [task], "archive").status_code == 401
+        login = other.post(
+            "/api/v1/auth/session", json={"username": "bob", "password": PASSWORD}
+        ).json()
+        other.headers["X-CSRF-Token"] = login["csrf_token"]
+        assert bulk(other, [task], "archive").status_code == 404
+        assert (
+            other.post(
+                f"/api/v1/tasks/{task['id']}/duplicate", json={"expected_version": task["version"]}
+            ).status_code
+            == 404
+        )
+        other_space, _ = create_space(other)
+        assert bulk(client, [task], "move", workspace_id=other_space["id"]).status_code == 404
+    csrf = client.headers.pop("X-CSRF-Token")
+    assert bulk(client, [task], "archive").status_code == 403
+    assert (
+        client.post(
+            f"/api/v1/tasks/{task['id']}/duplicate", json={"expected_version": task["version"]}
+        ).status_code
+        == 403
+    )
+    client.headers["X-CSRF-Token"] = csrf
+    client.patch(f"/api/v1/workspaces/{space['id']}", json={"archived": True})
+    assert bulk(client, [task], "archive").status_code == 409
+    assert (
+        client.post(
+            f"/api/v1/tasks/{task['id']}/duplicate", json={"expected_version": task["version"]}
+        ).status_code
+        == 409
+    )
+
+
+def test_simultaneous_bulk_and_single_write_are_serialized(client, app):
+    space, _ = create_space(client)
+    items = [create_task(client, space, title=f"Concurrent {index}") for index in range(2)]
+
+    def write(index):
+        with TestClient(app, cookies=client.cookies, headers=dict(client.headers)) as other:
+            if index == 0:
+                return bulk(other, items, "reschedule", due_date="2026-12-01").status_code
+            return other.post(
+                f"/api/v1/tasks/{items[1]['id']}/complete",
+                json={"expected_version": items[1]["version"]},
+            ).status_code
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        results = list(pool.map(write, range(2)))
+    assert sorted(results) == [200, 409]
+    saved = [client.get(f"/api/v1/tasks/{item['id']}").json() for item in items]
+    if results[0] == 200:
+        assert all(
+            item["due_date"] == "2026-12-01" and item["completed_at"] is None for item in saved
+        )
+    else:
+        assert saved[0] == items[0]
+        assert saved[1]["completed_at"] is not None and saved[1]["due_date"] is None
+        assert [event["kind"] for event in history(client, saved[0])] == ["created"]

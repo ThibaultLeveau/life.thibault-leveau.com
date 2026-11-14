@@ -66,7 +66,21 @@ Un espace garde au moins une colonne ouverte et une terminée. Le type d'une col
 
 **Nouvelle tâche** ou **Ajouter une tâche** ouvre l'éditeur. L'ajout rapide dans une liste ou une cellule utilise directement sa section et son statut. Une tâche comporte titre, description, priorité de P1 urgente à P4 sans priorité, échéance facultative et étiquettes.
 
-Cliquer sur le titre ou sur `…` ouvre les détails. Les étiquettes se créent dans les réglages de l'espace puis se sélectionnent dans la tâche. Les noms d'étiquettes sont propres à chaque espace.
+Cliquer sur le titre ouvre les détails. Le bouton `…` et le clic droit sur une tâche ouvrent un menu : **Modifier**, **Dupliquer**, **Sélectionner** et **Supprimer**. Ce menu existe en liste, tableau et agenda. Il se ferme au clic extérieur ou avec Échap ; les flèches permettent de parcourir ses actions au clavier. Les noms d’étiquettes sont propres à chaque espace ; elles se créent dans ses réglages puis se sélectionnent dans la tâche.
+
+**Dupliquer** crée une tâche ouverte dans le même espace et la même section, en fin de liste. Le titre, la description, la priorité, les étiquettes, l’échéance et la récurrence sont copiés. La copie commence son propre historique et son compteur de résolutions à zéro. L’original reste inchangé.
+
+**Supprimer** demande confirmation puis retire la tâche des vues actives en l’archivant. Elle reste restaurable dans **Réglages de l’espace → Archives**, avec ses dates et son historique.
+
+### Sélectionner plusieurs tâches
+
+- **Ordinateur :** maintenir le clic gauche et dessiner un rectangle dans la zone des tâches, y compris en partant du titre ou du fond d’une carte. Le cadre sélectionne les tâches qu’il rencontre. Approcher du bord fait défiler la vue ; Ctrl, ⌘ ou Maj pendant le départ conserve la sélection précédente. Les poignées restent réservées au déplacement.
+- **Mobile :** maintenir le doigt environ une demi-seconde sur une tâche, puis toucher les autres pour les ajouter ou les retirer de la sélection. Un mouvement avant ce délai reste un défilement normal.
+- **Clavier ou commande explicite :** choisir **Sélectionner** au-dessus des tâches ou dans leur menu, puis utiliser les cases de sélection. En mode sélection, toucher un titre sélectionne la tâche sans ouvrir son éditeur.
+
+La barre affiche le nombre sélectionné et propose **Replanifier**, **Déplacer**, **Supprimer** et **Tout désélectionner**. Échap quitte également la sélection. Replanifier applique une date commune (ou retire la date si aucune tâche n’est récurrente), en conservant règles et compteurs. Déplacer choisit un espace et une section, place les tâches en fin de section et préserve leur état ouvert/terminé, leurs dates de résolution et leurs étiquettes. Supprimer archive le lot après confirmation.
+
+Un lot comporte au plus 500 tâches. Les opérations sont atomiques : une version périmée, une destination invalide ou une date incompatible avec une récurrence annule le lot entier. Le dialogue conserve la sélection et permet de recharger après un conflit ; vérifier à nouveau avant de valider. La sélection est temporaire et limitée aux tâches de la vue : changer d’espace, de période ou de filtre la remet à zéro. Aucun geste de sélection n’écrit de données.
 
 Cocher termine la tâche dans le premier statut terminé de l'ordre configuré. Décocher la rouvre dans le premier statut ouvert. Déplacer une carte vers une colonne terminée produit le même effet. **Historique** montre créations, modifications, déplacements, résolutions, réouvertures et archives ; les anciennes résolutions restent présentes.
 
@@ -159,7 +173,7 @@ Le clavier permet de parcourir les actions, de fermer un dialogue avec Échap et
 
 Un tri automatique désactive les poignées ; le message au-dessus des tâches permet de revenir à l'ordre manuel. Les réglages sont conservés par espace, après rechargement et reconnexion. Une recherche active peut masquer une nouvelle tâche qui ne lui correspond pas : effacer les filtres pour tout retrouver.
 
-Le thème, sous la navigation, suit le système ou impose clair/sombre. Il est enregistré dans le compte. Sur mobile, le bouton de menu ouvre les espaces ; le tableau défile horizontalement dans sa zone.
+Le thème, sous la navigation, suit le système ou impose clair/sombre. Il est enregistré dans le compte. Sur mobile, le bouton de menu ouvre un panneau latéral ; le focus reste dans ce panneau jusqu’à sa fermeture. Le tableau défile horizontalement dans sa zone. Les commandes et champs sont adaptés aux petits écrans ; la barre d’actions groupées reste accessible en bas de l’écran. Les animations respectent le réglage système de réduction des mouvements.
 
 ## Archiver et restaurer
 

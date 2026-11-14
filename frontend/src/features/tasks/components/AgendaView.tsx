@@ -16,6 +16,7 @@ import { Icon } from "./Icon";
 import { TaskContents } from "./TaskContents";
 import { TaskEditor } from "./TaskEditor";
 import { MoveDialog } from "./MoveDialog";
+import { TaskActions } from "./TaskActions";
 
 type SpaceData = { sections: Section[]; statuses: Status[]; labels: Label[] };
 const periods = [
@@ -343,68 +344,85 @@ export function AgendaView({
                 <p>Aucune tâche à cette échéance.</p>
               </div>
             )}
-            {[...groups].map(([key, tasks]) => (
-              <section
-                className="task-section"
-                key={key}
-                aria-labelledby={`agenda-${key}`}
-              >
-                <div className="section-heading">
-                  <h2
-                    id={`agenda-${key}`}
-                    className={key === "overdue" ? "agenda-overdue" : ""}
-                  >
-                    {key === "overdue"
-                      ? "En retard"
-                      : relativeDate(key, today).label}
-                  </h2>
-                  <span className="section-count">{tasks.length}</span>
-                  {key !== "overdue" && (
-                    <span className="agenda-full-date">
-                      {relativeDate(key, today).full}
-                    </span>
-                  )}
-                </div>
-                {tasks.map((task) => {
-                  const space = workspaces.find(
-                    (space) => space.id === task.workspace_id,
-                  );
-                  const data = spaces[task.workspace_id];
-                  const section = data?.sections.find(
-                    (section) => section.id === task.section_id,
-                  );
-                  return (
-                    <article
-                      className={`task-row agenda-task ${task.completed_at ? "is-completed" : ""}`}
-                      data-task-id={task.id}
-                      key={task.id}
+            <TaskActions
+              key={JSON.stringify(settings)}
+              tasks={page.items}
+              workspaces={workspaces}
+              today={today}
+              busy={busy}
+              onEdit={setEditor}
+              onRefresh={(message) => {
+                if (message) {
+                  setNotice(message);
+                  setUndoTask(null);
+                }
+                setReload((value) => value + 1);
+              }}
+            >
+              {[...groups].map(([key, tasks]) => (
+                <section
+                  className="task-section"
+                  key={key}
+                  aria-labelledby={`agenda-${key}`}
+                >
+                  <div className="section-heading">
+                    <h2
+                      id={`agenda-${key}`}
+                      className={key === "overdue" ? "agenda-overdue" : ""}
                     >
-                      <TaskContents
-                        task={task}
-                        today={today}
-                        labels={data?.labels ?? []}
-                        busy={busy}
-                        onOpen={() => setEditor(task)}
-                        onComplete={() => complete(task)}
-                        context={
-                          <button
-                            className="agenda-task-context"
-                            onClick={() => onWorkspace(task.workspace_id)}
-                          >
-                            <span
-                              className="color-dot"
-                              style={{ background: space?.color }}
-                            />
-                            {spacePaths.get(task.workspace_id) ?? space?.name}
-                            {section && ` / ${section.name}`}
-                          </button>
-                        }
-                      />
-                    </article>
-                  );
-                })}
-              </section>
-            ))}
+                      {key === "overdue"
+                        ? "En retard"
+                        : relativeDate(key, today).label}
+                    </h2>
+                    <span className="section-count">{tasks.length}</span>
+                    {key !== "overdue" && (
+                      <span className="agenda-full-date">
+                        {relativeDate(key, today).full}
+                      </span>
+                    )}
+                  </div>
+                  {tasks.map((task) => {
+                    const space = workspaces.find(
+                      (space) => space.id === task.workspace_id,
+                    );
+                    const data = spaces[task.workspace_id];
+                    const section = data?.sections.find(
+                      (section) => section.id === task.section_id,
+                    );
+                    return (
+                      <article
+                        className={`task-row agenda-task ${task.completed_at ? "is-completed" : ""}`}
+                        data-task-id={task.id}
+                        key={task.id}
+                      >
+                        <TaskContents
+                          task={task}
+                          today={today}
+                          labels={data?.labels ?? []}
+                          busy={busy}
+                          onOpen={() => setEditor(task)}
+                          onComplete={() => complete(task)}
+                          context={
+                            <button
+                              className="agenda-task-context"
+                              onClick={() => onWorkspace(task.workspace_id)}
+                            >
+                              <span
+                                className="color-dot"
+                                style={{ background: space?.color }}
+                              />
+                              {spacePaths.get(task.workspace_id) ??
+                                space?.name}
+                              {section && ` / ${section.name}`}
+                            </button>
+                          }
+                        />
+                      </article>
+                    );
+                  })}
+                </section>
+              ))}
+            </TaskActions>
           </>
         )
       )}
