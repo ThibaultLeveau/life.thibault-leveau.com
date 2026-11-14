@@ -42,7 +42,12 @@ export function Calendar({
       next = plusDays(day, (event.key === "Home" ? 0 : 6) - weekday);
     } else if (event.key === "PageUp" || event.key === "PageDown") {
       const date = new Date(`${day}T12:00:00`);
+      const dayOfMonth = date.getDate();
+      date.setDate(1);
       date.setMonth(date.getMonth() + (event.key === "PageUp" ? -1 : 1));
+      const last = new Date(date);
+      last.setMonth(last.getMonth() + 1, 0);
+      date.setDate(Math.min(dayOfMonth, last.getDate()));
       next = dateString(date);
     } else return;
     event.preventDefault();

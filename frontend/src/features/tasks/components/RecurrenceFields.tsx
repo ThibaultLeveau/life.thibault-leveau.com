@@ -54,7 +54,7 @@ export function RecurrenceFields({
     const next = { ...(reset ? {} : parts), ...patch };
     // YEARLY + BYMONTHDAY/BYDAY otherwise expands across the whole year.
     // Persist the month visibly selected by the builder, including its default.
-    if (next.FREQ === "YEARLY" && !next.BYMONTH)
+    if (rule.mode === "scheduled" && next.FREQ === "YEARLY" && !next.BYMONTH)
       next.BYMONTH = String(Number(anchor.slice(5, 7)));
     set({
       rrule: Object.entries(next)

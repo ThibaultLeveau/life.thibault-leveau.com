@@ -228,6 +228,37 @@ test("une réponse tardive ne remplace pas une date choisie au calendrier", asyn
   expect(task.title).toBe("Préparer le voyage demain");
 });
 
+test("intervalle annuel après résolution et navigation entre mois inégaux", async ({
+  page,
+}) => {
+  await setup(page);
+  await page.getByLabel("Titre", { exact: true }).fill("Réviser le vélo");
+  await page.locator(".schedule-trigger").click();
+  await page
+    .getByRole("button", { name: "dimanche 31 janvier 2027", exact: true })
+    .focus();
+  await page.keyboard.press("PageDown");
+  await expect(
+    page.getByRole("button", { name: "dimanche 28 février 2027", exact: true }),
+  ).toBeFocused();
+  await page.getByRole("tab", { name: "Répéter", exact: true }).click();
+  await page.getByRole("button", { name: /Après résolution Le délai/ }).click();
+  await page
+    .getByRole("combobox", { name: "Unité", exact: true })
+    .selectOption("YEARLY");
+  await page
+    .getByRole("spinbutton", { name: "Répéter tous les", exact: true })
+    .fill("2");
+  await expect(page.locator(".schedule-preview time").nth(1)).toHaveAttribute(
+    "datetime",
+    "2029-01-27",
+  );
+  await page.getByRole("button", { name: "Appliquer la récurrence" }).click();
+  const task = await save(page);
+  expect(task.recurrence?.mode).toBe("completion");
+  expect(task.recurrence?.rrule).toBe("FREQ=YEARLY;INTERVAL=2");
+});
+
 for (const theme of ["light", "dark"])
   test(`calendrier mobile, clavier et absence de débordement (${theme})`, async ({
     page,
