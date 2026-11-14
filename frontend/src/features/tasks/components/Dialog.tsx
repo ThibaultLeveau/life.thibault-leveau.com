@@ -28,7 +28,11 @@ export function Dialog({
       ?.focus();
     return () => {
       element.close();
-      if (previous?.isConnected && previous.getClientRects().length)
+      if (
+        previous?.isConnected &&
+        previous.getClientRects().length &&
+        getComputedStyle(previous).visibility === "visible"
+      )
         previous.focus({ preventScroll: true });
       else
         document

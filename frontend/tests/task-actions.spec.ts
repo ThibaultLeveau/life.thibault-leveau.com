@@ -61,6 +61,12 @@ async function taskFromAPI(
   return (await request.get(`/api/v1/tasks/${task.id}`)).json();
 }
 async function rectangle(page: Page, first: Task, last: Task) {
+  await expect(
+    row(page, first).getByRole("button", {
+      name: `Actions : ${first.title}`,
+      exact: true,
+    }),
+  ).toBeEnabled();
   const a = (await row(page, first).boundingBox())!;
   const b = (await row(page, last).boundingBox())!;
   await page.mouse.move(a.x + 60, a.y + 5);
@@ -436,7 +442,15 @@ test("mobile tactile : défilement, appui long, actions et navigation à 320/375
     .getByRole("dialog")
     .getByRole("button", { name: "Fermer", exact: true })
     .tap();
-  await expect(page.locator(".tasks-main")).toBeFocused();
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          !!document.activeElement?.closest(".tasks-main") &&
+          getComputedStyle(document.activeElement).visibility === "visible",
+      ),
+    )
+    .toBe(true);
   await mutate("/preferences", { theme: "dark" }, "PUT");
   await page.reload();
   await page

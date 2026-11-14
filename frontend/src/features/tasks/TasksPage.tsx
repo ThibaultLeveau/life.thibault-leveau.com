@@ -349,9 +349,12 @@ export function TasksPage() {
   }, []);
 
   async function refreshEntities() {
-    await Promise.all([loadWorkspaces(), loadSpace(selectedRef.current)]);
     setTaskLoading(true);
-    setReloadTasks((value) => value + 1);
+    try {
+      await Promise.all([loadWorkspaces(), loadSpace(selectedRef.current)]);
+    } finally {
+      setReloadTasks((value) => value + 1);
+    }
   }
   async function action(
     run: () => Promise<unknown>,
