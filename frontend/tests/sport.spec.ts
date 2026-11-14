@@ -1,5 +1,10 @@
 import { test, expect, type BrowserContext, type Page } from "@playwright/test";
-import type { ExercisePage, Training, Workout } from "../src/apps/sport/types";
+import type {
+  ExercisePage,
+  KindDefinition,
+  Training,
+  Workout,
+} from "../src/apps/sport/types";
 
 const credentials = {
   username: process.env.LIFE_E2E_USERNAME ?? "browser-test",
@@ -486,7 +491,7 @@ test("Sport : saisie directe, brouillons, conflit, correction et séance suivant
   await expect(weight(second)).toHaveValue("42.5");
   await expect(reps(second)).toHaveValue("8");
   await expect(page.getByRole("progressbar")).toHaveCount(0);
-  await expect(first.locator("strong")).toHaveCSS(
+  await expect(first.locator(".sport-set-number")).toHaveCSS(
     "text-decoration-line",
     "none",
   );
@@ -730,6 +735,142 @@ test("Sport : récupération fixée en bas, défilement, thèmes et clavier mobi
     }
     await context.close();
   }
+});
+
+test("Sport : blocs d’exercice et lignes de séries compactes pour les dix types", async ({
+  page,
+}, testInfo) => {
+  const kinds: KindDefinition[] = await (
+    await page.request.get("/api/v1/sport/kinds")
+  ).json();
+  expect(kinds).toHaveLength(10);
+  const entries = [];
+  for (const [i, kind] of kinds.entries()) {
+    const created = await page.request.post("/api/v1/sport/exercises", {
+      headers,
+      data: {
+        name:
+          i === 0
+            ? "Développé avec haltères sur banc incliné — amplitude complète et mouvement contrôlé"
+            : `Exercice compact ${kind.name}`,
+        kind: kind.id,
+      },
+    });
+    expect(created.ok()).toBeTruthy();
+    entries.push({
+      exercise_id: (await created.json()).id as string,
+      sets: 2,
+      target: Object.fromEntries(kind.fields.map((field) => [field.key, 12])),
+    });
+  }
+  const created = await page.request.post("/api/v1/sport/workouts", {
+    headers,
+    data: { name: "Dix types en lignes compactes", entries },
+  });
+  expect(created.ok()).toBeTruthy();
+  const workout: Workout = await created.json();
+  const started = await page.request.post("/api/v1/sport/sessions", {
+    headers,
+    data: { workout_id: workout.id, expected_version: workout.version },
+  });
+  expect(started.ok()).toBeTruthy();
+  await page.goto("/sport?tab=training");
+  await expect(page.locator(".sport-session-exercise")).toHaveCount(10);
+  const first = page.getByRole("form", {
+    name: `${workout.entries[0].name}, série 1`,
+    exact: true,
+  });
+  await first
+    .getByRole("button", { name: "Valider la série", exact: true })
+    .click();
+  await expect(first.getByText("Validée", { exact: true })).toBeVisible();
+  await first.getByRole("spinbutton").first().fill("15");
+  await expect(first.getByText("Saisie à enregistrer")).toBeVisible();
+
+  for (const width of [320, 375, 1440]) {
+    await page.setViewportSize({ width, height: 1000 });
+    for (const theme of ["light", "dark"]) {
+      await page.evaluate(
+        (value) => (document.documentElement.dataset.theme = value),
+        theme,
+      );
+      for (const [i, entry] of workout.entries.entries()) {
+        const card = page.getByRole("region", { name: entry.name, exact: true });
+        await expect(
+          card.getByRole("heading", { name: entry.name, exact: true }),
+        ).toBeVisible();
+        await expect(card.getByRole("form")).toHaveCount(2);
+        const geometry = await card.evaluate((element) => {
+          const box = element.getBoundingClientRect();
+          const heading = element.querySelector("h2")!.getBoundingClientRect();
+          const style = getComputedStyle(element);
+          return {
+            border: parseFloat(style.borderTopWidth),
+            titleInside: heading.top >= box.top && heading.bottom <= box.bottom,
+            rows: Array.from(element.querySelectorAll("form")).map((form) => {
+              const controls = Array.from(
+                form.querySelectorAll("input, .sport-set-row > button"),
+              );
+              const rects = controls.map((control) =>
+                control.getBoundingClientRect(),
+              );
+              return {
+                aligned: rects.every(
+                  (rect) => Math.abs(rect.bottom - rects[0].bottom) < 2,
+                ),
+                inside: rects.every(
+                  (rect) => rect.left >= box.left && rect.right <= box.right,
+                ),
+                separate: rects.every(
+                  (rect, index) => !index || rect.left >= rects[index - 1].right + 4,
+                ),
+                touch: rects.every(
+                  (rect) => rect.height >= 44 && rect.width >= 44,
+                ),
+                height: form.getBoundingClientRect().height,
+              };
+            }),
+          };
+        });
+        expect(geometry.border).toBeGreaterThan(0);
+        expect(geometry.titleInside).toBe(true);
+        for (const row of geometry.rows) {
+          expect(row.aligned).toBe(true);
+          expect(row.inside).toBe(true);
+          expect(row.separate).toBe(true);
+          expect(row.touch).toBe(true);
+        }
+        // An untouched series remains compact, including its labels and status.
+        expect(geometry.rows[1].height).toBeLessThan(110);
+        for (const field of kinds[i].fields)
+          await expect(
+            card.getByLabel(`${field.label} (${field.unit})`, { exact: true }),
+          ).toHaveCount(2);
+      }
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+      ).toBe(true);
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.screenshot({
+        path: testInfo.outputPath(`sport-compact-${width}-${theme}.png`),
+      });
+    }
+  }
+  await page.setViewportSize({ width: 320, height: 1000 });
+  const fields = first.getByRole("spinbutton");
+  await fields.last().focus();
+  await page.keyboard.press("Tab");
+  await expect(
+    first.getByRole("button", { name: "Corriger la série" }),
+  ).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(first.getByText("Validée", { exact: true })).toBeVisible();
+  const saved: Training = await (
+    await page.request.get("/api/v1/sport/sessions/active")
+  ).json();
+  expect(saved.sets[0].values[kinds[0].fields[0].key]).toBe(15);
+  await page.reload();
+  await expect(first.getByRole("spinbutton").first()).toHaveValue("15");
 });
 
 test("Sport : réponse obsolète, déconnexion et erreur de chargement", async ({
