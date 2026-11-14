@@ -20,9 +20,19 @@ from life_app.core.database import Base, utcnow
 
 class Workspace(Base):
     __tablename__ = "workspaces"
-    __table_args__ = (CheckConstraint("position >= 0"),)
+    __table_args__ = (
+        CheckConstraint("position >= 0"),
+        UniqueConstraint("id", "owner_id", name="uq_workspaces_id_owner"),
+        ForeignKeyConstraint(
+            ["parent_id", "owner_id"],
+            ["workspaces.id", "workspaces.owner_id"],
+            name="fk_workspaces_parent_owner",
+        ),
+        CheckConstraint("parent_id <> id", name="ck_workspaces_not_self_parent"),
+    )
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     owner_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True)
+    parent_id: Mapped[UUID | None] = mapped_column(index=True)
     name: Mapped[str] = mapped_column(String(120))
     description: Mapped[str] = mapped_column(Text, default="")
     color: Mapped[str] = mapped_column(String(7), default="#c05a45")

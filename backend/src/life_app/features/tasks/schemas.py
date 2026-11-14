@@ -16,7 +16,7 @@ class Schema(BaseModel):
 class Patch(Schema):
     @model_validator(mode="after")
     def reject_null_required_fields(self):
-        for field in self.model_fields_set - {"section_id", "due_date"}:
+        for field in self.model_fields_set - {"section_id", "due_date", "parent_id"}:
             if getattr(self, field) is None:
                 raise ValueError(f"{field} ne peut pas être null")
         return self
@@ -24,15 +24,24 @@ class Patch(Schema):
 
 class WorkspaceCreate(Schema):
     name: Name
+    parent_id: UUID | None = Field(
+        default=None, description="Espace parent actif ; null à la racine."
+    )
     description: Description = ""
     color: Color = "#c05a45"
 
 
-class WorkspacePatch(Patch):
+class EntityPatch(Patch):
     name: Name | None = None
     description: Description | None = None
     color: Color | None = None
     archived: bool | None = None
+
+
+class WorkspacePatch(EntityPatch):
+    parent_id: UUID | None = Field(
+        default=None, description="Omis : inchangé ; null : racine ; UUID : parent actif."
+    )
 
 
 class WorkspaceOutput(WorkspaceCreate):
@@ -49,7 +58,7 @@ class SectionCreate(Schema):
     visibility: Literal["list", "board", "both"] = "both"
 
 
-class SectionPatch(WorkspacePatch):
+class SectionPatch(EntityPatch):
     visibility: Literal["list", "board", "both"] | None = None
 
 

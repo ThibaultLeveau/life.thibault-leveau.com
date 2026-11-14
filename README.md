@@ -1,6 +1,6 @@
 # Life
 
-Un espace personnel pour organiser ses tâches : espaces, sections, listes à cocher et kanban en glisser-déposer, avec thèmes clair et sombre. Les sections forment les listes et les **lignes** du tableau ; les statuts deviennent ses colonnes.
+Un espace personnel pour organiser ses tâches : espaces et sous-espaces, sections, listes à cocher et kanban en glisser-déposer, avec thèmes clair et sombre. Les sections forment les listes et les **lignes** du tableau ; les statuts deviennent ses colonnes.
 
 **[Ouvrir Life](https://life.thibault-leveau.com/)** · **[Documentation](https://life.thibault-leveau.com/documentation/)** · **[Référence API](https://life.thibault-leveau.com/api/docs)**
 

@@ -28,6 +28,7 @@ La suite vérifie notamment :
 - Routage explicite, fichiers absents, HEAD, traversal et OpenAPI.
 - Migration initiale aller/retour et comparaison du schéma aux modèles ORM.
 - Création, édition atomique, ordre, filtres, pagination et préférences.
+- Hiérarchie des espaces, cycles et propriétaires, archives/restaurations, concurrence rattachement/rattachement et création/archivage, migration 0002 aller/retour avec données et historique conservés.
 - Résolutions/réouvertures, idempotence, déplacements entre espaces et snapshots historiques.
 - Archives parentes/individuelles et configuration des statuts sans fausse résolution.
 - Contraintes de base, rollback après erreur et immuabilité des événements.
@@ -47,9 +48,9 @@ make test-container
 
 Le script crée un réseau privé, un PostgreSQL et un conteneur applicatif jetables. Il utilise l'image du SHA courant, le rôle applicatif non administrateur, les migrations empaquetées et un compte synthétique. Le port HTTP est choisi dynamiquement sur 127.0.0.1. Le runtime est en lecture seule, avec les mêmes restrictions de capacités que la production. Pour le navigateur local HTTP, seul l'environnement est réglé sur `test` ; le cookie Secure de production est vérifié dans les tests HTTP.
 
-Le smoke test vérifie routes publiques, disponibilité de la base, absence d'accès anonyme aux tâches, bundles, recherche MkDocs et vraies 404. Playwright exerce les formulaires de configuration, le cycle complet d'une tâche, le glisser-déposer entre lignes/colonnes, l'ordre en liste, les thèmes persistants, le mobile 320/375 px, le clavier, le déplacement inter-espaces et un conflit d'édition simulé. Les couleurs calculées du thème sombre sont contrôlées sur le bundle compilé.
+Le smoke test vérifie routes publiques, disponibilité de la base, absence d'accès anonyme aux tâches, bundles, recherche MkDocs et vraies 404. Playwright exerce les formulaires de configuration, le cycle complet d'une tâche, le glisser-déposer entre lignes/colonnes, l'ordre en liste, les thèmes persistants, le mobile 320/375 px, le clavier, le déplacement inter-espaces et un conflit d'édition simulé. La création de sous-espaces, le déplacement d'un sous-arbre, le retour à la racine, l'ordre des frères, la navigation mobile et la restauration parents avant enfants sont également couverts, avec vérification par API et après rechargement. Les couleurs calculées du thème sombre sont contrôlées sur le bundle compilé.
 
-Enfin, le script restaure un dump dans une seconde base, compare les événements, vérifie la révocation des sessions, les objets retirés et l'annulation sur erreur, puis revérifie migrations/immutabilité. Le nettoyage retire uniquement les ressources créées par ce script, sans toucher aux projets de développement ou de production.
+Enfin, le script restaure un dump dans une seconde base, compare les événements et les liens parent-enfant, vérifie la révocation des sessions, les objets retirés et l'annulation sur erreur, puis revérifie migrations/immutabilité. Le nettoyage retire uniquement les ressources créées par ce script, sans toucher aux projets de développement ou de production.
 
 Pour cibler une autre image locale :
 

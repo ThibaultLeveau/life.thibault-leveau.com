@@ -452,3 +452,163 @@ test("mobile, clavier, déplacement entre espaces et gestion des erreurs", async
   ).toBe(tasks[0].title);
   await closeDialog(page);
 });
+
+test("espaces parents : création, déplacement, ordre et archives persistantes", async ({
+  page,
+}, testInfo) => {
+  const mutate = await session(page.request);
+  const parent = await mutate<Workspace>("/workspaces", {
+    name: `Parent ${Date.now()}`,
+  });
+  await page.goto(`/tasks?space=${parent.id}`);
+  const dialog = page.getByRole("dialog");
+  const nav = page.getByRole("navigation", { name: "Espaces", exact: true });
+  async function createChild(name: string, parentId: string) {
+    await page
+      .getByRole("button", { name: "Nouvel espace", exact: true })
+      .click();
+    await dialog.getByLabel("Nom de l’espace").fill(name);
+    await dialog
+      .getByRole("combobox", { name: "Espace parent", exact: true })
+      .selectOption(parentId);
+    const saved = page.waitForResponse(
+      (response) =>
+        response.url().endsWith("/api/v1/workspaces") &&
+        response.request().method() === "POST",
+    );
+    await dialog
+      .getByRole("button", { name: "Créer l’espace", exact: true })
+      .click();
+    const response = await saved;
+    expect(response.status()).toBe(201);
+    const space: Workspace = await response.json();
+    expect(space.parent_id).toBe(parentId);
+    await expect(dialog).toHaveCount(0);
+    await expect(
+      page.getByRole("heading", { name: `# ${name}`, exact: true }),
+    ).toBeVisible();
+    return space;
+  }
+  const child = await createChild("Voyages", parent.id);
+  const leaf = await createChild("Japon", child.id);
+  const sibling = await createChild("Maison", parent.id);
+  await page.reload();
+  await expect(
+    nav.getByRole("button", {
+      name: `# ${parent.name} / Voyages / Japon`,
+      exact: true,
+    }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Gérer et réordonner les espaces" })
+    .click();
+  await dialog
+    .getByRole("button", { name: "Monter Maison", exact: true })
+    .click();
+  await expect
+    .poll(async () => {
+      const spaces: Workspace[] = await (
+        await page.request.get("/api/v1/workspaces")
+      ).json();
+      return spaces
+        .filter((space) => space.parent_id === parent.id)
+        .map((space) => space.id);
+    })
+    .toEqual([sibling.id, child.id]);
+  await closeDialog(page);
+  await page.reload();
+  const childButtons = nav
+    .getByRole("button")
+    .filter({ hasText: /Voyages|Maison|Japon/ });
+  await expect(childButtons).toHaveText(["#Maison", "#Voyages", "#Japon"]);
+  await nav
+    .getByRole("button", { name: `# ${parent.name}`, exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Configurer l’espace", exact: true })
+    .click();
+  const parents = dialog.getByRole("combobox", {
+    name: "Espace parent",
+    exact: true,
+  });
+  for (const id of [parent.id, child.id, leaf.id, sibling.id]) {
+    await expect(parents.locator(`option[value="${id}"]`)).toHaveCount(0);
+  }
+  await dialog.getByRole("button", { name: "Archiver", exact: true }).click();
+  await expect(dialog.getByRole("alert")).toContainText("sous-espaces actifs");
+  await closeDialog(page);
+  await nav
+    .getByRole("button", { name: `# ${parent.name} / Voyages`, exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Configurer l’espace", exact: true })
+    .click();
+  await dialog
+    .getByRole("combobox", { name: "Espace parent", exact: true })
+    .selectOption("");
+  await dialog
+    .getByRole("button", { name: "Enregistrer", exact: true })
+    .click();
+  await expect(dialog.getByRole("status")).toContainText("enregistrées");
+  await closeDialog(page);
+  await page.reload();
+  await expect(
+    nav.getByRole("button", { name: "# Voyages / Japon", exact: true }),
+  ).toBeVisible();
+  expect(
+    (await (await page.request.get(`/api/v1/workspaces/${child.id}`)).json())
+      .parent_id,
+  ).toBeNull();
+  // The whole subtree follows its moved parent, including on mobile.
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page
+    .getByRole("button", { name: "Ouvrir la navigation", exact: true })
+    .click();
+  await expect(
+    nav.getByRole("button", { name: "# Voyages / Japon", exact: true }),
+  ).toBeVisible();
+  await page.screenshot({
+    path: testInfo.outputPath("espaces-parents-mobile.png"),
+    fullPage: true,
+  });
+  await nav
+    .getByRole("button", { name: "# Voyages / Japon", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Configurer l’espace", exact: true })
+    .click();
+  await dialog.getByRole("button", { name: "Archiver", exact: true }).click();
+  await expect(dialog).toHaveCount(0);
+  await mutate(`/workspaces/${child.id}`, { archived: true }, "PATCH");
+  await page.reload();
+  await page
+    .getByRole("button", { name: "Ouvrir la navigation", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Archives des espaces", exact: true })
+    .click();
+  const leafRow = dialog
+    .locator(".archive-row")
+    .filter({ hasText: "Voyages / Japon" });
+  await expect(
+    leafRow.getByRole("button", { name: "Restaurer", exact: true }),
+  ).toBeDisabled();
+  await dialog
+    .locator(".archive-row")
+    .filter({ has: page.getByText("Voyages", { exact: true }) })
+    .getByRole("button", { name: "Restaurer", exact: true })
+    .click();
+  await expect(
+    leafRow.getByRole("button", { name: "Restaurer", exact: true }),
+  ).toBeEnabled();
+  await leafRow.getByRole("button", { name: "Restaurer", exact: true }).click();
+  await expect(leafRow).toHaveCount(0);
+  await closeDialog(page);
+  await page.reload();
+  await page
+    .getByRole("button", { name: "Ouvrir la navigation", exact: true })
+    .click();
+  await expect(
+    nav.getByRole("button", { name: "# Voyages / Japon", exact: true }),
+  ).toBeVisible();
+});

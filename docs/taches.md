@@ -4,7 +4,15 @@
 
 Ouvrir **Tâches** dans la navigation et utiliser le compte créé par l'opérateur. La page de connexion présente les champs **Identifiant** et **Mot de passe**, puis le bouton **Se connecter**. Les erreurs s’affichent dans le formulaire. La déconnexion se trouve à côté du profil. Une session expirée demande une nouvelle connexion ; les données déjà enregistrées restent conservées.
 
-Un espace peut représenter Personnel, Travail ou un projet. **Nouvel espace** définit son nom, sa description et sa couleur. Les trois colonnes initiales sont À faire, En cours et Terminé. Les réglages `…` à côté du titre permettent de les adapter. L'icône près de **Mes espaces** permet de réordonner les espaces avec les flèches.
+Un espace peut représenter Personnel, Travail ou un projet. **Nouvel espace** définit son nom, sa description, sa couleur et, si souhaité, son **Espace parent**. Les trois colonnes initiales sont À faire, En cours et Terminé. Les réglages `…` à côté du titre permettent de les adapter. L'icône près de **Mes espaces** permet de réordonner les espaces ayant le même parent avec les flèches.
+
+## Espaces parents et sous-espaces
+
+Créer par exemple **Personnel → Voyages → Japon** en choisissant le parent dans **Nouvel espace**. La navigation affiche les enfants sous leur parent ; le chemin complet apparaît en haut de la page et dans les choix d'espace, y compris pour déplacer une tâche.
+
+Pour déplacer un espace existant, ouvrir **Configurer l’espace → Espace**, choisir **Espace parent** puis **Enregistrer**. Choisir **Aucun — à la racine** pour le détacher. Ses sous-espaces le suivent. L'espace lui-même et ses descendants ne sont pas proposés comme parents, et le serveur refuse aussi ces cycles.
+
+Chaque espace conserve ses propres tâches, sections, colonnes, étiquettes et préférences. Ouvrir un parent n'agrège pas les tâches de ses descendants. Le rattachement ne déplace pas les tâches et ne change ni leurs dates, ni leur historique. Plusieurs niveaux sont possibles sans limite métier de profondeur ; le retrait visuel est plafonné sur les arbres très profonds, avec le chemin complet toujours disponible.
 
 ## Sections, listes et lignes
 
@@ -54,6 +62,8 @@ Le thème, sous la navigation, suit le système ou impose clair/sombre. Il est e
 Archiver une tâche dans ses détails. L'onglet **Archives** des réglages restaure tâches et sections. Restaurer d'abord une section archivée, puis ses tâches archivées individuellement si nécessaire. Une tâche seulement masquée par l'archive de sa section redevient visible avec celle-ci.
 
 Les réglages de l'espace permettent de l'archiver. **Archives des espaces** dans la navigation permet de le restaurer. Aucune de ces opérations ne termine une tâche ni n'efface son historique.
+
+Avant d'archiver un espace parent, archiver ou déplacer ses sous-espaces actifs. L'archivage n'est pas automatique en cascade. Dans **Archives des espaces**, restaurer d'abord le parent, puis les enfants souhaités : le bouton d'un enfant reste désactivé tant que son parent est archivé. Un nouvel espace ou un déplacement ne peut pas cibler un parent archivé.
 
 ## Erreurs et limites
 

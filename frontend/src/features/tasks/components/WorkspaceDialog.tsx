@@ -1,12 +1,15 @@
 import { useState, type FormEvent } from "react";
 import { api } from "../api";
 import type { Workspace } from "../types";
+import { WorkspaceParentSelect } from "./WorkspaceParentSelect";
 import { Dialog, ErrorMessage } from "./Dialog";
 
 export function WorkspaceDialog({
+  workspaces,
   onClose,
   onCreated,
 }: {
+  workspaces: Workspace[];
   onClose: () => void;
   onCreated: (workspace: Workspace) => void;
 }) {
@@ -19,7 +22,10 @@ export function WorkspaceDialog({
     const values = new FormData(event.currentTarget);
     try {
       onCreated(
-        await api<Workspace>("/workspaces", "POST", Object.fromEntries(values)),
+        await api<Workspace>("/workspaces", "POST", {
+          ...Object.fromEntries(values),
+          parent_id: values.get("parent_id") || null,
+        }),
       );
     } catch (error) {
       setError((error as Error).message);
@@ -44,6 +50,7 @@ export function WorkspaceDialog({
             placeholder="Personnel, Travail, Un nouveau projet…"
           />
         </label>
+        <WorkspaceParentSelect workspaces={workspaces} />
         <label>
           Description
           <textarea

@@ -22,6 +22,7 @@ import {
   WorkspaceSettings,
   type SettingsTab,
 } from "./components/WorkspaceSettings";
+import { workspaceTree } from "./workspaceTree";
 import "./tasks.css";
 
 export function TasksPage() {
@@ -59,6 +60,10 @@ export function TasksPage() {
   const viewRef = useRef(view);
   const viewWrites = useRef<Promise<unknown>>(Promise.resolve());
   selectedRef.current = workspaceId;
+  const spaceTree = workspaceTree(workspaces);
+  const archivedTree = workspaceTree([...workspaces, ...archivedSpaces]).filter(
+    ({ space }) => space.archived_at,
+  );
   const workspace = workspaces.find((space) => space.id === workspaceId);
 
   function acceptSession(value: Session | null) {
@@ -323,9 +328,17 @@ export function TasksPage() {
       setWorkspaceId("");
     }, "");
   }
-  async function orderSpaces(index: number, delta: number) {
-    const ids = workspaces.map((space) => space.id);
-    [ids[index], ids[index + delta]] = [ids[index + delta], ids[index]];
+  async function orderSpaces(space: Workspace, delta: number) {
+    const siblings = workspaces.filter(
+      (item) => item.parent_id === space.parent_id,
+    );
+    const siblingIndex = siblings.findIndex((item) => item.id === space.id);
+    const other = siblings[siblingIndex + delta];
+    if (!other) return;
+    const ids = workspaces.map((item) => item.id);
+    const index = ids.indexOf(space.id);
+    const otherIndex = ids.indexOf(other.id);
+    [ids[index], ids[otherIndex]] = [ids[otherIndex], ids[index]];
     await action(async () => {
       await api("/workspaces/order", "PUT", {
         ids: [...ids, ...archivedSpaces.map((space) => space.id)],
@@ -439,9 +452,12 @@ export function TasksPage() {
           </button>
         </div>
         <nav className="workspace-nav" aria-label="Espaces">
-          {workspaces.map((space) => (
+          {spaceTree.map(({ space, depth, path }) => (
             <button
               key={space.id}
+              style={{ paddingInlineStart: 12 + Math.min(depth, 6) * 16 }}
+              title={path}
+              aria-label={depth ? `# ${path}` : undefined}
               className={`workspace-link ${workspaceId === space.id ? "is-active" : ""}`}
               aria-current={workspaceId === space.id ? "page" : undefined}
               onClick={() => {
@@ -520,7 +536,10 @@ export function TasksPage() {
             </button>
             <span>Mes espaces</span>
             <Icon name="chevron" size={12} />
-            <strong>{workspace?.name ?? "Bienvenue"}</strong>
+            <strong>
+              {spaceTree.find(({ space }) => space.id === workspaceId)?.path ??
+                "Bienvenue"}
+            </strong>
           </div>
           <span className="topbar-date">
             {new Date().toLocaleDateString("fr-FR", {
@@ -871,6 +890,7 @@ export function TasksPage() {
       </main>
       {createSpace && (
         <WorkspaceDialog
+          workspaces={workspaces}
           onClose={() => setCreateSpace(false)}
           onCreated={(space) => {
             setCreateSpace(false);
@@ -883,6 +903,7 @@ export function TasksPage() {
       {workspace && settingsTab && (
         <WorkspaceSettings
           workspace={workspace}
+          workspaces={workspaces}
           sections={sections}
           statuses={statuses}
           labels={labels}
@@ -924,8 +945,16 @@ export function TasksPage() {
         <Dialog title="Mes espaces" onClose={() => setManageSpaces(false)}>
           <div className="dialog-body space-management">
             <h3>Ordre des espaces</h3>
-            {workspaces.map((space, index) => (
-              <div className="archive-row" key={space.id}>
+            <p className="muted small-text">
+              Les flèches changent l’ordre des espaces ayant le même parent.
+            </p>
+            {spaceTree.map(({ space, depth, path }) => (
+              <div
+                className="archive-row"
+                key={space.id}
+                style={{ paddingInlineStart: Math.min(depth, 6) * 16 }}
+                title={path}
+              >
                 <span>
                   <span
                     className="color-dot"
@@ -936,17 +965,27 @@ export function TasksPage() {
                 <div>
                   <button
                     className="icon-button"
-                    disabled={busy || index === 0}
+                    disabled={
+                      busy ||
+                      workspaces.filter(
+                        (item) => item.parent_id === space.parent_id,
+                      )[0]?.id === space.id
+                    }
                     aria-label={`Monter ${space.name}`}
-                    onClick={() => orderSpaces(index, -1)}
+                    onClick={() => orderSpaces(space, -1)}
                   >
                     <Icon name="up" />
                   </button>
                   <button
                     className="icon-button"
-                    disabled={busy || index === workspaces.length - 1}
+                    disabled={
+                      busy ||
+                      workspaces
+                        .filter((item) => item.parent_id === space.parent_id)
+                        .at(-1)?.id === space.id
+                    }
                     aria-label={`Descendre ${space.name}`}
-                    onClick={() => orderSpaces(index, 1)}
+                    onClick={() => orderSpaces(space, 1)}
                   >
                     <Icon name="down" />
                   </button>
@@ -957,12 +996,24 @@ export function TasksPage() {
             {!archivedSpaces.length && (
               <p className="muted">Aucun espace archivé.</p>
             )}
-            {archivedSpaces.map((space) => (
+            {archivedTree.map(({ space, path }) => (
               <div className="archive-row" key={space.id}>
-                <span>{space.name}</span>
+                <span>
+                  {path}
+                  {archivedSpaces.some(
+                    (item) => item.id === space.parent_id,
+                  ) && (
+                    <small className="muted">
+                      Restaurez d’abord son espace parent.
+                    </small>
+                  )}
+                </span>
                 <button
                   className="secondary-button small-button"
-                  disabled={busy}
+                  disabled={
+                    busy ||
+                    archivedSpaces.some((item) => item.id === space.parent_id)
+                  }
                   onClick={() =>
                     action(async () => {
                       await api(`/workspaces/${space.id}`, "PATCH", {
