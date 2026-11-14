@@ -84,6 +84,33 @@ async function mobileFields(page: Page) {
   );
 }
 
+async function mockViewport(page: Page) {
+  // Desktop automation has no OS keyboard. Shrink only the visual viewport,
+  // leaving innerHeight unchanged as on iOS/Android with resize-visual.
+  await page.addInitScript(() => {
+    const viewport = Object.assign(new EventTarget(), {
+      height: 812,
+      offsetTop: 0,
+      scale: 1,
+    });
+    Object.defineProperty(window, "visualViewport", {
+      configurable: true,
+      value: viewport,
+    });
+    window.addEventListener("test-viewport", (event) => {
+      const { scroll, ...values } = (event as CustomEvent).detail;
+      Object.assign(viewport, values);
+      viewport.dispatchEvent(new Event(scroll ? "scroll" : "resize"));
+    });
+  });
+  return (height: number, offsetTop = 0, scroll = false, scale = 1) =>
+    page.evaluate(
+      (detail) =>
+        window.dispatchEvent(new CustomEvent("test-viewport", { detail })),
+      { height, offsetTop, scroll, scale },
+    );
+}
+
 test.describe("confort tactile", () => {
   test.use({
     viewport: { width: 375, height: 812 },
@@ -255,30 +282,7 @@ test.describe("confort tactile", () => {
   test("clavier simulé : ajout rapide, dialogue, déplacement natif et fermeture", async ({
     page,
   }, testInfo) => {
-    // Desktop automation has no OS keyboard. Shrink only the visual viewport,
-    // leaving innerHeight unchanged as on iOS/Android with resize-visual.
-    await page.addInitScript(() => {
-      const viewport = Object.assign(new EventTarget(), {
-        height: 812,
-        offsetTop: 0,
-        scale: 1,
-      });
-      Object.defineProperty(window, "visualViewport", {
-        configurable: true,
-        value: viewport,
-      });
-      window.addEventListener("test-viewport", (event) => {
-        const { scroll, ...values } = (event as CustomEvent).detail;
-        Object.assign(viewport, values);
-        viewport.dispatchEvent(new Event(scroll ? "scroll" : "resize"));
-      });
-    });
-    const resize = (height: number, offsetTop = 0, scroll = false, scale = 1) =>
-      page.evaluate(
-        (detail) =>
-          window.dispatchEvent(new CustomEvent("test-viewport", { detail })),
-        { height, offsetTop, scroll, scale },
-      );
+    const resize = await mockViewport(page);
     const visible = async (field: Locator, height: number, top = 0) => {
       await expect
         .poll(async () => {
@@ -306,6 +310,7 @@ test.describe("confort tactile", () => {
       await expect(quick).toBeFocused();
       expect(await page.evaluate(() => innerHeight)).toBe(812);
       // Ordinary scrolling must not pull the user back to the focused input.
+      await page.locator(".tasks-main").dispatchEvent("touchmove");
       await page.locator(".tasks-main").evaluate((node) => {
         node.scrollTop -= 200;
       });
@@ -359,6 +364,140 @@ test.describe("confort tactile", () => {
           ),
         )
         .toBe("812px");
+    } finally {
+      await data.cleanup();
+    }
+  });
+
+  test("sections : garder la saisie visible après le déplacement tardif du clavier", async ({
+    page,
+  }, testInfo) => {
+    const resize = await mockViewport(page);
+    const data = await seed(page, 1);
+    try {
+      for (const name of ["Maison", "Travail", "Loisirs"])
+        await data.mutate(`/workspaces/${data.space.id}/sections`, { name });
+      await data.open();
+      await page
+        .getByRole("button", { name: "Configurer l’espace", exact: true })
+        .click();
+      await page.getByRole("tab", { name: "Sections", exact: true }).click();
+      const dialog = page.getByRole("dialog");
+      const visible = async (field: Locator) => {
+        await expect(field).toBeFocused();
+        await expect
+          .poll(() =>
+            field.evaluate((node) => {
+              const box = node.getBoundingClientRect();
+              const dialog = node.closest("dialog")!;
+              const header = dialog.querySelector(".dialog-header")!;
+              return (
+                box.top >= header.getBoundingClientRect().bottom + 8 &&
+                box.bottom <= dialog.getBoundingClientRect().bottom - 8
+              );
+            }),
+          )
+          .toBeTruthy();
+      };
+      const second = dialog.getByRole("textbox", {
+        name: "Nom Travail",
+        exact: true,
+      });
+      await second.tap();
+      await second.fill("Travail en cours");
+      await resize(335);
+      await visible(second);
+      // The OS can finish panning AFTER focus and resize, restoring an older
+      // scroller position. A resize-only mock misses the reported hidden field.
+      await dialog.evaluate((node) => {
+        node.scrollTop = 0;
+      });
+      await visible(second);
+      await resize(335, 80, true);
+      await visible(second);
+      await expect(second).toHaveValue("Travail en cours");
+      await page.screenshot({
+        path: testInfo.outputPath("deuxieme-section-clavier.png"),
+      });
+
+      const thirdForm = dialog.locator(".entity-form").filter({
+        has: page.getByRole("textbox", { name: "Nom Loisirs", exact: true }),
+      });
+      const description = thirdForm.getByRole("textbox", {
+        name: "Description",
+        exact: true,
+      });
+      await dialog.dispatchEvent("touchmove");
+      await description.tap();
+      await description.fill("Description conservée pendant la saisie.");
+      await resize(335, 0, true);
+      await visible(description);
+
+      // Scrolling by touch takes precedence over following the focused field.
+      await dialog.dispatchEvent("touchmove");
+      await dialog.evaluate((node) => {
+        node.scrollTop = 0;
+      });
+      await resize(335, 0, true);
+      await page.evaluate(() => new Promise(requestAnimationFrame));
+      expect(await dialog.evaluate((node) => node.scrollTop)).toBe(0);
+      await expect(description).toBeFocused();
+      // Native keyboard input (unlike Locator.fill) does not scroll for the test.
+      await page.keyboard.type(" Suite.");
+      await visible(description);
+      await expect(description).toHaveValue(
+        "Description conservée pendant la saisie. Suite.",
+      );
+
+      await resize(812);
+      const newName = dialog.getByRole("textbox", {
+        name: "Nom du nouvel élément",
+        exact: true,
+      });
+      await dialog.dispatchEvent("touchmove");
+      await newName.tap();
+      await newName.fill("Nouvelle section");
+      // Some keyboard geometry becomes available with the later pan event.
+      await resize(335, 0, true);
+      await visible(newName);
+      await dialog.dispatchEvent("wheel", { deltaY: -200 });
+      const manualPosition = await dialog.evaluate((node) => {
+        node.scrollTop -= 100;
+        return node.scrollTop;
+      });
+      await resize(335, 0, true);
+      await page.evaluate(() => new Promise(requestAnimationFrame));
+      expect(await dialog.evaluate((node) => node.scrollTop)).toBe(
+        manualPosition,
+      );
+      // Retapping the same field must resume following without a new focusin.
+      await newName.tap();
+      await dialog.evaluate((node) => {
+        node.scrollTop = 0;
+      });
+      await resize(335, 40, true);
+      await visible(newName);
+      await resize(812);
+      await expect(second).toHaveValue("Travail en cours");
+      await dialog.dispatchEvent("touchmove");
+      await thirdForm
+        .getByRole("button", { name: "Enregistrer", exact: true })
+        .click();
+      await expect(dialog.getByRole("status")).toHaveText(
+        "Modifications enregistrées.",
+      );
+      const response = await page.request.get(
+        `/api/v1/workspaces/${data.space.id}/sections`,
+      );
+      expect(
+        (await response.json()).find(
+          (section: { name: string }) => section.name === "Loisirs",
+        ).description,
+      ).toBe("Description conservée pendant la saisie. Suite.");
+      await dialog.getByRole("button", { name: "Fermer", exact: true }).click();
+      await expect(
+        page.getByRole("button", { name: "Configurer l’espace", exact: true }),
+      ).toBeFocused();
     } finally {
       await data.cleanup();
     }

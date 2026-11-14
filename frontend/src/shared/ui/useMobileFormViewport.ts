@@ -9,13 +9,14 @@ export function useMobileFormViewport() {
     const style = document.documentElement.style;
     let frame = 0;
     let reveal = false;
+    let followingFocus = false;
     const reset = () => {
       style.removeProperty("--ui-viewport-height");
       style.removeProperty("--ui-viewport-top");
     };
     function update() {
       frame = 0;
-      const shouldReveal = reveal;
+      const shouldReveal = reveal && followingFocus;
       reveal = false;
       if (!touch.matches) {
         reset();
@@ -47,37 +48,74 @@ export function useMobileFormViewport() {
       );
       const visibleBottom = Math.min(
         top + height - 32,
+        dialog ? dialog.getBoundingClientRect().bottom - 16 : Infinity,
         actions && getComputedStyle(actions).position === "sticky"
           ? actions.getBoundingClientRect().top - 16
           : Infinity,
       );
-      if (bounds.top < visibleTop || bounds.bottom > visibleBottom)
-        field.scrollIntoView({
-          block: "center",
-          inline: "nearest",
-          behavior: "instant",
-        });
+      if (bounds.top < visibleTop || bounds.bottom > visibleBottom) {
+        if (dialog) {
+          // Scroll only the dialog, without asking the browser to pan the page
+          // again while its native keyboard/focus animation is still settling.
+          const targetTop =
+            visibleTop +
+            Math.max(0, (visibleBottom - visibleTop - bounds.height) / 2);
+          dialog.scrollTop += bounds.top - targetTop;
+        } else {
+          field.scrollIntoView({
+            block: "center",
+            inline: "nearest",
+            behavior: "instant",
+          });
+        }
+      }
     }
     function schedule(ensureVisible = false) {
       reveal ||= ensureVisible;
       if (!frame) frame = requestAnimationFrame(update);
     }
-    const onFocusOrResize = () => schedule(true);
-    // Native panning changes the offset; manual scrolling must stay under user control.
-    const onScroll = () => schedule();
-    document.addEventListener("focusin", onFocusOrResize);
-    window.addEventListener("resize", onFocusOrResize);
-    viewport?.addEventListener("resize", onFocusOrResize);
-    viewport?.addEventListener("scroll", onScroll);
-    touch.addEventListener("change", onFocusOrResize);
+    const onEditing = () => {
+      followingFocus = true;
+      schedule(true);
+    };
+    const onViewportChange = () => schedule(followingFocus);
+    // Native scrolling may finish after focus/resize. Recheck the active field
+    // then too, but stop following it as soon as the user scrolls deliberately.
+    const onDialogScroll = (event: Event) => {
+      if (event.target === document.activeElement?.closest("dialog"))
+        schedule(followingFocus);
+    };
+    const onManualScroll = () => {
+      followingFocus = false;
+    };
+    const onPointerDown = (event: PointerEvent) => {
+      // A second tap on an already focused input can reopen the OS keyboard
+      // without a new focusin; tapping elsewhere releases automatic following.
+      followingFocus = event.target === document.activeElement;
+    };
+    document.addEventListener("focusin", onEditing);
+    document.addEventListener("input", onEditing);
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("touchmove", onManualScroll, { passive: true });
+    document.addEventListener("wheel", onManualScroll, { passive: true });
+    document.addEventListener("scroll", onDialogScroll, true);
+    window.addEventListener("resize", onViewportChange);
+    viewport?.addEventListener("resize", onViewportChange);
+    viewport?.addEventListener("scroll", onViewportChange);
+    touch.addEventListener("change", onViewportChange);
     schedule();
     return () => {
       cancelAnimationFrame(frame);
-      document.removeEventListener("focusin", onFocusOrResize);
-      window.removeEventListener("resize", onFocusOrResize);
-      viewport?.removeEventListener("resize", onFocusOrResize);
-      viewport?.removeEventListener("scroll", onScroll);
-      touch.removeEventListener("change", onFocusOrResize);
+      document.removeEventListener("focusin", onEditing);
+      document.removeEventListener("input", onEditing);
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("touchmove", onManualScroll);
+      document.removeEventListener("wheel", onManualScroll);
+      document.removeEventListener("scroll", onDialogScroll, true);
+      window.removeEventListener("resize", onViewportChange);
+      viewport?.removeEventListener("resize", onViewportChange);
+      viewport?.removeEventListener("scroll", onViewportChange);
+      touch.removeEventListener("change", onViewportChange);
       reset();
     };
   }, []);
