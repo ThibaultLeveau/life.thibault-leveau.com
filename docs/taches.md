@@ -16,14 +16,14 @@ Chaque espace conserve ses propres tâches, sections, colonnes, étiquettes et p
 
 ## Voir les tâches du jour et les prochaines
 
-**À venir**, dans la navigation, rassemble les échéances de tous les espaces actifs. C’est la vue ouverte par défaut sur `/tasks` ; un lien `?space=…` ouvre toujours l’espace indiqué. Les tâches sont regroupées par date, de la plus ancienne à la plus proche, avec le nom de leur espace et de leur section. La visibilité liste/tableau d’une section ne masque rien dans cet agenda.
+**À venir**, dans la navigation, rassemble les échéances de tous les espaces actifs. C’est la vue ouverte par défaut sur `/tasks` ; un lien `?space=…` ouvre toujours l’espace indiqué. Les tâches sont regroupées par date, par ordre chronologique, avec le nom de leur espace et de leur section. La visibilité liste/tableau d’une section ne masque rien dans cet agenda.
 
 - **Aujourd’hui** : tâches datées du jour local.
 - **Demain** : tâches du lendemain.
 - **Semaine** : aujourd’hui et les six jours suivants, même à cheval sur deux semaines civiles.
 - **Personnalisé** : de 1 à 90 jours dès aujourd’hui ; saisir **Nombre de jours**, puis **Appliquer** (14 par défaut).
 
-**Inclure les retards**, activé par défaut, ajoute un groupe séparé avec les tâches non terminées antérieures à aujourd’hui, quelle que soit la période. **Afficher les tâches terminées**, désactivé par défaut, montre les résolutions de la période ; les anciennes tâches terminées ne deviennent jamais des retards. La période, l’horizon et ces deux options sont enregistrés dans le compte, après rechargement et reconnexion.
+**Inclure les retards**, activé par défaut, ajoute un groupe séparé avec les tâches non terminées antérieures à aujourd’hui, quelle que soit la période. **Afficher les tâches terminées**, désactivé par défaut, montre les tâches terminées dont l’échéance appartient à la période ; les anciennes tâches terminées ne deviennent jamais des retards. La période, l’horizon et ces deux options sont enregistrés dans le compte, après rechargement et reconnexion.
 
 Cliquer sur une tâche ouvre ses détails pour modifier sa date, consulter son historique, la déplacer ou l’archiver. La case permet de terminer ou rouvrir ; la liste se recharge ensuite. Le nom d’espace sur une tâche ramène à cet espace. Les tâches sans échéance et celles archivées (ou dans une section/espace archivé) sont exclues ; elles restent accessibles dans leurs espaces et archives.
 
@@ -31,7 +31,7 @@ Les dates utilisent le calendrier et le fuseau du navigateur. Une page ouverte s
 
 ### Dates sur les tickets
 
-Les listes, le kanban et l’agenda partagent le même affichage : **Hier**, **Aujourd’hui**, **Demain**, **Après-demain**, puis le nom du jour pour les trois jours suivants, ou une date courte. L’année apparaît si elle diffère de celle du jour courant. Survoler la date donne sa forme complète, aussi annoncée aux lecteurs d’écran.
+Les listes, le kanban et l’agenda partagent le même affichage : **Hier**, **Aujourd’hui**, **Demain**, **Après-demain**, puis le nom du jour du troisième au sixième jour, ou une date courte. Une date courte affiche aussi l’année si elle diffère de celle du jour courant. Survoler la date donne sa forme complète, aussi annoncée aux lecteurs d’écran.
 
 | Échéance d’une tâche ouverte | Couleur |
 | --- | --- |

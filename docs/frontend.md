@@ -1,6 +1,6 @@
 # Frontend
 
-React, TypeScript et Vite conservent l'outillage du socle. `App.tsx` sélectionne l'accueil `/` ou les tâches `/tasks`, sans routeur supplémentaire ni fallback général. L'espace actif peut être référencé avec `?space=<UUID>` ; les accès sont toujours contrôlés côté serveur.
+React, TypeScript et Vite conservent l'outillage du socle. `App.tsx` sélectionne l'accueil `/` ou les tâches `/tasks`, sans routeur supplémentaire ni fallback général. Sans espace indiqué, `/tasks` ouvre l’agenda global (`?view=agenda`). L'espace actif peut être référencé avec `?space=<UUID>` ; les accès sont toujours contrôlés côté serveur.
 
 ## Module tâches
 

@@ -98,13 +98,14 @@ La requête exclut les tâches sans échéance, les archives directes et les tâ
 Exemple indépendant de l’interface, après obtention du cookie et du jeton CSRF (voir l’exemple de connexion plus bas) :
 
 ```python
-# client = httpx.Client authentifié ; headers contient X-CSRF-Token.
-response = client.put("/api/v1/agenda/view", headers=headers, json={
+# client = httpx.Client authentifié, base_url se termine par /api/v1,
+# client.headers contient X-CSRF-Token, comme dans l’exemple complet ci-dessous.
+response = client.put("/agenda/view", json={
     "period": "custom", "custom_days": 10,
     "include_overdue": True, "show_completed": False,
 })
 response.raise_for_status()
-response = client.get("/api/v1/agenda/tasks", params={
+response = client.get("/agenda/tasks", params={
     "today": "2026-12-31", "offset": 0, "limit": 200,
 })
 response.raise_for_status()

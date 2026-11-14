@@ -112,7 +112,9 @@ export function AgendaView({
     if (!settings || busy) return;
     setBusy(true);
     setError("");
+    const previous = settings;
     const next = { ...settings, ...patch };
+    setSettings(next);
     const pending = writes.current.then(() =>
       api<AgendaSettings>("/agenda/view", "PUT", next),
     );
@@ -124,8 +126,10 @@ export function AgendaView({
         setReload((value) => value + 1);
       }
     } catch (error) {
-      if (mounted.current)
+      if (mounted.current) {
+        setSettings(previous);
         setError(`Réglages non enregistrés : ${(error as Error).message}`);
+      }
     } finally {
       if (mounted.current) setBusy(false);
     }

@@ -918,3 +918,9 @@ def test_agenda_migration_preserves_existing_data(client, engine):
         conn.execute(
             text("INSERT INTO agenda_preferences VALUES (:id, '{}'::jsonb)"), {"id": uuid4()}
         )
+
+    client.put("/api/v1/agenda/view", json={"period": "week"})
+    with engine.begin() as conn, pytest.raises(IntegrityError):
+        conn.execute(
+            text("INSERT INTO agenda_preferences SELECT user_id, settings FROM agenda_preferences")
+        )

@@ -58,7 +58,6 @@ async function setup(page: Page) {
   const cleanup = async () => {
     await mutate(`/workspaces/${home.id}`, { archived: true }, "PATCH");
     await mutate(`/workspaces/${work.id}`, { archived: true }, "PATCH");
-    await mutate("/agenda/view", {}, "PUT");
   };
   await page.goto("/tasks");
   await expect(
@@ -109,6 +108,25 @@ test("agenda global : périodes, réglages persistants et cycle de tâche", asyn
     await expect(card(page, tasks["Fin semaine agenda"])).toBeVisible();
     await expect(card(page, tasks["Hors semaine agenda"])).toHaveCount(0);
     await expect(card(page, tasks["Sans date agenda"])).toHaveCount(0);
+    await page.getByLabel("Apparence").selectOption("light");
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+    const colors = await Promise.all(
+      [
+        "Retard agenda",
+        "Jour agenda",
+        "Demain agenda",
+        "Après demain agenda",
+      ].map((title) =>
+        card(page, tasks[title])
+          .locator("time")
+          .evaluate((node) => getComputedStyle(node).color),
+      ),
+    );
+    expect(new Set(colors).size).toBe(4);
+    await page.screenshot({
+      path: "test-results/agenda-light.png",
+      fullPage: true,
+    });
     await period(page, "Personnalisé");
     await page.getByLabel("Nombre de jours").fill("8");
     await page.getByRole("button", { name: "Appliquer", exact: true }).click();
@@ -216,6 +234,19 @@ test("dates partagées liste/kanban, minuit local, mobile et erreurs", async ({
     await period(page, "Semaine");
     await page.getByLabel("Apparence").selectOption("dark");
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    const colors = await Promise.all(
+      [
+        "Jour agenda",
+        "Demain agenda",
+        "Après demain agenda",
+        "Fin semaine agenda",
+      ].map((title) =>
+        card(page, tasks[title])
+          .locator("time")
+          .evaluate((node) => getComputedStyle(node).color),
+      ),
+    );
+    expect(new Set(colors).size).toBe(4);
     await page.screenshot({
       path: "test-results/agenda-dark.png",
       fullPage: true,

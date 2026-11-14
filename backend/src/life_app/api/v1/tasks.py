@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Literal
+from typing import Annotated, Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Query
@@ -45,7 +45,9 @@ def update_agenda_view(payload: s.AgendaSettings, user: CurrentUser, db: Databas
 def agenda_tasks(
     user: CurrentUser,
     db: Database,
-    today: date | None = None,
+    today: Annotated[
+        date | None, Query(description="Date locale du client ; date serveur si omise.")
+    ] = None,
     offset: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=200),
 ):
