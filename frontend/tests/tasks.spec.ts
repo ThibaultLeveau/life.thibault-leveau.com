@@ -116,7 +116,7 @@ test("connexion et cycle complet depuis les formulaires", async ({ page }) => {
   await page.goto("/tasks");
   await page.getByLabel("Identifiant").fill(credentials.username);
   await page.getByLabel("Mot de passe").fill(credentials.password);
-  await page.getByRole("button", { name: "Ouvrir mon espace" }).click();
+  await page.getByRole("button", { name: "Se connecter" }).click();
   await page
     .getByRole("button", { name: "Nouvel espace", exact: true })
     .click();
@@ -233,7 +233,7 @@ test("connexion et cycle complet depuis les formulaires", async ({ page }) => {
     .getByRole("button", { name: "Se déconnecter", exact: true })
     .click();
   await expect(
-    page.getByRole("button", { name: "Ouvrir mon espace" }),
+    page.getByRole("button", { name: "Se connecter" }),
   ).toBeVisible();
   expect((await page.request.get("/api/v1/tasks")).status()).toBe(401);
   expect(errors).toEqual([]);
