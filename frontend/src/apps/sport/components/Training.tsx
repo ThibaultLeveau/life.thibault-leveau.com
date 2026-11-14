@@ -188,7 +188,7 @@ export function TrainingDetail({
           <strong>{training.sets.length}</strong>
         </div>
         <div>
-          <span>Score de séance</span>
+          <span>Score de l’entraînement</span>
           <strong>
             {training.score == null ? "—" : number(training.score)}
           </strong>
@@ -197,8 +197,8 @@ export function TrainingDetail({
       {training.score != null && (
         <p className="muted">
           {training.baseline_id
-            ? "100 = votre première séance terminée avec ces exercices et ce nombre de séries. Un score supérieur indique une meilleure performance selon les mesures choisies."
-            : "Première séance comparable : elle devient votre référence à 100 points."}
+            ? "100 = votre premier entraînement terminé avec ces exercices et ce nombre de séries. Un score supérieur indique une meilleure performance selon les mesures choisies."
+            : "Premier entraînement comparable : il devient votre référence à 100 points."}
         </p>
       )}
       {training.entries.map((entry, i) => (
@@ -238,7 +238,7 @@ export function ActiveTraining({
   if (!training)
     return (
       <Empty title="Aucun entraînement en cours">
-        Lancez une séance depuis l’onglet Séances.
+        Démarrez un entraînement depuis l’onglet Programmes.
       </Empty>
     );
   const total = training.entries.reduce((sum, e) => sum + e.sets, 0);
@@ -257,7 +257,7 @@ export function ActiveTraining({
         className="sport-progress"
         max={total}
         value={training.sets.length}
-        aria-label="Progression de la séance"
+        aria-label="Progression de l’entraînement"
       />
       <RestTimer training={training} onChanged={onChanged} />
       {training.entries.map((entry, i) => (

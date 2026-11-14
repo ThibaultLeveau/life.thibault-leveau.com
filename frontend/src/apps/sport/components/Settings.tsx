@@ -18,11 +18,12 @@ function SettingsForm({ initial }: { initial: number }) {
         );
       }}
     >
-      <h2>Le rythme de vos séances</h2>
+      <h2>Le rythme de vos entraînements</h2>
       <label>
         Temps de repos entre les séries (secondes)
         <input
           type="number"
+          inputMode="numeric"
           required
           min={0}
           max={3600}

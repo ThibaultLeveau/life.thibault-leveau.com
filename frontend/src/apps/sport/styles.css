@@ -104,6 +104,10 @@
 }
 .sport-user {
   font-size: 11px;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .sport-content {
   max-width: 1180px;
@@ -162,12 +166,12 @@
 }
 .sport-filters label {
   flex: 1;
-  min-width: 150px;
   display: flex;
   flex-direction: column;
   gap: 6px;
   font-size: 12px;
   color: var(--ui-muted);
+  min-width: min(100%, 150px);
 }
 .sport-filters input,
 .sport-filters select,
@@ -181,9 +185,11 @@
   color: var(--ui-text);
   background: var(--ui-paper);
   font: inherit;
+  font-size: var(--ui-input-size, inherit);
+  min-height: 44px;
 }
 .sport-filters input[type="search"] {
-  min-width: 200px;
+  min-width: 0;
 }
 .sport-workout-grid {
   display: grid;
@@ -259,6 +265,14 @@
 .sport-active-banner small {
   display: block;
   margin-top: 4px;
+}
+.sport-active-banner > span:first-child {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+.sport-active-banner > span:last-child {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 .sport-fieldset {
   min-width: 0;
@@ -535,10 +549,16 @@
   margin-top: 5px;
   font-size: 12px;
 }
+.sport-history-row > span:first-child {
+  flex: 1;
+}
 .sport-score {
   text-align: right;
   font-size: 24px;
   color: var(--ui-accent);
+  flex-shrink: 0;
+  overflow-wrap: normal;
+  white-space: nowrap;
 }
 .sport-summary {
   display: grid;
@@ -607,9 +627,10 @@
   gap: 7px;
   font-size: 12px;
   color: var(--ui-muted);
+  min-width: 0;
 }
 .sport-chart-select select {
-  font-size: 13px;
+  font-size: var(--ui-input-size, 13px);
 }
 .sport-score-explained {
   color: var(--ui-muted);
@@ -688,6 +709,106 @@
 .sport-skip:focus {
   top: 10px;
 }
+.sport-content,
+.sport-shell .app-dialog {
+  overflow-wrap: anywhere;
+}
+.sport-content
+  :is(section, article, .sport-section-heading > *, .sport-toolbar > *),
+.sport-history-row > span,
+.sport-set > span,
+.sport-picker-item > span {
+  min-width: 0;
+}
+.sport-shell
+  :is(
+    .primary-button,
+    .secondary-button,
+    .text-button,
+    .sport-toggle,
+    summary
+  ) {
+  min-height: 44px;
+}
+.sport-shell .icon-button {
+  width: 44px;
+  height: 44px;
+}
+.sport-shell .app-dialog .dialog-actions {
+  flex-wrap: wrap;
+}
+.sport-page-heading h1:focus {
+  outline: none;
+}
+.sport-back {
+  margin: -16px 0 18px;
+  gap: 10px;
+}
+.sport-program-form {
+  max-width: 920px;
+}
+.sport-shell textarea {
+  font-family: inherit;
+}
+.sport-program-info {
+  display: grid;
+  gap: 18px;
+  padding: 24px;
+  border: 1px solid var(--ui-border);
+  border-radius: 12px;
+  background: var(--ui-sidebar);
+}
+.sport-program-info label > .muted {
+  font-weight: 400;
+}
+.sport-program-form .sport-fieldset {
+  gap: 24px;
+}
+.sport-program-form .sport-plan-entry {
+  padding: 24px;
+  margin: 16px 0;
+}
+.sport-program-form .sport-plan-entry > p {
+  margin-top: 18px;
+}
+.sport-program-form .sport-section-heading h3 {
+  font-size: 16px;
+  line-height: 1.5;
+  align-items: flex-start;
+  gap: 0;
+}
+.sport-add-exercise {
+  width: 100%;
+  margin: 4px 0 16px;
+  border-style: dashed;
+}
+.sport-program-actions {
+  border-top: 1px solid var(--ui-border);
+  padding: 20px 0 max(12px, env(safe-area-inset-bottom));
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+}
+.sport-program-actions > p {
+  flex: 1 1 200px;
+}
+.sport-shell input[type="date"] {
+  max-width: 100%;
+  min-height: 44px;
+}
+@media (pointer: coarse) {
+  .sport-shell {
+    height: var(--ui-viewport-height, 100dvh);
+    min-height: 0;
+    overflow-y: auto;
+    scroll-padding-block: 16px 32px;
+  }
+  .sport-sidebar {
+    height: var(--ui-viewport-height, 100dvh);
+  }
+}
 @media (max-width: 1050px) {
   .sport-content {
     padding: 32px 28px 60px;
@@ -705,6 +826,9 @@
   }
   .sport-topbar {
     padding: 12px 18px;
+  }
+  .sport-user {
+    max-width: 90px;
   }
   .sport-content {
     padding: 28px 22px 60px;
@@ -730,6 +854,36 @@
   }
   .sport-toolbar {
     gap: 12px;
+  }
+  .sport-toolbar > .primary-button {
+    width: 100%;
+  }
+  .sport-program-info,
+  .sport-program-form .sport-plan-entry {
+    padding: 16px;
+  }
+  .sport-program-form .sport-plan-entry .sport-section-heading {
+    align-items: flex-start;
+  }
+  .sport-program-form .sport-plan-entry .sport-section-heading h3 {
+    flex-basis: 100%;
+  }
+  .sport-program-actions .sport-inline,
+  .sport-program-actions .primary-button {
+    width: 100%;
+  }
+  .sport-program-actions .sport-inline {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+  .sport-shell .app-dialog .dialog-body {
+    padding: 20px 16px;
+  }
+  .sport-shell .app-dialog .dialog-header {
+    padding: 12px 16px;
+  }
+  .sport-shell .sport-summary strong {
+    overflow-wrap: anywhere;
   }
   .sport-exercise {
     gap: 10px;

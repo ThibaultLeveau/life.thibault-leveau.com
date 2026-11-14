@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AccountMenu } from "../../platform/auth/AccountMenu";
 import { useSession } from "../../platform/auth/SessionProvider";
 import { Dialog } from "../../shared/ui/Dialog";
@@ -10,12 +10,13 @@ import { Measurements } from "./components/Measurements";
 import { Settings } from "./components/Settings";
 import { Statistics } from "./components/Statistics";
 import { ActiveTraining, History } from "./components/Training";
+import { ProgramEditor } from "./components/ProgramEditor";
 import { Workouts } from "./components/Workouts";
 import type { Training } from "./types";
 import "./styles.css";
 
 const tabs = [
-  ["workouts", "Séances", "grid"],
+  ["workouts", "Programmes", "grid"],
   ["training", "Entraînement", "flag"],
   ["exercises", "Exercices", "list"],
   ["measurements", "Mensurations", "edit"],
@@ -24,13 +25,27 @@ const tabs = [
   ["settings", "Réglages", "settings"],
 ] as const satisfies readonly (readonly [string, string, IconName])[];
 type Tab = (typeof tabs)[number][0];
-function readTab(): Tab {
-  const key = new URLSearchParams(location.search).get("tab");
-  return tabs.find(([id]) => id === key)?.[0] ?? "workouts";
+function readView() {
+  const params = new URLSearchParams(location.search);
+  const tab = tabs.find(([id]) => id === params.get("tab"))?.[0] ?? "workouts";
+  return {
+    tab,
+    program: tab === "workouts" ? params.get("program") : null,
+    archived: params.get("archived") === "true",
+  };
 }
 export function Page() {
   const { session } = useSession();
-  const [tab, setTab] = useState<Tab>(readTab);
+  const [view, setView] = useState(readView);
+  const { tab, program, archived } = view;
+  const guard = useRef<() => boolean>(() => true);
+  const index = useRef(0);
+  const restoring = useRef(false);
+  const shell = useRef<HTMLDivElement>(null);
+  const heading = useRef<HTMLHeadingElement>(null);
+  const registerGuard = useCallback((next: (() => boolean) | null) => {
+    guard.current = next ?? (() => true);
+  }, []);
   const [navigation, setNavigation] = useState(false);
   const [active, setActive] = useState<Training | null>();
   const kinds = useResource(sportApi.kinds, []);
@@ -39,15 +54,55 @@ export function Page() {
     if (activeResource.data !== undefined) setActive(activeResource.data);
   }, [activeResource.data]);
   useEffect(() => {
-    const pop = () => setTab(readTab());
+    index.current = history.state?.sportIndex ?? 0;
+    history.replaceState({ ...history.state, sportIndex: index.current }, "");
+    const pop = (event: PopStateEvent) => {
+      if (restoring.current) {
+        restoring.current = false;
+        return;
+      }
+      const nextIndex = event.state?.sportIndex ?? 0;
+      if (!guard.current()) {
+        restoring.current = true;
+        history.go(index.current - nextIndex);
+        return;
+      }
+      index.current = nextIndex;
+      setView(readView());
+      setNavigation(false);
+    };
     window.addEventListener("popstate", pop);
     return () => window.removeEventListener("popstate", pop);
   }, []);
-  // A manual reload also recovers from a version conflict in another device.
-  function choose(next: Tab) {
-    setTab(next);
+  const title = program
+    ? program === "new"
+      ? "Nouveau programme"
+      : "Modifier le programme"
+    : tabs.find(([id]) => id === tab)![1];
+  useEffect(() => {
+    document.title = `${title} · Sport · LifeOS`;
+    heading.current?.focus({ preventScroll: true });
+    window.scrollTo({ top: 0, behavior: "instant" });
+    shell.current?.scrollTo({ top: 0, behavior: "instant" });
+  }, [tab, program, title]);
+  function choose(
+    next: Tab,
+    nextProgram: string | null = null,
+    nextArchived = false,
+    saved = false,
+  ) {
+    if (!saved && !guard.current()) return;
+    const params = new URLSearchParams({ tab: next });
+    if (nextProgram) params.set("program", nextProgram);
+    if (nextArchived) params.set("archived", "true");
+    if (!saved) index.current += 1;
+    history[saved ? "replaceState" : "pushState"](
+      { sportIndex: index.current },
+      "",
+      `?${params}`,
+    );
+    setView({ tab: next, program: nextProgram, archived: nextArchived });
     setNavigation(false);
-    history.pushState({}, "", `?tab=${next}`);
   }
   const nav = (
     <nav aria-label="Sport">
@@ -69,8 +124,15 @@ export function Page() {
     </nav>
   );
   return (
-    <div className="ui-scope sport-shell">
-      <a className="sport-skip" href="#sport-main">
+    <div ref={shell} className="ui-scope sport-shell">
+      <a
+        className="sport-skip"
+        href="#sport-main"
+        onClick={(event) => {
+          event.preventDefault();
+          document.getElementById("sport-main")?.focus();
+        }}
+      >
         Aller au contenu
       </a>
       <aside className="sport-sidebar">
@@ -117,19 +179,33 @@ export function Page() {
           >
             <Icon name="restore" />
           </button>
-          <span className="sport-user">{session.username}</span>
+          <span className="sport-user" title={session.username}>
+            {session.username}
+          </span>
         </header>
         <div className="sport-content">
+          {program && (
+            <button
+              className="text-button sport-back"
+              onClick={() => choose("workouts", null, archived)}
+            >
+              <span aria-hidden="true">←</span>Tous les programmes
+            </button>
+          )}
           <div className="sport-page-heading">
             <p className="eyebrow">VOTRE ESPACE SPORT</p>
-            <h1>{tabs.find(([id]) => id === tab)![1]}</h1>
+            <h1 ref={heading} tabIndex={-1}>
+              {title}
+            </h1>
             <p className="muted">
               {tab === "workouts"
-                ? "Préparez votre séance. Suivez chaque progrès."
+                ? program
+                  ? "Composez un programme à votre rythme."
+                  : "Vos programmes, prêts pour le prochain entraînement."
                 : tab === "exercises"
                   ? "Trouvez le bon mouvement, avec les bonnes mesures."
                   : tab === "statistics"
-                    ? "Votre évolution, séance après séance."
+                    ? "Votre évolution, entraînement après entraînement."
                     : tab === "measurements"
                       ? "Gardez une trace de votre évolution."
                       : tab === "training"
@@ -141,11 +217,30 @@ export function Page() {
           </div>
           <LoadState {...kinds} />
           <LoadState {...activeResource} />
-          {kinds.data && activeResource.data !== undefined && (
-            <div key={tab}>
-              {tab === "workouts" && (
+          {kinds.data && active !== undefined && (
+            <div key={`${tab}-${program ?? "list"}`}>
+              {tab === "workouts" && program && (
+                <ProgramEditor
+                  id={program}
+                  kinds={kinds.data}
+                  registerGuard={registerGuard}
+                  onClose={() => choose("workouts", null, archived)}
+                  onSaved={() =>
+                    choose(
+                      "workouts",
+                      null,
+                      program !== "new" && archived,
+                      true,
+                    )
+                  }
+                />
+              )}
+              {tab === "workouts" && !program && (
                 <Workouts
                   kinds={kinds.data}
+                  archived={archived}
+                  onArchivedChange={(value) => choose("workouts", null, value)}
+                  onEdit={(id) => choose("workouts", id, archived)}
                   active={active}
                   onStarted={(t) => {
                     if (t) setActive(t);

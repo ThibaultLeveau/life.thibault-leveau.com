@@ -1,224 +1,24 @@
-import { useState } from "react";
-import { Dialog, ErrorMessage } from "../../../shared/ui/Dialog";
+import { ErrorMessage } from "../../../shared/ui/Dialog";
 import { Icon } from "../../../shared/ui/Icon";
 import { sportApi } from "../api";
-import type { Entry, KindDefinition, Training, Workout } from "../types";
-import {
-  Empty,
-  LoadState,
-  useAction,
-  useResource,
-  ValuesFields,
-  valuesText,
-} from "./common";
-import { ExercisePicker } from "./Exercises";
+import type { KindDefinition, Training } from "../types";
+import { Empty, LoadState, useAction, useResource, valuesText } from "./common";
 
-function WorkoutForm({
-  workout,
-  kinds,
-  onClose,
-  onSaved,
-}: {
-  workout?: Workout;
-  kinds: KindDefinition[];
-  onClose: () => void;
-  onSaved: () => void;
-}) {
-  const [name, setName] = useState(workout?.name ?? "");
-  const [notes, setNotes] = useState(workout?.notes ?? "");
-  const [entries, setEntries] = useState<Entry[]>(workout?.entries ?? []);
-  const [picking, setPicking] = useState(!workout);
-  const action = useAction();
-  function edit(index: number, change: Partial<Entry>) {
-    setEntries((old) =>
-      old.map((e, i) => (i === index ? { ...e, ...change } : e)),
-    );
-  }
-  function move(index: number, delta: number) {
-    setEntries((old) => {
-      const next = [...old];
-      [next[index], next[index + delta]] = [next[index + delta], next[index]];
-      return next;
-    });
-  }
-  return (
-    <Dialog
-      title={workout ? "Modifier la séance" : "Nouvelle séance"}
-      wide
-      onClose={onClose}
-    >
-      <form
-        className="dialog-body stack-form"
-        onSubmit={(e) => {
-          e.preventDefault();
-          void action.run(
-            () =>
-              sportApi.write(
-                `/workouts${workout ? `/${workout.id}` : ""}`,
-                {
-                  name,
-                  notes,
-                  entries: entries.map(({ exercise_id, sets, target }) => ({
-                    exercise_id,
-                    sets,
-                    target,
-                  })),
-                  ...(workout ? { expected_version: workout.version } : {}),
-                },
-                workout ? "PUT" : "POST",
-              ),
-            onSaved,
-          );
-        }}
-      >
-        <fieldset className="sport-fieldset" disabled={action.busy}>
-          <label>
-            Nom de la séance
-            <input
-              required
-              maxLength={160}
-              placeholder="Haut du corps, course du samedi…"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </label>
-          <label>
-            Notes de préparation
-            <textarea
-              value={notes}
-              maxLength={4000}
-              onChange={(e) => setNotes(e.target.value)}
-            />
-          </label>
-          <div className="sport-section-heading">
-            <h3>
-              Exercices · {entries.reduce((sum, e) => sum + e.sets, 0)} séries
-            </h3>
-            <button
-              type="button"
-              className="text-button"
-              onClick={() => setPicking((p) => !p)}
-            >
-              {picking ? "Fermer le catalogue" : "Ajouter un exercice"}
-            </button>
-          </div>
-          {picking && (
-            <ExercisePicker
-              kinds={kinds}
-              onPick={(ex) => {
-                setEntries((old) => [
-                  ...old,
-                  {
-                    exercise_id: ex.id,
-                    name: ex.name,
-                    kind: ex.kind,
-                    sets: 3,
-                    target: {},
-                  },
-                ]);
-                setPicking(false);
-              }}
-            />
-          )}
-          {entries.length === 0 && (
-            <p className="muted">
-              Ajoutez les exercices de votre séance depuis le catalogue.
-            </p>
-          )}
-          {entries.map((entry, index) => (
-            <section
-              className="sport-plan-entry"
-              key={`${index}-${entry.exercise_id}`}
-              aria-label={`Exercice ${index + 1} : ${entry.name}`}
-            >
-              <div className="sport-section-heading">
-                <h3>
-                  <span className="sport-order">{index + 1}</span>
-                  {entry.name}
-                </h3>
-                <div className="sport-inline">
-                  <button
-                    type="button"
-                    className="icon-button"
-                    aria-label={`Monter ${entry.name}`}
-                    disabled={index === 0}
-                    onClick={() => move(index, -1)}
-                  >
-                    <Icon name="up" />
-                  </button>
-                  <button
-                    type="button"
-                    className="icon-button"
-                    aria-label={`Descendre ${entry.name}`}
-                    disabled={index === entries.length - 1}
-                    onClick={() => move(index, 1)}
-                  >
-                    <Icon name="down" />
-                  </button>
-                  <button
-                    type="button"
-                    className="icon-button"
-                    aria-label={`Retirer ${entry.name}`}
-                    onClick={() =>
-                      setEntries((old) => old.filter((_, i) => i !== index))
-                    }
-                  >
-                    <Icon name="x" />
-                  </button>
-                </div>
-              </div>
-              <label>
-                Nombre de séries
-                <input
-                  type="number"
-                  min={1}
-                  max={30}
-                  required
-                  value={entry.sets}
-                  onChange={(e) =>
-                    edit(index, { sets: Number(e.target.value) })
-                  }
-                />
-              </label>
-              <p className="muted small-text">
-                Objectif par série (facultatif)
-              </p>
-              <ValuesFields
-                kind={kinds.find((k) => k.id === entry.kind)!}
-                value={entry.target}
-                onChange={(target) => edit(index, { target })}
-              />
-            </section>
-          ))}
-          <ErrorMessage message={action.error} />
-          <div className="dialog-actions">
-            <button
-              className="primary-button"
-              disabled={
-                !entries.length ||
-                entries.length > 50 ||
-                entries.reduce((sum, e) => sum + e.sets, 0) > 300
-              }
-            >
-              Enregistrer la séance
-            </button>
-          </div>
-        </fieldset>
-      </form>
-    </Dialog>
-  );
-}
 export function Workouts({
   kinds,
   active,
   onStarted,
+  archived,
+  onArchivedChange,
+  onEdit,
 }: {
   kinds: KindDefinition[];
   active: Training | null | undefined;
   onStarted: (t?: Training) => void;
+  archived: boolean;
+  onArchivedChange: (value: boolean) => void;
+  onEdit: (id: string) => void;
 }) {
-  const [archived, setArchived] = useState(false);
-  const [form, setForm] = useState<Workout | "new" | null>(null);
   const resource = useResource(
     (signal) => sportApi.workouts(archived, signal),
     [archived],
@@ -242,13 +42,13 @@ export function Workouts({
           <input
             type="checkbox"
             checked={archived}
-            onChange={(e) => setArchived(e.target.checked)}
+            onChange={(e) => onArchivedChange(e.target.checked)}
           />
-          Séances archivées
+          Programmes archivés
         </label>
-        <button className="primary-button" onClick={() => setForm("new")}>
+        <button className="primary-button" onClick={() => onEdit("new")}>
           <Icon name="plus" />
-          Nouvelle séance
+          Nouveau programme
         </button>
       </div>
       <LoadState {...resource} />
@@ -257,13 +57,13 @@ export function Workouts({
         <Empty
           title={
             archived
-              ? "Aucune séance archivée"
+              ? "Aucun programme archivé"
               : "Votre prochain entraînement commence ici"
           }
         >
           {archived
-            ? "Vos séances archivées restent disponibles pour être restaurées."
-            : "Composez une séance avec les exercices du catalogue, puis lancez-la à chaque entraînement."}
+            ? "Vos programmes archivés restent disponibles pour être restaurés."
+            : "Composez un programme avec les exercices du catalogue, puis utilisez-le à chaque entraînement."}
         </Empty>
       )}
       <div className="sport-workout-grid">
@@ -277,7 +77,7 @@ export function Workouts({
               <button
                 className="icon-button"
                 aria-label={`Modifier ${w.name}`}
-                onClick={() => setForm(w)}
+                onClick={() => onEdit(w.id)}
               >
                 <Icon name="edit" />
               </button>
@@ -294,7 +94,10 @@ export function Workouts({
                       kinds.find((k) => k.id === entry.kind)!,
                       entry.target,
                     ) &&
-                      ` · ${valuesText(kinds.find((k) => k.id === entry.kind)!, entry.target)}`}
+                      ` · ${valuesText(
+                        kinds.find((k) => k.id === entry.kind)!,
+                        entry.target,
+                      )}`}
                   </small>
                 </li>
               ))}
@@ -316,7 +119,7 @@ export function Workouts({
                     )
                   }
                 >
-                  Lancer la séance <Icon name="arrow" />
+                  Démarrer l’entraînement <Icon name="arrow" />
                 </button>
               )}
               <button
@@ -339,17 +142,6 @@ export function Workouts({
           </article>
         ))}
       </div>
-      {form && (
-        <WorkoutForm
-          workout={form === "new" ? undefined : form}
-          kinds={kinds}
-          onClose={() => setForm(null)}
-          onSaved={() => {
-            setForm(null);
-            resource.reload();
-          }}
-        />
-      )}
     </>
   );
 }

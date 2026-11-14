@@ -67,7 +67,7 @@ def create_exercise(payload: s.ExerciseInput, user: CurrentUser, db: Database):
 
 @router.put("/exercises/{exercise_id}", response_model=s.ExerciseOutput)
 def update_exercise(exercise_id: UUID, payload: s.ExerciseUpdate, user: CurrentUser, db: Database):
-    """Modifier un exercice personnel ; les instantanés des séances et sessions sont conservés."""
+    """Modifier un exercice ; conserver les instantanés des programmes et entraînements."""
     item = svc.owned(db, m.Exercise, user, exercise_id)
     svc.version(item, payload.expected_version)
     for key, value in payload.model_dump(exclude={"expected_version"}).items():
@@ -100,6 +100,7 @@ def update_settings(payload: s.Settings, user: CurrentUser, db: Database):
 
 @router.get("/workouts", response_model=list[s.WorkoutOutput])
 def workouts(user: CurrentUser, db: Database, archived: bool = False):
+    """Programmes réutilisables actifs, ou archivés avec archived=true."""
     return db.scalars(
         select(m.Workout)
         .where(
@@ -112,11 +113,13 @@ def workouts(user: CurrentUser, db: Database, archived: bool = False):
 
 @router.get("/workouts/{workout_id}", response_model=s.WorkoutOutput)
 def get_workout(workout_id: UUID, user: CurrentUser, db: Database):
+    """Lire un programme, même archivé, pour sa page de modification."""
     return svc.owned(db, m.Workout, user, workout_id)
 
 
 @router.post("/workouts", response_model=s.WorkoutOutput, status_code=201)
 def create_workout(payload: s.WorkoutInput, user: CurrentUser, db: Database):
+    """Créer un programme avec 1 à 50 exercices et au maximum 300 séries."""
     item = m.Workout(
         owner_id=user.id,
         name=payload.name,
@@ -129,7 +132,7 @@ def create_workout(payload: s.WorkoutInput, user: CurrentUser, db: Database):
 
 @router.put("/workouts/{workout_id}", response_model=s.WorkoutOutput)
 def update_workout(workout_id: UUID, payload: s.WorkoutUpdate, user: CurrentUser, db: Database):
-    """Remplacer nom, notes et exercices ordonnés ; sessions passées ou en cours inchangées."""
+    """Modifier un programme : nom, notes et exercices ordonnés ; entraînements inchangés."""
     item = svc.owned(db, m.Workout, user, workout_id)
     svc.version(item, payload.expected_version)
     item.name, item.notes = payload.name, payload.notes
