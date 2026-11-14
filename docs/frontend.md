@@ -1,6 +1,6 @@
 # Frontend
 
-React, TypeScript et Vite conservent l'outillage du socle. `App.tsx` sélectionne l'accueil `/` ou les tâches `/tasks`, sans routeur supplémentaire ni fallback général. Sans espace indiqué, `/tasks` ouvre l’agenda global (`?view=agenda`). L'espace actif peut être référencé avec `?space=<UUID>` ; les accès sont toujours contrôlés côté serveur.
+React, TypeScript et Vite conservent l'outillage du socle. `App.tsx` assemble la connexion commune, l’accueil `/`, la bibliothèque `/applications` et les Pages enregistrées, sans routeur supplémentaire ni fallback général. Sans espace indiqué, `/tasks` ouvre l’agenda global (`?view=agenda`). L'espace actif peut être référencé avec `?space=<UUID>` ; les accès sont toujours contrôlés côté serveur.
 
 ## Module tâches
 
@@ -12,8 +12,8 @@ La détection affiche le libellé et les trois premières dates retournées par 
 
 | Fichier / composant | Rôle |
 | --- | --- |
-| `TasksPage.tsx` | Session, espaces, état de chargement, filtres et assemblage |
-| `api.ts` | Requêtes de même origine, CSRF en mémoire, pagination et erreurs |
+| `Page.tsx` | Espaces, état de chargement, filtres et assemblage métier ; session du socle |
+| `api.ts` | Pagination métier ; transport et CSRF dans `platform/api.ts` |
 | `types.ts`, `dates.ts` | Contrats, libellés calendaires et changement de jour local |
 | `AgendaView` | Vue globale des échéances, périodes et réglages enregistrés par API |
 | `TaskContents` | Contenu et échéance partagés par liste, kanban et agenda |
@@ -22,8 +22,8 @@ La détection affiche le libellé et les trois premières dates retournées par 
 | `useTaskSelection` | Rectangle souris, défilement aux bords et appui long tactile annulé par le défilement |
 | `TaskEditor`, `MoveDialog` | Édition atomique, conflits, historique et déplacement accessible |
 | `WorkspaceSettings`, `WorkspaceDialog` | Propriétés, ordre, sections, colonnes, étiquettes et archives |
-| `Dialog`, `LoginPanel` | Dialogues natifs, focus et connexion |
-| `tasks.css` | Présentation et tokens spécifiques à la fonctionnalité |
+| `shared/ui/Dialog`, `platform/auth/LoginPanel` | Dialogue partagé et connexion commune |
+| `styles.css` | Présentation métier utilisant les tokens communs |
 
 `@dnd-kit/core` fournit les capteurs pointeur/clavier et les cibles de dépôt. Le serveur calcule l'ordre final. Un tri automatique désactive les poignées ; la commande de déplacement reste disponible. Les sections sont filtrées selon leur visibilité ; les statuts définissent les colonnes, sans les confondre avec les sections.
 
@@ -31,7 +31,7 @@ Le client recharge les données après mutation. Les préférences de vue sont �
 
 ## Thèmes et accessibilité
 
-Les tokens globaux de l'accueil restent dans `styles/tokens.css`. Les tokens des tâches sont définis au niveau racine, avec variantes explicites `data-theme=light/dark` et média système ; ce choix évite une transformation partielle de `light-dark()` dans le CSS compilé. Le thème du compte est chargé depuis l'API, sans secret ni donnée métier dans localStorage.
+Les tokens globaux de l'accueil restent dans `styles/tokens.css`. Les tokens communs `--ui-*` sont définis dans `shared/styles/ui.css` au niveau racine, avec variantes explicites `data-theme=light/dark` et média système ; ce choix évite une transformation partielle de `light-dark()` dans le CSS compilé. Le thème du compte est chargé depuis l'API, sans secret ni donnée métier dans localStorage.
 
 Inter est servi localement. Les icônes sont des SVG décoratifs avec des noms accessibles sur leurs boutons. Les dialogues natifs retiennent le focus, se ferment avec Échap, donnent le focus au premier champ et le rendent au déclencheur. Les onglets acceptent flèches, Début et Fin. Chaque tâche dispose d'une commande de déplacement utilisable sans geste de glisser-déposer.
 
@@ -48,3 +48,11 @@ Pas de mode hors connexion, service worker, synchronisation temps réel ou virtu
 Les trois vues partagent le menu contextuel et les actions de sélection. Le menu est rendu dans un portail, borné au viewport et refermé au défilement, clic extérieur ou Échap. Il gère focus et navigation au clavier. La sélection souris démarre après 6 px, le maintien tactile après 450 ms et s’annule avant activation au-delà de 10 px de mouvement. Les poignées conservent le glisser-déposer individuel ; un clic simple conserve l’édition. Le rectangle et le défilement aux bords utilisent `requestAnimationFrame` ; le pointeur est suivi jusqu’au relâchement ou à l’annulation, même hors de la zone des tâches.
 
 La barre fixe présente replanification, déplacement, suppression réversible et désélection. `BulkTaskDialog` fige les versions affichées avant soumission à `/tasks/bulk`, conserve les erreurs et propose un rechargement après conflit. Le menu appelle `/duplicate` ou la même suppression groupée pour une seule tâche. Les gestes restent purement locaux ; seules les actions confirmées mutent l’API. Au changement de vue/filtre/période, la sélection est remise à zéro. Le panneau mobile bloque le contenu arrière et contient le focus ; les cibles tactiles, champs sans zoom automatique, marges de sécurité et animations réduites sont pris en compte.
+
+## Socle commun et bibliothèque
+
+`platform/auth/SessionProvider` charge la session, sérialise les écritures de thème et démonte les données privées à la déconnexion/expiration. `AccountMenu` est commun au shell et aux applications. `platform/api.ts` possède le CSRF en mémoire, les erreurs réseau et les événements d’expiration/désactivation. Les réponses d’anciennes sessions ne doivent pas invalider une nouvelle session.
+
+`ApplicationProvider` charge le catalogue et enregistre les activations via l’API. Une lecture en cours est annulée avant une mutation ; une réponse obsolète ne remplace pas un état enregistré. L’accueil filtre `enabled`, la bibliothèque affiche toutes les applications disponibles. État vide, chargement, erreurs et reprise sont explicites. Les chemins inconnus ne sont pas des accueils implicites.
+
+Chaque `manifest.ts` associe seulement l’identifiant à `Page.tsx` via `React.lazy`. Les métadonnées restent celles du serveur. Les tokens communs et boutons/formulaires/dialogues sont dans `shared/styles/ui.css` ; le CSS métier `apps/<id>/styles.css` arrive avec sa Page. Les imports entre applications et ceux du socle vers une application sont vérifiés par les tests de frontières.

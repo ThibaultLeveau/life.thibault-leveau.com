@@ -1,6 +1,5 @@
 """Exercise the real PostgreSQL schema, sessions and task API over HTTP."""
 
-import os
 from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta
 from uuid import UUID, uuid4
@@ -10,73 +9,24 @@ from alembic import command
 from alembic.autogenerate import compare_metadata
 from alembic.migration import MigrationContext
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, select, text
+from sqlalchemy import select, text
 from sqlalchemy.exc import DBAPIError, IntegrityError
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session
 
+from life_app.apps.tasks.models import Task
 from life_app.cli import migration_config
 from life_app.core.config import Settings
 from life_app.core.database import Base, utcnow
-from life_app.features.auth.models import LoginSession, User
-from life_app.features.auth.service import hasher
-from life_app.features.tasks.models import Task
-from life_app.main import create_app
+from life_app.platform.auth.models import LoginSession, User
+from life_app.platform.auth.service import hasher
 
 PASSWORD = "synthetic-test-password"
 PASSWORD_HASH = hasher.hash(PASSWORD)
 
 
-@pytest.fixture(scope="module")
-def engine():
-    url = os.environ.get("LIFE_TEST_DATABASE_URL")
-    if not url:
-        pytest.fail("Run make test, or supply LIFE_TEST_DATABASE_URL for an isolated test schema")
-    schema = "life_test_" + uuid4().hex
-    admin = create_engine(url)
-    with admin.begin() as conn:
-        conn.execute(text(f'CREATE SCHEMA "{schema}"'))
-    engine = create_engine(url, connect_args={"options": f"-csearch_path={schema}"})
-    try:
-        with engine.begin() as conn:
-            config = migration_config()
-            config.attributes["connection"] = conn
-            command.upgrade(config, "head")
-        yield engine
-    finally:
-        engine.dispose()
-        with admin.begin() as conn:
-            conn.execute(text(f'DROP SCHEMA "{schema}" CASCADE'))
-        admin.dispose()
-
-
 @pytest.fixture
-def app(engine):
-    with engine.begin() as conn:
-        names = ", ".join(f'"{name}"' for name in Base.metadata.tables)
-        conn.execute(text(f"TRUNCATE {names} CASCADE"))
-    with Session(engine) as db, db.begin():
-        db.add_all([User(username=name, password_hash=PASSWORD_HASH) for name in ("alice", "bob")])
-    app = create_app(
-        Settings(
-            _env_file=None,
-            environment="test",
-            database_url=None,
-            public_base_url="http://testserver",
-        )
-    )
-    app.state.sessions = sessionmaker(engine, expire_on_commit=False)
-    return app
-
-
-@pytest.fixture
-def client(app):
-    with TestClient(app) as client:
-        response = client.post(
-            "/api/v1/auth/session", json={"username": "alice", "password": PASSWORD}
-        )
-        assert response.status_code == 200, response.text
-        client.headers["X-CSRF-Token"] = response.json()["csrf_token"]
-        yield client
+def client(authenticated_client):
+    return authenticated_client
 
 
 def create_space(client, name="Personnel"):
@@ -120,7 +70,7 @@ def history(client, item):
 def test_recurring_task_complete_undo_end_and_history(client, monkeypatch):
     from datetime import UTC, datetime
 
-    from life_app.features.tasks import service
+    from life_app.apps.tasks import service
 
     monkeypatch.setattr(service, "utcnow", lambda: datetime(2026, 11, 14, 12, tzinfo=UTC))
     space, _ = create_space(client)
@@ -263,7 +213,7 @@ def test_schedule_api_parity_validation_and_literal_titles(client, app):
 def test_composed_french_api_preview_persistence_and_diagnostics(client, app, monkeypatch):
     from datetime import UTC, datetime
 
-    from life_app.features.tasks import service
+    from life_app.apps.tasks import service
 
     monkeypatch.setattr(service, "utcnow", lambda: datetime(2026, 11, 14, 12, tzinfo=UTC))
     payload = {
@@ -386,7 +336,7 @@ def test_recurrence_constraints_and_concurrent_completion(client, app, engine):
 def test_completion_based_series_finished_early_remains_editable(client, monkeypatch):
     from datetime import UTC, datetime
 
-    from life_app.features.tasks import service
+    from life_app.apps.tasks import service
 
     monkeypatch.setattr(service, "utcnow", lambda: datetime(2026, 11, 14, 12, tzinfo=UTC))
     space, _ = create_space(client)
@@ -1277,7 +1227,7 @@ def test_duplicate_creates_independent_open_lifecycle(client):
 def test_duplicate_recurring_after_early_completion(client, monkeypatch):
     from datetime import UTC, datetime
 
-    from life_app.features.tasks import service
+    from life_app.apps.tasks import service
 
     monkeypatch.setattr(service, "utcnow", lambda: datetime(2026, 11, 14, 12, tzinfo=UTC))
     space, _ = create_space(client)

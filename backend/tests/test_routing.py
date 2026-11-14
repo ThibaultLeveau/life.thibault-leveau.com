@@ -57,7 +57,7 @@ def test_public_api_documentation(client: TestClient) -> None:
     assert schema["components"]["securitySchemes"]["APIKeyCookie"]["in"] == "cookie"
 
 
-@pytest.mark.parametrize("path", ["/", "/favicon.svg"])
+@pytest.mark.parametrize("path", ["/", "/applications", "/tasks", "/favicon.svg"])
 def test_static_head_returns_headers_without_body(client: TestClient, path: str) -> None:
     response = client.head(path)
     assert response.status_code == 200

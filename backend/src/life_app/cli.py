@@ -11,8 +11,8 @@ from sqlalchemy import create_engine, delete, select
 from sqlalchemy.orm import Session
 
 from life_app.core.config import get_settings
-from life_app.features.auth.models import LoginSession, User
-from life_app.features.auth.service import hasher
+from life_app.platform.auth.models import LoginSession, User
+from life_app.platform.auth.service import hasher
 
 
 def migration_config() -> Config:

@@ -1,47 +1,69 @@
-# Faire évoluer l'application
+# Faire évoluer LifeOS
 
-## État actuel
+## État disponible
 
-Le socle comprend la gestion privée des tâches, PostgreSQL, les sessions personnelles et une API complète. L'[issue #3](https://github.com/ThibaultLeveau/life.thibault-leveau.com/issues/3), la [spécification](taches-specification.md) et l'[ADR 002](decisions/002-gestion-taches.md) définissent cette première fonctionnalité persistante. La hiérarchie parent-enfant des espaces est disponible via `parent_id` et la migration `0002` ; elle reste dans les modules existants. Les domaines sport et objectifs restent futurs.
+LifeOS possède un socle commun, une bibliothèque avec activation par compte et une première application **Tâches**. Sport, objectifs OKR, ménage et plantes restent des pistes futures. L’[ADR 003](decisions/003-applications-lifeos.md) décrit l’organisation approuvée ; les ADR précédents conservent l’historique du socle et de la persistance.
 
-## Organisation par fonctionnalité
+Toutes les applications suivent les mêmes conventions et isolent leur métier. Les dossiers ne sont pas des copies de Tâches : ils réutilisent connexion, transport API, activation, thème et composants accessibles du socle.
 
-Les récurrences calendaires et la saisie naturelle sont disponibles (issue #13, migration `0004_recurrence`). Elles étendent les modules tâches existants et utilisent la même transaction que les résolutions. Aucun ordonnanceur, nouveau stockage ou service n’est introduit. L’aperçu et l’analyse sont accessibles par l’API versionnée.
+## Ajouter une application
 
-La suite de l’issue #13 apporte une grammaire française composable, les nombres en lettres et des diagnostics de saisie. Elle compile vers le même contrat calendaire, sans migration ni réinterprétation des séries enregistrées. Les helpers de vocabulaire et grammaire restent dans `features/tasks`.
+Créer une issue détaillée puis une branche depuis `main` à jour. Une application respectant le contrat ci-dessous reste dans l’architecture approuvée ; un nouveau service, stockage, framework, mode de déploiement ou changement de frontières demande un nouvel accord explicite.
 
 ```text
-backend/src/life_app/
-├── api/v1/tasks.py
-├── features/tasks/{models,schemas,service}.py
-└── migrations/versions/
-frontend/src/features/tasks/
+backend/src/life_app/apps/<id>/
+├── __init__.py
+├── manifest.py
+├── router.py
+├── models.py
+├── schemas.py
+└── service.py
+frontend/src/apps/<id>/
+├── manifest.ts
+├── Page.tsx
 ├── api.ts
 ├── types.ts
-├── TasksPage.tsx
 ├── components/
-└── tasks.css
+└── styles.css
 ```
 
-Réutiliser les sessions SQL, les contrôles d'accès, le routage explicite et les tokens. Les schémas définissent le contrat, les services portent les règles, les routes committent la transaction. Ne pas créer une couche générique sans besoin concret ni déplacer les responsabilités sans accord.
+1. Choisir un identifiant immuable : lettre minuscule suivie de lettres/chiffres/underscores, 50 caractères maximum. Garder les libellés français dans le manifeste backend. Réserver un chemin HTML unique (hors `/`, `/applications`, `/api`, `/documentation`, `/assets`).
+2. Définir les contrats Pydantic, contrôles de propriétaire et services transactionnels. Les schémas refusent les champs inconnus ; le propriétaire vient de `CurrentUser`. Les routeurs committent les mutations après validation. Réutiliser `core.database.Database` et les sessions existantes ; aucune couche générique de dépôt.
+3. Définir les tables propres au métier et une migration dans la chaîne globale `migrations/versions/` si nécessaire. Le manifeste importe le routeur, qui charge les modèles de l’application. L’import du registre lors des migrations doit charger toutes les métadonnées ORM. Ne pas modifier une ancienne migration.
+4. Fournir `manifest.py` avec une `ApplicationDefinition` et l’importer dans `apps/registry.py`. L’ordre du tuple définit celui du catalogue. Le défaut est désactivé ; toute exception demande une justification de migration. L’assemblage API monte le routeur et lui applique automatiquement le contrôle d’activation. Les nouvelles routes métier utilisent un préfixe propre à l’application pour éviter les collisions ; Tâches garde ses URL historiques.
+5. Fournir `manifest.ts` avec le même identifiant et une `Page` chargée via `React.lazy`, puis l’importer dans `apps/registry.ts`. La Page utilise `useSession`, `AccountMenu`, `platform/api.ts`, les composants `shared/ui` et les tokens `--ui-*`. Elle n’implémente ni connexion ni catalogue parallèle. Les noms, descriptions et URL d’ouverture viennent de l’API.
+6. Garder les helpers et styles métier dans le dossier de l’application. Les données de formulaire restent transitoires ; toute opération et préférence persistante possède son accès API. Le socle ne dépend pas du métier ; aucune application n’importe une autre application.
+7. Ajouter des tests HTTP avec PostgreSQL, des tests navigateur et le guide utilisateur. Le test de contrat vérifie les manifestes et frontières ; le test des routes désactivées doit couvrir tous les routeurs enregistrés. Vérifier isolation propriétaires, erreurs, clavier/mobile, migration, sauvegarde/restauration et préservation après bascule.
+8. Exécuter `make check`, `make test`, `make build`, construire/tester l’image, relire le diff et ouvrir une PR liée à l’issue. Consigner la revue, attendre la CI du dernier commit, fusionner puis déployer le dernier `main` sur le VPS selon [le guide](deploiement.md). Vérifier SHA, HTTPS, sondes et parcours avant de conclure.
 
-## Procédure
+Exemple de manifeste backend (illustration, pas une application livrée) :
 
-1. Créer une issue détaillée puis une branche depuis `main` à jour.
-2. Lire architecture et décisions ; obtenir l'accord de Thibault avant toute nouvelle couche, stockage, service, authentification, framework ou mode de déploiement.
-3. Définir les données, les règles, le contrat API et les contrôles d'accès.
-4. Ajouter la migration et les tests de comportement concernés.
-5. Livrer l'interface avec chargement, vide, erreur et conflit explicites.
-6. Mettre à jour OpenAPI, le guide utilisateur, la configuration et l'exploitation.
-7. Exécuter les contrôles, ouvrir la PR, consigner la revue, attendre la CI et fusionner selon `AGENTS.md`.
-8. Déployer le dernier `main` validé sur le VPS selon le [guide de déploiement](deploiement.md), vérifier la publication et consigner les résultats dans l'issue, y compris pour un changement documentaire.
+```python
+from life_app.platform.applications.definition import ApplicationDefinition
+from life_app.apps.example.router import router
 
-Toute action métier de l'interface doit avoir son équivalent API, y compris un réglage persistant. Ajouter une documentation sans prétendre qu'un contrôle non exécuté a réussi. Fusion et publication sont deux étapes successives obligatoires ; signaler explicitement tout blocage empêchant la publication.
+application = ApplicationDefinition(
+    id="example", name="Exemple", description="Description de l’application.",
+    path="/example", icon="grid", router=router,
+)
+```
 
-## Migrations et statistiques futures
+Exemple frontend :
 
-Créer une nouvelle migration pour chaque changement du schéma livré, sans réécrire celles déjà publiées. Tester aller/retour sur données synthétiques, contraintes, compatibilité avec l'image précédente et restauration. La migration s'exécute une fois, explicitement au déploiement, jamais au démarrage des workers.
+```typescript
+import { lazy } from "react";
+import type { ApplicationModule } from "../../platform/applications/definition";
 
-Pour les statistiques, utiliser les événements `completed` et `reopened`, leurs instants UTC et leur contexte historique. `completed_at` seul décrit uniquement l'état actuel. Distinguer nombre de résolutions, nombre de tâches distinctes résolues et délai de résolution par cycle. L'archivage n'est pas une résolution. Les [règles de données](donnees.md) précisent ces invariants.
+export const application: ApplicationModule = {
+  id: "example",
+  Page: lazy(() => import("./Page").then(({ Page }) => ({ default: Page }))),
+};
+```
 
-Une interface de statistiques ne nécessite pas automatiquement un entrepôt séparé. Mesurer les besoins avant de proposer un autre stockage, un ordonnanceur ou une file. Une piste dans cette page ne vaut jamais autorisation d'architecture.
+## Cycle de vie et migrations
+
+La bibliothèque conserve uniquement les activations personnelles. Désactiver ne supprime, ne résout et n’archive aucune donnée ; réactiver rend les mêmes objets. Une application retirée du code ne doit pas entraîner de suppression silencieuse de ses préférences ou tables. Documenter séparément toute procédure de retrait définitif.
+
+Créer une nouvelle migration pour chaque changement du schéma livré. Tester contraintes, aller/retour, compatibilité avec l’image précédente et restauration sur données synthétiques. La migration reste une commande explicite de publication. Une image précédente n’annule jamais le schéma.
+
+Pour Tâches, préserver les événements `completed`, `reopened`, `rescheduled` et `completion_undone`, leurs instants UTC et contexte historique. Les futures statistiques doivent distinguer résolutions, tâches distinctes et délais par cycle ; l’archivage et la désactivation ne sont pas des résolutions. Voir [les invariants](donnees.md).

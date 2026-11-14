@@ -2,15 +2,17 @@
 
 `life_app.main:create_app` assemble FastAPI, la configuration, les connexions, les routes et les fichiers statiques. L'installation `backend/src/` expose aussi la commande `life` ; aucun ajustement manuel de `PYTHONPATH` n'est nécessaire.
 
-`features/tasks/recurrence.py` valide les règles de jours/semaines/mois/années et calcule les dates avec python-dateutil. La recherche saute les phases calendaires anciennes et borne la vérification d’une règle impossible par le cycle grégorien. Les combinaisons impossibles usuelles (31 février, jour incompatible avec un intervalle de sept jours) sont rejetées sans parcourir des millénaires. `scheduling.py` analyse le français et conserve les indices du texte original, y compris accents combinés et emoji. Analyse et aperçu ne modifient pas de tâche ; résolutions, déplacements et éditions de statut partagent la même transition atomique. Voir les [invariants d’occurrence](donnees.md#recurrences-et-occurrences) et les [contrats](api.md#planification-et-recurrences).
+`apps/tasks/recurrence.py` valide les règles de jours/semaines/mois/années et calcule les dates avec python-dateutil. La recherche saute les phases calendaires anciennes et borne la vérification d’une règle impossible par le cycle grégorien. Les combinaisons impossibles usuelles (31 février, jour incompatible avec un intervalle de sept jours) sont rejetées sans parcourir des millénaires. `scheduling.py` analyse le français et conserve les indices du texte original, y compris accents combinés et emoji. Analyse et aperçu ne modifient pas de tâche ; résolutions, déplacements et éditions de statut partagent la même transition atomique. Voir les [invariants d’occurrence](donnees.md#recurrences-et-occurrences) et les [contrats](api.md#planification-et-recurrences).
 
 | Module | Responsabilité |
 | --- | --- |
 | `core/config.py`, `core/logging.py` | Paramètres typés, sortie standard et suppression des paramètres de requête des logs d'accès |
 | `core/database.py` | Engine PostgreSQL, pool et session SQLAlchemy par requête |
-| `features/auth/` | Comptes, sessions, limites de connexion, contrats et contrôles d'accès |
-| `features/tasks/` | Modèles relationnels, contrats Pydantic et règles métier |
-| `api/v1/` | Traduction HTTP, dépendances et commit explicite des mutations |
+| `platform/auth/` | Comptes, sessions, limites de connexion, contrats et contrôles d'accès |
+| `apps/tasks/` | Modèles relationnels, contrats Pydantic et règles métier |
+| `apps/<id>/router.py`, `platform/*/router.py` | Traduction HTTP et commit explicite |
+| `api/router.py` | Assemblage versionné et garde d’activation commun |
+| `platform/applications/` | Catalogue, contrat de manifeste et activation par propriétaire |
 | `api/health.py` | Vie du processus et disponibilité base/migrations |
 | `web/static.py` | Routes publiques explicites et artefacts autorisés |
 | `migrations/` | Historique Alembic inclus dans le package et l'image |
@@ -50,6 +52,6 @@ Ne jamais réécrire une migration déjà publiée. Le fichier `alembic.ini` fac
 
 ## Distribution HTTP
 
-Seuls `/` et `/tasks` servent le shell React. `/tasks?space=<UUID>` ouvre directement un espace autorisé ; un identifiant inconnu revient au premier espace actif. `/assets/`, `/favicon.svg` et `/documentation/` servent leurs artefacts dédiés. Les autres chemins restent 404, y compris une route API inconnue. Aucun répertoire de travail, secret ou sauvegarde n'est exposé.
+`/`, `/applications` et les chemins des manifestes (actuellement `/tasks`) servent le shell React. `/tasks?space=<UUID>` ouvre directement un espace autorisé ; un identifiant inconnu revient au premier espace actif. `/assets/`, `/favicon.svg` et `/documentation/` servent leurs artefacts dédiés. Les autres chemins restent 404, y compris une route API inconnue. Aucun répertoire de travail, secret ou sauvegarde n'est exposé.
 
 Les tests combinent artefacts temporaires pour le routage et PostgreSQL réel pour les fonctions privées. Voir [Tests](tests.md) et [Référence API](api.md).

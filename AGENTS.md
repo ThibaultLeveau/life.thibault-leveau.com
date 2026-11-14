@@ -9,6 +9,38 @@ Ces règles s'appliquent à l'ensemble du dépôt et à chaque requête concerna
 - Si une requête nécessite une évolution architecturale (nouvelle couche, réorganisation des responsabilités, stockage, authentification, service, framework ou mode de déploiement), présenter à Thibault le besoin, la proposition, les alternatives et les conséquences, puis demander son accord explicite **avant de l'implémenter**. Une piste décrite dans `docs/evolution.md` ne vaut pas autorisation.
 - Consigner l'accord dans l'issue. Après accord, documenter la décision dans `docs/decisions/` et actualiser la documentation concernée, sans réécrire l'historique des décisions.
 
+## Applications LifeOS : structure et frontières obligatoires
+
+L'[ADR 003](docs/decisions/003-applications-lifeos.md) définit le socle modulaire approuvé. Toutes les applications suivent **la même structure**, dans des dossiers distincts. Identifiants stables en anglais (`tasks`, puis les identifiants des futures applications) ; libellés utilisateur en français.
+
+```text
+backend/src/life_app/apps/<id>/
+  __init__.py
+  manifest.py        # ApplicationDefinition : identité, route, défaut, routeur
+  router.py          # HTTP, dépendances, transactions et réponses
+  models.py          # tables propres au métier
+  schemas.py         # contrats et validation
+  service.py         # règles métier
+frontend/src/apps/<id>/
+  manifest.ts        # ApplicationModule : identifiant et Page chargée à la demande
+  Page.tsx           # assemblage de l'interface métier
+  api.ts             # client métier utilisant le transport commun
+  types.ts           # contrats du métier
+  components/        # composants propres à l'application
+  styles.css         # styles propres à l'application
+```
+
+- Les helpers propres à un métier restent dans son dossier. Ne pas dupliquer une application pour en construire une autre : reproduire la structure et les contrats, réutiliser le socle et écrire uniquement le métier concerné. Sport, OKR, ménage et plantes sont futurs tant qu'ils ne sont pas implémentés.
+- Aucune application n'importe le métier d'une autre. Le backend `core/` contient l'infrastructure, `platform/` la connexion et la bibliothèque ; le frontend `platform/` contient session, transport HTTP/CSRF et bibliothèque, `shared/` les composants et styles communs. Ces dossiers ne dépendent d'aucune application.
+- Les seuls assemblages des applications sont les registres explicites `apps/registry.py` et `apps/registry.ts`. Le manifeste backend est la source des métadonnées et chemins. Le frontend associe seulement un identifiant à sa Page. Aucun catalogue utilisateur parallèle, chargement dynamique de code externe ou stockage métier dans le navigateur.
+- Enregistrer chaque nouvelle application dans les deux registres et suivre [le guide d'évolution](docs/evolution.md). L'assemblage central applique automatiquement le contrôle d'activation à **tout** son routeur. Ne jamais monter une route métier hors de ce contrôle ni recopier la connexion dans une Page.
+- Toute application utilise les sessions, CSRF, contrôles de propriétaire, transactions, thème, composants accessibles et tokens existants. Le shell monte la Page uniquement après connexion et activation ; déconnexion et expiration démontent ses données privées. Les réponses obsolètes doivent être annulées ou ignorées.
+- Une application est désactivée par défaut, sauf exception documentée de migration (Tâches). Une désactivation conserve données, dates, préférences et historique ; elle n'est ni un archivage ni une suppression. Les activations personnelles passent exclusivement par l'API commune.
+- Les migrations restent dans `migrations/versions/`, en une chaîne globale ; ne pas déplacer ni réécrire celles déjà publiées. Chaque application documente données, erreurs, contraintes, cycle de vie et sauvegarde/restauration.
+- Étendre les tests de frontières et de contrat (`test_architecture.py`), les tests HTTP de toutes les routes désactivées et les parcours navigateur lors de l'ajout d'une application. Prouver la parité API/interface, l'isolation des propriétaires, les états vide/erreur, les formats mobile et clavier et la préservation après désactivation/réactivation.
+
+Ajouter une application respectant ce contrat ne nécessite pas de nouvelle décision architecturale. Toute modification des frontières, du contrat commun ou du socle suit la règle d'accord explicite ci-dessus.
+
 ## Fonctionnalités accessibles par API et documentées
 
 - Toute opération métier proposée par l'interface doit être accessible par l'API versionnée, y compris les réglages persistants, les déplacements, le réordonnancement, l'archivage et la restauration. Le frontend utilise cette API ; il ne constitue pas un stockage métier parallèle.

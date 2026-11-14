@@ -18,6 +18,43 @@ Après connexion, conserver le cookie et envoyer **`X-CSRF-Token`** pour toute m
 
 Swagger montre les contrats, mais le navigateur ne peut pas définir lui-même un en-tête Cookie arbitraire : utiliser la session obtenue sur la même origine et renseigner `X-CSRF-Token` dans l'opération. L'exemple Python ci-dessous couvre un client indépendant.
 
+## Bibliothèque et activation
+
+| Méthode et chemin sous `/api/v1` | Contrat |
+| --- | --- |
+| `GET /applications` | Liste ordonnée des applications disponibles et de l’état du compte connecté |
+| `PUT /applications/{id}` | `{ "enabled": true }` ou `{ "enabled": false }` → application enregistrée, 200 |
+
+Une entrée contient `id`, `name`, `description`, `path`, `icon`, `enabled` et `updated_at` (instant UTC ou `null` avant le premier réglage explicite). Seule Tâches (`tasks`, `/tasks`) est actuellement disponible. La liste provient du registre livré, sans applications futures factices. Aucune préférence absente n’est créée par GET : le défaut de Tâches est `true`, celui des futures applications est `false`.
+
+PUT exige un booléen JSON strict (pas une chaîne, un nombre ou `null`), refuse les champs inconnus et ne permet pas de choisir le propriétaire (422). Identifiant non enregistré : 404 ; session absente/expirée : 401 ; origine ou CSRF invalide : 403. L’écriture utilise le verrou utilisateur commun. Répéter le même PUT ne change ni état ni `updated_at` après le premier enregistrement. Deux écritures concurrentes sont sérialisées ; la dernière validée devient l’état courant, sans création de doublon.
+
+Toutes les routes métier d’une application désactivée renvoient 403 avec `detail` explicatif et l’en-tête `X-Life-Application-Disabled: tasks`. Cela couvre tâches, espaces, sections, statuts, étiquettes, préférences de vue, agenda, analyse et aperçu de planification. L’authentification, le thème, la bibliothèque et les sondes restent disponibles. Un contrôle d’activation déjà passé peut laisser terminer une lecture en cours ; les mutations utilisent le même verrou que les bascules. Les données et événements restent inchangés.
+
+Exemple autonome (environnement doté de `httpx`, ou `uv run python` depuis le dépôt) :
+
+```python
+import getpass
+import httpx
+
+with httpx.Client(base_url="http://127.0.0.1:8100/api/v1", timeout=20) as client:
+    response = client.post("/auth/session", json={
+        "username": input("Identifiant : "), "password": getpass.getpass(),
+    })
+    response.raise_for_status()
+    client.headers["X-CSRF-Token"] = response.json()["csrf_token"]
+    response = client.get("/applications")
+    response.raise_for_status()
+    print(response.json())
+    response = client.put("/applications/tasks", json={"enabled": False})
+    response.raise_for_status()
+    assert client.get("/tasks").status_code == 403
+    response = client.put("/applications/tasks", json={"enabled": True})
+    response.raise_for_status()
+```
+
+Utiliser l’origine HTTPS en production. Ces deux PUT modifient réellement le réglage du compte ; utiliser un compte de recette pour les essais.
+
 ## Espaces et configuration
 
 Dans les chemins ci-dessous, `{w}`, `{s}`, `{c}` et `{l}` sont des UUID d'espace, section, statut et étiquette.

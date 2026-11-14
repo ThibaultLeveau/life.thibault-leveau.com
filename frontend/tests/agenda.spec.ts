@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import type { Section, Task, Workspace } from "../src/features/tasks/types";
+import type { Section, Task, Workspace } from "../src/apps/tasks/types";
 
 // The local day must take precedence over the UTC day in API queries and labels.
 test.use({ timezoneId: "America/Los_Angeles" });

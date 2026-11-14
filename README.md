@@ -1,4 +1,6 @@
-# Life
+# LifeOS
+
+LifeOS réunit des applications personnelles dans une bibliothèque. Activez celles qui vous sont utiles : l’accueil affiche vos applications activées, avec une connexion et un thème communs. La désactivation conserve les données et se révoque à tout moment. [Guide de la bibliothèque](docs/applications.md).
 
 Un espace personnel pour organiser ses tâches : espaces et sous-espaces, sections, listes à cocher et kanban en glisser-déposer, avec thèmes clair et sombre. Une vue **À venir** réunit les échéances de tous les espaces, avec périodes configurables et dates en langage humain. Les sections forment les listes et les **lignes** du tableau ; les statuts deviennent ses colonnes.
 
@@ -15,15 +17,18 @@ FastAPI / Python 3.13 sert React / TypeScript, l'API et MkDocs depuis une image 
 | Dossier | Responsabilité |
 | --- | --- |
 | `backend/src/life_app/core/` | Configuration, connexions et journaux |
-| `backend/src/life_app/features/` | Modèles, contrats et services tâches/authentification |
+| `backend/src/life_app/apps/<id>/` | Manifeste, routes, modèles, contrats et services de chaque application |
+| `backend/src/life_app/platform/` | Connexion, bibliothèque et activations personnelles |
 | `backend/src/life_app/api/` | API versionnée et sondes |
 | `backend/src/life_app/migrations/` | Migrations versionnées incluses dans l'image |
-| `frontend/src/features/tasks/` | Interface et client API des tâches |
+| `frontend/src/apps/<id>/` | Manifeste, page, types, API, composants et styles de chaque application |
+| `frontend/src/platform/`, `frontend/src/shared/` | Session, API/CSRF, bibliothèque, composants et styles communs |
+| `frontend/src/app/`, `frontend/src/pages/` | Shell, accueil et bibliothèque |
 | `backend/tests/`, `frontend/tests/` | Tests HTTP/PostgreSQL et parcours navigateur |
 | `docs/` | Guides utilisateur, architecture, API et exploitation |
 | `infrastructure/`, `scripts/` | Intégration Caddy/PostgreSQL, publication et sauvegardes |
 
-Voir [l'architecture](docs/architecture.md), l'[ADR approuvé](docs/decisions/002-gestion-taches.md) et le [guide utilisateur](docs/taches.md).
+Voir [l'architecture](docs/architecture.md), l'[ADR des applications](docs/decisions/003-applications-lifeos.md) et le [guide utilisateur](docs/taches.md).
 
 ## Démarrage
 
