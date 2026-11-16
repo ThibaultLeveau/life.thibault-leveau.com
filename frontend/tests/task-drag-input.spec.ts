@@ -172,8 +172,10 @@ test("outside drops and Escape cancel; server rejection restores the task", asyn
   expect(writes).toBe(0);
   const handle = card(page, tasks[0]).locator(".drag-handle");
   await handle.focus();
-  await page.keyboard.press("Space");
+  // The keyboard sensor installs its document listener on the next event-loop turn.
+  await page.keyboard.press("Space", { delay: 100 });
   await expect(page.locator(".drag-overlay")).toBeVisible();
+  await page.keyboard.press("ArrowDown");
   await page.keyboard.press("Escape");
   await expect(page.locator(".drag-overlay")).toHaveCount(0);
   await expect(handle).not.toHaveAttribute("aria-pressed", "true");
