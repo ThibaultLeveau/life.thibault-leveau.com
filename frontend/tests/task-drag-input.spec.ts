@@ -1,6 +1,11 @@
 import { test, expect, type Page, type Locator } from "@playwright/test";
 import type { Task, Workspace, Section, Status } from "../src/apps/tasks/types";
 
+const restorePreferences = new WeakMap<Page, () => Promise<unknown>>();
+test.afterEach(async ({ page }) => {
+  await restorePreferences.get(page)?.();
+});
+
 async function seed(page: Page, locale = "fr", layout = "list") {
   const login = await page.request.post("/api/v1/auth/session", { data: {
     username: process.env.LIFE_E2E_USERNAME ?? "browser-test",
@@ -15,6 +20,8 @@ async function seed(page: Page, locale = "fr", layout = "list") {
     expect(response.ok(), await response.text()).toBeTruthy();
     return response.json();
   };
+  const preferences = await (await page.request.get("/api/v1/preferences")).json();
+  restorePreferences.set(page, () => mutate("/preferences", preferences, "PUT"));
   await mutate("/preferences", { locale, theme: locale === "fr" ? "light" : "dark" }, "PUT");
   const space = await mutate<Workspace>("/workspaces", { name: `Source ${Date.now()}` });
   const other = await mutate<Workspace>("/workspaces", { name: `Target ${Date.now()}`, parent_id: space.id });
