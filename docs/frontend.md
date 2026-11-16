@@ -8,7 +8,7 @@ React, TypeScript et Vite conservent l'outillage du socle. `App.tsx` assemble la
 
 Les règles et dates restent des données API. Les brouillons du planificateur ne sont appliqués qu’après sélection de date ou validation de l’aperçu serveur. Les erreurs conservent la saisie ; Échap referme le planificateur avant le dialogue. Aucun contenu de tâche n’est enregistré dans localStorage.
 
-La détection affiche le libellé et les trois premières dates retournées par le serveur. `status=incomplete/invalid` affiche `diagnostic` et demande une correction ou le choix explicite **Garder le texte** avant sauvegarde, y compris sur validation immédiate et dans l’ajout rapide. Le planificateur montre le même diagnostic. `ScheduleHelp` expose des exemples français ; ses boutons dans le planificateur remplissent seulement le brouillon à interpréter. L’aide est hors de la région `aria-live` pour éviter de la relire à chaque frappe.
+La détection affiche le libellé et les trois premières dates retournées par le serveur. `status=incomplete/invalid` affiche `diagnostic` et demande une correction ou le choix explicite **Garder le texte** avant sauvegarde, y compris sur validation immédiate et dans l’ajout rapide. Le planificateur montre le même diagnostic. `ScheduleHelp` expose des exemples français ou anglais selon la langue ; ses boutons dans le planificateur remplissent seulement le brouillon à interpréter. L’aide est hors de la région `aria-live` pour éviter de la relire à chaque frappe.
 
 | Fichier / composant | Rôle |
 | --- | --- |
@@ -59,8 +59,14 @@ La barre fixe présente replanification, déplacement, suppression réversible e
 
 ## Socle commun et bibliothèque
 
-`platform/auth/SessionProvider` charge la session, sérialise les écritures de thème et démonte les données privées à la déconnexion/expiration. `AccountMenu` est commun au shell et aux applications. `platform/api.ts` possède le CSRF en mémoire, les erreurs réseau et les événements d’expiration/désactivation. Les réponses d’anciennes sessions ne doivent pas invalider une nouvelle session.
+`platform/auth/SessionProvider` charge la session, sérialise les écritures partielles de thème et de langue et démonte les données privées à la déconnexion/expiration. `AccountMenu` est commun au shell et aux applications. `platform/api.ts` possède le CSRF en mémoire, les erreurs réseau et les événements d’expiration/désactivation. Les réponses d’anciennes sessions ne doivent pas invalider une nouvelle session.
 
 `ApplicationProvider` charge le catalogue et enregistre les activations via l’API. Une lecture en cours est annulée avant une mutation ; une réponse obsolète ne remplace pas un état enregistré. L’accueil filtre `enabled`, la bibliothèque affiche toutes les applications disponibles. État vide, chargement, erreurs et reprise sont explicites. Les chemins inconnus ne sont pas des accueils implicites.
 
 Chaque `manifest.ts` associe seulement l’identifiant à `Page.tsx` via `React.lazy`. Les métadonnées restent celles du serveur. Les tokens communs et boutons/formulaires/dialogues sont dans `shared/styles/ui.css` ; le CSS métier `apps/<id>/styles.css` arrive avec sa Page. Les imports entre applications et ceux du socle vers une application sont vérifiés par les tests de frontières.
+
+## Langue de session
+
+`platform/i18n/` initialise i18next avant le rendu. Les helpers typés `tr` utilisent les ressources JSON de `shared/` ou de leur application ; les ressources métier arrivent avec la Page chargée à la demande. Les formats de dates et nombres passent par `formatLocale()`. Les chaînes interpolées sont du texte React, sans HTML dynamique.
+
+`SessionProvider` applique `locale` retournée par le serveur, met à jour `html.lang` et remonte l’arbre privé lors d’une bascule. Le transport associe chaque requête à une génération de session/langue et ignore toute réponse devenue obsolète, même après un aller-retour FR → EN → FR. Les préférences sont écrites en série et ne remettent pas les autres champs au défaut. `AccountMenu.beforeSessionChange` attend les écritures Tâches ou consulte la protection des brouillons Sport avant langue/déconnexion. Les formulaires non enregistrés restent transitoires. Voir [Internationalisation](internationalisation.md).

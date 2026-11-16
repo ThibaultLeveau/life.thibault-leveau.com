@@ -9,6 +9,7 @@ from datetime import date, timedelta
 
 from dateutil.relativedelta import relativedelta
 
+from life_app.apps.tasks.messages import tr
 from life_app.apps.tasks.recurrence import DAY_NAMES, WEEKDAYS, Recurrence, dates
 from life_app.apps.tasks.scheduling_language import (
     ALIASES,
@@ -47,7 +48,7 @@ class CalendarSpec:
     def frequency(self, value):
         if self.cadence is not None and self.cadence != value:
             raise ScheduleError(
-                "Deux rythmes différents sont indiqués. Gardez un seul intervalle de répétition."
+                tr("two_different_intervals_were_specified_keep_a_single_repeat_interval")
             )
         self.cadence = value
 
@@ -64,25 +65,24 @@ class CalendarSpec:
             duration_end = start + relativedelta(**{key: self.duration[1]}) - timedelta(days=1)
             if end is not None and end != duration_end:
                 raise ScheduleError(
-                    "La durée et la date de fin ne donnent pas la même fin. "
-                    "Choisissez l’une des deux."
+                    tr("the_duration_and_end_date_give_different_endings_choose_one_of_them")
                 )
             end = duration_end
         if end is not None and self.count is not None:
-            raise ScheduleError("Choisissez une fin par date ou durée, ou un nombre d’occurrences.")
+            raise ScheduleError(tr("choose_an_end_date_a_duration_or_a_number_of_occurrences"))
         selected = {key: set(value) for key, value in self.selectors.items()}
         if self.annual_dates:
             month_days = {day for _, day in self.annual_dates}
             months = {month for month, _ in self.annual_dates}
             if self.annual_dates != {(month, day) for month in months for day in month_days}:
                 raise ScheduleError(
-                    "Ces dates annuelles ont des jours différents selon le mois. "
-                    "Utilisez des tâches distinctes pour préserver chaque date."
+                    tr("these_annual_dates_have_different_days_in_each_month_use_separate_tasks")
                 )
             if selected.get("BYMONTHDAY", month_days) != month_days:
                 raise ScheduleError(
-                    "Cette composition mélange des dates annuelles et mensuelles différentes. "
-                    "Séparez ces calendriers."
+                    tr(
+                        "this_expression_mixes_different_annual_and_monthly_dates_use_separate_schedules"
+                    )
                 )
             selected.setdefault("BYMONTHDAY", set()).update(month_days)
             selected.setdefault("BYMONTH", set()).update(months)
@@ -99,13 +99,14 @@ class CalendarSpec:
         weekdays = selected.get("BYDAY", set())
         if any(len(day) > 2 for day in weekdays) and any(len(day) == 2 for day in weekdays):
             raise ScheduleError(
-                "Ces jours avec et sans position forment des calendriers différents. "
-                "Précisez une position pour chaque jour ou utilisez des tâches distinctes."
+                tr(
+                    "days_with_and_without_positions_form_different_schedules_specify_a_position_for"
+                )
             )
         if "BYWEEKNO" in selected:
             if self.cadence and self.cadence not in {("WEEKLY", 1), ("YEARLY", 1)}:
                 raise ScheduleError(
-                    "Les semaines numérotées se répètent chaque année ; retirez l’autre intervalle."
+                    tr("numbered_weeks_repeat_every_year_remove_the_other_interval")
                 )
             frequency = "YEARLY"
             selected.setdefault("BYDAY", {WEEKDAYS[start.weekday()]})
@@ -132,15 +133,13 @@ class CalendarSpec:
                 nominal *= len(selected.get("BYMONTH", {start.month}))
             if nominal != self.rate:
                 raise ScheduleError(
-                    "Précisez les jours correspondant au nombre de fois demandé, "
-                    "par exemple « deux fois par semaine le lundi et le jeudi »."
+                    tr("specify_the_days_for_the_requested_frequency_for_example_twice_a_week")
                 )
         if frequency == "YEARLY" and "BYMONTHDAY" in selected and "BYMONTH" not in selected:
             selected["BYMONTH"] = {start.month}
         if self.completion and (selected or self.excluded_days or self.excluded_months):
             raise ScheduleError(
-                "Après résolution utilise un délai seul. "
-                "Retirez les jours fixes ou choisissez un calendrier fixe."
+                tr("after_completion_uses_an_interval_only_remove_fixed_days_or_choose_a")
             )
 
         def make_rule(selection, step, anchor):
@@ -170,7 +169,7 @@ class CalendarSpec:
             first = dates(make_rule(selected, 1, start), start, inclusive=True, limit=1)
             if not first:
                 raise ScheduleError(
-                    "Ces réglages ne donnent aucune date. Vérifiez les jours et la fin."
+                    tr("these_settings_produce_no_dates_check_the_days_and_end_date")
                 )
             anchor = first[0]
 
@@ -185,8 +184,7 @@ class CalendarSpec:
         if frequency == "YEARLY" and "BYMONTH" not in selected:
             if self.excluded_months and any(len(d) > 2 for d in selected.get("BYDAY", [])):
                 raise ScheduleError(
-                    "Une position dans l’année et un mois exclu ne se combinent pas dans "
-                    "une seule règle. Précisez un mois pour cette position ou excluez des dates."
+                    tr("a_position_in_the_year_and_an_excluded_month_cannot_share_one")
                 )
             if "BYMONTHDAY" in selected or (
                 self.excluded_months and not {"BYDAY", "BYYEARDAY", "BYWEEKNO"} & selected.keys()
@@ -203,7 +201,7 @@ class CalendarSpec:
         if self.excluded_months:
             selected["BYMONTH"] = selected.get("BYMONTH", set(range(1, 13))) - self.excluded_months
         if any(not values for values in selected.values()):
-            raise ScheduleError("Les exclusions retirent tous les jours ou mois sélectionnés.")
+            raise ScheduleError(tr("the_exclusions_remove_all_selected_days_or_months"))
         rule = make_rule(selected, interval, anchor)
         exclusions = set()
         for first_tokens, last_tokens in self.excluded_dates:
@@ -211,11 +209,11 @@ class CalendarSpec:
             last = read_date(last_tokens, 0, first)[0] if last_tokens else first
             if last < first or (last - first).days > 365:
                 raise ScheduleError(
-                    "Une plage d’exclusion doit aller dans l’ordre et couvrir au plus 366 dates."
+                    tr("an_exclusion_range_must_be_chronological_and_cover_at_most_366_dates")
                 )
             exclusions.update(first + timedelta(days=i) for i in range((last - first).days + 1))
             if len(exclusions) > 366:
-                raise ScheduleError("Une récurrence accepte au plus 366 dates exclues.")
+                raise ScheduleError(tr("a_recurrence_can_have_at_most_366_excluded_dates"))
         rule.excluded_dates = sorted(exclusions)
         return Recurrence.model_validate(rule.model_dump())
 
@@ -272,12 +270,12 @@ class Grammar:
             other, self.pos = item
             if range_item:
                 if not isinstance(value, int) or not isinstance(other, int):
-                    raise ScheduleError("Cette plage de calendrier n’est pas reconnue.")
+                    raise ScheduleError(tr("this_calendar_range_is_not_recognized"))
                 if other < value and cycle:
                     result.extend(range(value + 1, cycle + 1))
                     result.extend(range(1, other + 1))
                 elif other < value or other - value > 366:
-                    raise ScheduleError("Vérifiez l’ordre et les bornes de la plage de jours.")
+                    raise ScheduleError(tr("check_the_order_and_limits_of_the_day_range"))
                 else:
                     result.extend(range(value + 1, other + 1))
             else:
@@ -340,23 +338,24 @@ class Grammar:
             self.intent = True
             if count != 1:
                 raise ScheduleError(
-                    "Pour une alternance, écrivez « un jour sur deux » "
-                    "ou indiquez les jours souhaités."
+                    tr("for_an_alternating_schedule_write_every_other_day_or_specify_the_days")
                 )
             alternate = number(self.tokens, self.pos)
             if not alternate:
                 raise ScheduleError(
-                    "Complétez l’alternance, par exemple « une semaine sur trois ».", "incomplete"
+                    tr("complete_the_alternating_interval_for_example_every_three_weeks"),
+                    "incomplete",
                 )
             count, self.pos = alternate
             self.intent = True
         if count <= 0 or count * period[1] > 1000:
-            raise ScheduleError("L’intervalle de répétition doit être compris entre 1 et 1000.")
+            raise ScheduleError(tr("the_repeat_interval_must_be_between_1_and_1000"))
         if singular(self.peek()) in {"ouvre", "ouvrable"}:
             if period[0] != "DAILY" or count != 1:
                 raise ScheduleError(
-                    "Un délai en jours ouvrés demande un autre calcul. "
-                    "Choisissez des jours fixes ou un intervalle calendaire avec exceptions."
+                    tr(
+                        "a_business_day_interval_requires_a_different_calculation_choose_fixed_days_or"
+                    )
                 )
             length = 5 if singular(self.peek()) == "ouvre" else 6
             self.pos += 1
@@ -396,7 +395,7 @@ class Grammar:
             period = unit(self.tokens, self.pos)
             if not period or period[0] not in {"MONTHLY", "YEARLY", "WEEKLY"}:
                 raise ScheduleError(
-                    "Précisez « début/fin de mois », « de semaine » ou « d’année ».", "incomplete"
+                    tr("specify_start_end_of_month_of_week_or_of_year"), "incomplete"
                 )
             self.pos += 1
             self.spec.scopes.add(period[0])
@@ -422,7 +421,7 @@ class Grammar:
                 self.pos += 1
                 numbers = self.list_of(number)
                 if not numbers:
-                    raise ScheduleError("Indiquez les numéros de semaine (1 à 53).", "incomplete")
+                    raise ScheduleError(tr("enter_week_numbers_from_1_to_53"), "incomplete")
                 self.spec.select("BYWEEKNO", numbers)
                 self.calendar_evidence = True
                 return True
@@ -460,7 +459,7 @@ class Grammar:
             "premiere",
         }:
             if not 1 <= quantity[0] <= 31:
-                raise ScheduleError("Choisissez entre 1 et 31 positions calendaires.")
+                raise ScheduleError(tr("choose_between_1_and_31_calendar_positions"))
             last = singular(word(self.tokens, quantity[1])).startswith("dern")
             positions = list(range(-quantity[0], 0)) if last else list(range(1, quantity[0] + 1))
             self.pos = quantity[1] + 1
@@ -471,7 +470,7 @@ class Grammar:
             if group:
                 if any(len(day) > 2 for day in self.spec.selectors.get("BYDAY", [])):
                     raise ScheduleError(
-                        "Séparez les positions de jours ouvrés et les positions de jours nommés."
+                        tr("separate_business_day_positions_from_named_weekday_positions")
                     )
                 self.spec.select("BYDAY", (WEEKDAYS[d - 1] for d in group))
                 self.spec.select("BYSETPOS", positions)
@@ -481,7 +480,7 @@ class Grammar:
             if weekdays:
                 if "BYSETPOS" in self.spec.selectors:
                     raise ScheduleError(
-                        "Séparez les positions de jours nommés et les positions de jours ouvrés."
+                        tr("separate_named_weekday_positions_from_business_day_positions")
                     )
                 self.spec.select(
                     "BYDAY", (f"{p}{WEEKDAYS[d - 1]}" for p in positions for d in weekdays)
@@ -539,7 +538,7 @@ class Grammar:
             self.pos = result[1]
             return self.tokens[start : self.pos]
         raise ScheduleError(
-            "Complétez la date, par exemple « demain » ou « 21 janvier ».", "incomplete"
+            tr("complete_the_date_for_example_tomorrow_or_january_21"), "incomplete"
         )
 
     def bound(self, key):
@@ -547,10 +546,7 @@ class Grammar:
         if key in self.spec.bounds and [t.value for t in self.spec.bounds[key]] != [
             t.value for t in value
         ]:
-            raise ScheduleError(
-                "Plusieurs dates de début ou de fin sont indiquées. "
-                "Gardez une seule borne de chaque type."
-            )
+            raise ScheduleError(tr("several_start_or_end_dates_were_specified_keep_one_of_each"))
         self.spec.bounds[key] = value
 
     def modifier(self):
@@ -586,7 +582,7 @@ class Grammar:
             if result:
                 self.bound("start")
                 if not self.take("au"):
-                    raise ScheduleError("Complétez la période « du … au … ».", "incomplete")
+                    raise ScheduleError(tr("complete_the_from_to_period"), "incomplete")
                 self.bound("end")
                 return True
             self.pos = start
@@ -599,12 +595,12 @@ class Grammar:
                 count, self.pos = amount
                 if not 1 <= count <= 10000:
                     raise ScheduleError(
-                        "Choisissez un nombre d’occurrences ou une durée entre 1 et 10000."
+                        tr("choose_an_occurrence_count_or_duration_between_1_and_10000")
                     )
                 if self.peek() in {"fois", "occurrence", "occurrences"}:
                     self.pos += 1
                     if self.spec.count is not None and self.spec.count != count:
-                        raise ScheduleError("Plusieurs nombres d’occurrences sont indiqués.")
+                        raise ScheduleError(tr("several_occurrence_counts_were_specified"))
                     self.spec.count = count
                     return True
                 period = unit(self.tokens, self.pos)
@@ -612,12 +608,14 @@ class Grammar:
                     self.pos += 1
                     duration = period[0], period[1] * count
                     if self.spec.duration and self.spec.duration != duration:
-                        raise ScheduleError("Plusieurs durées différentes sont indiquées.")
+                        raise ScheduleError(tr("several_different_durations_were_specified"))
                     self.spec.duration = duration
                     return True
-                raise ScheduleError("Ajoutez une unité ou « fois » après ce nombre.", "incomplete")
+                raise ScheduleError(tr("add_a_unit_or_times_after_this_number"), "incomplete")
             if introducer != "pour" or not self.peek():
-                raise ScheduleError("Complétez la durée ou le nombre d’occurrences.", "incomplete")
+                raise ScheduleError(
+                    tr("complete_the_duration_or_number_of_occurrences"), "incomplete"
+                )
             self.pos = start
         amount = number(self.tokens, self.pos)
         if amount and word(self.tokens, amount[1]) in {"fois", "occurrence", "occurrences"}:
@@ -625,13 +623,13 @@ class Grammar:
             if following in {"par", "tous", "toutes", "chaque"}:
                 self.intent = True
                 if not 1 <= amount[0] <= 366 or self.spec.rate not in {None, amount[0]}:
-                    raise ScheduleError("Vérifiez le nombre de fois demandé par période.")
+                    raise ScheduleError(tr("check_the_requested_number_of_occurrences_per_period"))
                 self.spec.rate, self.pos = amount[0], amount[1] + 1
                 if self.take("par"):
                     period = unit(self.tokens, self.pos)
                     if not period:
                         raise ScheduleError(
-                            "Complétez « fois par semaine », « par mois » ou « par an ».",
+                            tr("complete_times_per_week_per_month_or_per_year"),
                             "incomplete",
                         )
                     self.spec.frequency(period)
@@ -639,7 +637,7 @@ class Grammar:
                     self.pos += 1
                 return True
             if self.spec.count not in {None, amount[0]}:
-                raise ScheduleError("Plusieurs nombres d’occurrences sont indiqués.")
+                raise ScheduleError(tr("several_occurrence_counts_were_specified"))
             self.spec.count, self.pos = amount[0], amount[1] + 1
             return True
         if self.take("apres"):
@@ -649,9 +647,9 @@ class Grammar:
                 if not self.peek() or any(
                     v.startswith(self.peek()) for v in ("resolution", "realisation")
                 ):
-                    raise ScheduleError("Complétez « après résolution ».", "incomplete")
+                    raise ScheduleError(tr("complete_after_completion"), "incomplete")
                 raise ScheduleError(
-                    "Pour un délai qui repart quand c’est fait, écrivez « après résolution »."
+                    tr("for_an_interval_that_restarts_when_done_write_after_completion")
                 )
             self.pos += 1
             self.spec.completion = True
@@ -671,8 +669,7 @@ class Grammar:
             singular(self.peek()) == "jour" and singular(self.peek(1)) == "ferie"
         ):
             raise ScheduleError(
-                "Les jours fériés dépendent du calendrier local. "
-                "Indiquez leurs dates dans les exceptions."
+                tr("public_holidays_depend_on_the_local_calendar_add_their_dates_as_exceptions")
             )
         group = self.attempt(self.day_group)
         weekdays = group or self.list_of(self.weekday, cycle=7)
@@ -722,11 +719,11 @@ class Grammar:
         if self.peek() in {"bimensuel", "bimensuelle", "bihebdomadaire"}:
             self.intent = True
             raise ScheduleError(
-                "Ce raccourci est ambigu. Indiquez un intervalle ou les jours souhaités."
+                tr("this_shortcut_is_ambiguous_specify_an_interval_or_the_days_you_want")
             )
         if prefix and singular(self.peek()) in {"heure", "minute", "seconde"}:
             raise ScheduleError(
-                "Les récurrences se règlent en jours, semaines, mois ou années, sans heure."
+                tr("recurrences_use_days_weeks_months_or_years_without_a_time_of_day")
             )
         if self.attempt(self.selector):
             return True
@@ -755,14 +752,15 @@ class Grammar:
                 if not any(value.startswith(self.peek()) for value in vocabulary):
                     if self.calendar_evidence:
                         raise ScheduleError(
-                            "Une partie de la composition n’est pas reconnue. "
-                            "Précisez son intervalle ou ses jours."
+                            tr(
+                                "part_of_this_expression_is_not_recognized_specify_its_interval_or_days"
+                            )
                         )
                     self.barrier = True
                     self.pos = start
                     return None
             raise ScheduleError(
-                "Complétez la récurrence : un intervalle, un jour ou une position dans le mois.",
+                tr("complete_the_recurrence_with_an_interval_a_day_or_a_position_in"),
                 "incomplete",
             )
         self.pos = start
@@ -782,23 +780,24 @@ class Grammar:
         if self.intent and self.pos > self.start:
             if self.peek() in {"heure", "heures", "minute", "minutes", "ferie", "feries"}:
                 raise ScheduleError(
-                    "Ce calendrier accepte des dates, sans heure "
-                    "ni calendrier automatique des jours fériés."
+                    tr(
+                        "this_schedule_accepts_dates_without_times_or_an_automatic_public_holiday_calendar"
+                    )
                 )
             if not self.calendar_evidence:
                 if not self.peek():
                     raise ScheduleError(
-                        "Ajoutez une unité ou « du mois » après le nombre.", "incomplete"
+                        tr("add_a_unit_or_of_the_month_after_the_number"), "incomplete"
                     )
                 return None
             if self.pending_day:
                 raise ScheduleError(
-                    "Complétez le nombre avec une unité ou « du mois ».", "incomplete"
+                    tr("complete_the_number_with_a_unit_or_of_the_month"), "incomplete"
                 )
             # A recognised cadence followed by an unfinished selector is not a valid prefix.
             if self.peek() in {"le", "les", "en", "de", "du", "a", "sur", "sauf", "jusqu"}:
                 raise ScheduleError(
-                    "Complétez la précision de calendrier avant d’appliquer la récurrence.",
+                    tr("complete_the_calendar_details_before_applying_the_recurrence"),
                     "incomplete",
                 )
             return self.spec

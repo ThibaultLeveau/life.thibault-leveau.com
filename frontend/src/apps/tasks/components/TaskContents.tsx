@@ -1,3 +1,4 @@
+import { tr } from "../i18n";
 import type { ReactNode } from "react";
 import { relativeDate } from "../dates";
 import type { Label, Task } from "../types";
@@ -38,12 +39,19 @@ export function TaskContents({
             : `task-checkbox priority-${task.priority}`
         }
         onClick={() => (selecting ? actions?.toggle(task.id) : onComplete())}
-        aria-label={`${selecting ? (selected ? "Désélectionner" : "Sélectionner") : completed ? "Rouvrir" : "Terminer"} : ${task.title}`}
+        aria-label={tr("action_named", {
+          action: selecting
+            ? selected
+              ? tr("deselect")
+              : tr("select")
+            : completed
+              ? tr("reopen")
+              : tr("complete"),
+          name: task.title,
+        })}
         disabled={busy || actions?.busy}
       >
-        {(selecting ? selected : completed) && (
-          <Icon name="check" size={13} />
-        )}
+        {(selecting ? selected : completed) && <Icon name="check" size={13} />}
       </button>
       <div className="task-content">
         <button
@@ -65,7 +73,13 @@ export function TaskContents({
               <time
                 dateTime={task.due_date!}
                 title={date.full}
-                aria-label={`Échéance : ${date.full}${!completed && date.tone === "overdue" ? ", en retard" : ""}`}
+                aria-label={tr("due_label", {
+                  date: date.full,
+                  overdue:
+                    !completed && date.tone === "overdue"
+                      ? tr("overdue_suffix")
+                      : "",
+                })}
                 className={`task-date is-${completed ? "completed" : date.tone}`}
               >
                 <Icon
@@ -74,7 +88,7 @@ export function TaskContents({
                 />
                 {date.label}
                 {!completed && date.tone === "overdue" && (
-                  <span> · En retard</span>
+                  <span> {tr("overdue_annotation")}</span>
                 )}
               </time>
             )}
@@ -82,7 +96,9 @@ export function TaskContents({
               <span
                 className="task-recurrence"
                 title={shortRecurrence(task.recurrence)}
-                aria-label={`Récurrence : ${shortRecurrence(task.recurrence)}`}
+                aria-label={tr("recurrence_label", {
+                  rule: shortRecurrence(task.recurrence),
+                })}
               >
                 {shortRecurrence(task.recurrence)}
               </span>
@@ -109,7 +125,7 @@ export function TaskContents({
       </div>
       <button
         className="task-more icon-button"
-        aria-label={`Actions : ${task.title}`}
+        aria-label={tr("actions_for", { name: task.title })}
         aria-haspopup="menu"
         aria-expanded={actions?.menuId === task.id}
         disabled={busy || actions?.busy}

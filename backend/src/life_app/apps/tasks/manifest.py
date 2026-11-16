@@ -9,4 +9,7 @@ application = ApplicationDefinition(
     icon="check",
     router=router,
     default_enabled=True,
+    translations={
+        "en": ("Tasks", "Organize your projects, plan your day and move at your own pace."),
+    },
 )

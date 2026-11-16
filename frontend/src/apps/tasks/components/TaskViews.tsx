@@ -1,3 +1,4 @@
+import { tr } from "../i18n";
 import { useState, type CSSProperties, type FormEvent } from "react";
 import {
   closestCenter,
@@ -99,7 +100,7 @@ function TaskCard({
         {...drag.attributes}
         {...drag.listeners}
         disabled={disabled}
-        aria-label={`Glisser la tâche ${task.title}`}
+        aria-label={tr("drag_task", { name: task.title })}
       >
         <Icon name="grip" size={14} />
       </button>
@@ -139,7 +140,7 @@ function QuickAdd({
       const parsed = await recognition.resolve();
       const cleanTitle = parsed?.matched_text ? parsed.title : title;
       if (!cleanTitle.trim())
-        throw new Error("Ajoutez un titre à côté de la date.");
+        throw new Error(tr("add_a_title_next_to_the_date"));
       await onAdd(
         cleanTitle,
         sectionId,
@@ -159,13 +160,13 @@ function QuickAdd({
     return (
       <button className="quick-add" onClick={() => setOpen(true)}>
         <Icon name="plus" size={16} />
-        Ajouter une tâche
+        {tr("add_a_task")}
       </button>
     );
   return (
     <form className="quick-add-form" onSubmit={submit}>
       <label className="sr-only" htmlFor={`quick-${sectionId}-${statusId}`}>
-        Nom de la tâche
+        {tr("task_name")}
       </label>
       <input
         id={`quick-${sectionId}-${statusId}`}
@@ -176,7 +177,7 @@ function QuickAdd({
         autoFocus
         required
         maxLength={500}
-        placeholder="Lire demain, courir tous les lundis…"
+        placeholder={tr("read_tomorrow_run_every_monday")}
         onKeyDown={(event) => {
           if (event.key === "Escape") setOpen(false);
         }}
@@ -193,10 +194,10 @@ function QuickAdd({
           className="text-button"
           onClick={() => setOpen(false)}
         >
-          Annuler
+          {tr("cancel")}
         </button>
         <button className="primary-button small-button" disabled={busy}>
-          {busy ? "Ajout…" : "Ajouter"}
+          {busy ? tr("adding") : tr("add")}
         </button>
       </div>
     </form>
@@ -243,8 +244,7 @@ function Cell({
       <QuickAdd
         sectionId={sectionId}
         statusId={
-          statusId ??
-          props.statuses.find((status) => !status.is_completed)!.id
+          statusId ?? props.statuses.find((status) => !status.is_completed)!.id
         }
         onAdd={props.onAdd}
       />
@@ -267,8 +267,7 @@ export function TaskViews(props: Props) {
   const board = props.view.layout === "board";
   const sections = props.sections.filter(
     (section) =>
-      section.visibility === "both" ||
-      section.visibility === props.view.layout,
+      section.visibility === "both" || section.visibility === props.view.layout,
   );
   const groups: {
     id: string | null;
@@ -276,7 +275,7 @@ export function TaskViews(props: Props) {
     description: string;
     color: string;
   }[] = [
-    { id: null, name: "Sans section", description: "", color: "#91948e" },
+    { id: null, name: tr("no_section"), description: "", color: "#91948e" },
     ...sections,
   ];
   async function end(event: DragEndEvent) {
@@ -301,8 +300,7 @@ export function TaskViews(props: Props) {
       onDragEnd={end}
       accessibility={{
         screenReaderInstructions: {
-          draggable:
-            "Appuyez sur Espace pour saisir une tâche, utilisez les flèches puis Espace pour la déposer. Échap annule. Le titre ouvre aussi les détails et la commande Déplacer.",
+          draggable: tr("press_space_to_pick_up_a_task_use_the_arrow"),
         },
       }}
     >
@@ -355,7 +353,7 @@ export function TaskViews(props: Props) {
                 {section.id && (
                   <button
                     className="icon-button"
-                    aria-label={`Configurer la section ${section.name}`}
+                    aria-label={tr("configure_section", { name: section.name })}
                     onClick={props.onConfigure}
                   >
                     <Icon name="more" size={18} />
@@ -392,7 +390,7 @@ export function TaskViews(props: Props) {
         })}
         <button className="add-section-button" onClick={props.onConfigure}>
           <Icon name="plus" size={16} />
-          Ajouter une section
+          {tr("add_a_section")}
         </button>
       </div>
       <DragOverlay>

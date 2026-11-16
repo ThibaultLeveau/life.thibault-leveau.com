@@ -1,3 +1,4 @@
+import type { Locale } from "../i18n";
 export type Theme = "system" | "light" | "dark";
 export interface Session {
   user_id: string;
@@ -5,4 +6,5 @@ export interface Session {
   csrf_token: string;
   expires_at: string;
   theme: Theme;
+  locale: Locale;
 }

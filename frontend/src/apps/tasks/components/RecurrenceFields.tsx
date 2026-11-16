@@ -1,3 +1,5 @@
+import { formatLocale } from "../../../shared/i18n";
+import { tr } from "../i18n";
 import { useState } from "react";
 import { dayCodes, months, plusDays, weekdays } from "../scheduling";
 import { localDate, type Recurrence } from "../types";
@@ -88,15 +90,15 @@ export function RecurrenceFields({
       <div
         className="recurrence-mode"
         role="group"
-        aria-label="Calcul de la récurrence"
+        aria-label={tr("recurrence_calculation")}
       >
         <button
           type="button"
           aria-pressed={rule.mode === "scheduled"}
           onClick={() => set({ mode: "scheduled" })}
         >
-          <strong>Calendrier fixe</strong>
-          <span>Par exemple, chaque lundi</span>
+          <strong>{tr("fixed_schedule")}</strong>
+          <span>{tr("for_example_every_monday")}</span>
         </button>
         <button
           type="button"
@@ -108,15 +110,15 @@ export function RecurrenceFields({
             })
           }
         >
-          <strong>Après résolution</strong>
-          <span>Le délai repart quand c’est fait</span>
+          <strong>{tr("after_completion")}</strong>
+          <span>{tr("the_interval_restarts_when_done")}</span>
         </button>
       </div>
       {!advanced && (
         <>
           <div className="recurrence-interval">
             <label>
-              Répéter tous les
+              {tr("repeat_every")}
               <input
                 type="number"
                 min={1}
@@ -126,7 +128,7 @@ export function RecurrenceFields({
               />
             </label>
             <label>
-              Unité
+              {tr("unit")}
               <select
                 value={frequency}
                 onChange={(e) =>
@@ -136,22 +138,22 @@ export function RecurrenceFields({
                   )
                 }
               >
-                <option value="DAILY">jours</option>
-                <option value="WEEKLY">semaines</option>
-                <option value="MONTHLY">mois</option>
-                <option value="YEARLY">années</option>
+                <option value="DAILY">{tr("days")}</option>
+                <option value="WEEKLY">{tr("weeks")}</option>
+                <option value="MONTHLY">{tr("months")}</option>
+                <option value="YEARLY">{tr("years")}</option>
               </select>
             </label>
           </div>
           {frequency === "WEEKLY" && rule.mode === "scheduled" && (
             <fieldset className="schedule-fieldset">
-              <legend>Les jours suivants</legend>
+              <legend>{tr("on_these_days")}</legend>
               <div className="weekday-picker">
                 {dayCodes.map((day, i) => (
                   <button
                     type="button"
                     key={day}
-                    aria-label={weekdays[i]}
+                    aria-label={weekdays()[i]}
                     aria-pressed={(
                       parts.BYDAY ||
                       dayCodes[
@@ -162,7 +164,17 @@ export function RecurrenceFields({
                       .includes(day)}
                     onClick={() => toggleDay(day)}
                   >
-                    {["Lu", "Ma", "Me", "Je", "Ve", "Sa", "Di"][i]}
+                    {
+                      [
+                        tr("mo"),
+                        tr("tu"),
+                        tr("we"),
+                        tr("th"),
+                        tr("fr"),
+                        tr("sa"),
+                        tr("su"),
+                      ][i]
+                    }
                   </button>
                 ))}
               </div>
@@ -170,9 +182,9 @@ export function RecurrenceFields({
           )}
           {frequency === "YEARLY" && rule.mode === "scheduled" && (
             <fieldset className="schedule-fieldset">
-              <legend>Les mois suivants</legend>
+              <legend>{tr("in_these_months")}</legend>
               <div className="month-picker">
-                {months.map((month, i) => (
+                {months().map((month, i) => (
                   <button
                     type="button"
                     key={month}
@@ -208,7 +220,7 @@ export function RecurrenceFields({
             rule.mode === "scheduled" && (
               <>
                 <label>
-                  Quel jour ?
+                  {tr("which_day")}
                   <select
                     value={monthlyMode}
                     onChange={(e) =>
@@ -221,15 +233,17 @@ export function RecurrenceFields({
                         : ordinalRule("1", "MO")
                     }
                   >
-                    <option value="date">Un ou plusieurs jours du mois</option>
+                    <option value="date">
+                      {tr("one_or_more_days_of_the_month")}
+                    </option>
                     <option value="weekday">
-                      Un jour de semaine dans le mois
+                      {tr("a_weekday_in_the_month")}
                     </option>
                   </select>
                 </label>
                 {monthlyMode === "date" ? (
                   <label>
-                    Jours du mois
+                    {tr("days_of_the_month")}
                     <input
                       value={
                         parts.BYMONTHDAY ?? String(Number(anchor.slice(8)))
@@ -242,14 +256,13 @@ export function RecurrenceFields({
                       }
                     />
                     <span className="field-help">
-                      Séparez par des virgules. −1 = dernier jour, −2 =
-                      avant-dernier.
+                      {tr("separate_with_commas_1_last_day_2_second_to_last")}
                     </span>
                   </label>
                 ) : (
                   <div className="form-grid">
                     <label>
-                      Position
+                      {tr("position")}
                       <select
                         value={ordinal?.[1] || parts.BYSETPOS || "1"}
                         onChange={(e) =>
@@ -259,17 +272,17 @@ export function RecurrenceFields({
                           )
                         }
                       >
-                        <option value="1">Premier</option>
-                        <option value="2">Deuxième</option>
-                        <option value="3">Troisième</option>
-                        <option value="4">Quatrième</option>
-                        <option value="5">Cinquième</option>
-                        <option value="-1">Dernier</option>
-                        <option value="-2">Avant-dernier</option>
+                        <option value="1">{tr("first")}</option>
+                        <option value="2">{tr("second")}</option>
+                        <option value="3">{tr("third")}</option>
+                        <option value="4">{tr("fourth")}</option>
+                        <option value="5">{tr("fifth")}</option>
+                        <option value="-1">{tr("last")}</option>
+                        <option value="-2">{tr("second_to_last")}</option>
                       </select>
                     </label>
                     <label>
-                      Jour
+                      {tr("day")}
                       <select
                         value={ordinal?.[2] || parts.BYDAY || "MO"}
                         onChange={(e) =>
@@ -281,13 +294,13 @@ export function RecurrenceFields({
                       >
                         {dayCodes.map((d, i) => (
                           <option key={d} value={d}>
-                            {weekdays[i]}
+                            {weekdays()[i]}
                           </option>
                         ))}
                         <option value="MO,TU,WE,TH,FR">
-                          jour ouvré (lun–ven)
+                          {tr("business_day_mon_fri")}
                         </option>
-                        <option value="SA,SU">jour du week-end</option>
+                        <option value="SA,SU">{tr("weekend_day")}</option>
                       </select>
                     </label>
                   </div>
@@ -298,7 +311,7 @@ export function RecurrenceFields({
       )}
       <div className="form-grid">
         <label>
-          À partir du
+          {tr("starting_on")}
           <input
             type="date"
             value={rule.start_date}
@@ -307,7 +320,7 @@ export function RecurrenceFields({
           />
         </label>
         <label>
-          Fin de la récurrence
+          {tr("recurrence_end")}
           <select
             value={endMode}
             onChange={(e) =>
@@ -318,14 +331,14 @@ export function RecurrenceFields({
               })
             }
           >
-            <option value="never">Jamais</option>
-            <option value="date">À une date</option>
-            <option value="count">Après un nombre d’occurrences</option>
+            <option value="never">{tr("never")}</option>
+            <option value="date">{tr("on_a_date")}</option>
+            <option value="count">{tr("after_a_number_of_occurrences")}</option>
           </select>
         </label>
         {endMode === "date" && (
           <label>
-            Jusqu’au (inclus)
+            {tr("until_inclusive")}
             <input
               type="date"
               min={rule.start_date}
@@ -337,7 +350,7 @@ export function RecurrenceFields({
         )}
         {endMode === "count" && (
           <label>
-            Nombre d’occurrences
+            {tr("number_of_occurrences")}
             <input
               type="number"
               min={1}
@@ -347,16 +360,18 @@ export function RecurrenceFields({
               onChange={(e) => set({ max_occurrences: Number(e.target.value) })}
             />
             <span className="field-help">
-              La première est comprise. Les retards sautés ne comptent pas.
+              {tr(
+                "includes_the_first_occurrence_skipped_overdue_dates_do_not_count",
+              )}
             </span>
           </label>
         )}
       </div>
       <details className="schedule-options">
-        <summary>Exceptions et réglages avancés</summary>
+        <summary>{tr("exceptions_and_advanced_settings")}</summary>
         <div className="exception-add">
           <label>
-            Exclure une date
+            {tr("exclude_a_date")}
             <input
               type="date"
               value={exclude}
@@ -376,18 +391,18 @@ export function RecurrenceFields({
               setExclude("");
             }}
           >
-            Exclure
+            {tr("exclude")}
           </button>
         </div>
         {rule.excluded_dates.length > 0 && (
           <ul className="exception-list">
             {rule.excluded_dates.map((day) => (
               <li key={day}>
-                {new Date(`${day}T12:00:00`).toLocaleDateString("fr-FR")}
+                {new Date(`${day}T12:00:00`).toLocaleDateString(formatLocale())}
                 <button
                   type="button"
                   className="icon-button"
-                  aria-label={`Réinclure le ${day}`}
+                  aria-label={tr("reinclude_date", { date: day })}
                   onClick={() =>
                     set({
                       excluded_dates: rule.excluded_dates.filter(
@@ -403,14 +418,14 @@ export function RecurrenceFields({
           </ul>
         )}
         <label>
-          Fuseau horaire
+          {tr("time_zone")}
           <input
             value={rule.timezone}
             onChange={(e) => set({ timezone: e.target.value })}
             placeholder="Europe/Paris"
           />
           <span className="field-help">
-            Détermine le jour de résolution, même en déplacement.
+            {tr("determines_the_completion_day_even_when_travelling")}
           </span>
         </label>
         <label className="inline-check">
@@ -419,11 +434,11 @@ export function RecurrenceFields({
             checked={advanced}
             onChange={(e) => setAdvanced(e.target.checked)}
           />
-          Éditer une règle calendaire avancée
+          {tr("edit_an_advanced_calendar_rule")}
         </label>
         {advanced && (
           <label>
-            Règle RRULE
+            {tr("rrule_rule")}
             <input
               value={rule.rrule}
               onChange={(e) => set({ rrule: e.target.value.toUpperCase() })}
@@ -431,8 +446,9 @@ export function RecurrenceFields({
               placeholder="FREQ=YEARLY;BYWEEKNO=2;BYDAY=MO"
             />
             <span className="field-help">
-              Fréquence, intervalle, jours, mois, positions, semaines ou jours
-              de l’année. Réglez la fin ci-dessus. L’aperçu valide la règle.
+              {tr(
+                "frequency_interval_days_months_positions_weeks_or_days_of_the",
+              )}
             </span>
           </label>
         )}

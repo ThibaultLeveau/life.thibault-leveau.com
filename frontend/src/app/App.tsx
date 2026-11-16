@@ -1,3 +1,4 @@
+import { tr } from "../shared/i18n";
 import { Component, Suspense, useEffect, type ReactNode } from "react";
 import { applications } from "../apps/registry";
 import { AppLayout } from "../components/layout/AppLayout";
@@ -23,13 +24,13 @@ class ApplicationBoundary extends Component<
   render() {
     return this.state.failed ? (
       <AppLayout>
-        <h1>Ouverture interrompue</h1>
-        <p>Rechargez la page pour réessayer.</p>
+        <h1>{tr("unable_to_open")}</h1>
+        <p>{tr("reload_the_page_to_try_again")}</p>
         <button
           className="primary-button"
           onClick={() => window.location.reload()}
         >
-          Recharger
+          {tr("reload")}
         </button>
       </AppLayout>
     ) : (
@@ -41,22 +42,22 @@ function Routes() {
   const path = window.location.pathname;
   const { items, error, refresh } = useApplications();
   useEffect(() => {
-    document.title = `${path === "/applications" ? "Bibliothèque" : "Accueil"} · LifeOS`;
+    document.title = `${path === "/applications" ? tr("library") : tr("home")} · LifeOS`;
   }, [path]);
   if (error)
     return (
       <AppLayout>
-        <h1>Applications indisponibles</h1>
+        <h1>{tr("applications_unavailable")}</h1>
         <ErrorMessage message={error} />
         <button className="primary-button" onClick={refresh}>
-          Réessayer
+          {tr("try_again")}
         </button>
       </AppLayout>
     );
   if (!items)
     return (
       <AppLayout>
-        <p role="status">Chargement des applications…</p>
+        <p role="status">{tr("loading_applications")}</p>
       </AppLayout>
     );
   if (path === "/")
@@ -76,8 +77,8 @@ function Routes() {
   if (!application || !module)
     return (
       <AppLayout>
-        <h1>Page introuvable</h1>
-        <a href="/">Revenir à l’accueil</a>
+        <h1>{tr("page_not_found")}</h1>
+        <a href="/">{tr("back_to_home")}</a>
       </AppLayout>
     );
   if (!application.enabled)
@@ -85,13 +86,14 @@ function Routes() {
       <AppLayout>
         <div className="applications-empty">
           <Icon name="grid" size={32} />
-          <h1>{application.name} est désactivée</h1>
+          <h1>{tr("application_disabled", { name: application.name })}</h1>
           <p>
-            Vos données sont conservées. Réactivez l’application pour les
-            retrouver.
+            {tr(
+              "your_data_is_preserved_enable_the_application_again_to_access",
+            )}
           </p>
           <a className="primary-button" href="/applications">
-            Ouvrir la bibliothèque <Icon name="arrow" />
+            {tr("open_the_library")} <Icon name="arrow" />
           </a>
         </div>
       </AppLayout>
@@ -101,7 +103,9 @@ function Routes() {
       <Suspense
         fallback={
           <AppLayout>
-            <p role="status">Ouverture de {application.name}…</p>
+            <p role="status">
+              {tr("opening_application", { name: application.name })}
+            </p>
           </AppLayout>
         }
       >

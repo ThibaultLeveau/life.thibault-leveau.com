@@ -1,3 +1,5 @@
+import { documentationPath } from "../../shared/i18n";
+import { tr } from "./i18n";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AccountMenu } from "../../platform/auth/AccountMenu";
 import { useSession } from "../../platform/auth/SessionProvider";
@@ -15,19 +17,21 @@ import { Workouts } from "./components/Workouts";
 import type { Training } from "./types";
 import "./styles.css";
 
-const tabs = [
-  ["workouts", "Programmes", "grid"],
-  ["training", "Entraînement", "flag"],
-  ["exercises", "Exercices", "list"],
-  ["measurements", "Mensurations", "edit"],
-  ["statistics", "Statistiques", "board"],
-  ["history", "Historique", "calendar"],
-  ["settings", "Réglages", "settings"],
-] as const satisfies readonly (readonly [string, string, IconName])[];
-type Tab = (typeof tabs)[number][0];
+const tabs = () =>
+  [
+    ["workouts", tr("programs"), "grid"],
+    ["training", tr("training"), "flag"],
+    ["exercises", tr("exercises"), "list"],
+    ["measurements", tr("body_measurements"), "edit"],
+    ["statistics", tr("statistics"), "board"],
+    ["history", tr("history"), "calendar"],
+    ["settings", tr("settings"), "settings"],
+  ] as const satisfies readonly (readonly [string, string, IconName])[];
+type Tab = ReturnType<typeof tabs>[number][0];
 function readView() {
   const params = new URLSearchParams(location.search);
-  const tab = tabs.find(([id]) => id === params.get("tab"))?.[0] ?? "workouts";
+  const tab =
+    tabs().find(([id]) => id === params.get("tab"))?.[0] ?? "workouts";
   return {
     tab,
     program: tab === "workouts" ? params.get("program") : null,
@@ -87,9 +91,9 @@ export function Page() {
   }, []);
   const title = program
     ? program === "new"
-      ? "Nouveau programme"
-      : "Modifier le programme"
-    : tabs.find(([id]) => id === tab)![1];
+      ? tr("new_program")
+      : tr("edit_program")
+    : tabs().find(([id]) => id === tab)![1];
   useEffect(() => {
     document.title = `${title} · Sport · LifeOS`;
     heading.current?.focus({ preventScroll: true });
@@ -116,8 +120,8 @@ export function Page() {
     setNavigation(false);
   }
   const nav = (
-    <nav aria-label="Sport">
-      {tabs.map(([id, label, icon]) => (
+    <nav aria-label={tr("sport")}>
+      {tabs().map(([id, label, icon]) => (
         <button
           key={id}
           className={`sport-nav-item ${tab === id ? "is-active" : ""}`}
@@ -128,7 +132,7 @@ export function Page() {
           <Icon name={icon} />
           {label}
           {id === "training" && active && (
-            <span className="sport-live-dot" aria-label="En cours" />
+            <span className="sport-live-dot" aria-label={tr("in_progress")} />
           )}
         </button>
       ))}
@@ -147,10 +151,10 @@ export function Page() {
           document.getElementById("sport-main")?.focus();
         }}
       >
-        Aller au contenu
+        {tr("skip_to_content")}
       </a>
       <aside className="sport-sidebar">
-        <a className="app-brand" href="/" aria-label="Accueil LifeOS">
+        <a className="app-brand" href="/" aria-label={tr("lifeos_home")}>
           <span className="app-brand-icon">
             <Icon name="grid" />
           </span>
@@ -158,37 +162,37 @@ export function Page() {
         </a>
         <div className="sport-app-label">
           <Icon name="flag" />
-          SPORT
+          {tr("sport_eyebrow")}
         </div>
         {nav}
         <div className="sport-sidebar-bottom">
           <a href="/applications">
             <Icon name="grid" />
-            Bibliothèque des applications
+            {tr("application_library")}
           </a>
-          <a href="/documentation/sport/">
+          <a href={documentationPath("sport")}>
             <Icon name="info" />
-            Guide Sport
+            {tr("sport_guide")}
           </a>
-          <AccountMenu />
+          <AccountMenu beforeSessionChange={() => guard.current()} />
         </div>
       </aside>
       <main className="sport-main" id="sport-main" tabIndex={-1}>
         <header className="sport-topbar">
           <button
             className="icon-button sport-mobile"
-            aria-label="Ouvrir la navigation"
+            aria-label={tr("open_navigation")}
             onClick={() => setNavigation(true)}
           >
             <Icon name="menu" />
           </button>
           <a href="/">LifeOS</a>
           <span>/</span>
-          <span>Sport</span>
+          <span>{tr("sport")}</span>
           <div className="spacer" />
           <button
             className="icon-button"
-            aria-label="Actualiser l’entraînement"
+            aria-label={tr("refresh_training_session")}
             onClick={activeResource.reload}
           >
             <Icon name="restore" />
@@ -203,30 +207,31 @@ export function Page() {
               className="text-button sport-back"
               onClick={() => choose("workouts", null, archived)}
             >
-              <span aria-hidden="true">←</span>Tous les programmes
+              <span aria-hidden="true">←</span>
+              {tr("all_programs")}
             </button>
           )}
           <div className="sport-page-heading">
-            <p className="eyebrow">VOTRE ESPACE SPORT</p>
+            <p className="eyebrow">{tr("your_training_space")}</p>
             <h1 ref={heading} tabIndex={-1}>
               {title}
             </h1>
             <p className="muted">
               {tab === "workouts"
                 ? program
-                  ? "Composez un programme à votre rythme."
-                  : "Vos programmes, prêts pour le prochain entraînement."
+                  ? tr("build_a_program_at_your_own_pace")
+                  : tr("your_programs_ready_for_your_next_training_session")
                 : tab === "exercises"
-                  ? "Trouvez le bon mouvement, avec les bonnes mesures."
+                  ? tr("find_the_right_movement_with_the_right_measurements")
                   : tab === "statistics"
-                    ? "Votre évolution, entraînement après entraînement."
+                    ? tr("your_progress_one_training_session_at_a_time")
                     : tab === "measurements"
-                      ? "Gardez une trace de votre évolution."
+                      ? tr("keep_track_of_your_progress")
                       : tab === "training"
-                        ? "Une série à la fois."
+                        ? tr("one_set_at_a_time")
                         : tab === "history"
-                          ? "Retrouvez les détails de chaque entraînement."
-                          : "Des réglages qui suivent votre rythme."}
+                          ? tr("revisit_the_details_of_each_training_session")
+                          : tr("settings_that_follow_your_pace")}
             </p>
           </div>
           <LoadState {...kinds} />
@@ -306,14 +311,14 @@ export function Page() {
       )}
       {navigation && (
         <Dialog
-          title="Navigation Sport"
+          title={tr("sport_navigation")}
           initialFocus="close"
           onClose={() => setNavigation(false)}
         >
           <div className="dialog-body sport-mobile-nav">
             {nav}
-            <a href="/applications">Bibliothèque des applications</a>
-            <AccountMenu />
+            <a href="/applications">{tr("application_library")}</a>
+            <AccountMenu beforeSessionChange={() => guard.current()} />
           </div>
         </Dialog>
       )}

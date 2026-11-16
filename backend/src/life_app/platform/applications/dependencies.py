@@ -1,6 +1,7 @@
 from fastapi import HTTPException, Request
 
 from life_app.core.database import Database
+from life_app.platform.applications.messages import tr
 from life_app.platform.applications.models import ApplicationPreference
 from life_app.platform.applications.service import find_application
 from life_app.platform.auth.service import CurrentUser
@@ -14,7 +15,7 @@ def require_application(application_id: str):
         if not active:
             raise HTTPException(
                 403,
-                "Cette application est désactivée. Activez-la dans la bibliothèque.",
+                tr("this_application_is_disabled_enable_it_in_the_library"),
                 headers={"X-Life-Application-Disabled": application_id},
             )
 

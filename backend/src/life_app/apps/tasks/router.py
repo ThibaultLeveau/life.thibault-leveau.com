@@ -8,6 +8,7 @@ from sqlalchemy import delete, func, select
 from life_app.apps.tasks import models as m
 from life_app.apps.tasks import schemas as s
 from life_app.apps.tasks import service as svc
+from life_app.apps.tasks.messages import tr
 from life_app.apps.tasks.recurrence import Recurrence, dates, describe
 from life_app.apps.tasks.scheduling import parse_schedule
 from life_app.core.database import Database
@@ -64,14 +65,12 @@ def preview_scheduling(payload: s.SchedulePreviewInput, user: CurrentUser):
     )
     if not upcoming:
         raise HTTPException(
-            422, "Aucune occurrence pour ces réglages. Vérifiez les jours et la fin."
+            422, tr("these_settings_produce_no_occurrences_check_the_days_and_end_date")
         )
     return s.SchedulePreviewOutput(
         label=describe(rule),
         dates=upcoming,
-        explanation="Dates indicatives : le délai repart de chaque résolution."
-        if rule.mode == "completion"
-        else "Calendrier fixe. Les dates inexistantes et exclues sont sautées.",
+        explanation=tr("preview_completion") if rule.mode == "completion" else tr("preview_fixed"),
     )
 
 

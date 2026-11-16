@@ -1,3 +1,4 @@
+import { tr } from "../i18n";
 import { useState } from "react";
 import { Dialog, ErrorMessage } from "../../../shared/ui/Dialog";
 import { sportApi } from "../api";
@@ -24,7 +25,7 @@ function MeasurementForm({
   const [date, setDate] = useState(measurement?.measured_on ?? localDay());
   const [values, setValues] = useState<MeasureValues>(
     Object.fromEntries(
-      measureFields.map(([key]) => [key, measurement?.[key] ?? null]),
+      measureFields().map(([key]) => [key, measurement?.[key] ?? null]),
     ),
   );
   const [notes, setNotes] = useState(measurement?.notes ?? "");
@@ -32,7 +33,9 @@ function MeasurementForm({
   return (
     <Dialog
       title={
-        measurement ? "Modifier les mensurations" : "Relever mes mensurations"
+        measurement
+          ? tr("edit_body_measurements")
+          : tr("record_my_measurements")
       }
       wide
       onClose={onClose}
@@ -61,7 +64,7 @@ function MeasurementForm({
       >
         <fieldset className="sport-fieldset" disabled={action.busy}>
           <label>
-            Date du relevé
+            {tr("measurement_date")}
             <input
               type="date"
               required
@@ -71,11 +74,10 @@ function MeasurementForm({
             />
           </label>
           <p className="muted">
-            Renseignez les mesures que vous souhaitez suivre. Un seul relevé par
-            jour, modifiable à tout moment.
+            {tr("enter_the_measurements_you_want_to_track_one_record_per")}
           </p>
           <div className="form-grid">
-            {measureFields.map(([key, label, unit]) => (
+            {measureFields().map(([key, label, unit]) => (
               <label key={key}>
                 {label} ({unit})
                 <input
@@ -103,7 +105,7 @@ function MeasurementForm({
             ))}
           </div>
           <label>
-            Notes
+            {tr("notes")}
             <textarea
               maxLength={2000}
               value={notes}
@@ -116,7 +118,7 @@ function MeasurementForm({
               className="primary-button"
               disabled={!Object.values(values).some((v) => v != null)}
             >
-              Enregistrer les mensurations
+              {tr("save_body_measurements")}
             </button>
           </div>
         </fieldset>
@@ -141,18 +143,17 @@ export function Measurements() {
             checked={archived}
             onChange={(e) => setArchived(e.target.checked)}
           />
-          Relevés archivés
+          {tr("archived_records")}
         </label>
         <button className="primary-button" onClick={() => setForm("new")}>
-          Nouveau relevé
+          {tr("new_record")}
         </button>
       </div>
       <LoadState {...resource} />
       <ErrorMessage message={action.error} />
       {resource.data?.length === 0 && (
-        <Empty title="Vos mensurations, au fil du temps">
-          Ajoutez votre premier relevé pour suivre votre évolution dans les
-          statistiques.
+        <Empty title={tr("your_measurements_over_time")}>
+          {tr("add_your_first_record_to_track_your_progress_in_the")}
         </Empty>
       )}
       <div className="sport-measurements">
@@ -166,7 +167,7 @@ export function Measurements() {
                     className="secondary-button small-button"
                     onClick={() => setForm(m)}
                   >
-                    Modifier
+                    {tr("edit")}
                   </button>
                 )}
                 <button
@@ -183,12 +184,12 @@ export function Measurements() {
                     )
                   }
                 >
-                  {archived ? "Restaurer" : "Archiver"}
+                  {archived ? tr("restore") : tr("archive")}
                 </button>
               </div>
             </div>
             <dl>
-              {measureFields
+              {measureFields()
                 .filter(([key]) => m[key] != null)
                 .map(([key, label, unit]) => (
                   <div key={key}>

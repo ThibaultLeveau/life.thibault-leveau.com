@@ -1,10 +1,14 @@
-const examples = [
-  ["Un intervalle", "tous les deux jours"],
-  ["Une composition", "tous les mercredis toutes les trois semaines"],
-  ["Plusieurs jours", "du lundi au vendredi une semaine sur deux"],
-  ["Des dates dans le mois", "les 1er et 21 de chaque mois"],
-  ["Une position", "le dernier jour ouvré de chaque mois"],
-  ["Une fin et des exceptions", "tous les jours pour cinq fois sauf demain"],
+import { tr } from "../i18n";
+const examples = () => [
+  [tr("an_interval"), tr("every_two_days")],
+  [tr("a_combination"), tr("every_wednesday_every_three_weeks")],
+  [tr("several_days"), tr("every_other_week_on_monday_through_friday")],
+  [tr("dates_in_the_month"), tr("every_1st_and_21st_of_the_month")],
+  [tr("a_position"), tr("every_last_business_day_of_the_month")],
+  [
+    tr("an_ending_and_exceptions"),
+    tr("every_day_for_five_times_except_tomorrow"),
+  ],
 ];
 
 export function ScheduleHelp({
@@ -16,13 +20,12 @@ export function ScheduleHelp({
 }) {
   return (
     <details className="schedule-help">
-      <summary>Les raccourcis en français</summary>
+      <summary>{tr("natural_language_shortcuts")}</summary>
       <p>
-        Combinez un rythme, des jours, une fin ou des exceptions. Les nombres
-        peuvent s’écrire en lettres.
+        {tr("combine_a_repeat_interval_days_an_ending_or_exceptions_numbers")}
       </p>
       <dl>
-        {examples.map(([label, example]) => (
+        {examples().map(([label, example]) => (
           <div key={label}>
             <dt>{label}</dt>
             <dd>
@@ -42,10 +45,7 @@ export function ScheduleHelp({
           </div>
         ))}
       </dl>
-      <p>
-        Vérifiez toujours l’aperçu. Pour conserver des mots tels quels,
-        entourez-les de « guillemets » ou choisissez de garder le texte.
-      </p>
+      <p>{tr("always_check_the_preview_to_keep_words_unchanged_put_them")}</p>
     </details>
   );
 }

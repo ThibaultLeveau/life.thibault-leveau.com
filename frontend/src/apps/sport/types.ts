@@ -1,3 +1,4 @@
+import { tr } from "./i18n";
 export type Kind =
   | "weight_reps"
   | "reps"
@@ -40,6 +41,8 @@ export interface Exercise {
   kind: Kind;
   muscle_group: string;
   equipment: string;
+  muscle_id: string | null;
+  equipment_id: string | null;
   notes: string;
   builtin: boolean;
   aliases: string[];
@@ -111,22 +114,23 @@ export interface SessionPage {
   offset: number;
   limit: number;
 }
-export const measureFields = [
-  ["weight_kg", "Poids", "kg"],
-  ["body_fat_pct", "Masse grasse", "%"],
-  ["neck_cm", "Cou", "cm"],
-  ["shoulders_cm", "Épaules", "cm"],
-  ["chest_cm", "Poitrine", "cm"],
-  ["waist_cm", "Taille", "cm"],
-  ["hips_cm", "Hanches", "cm"],
-  ["arm_left_cm", "Bras gauche", "cm"],
-  ["arm_right_cm", "Bras droit", "cm"],
-  ["thigh_left_cm", "Cuisse gauche", "cm"],
-  ["thigh_right_cm", "Cuisse droite", "cm"],
-  ["calf_left_cm", "Mollet gauche", "cm"],
-  ["calf_right_cm", "Mollet droit", "cm"],
-] as const;
-export type MeasureKey = (typeof measureFields)[number][0];
+export const measureFields = () =>
+  [
+    ["weight_kg", tr("weight"), "kg"],
+    ["body_fat_pct", tr("body_fat"), "%"],
+    ["neck_cm", tr("neck"), "cm"],
+    ["shoulders_cm", tr("shoulders"), "cm"],
+    ["chest_cm", tr("chest"), "cm"],
+    ["waist_cm", tr("waist"), "cm"],
+    ["hips_cm", tr("hips"), "cm"],
+    ["arm_left_cm", tr("left_arm"), "cm"],
+    ["arm_right_cm", tr("right_arm"), "cm"],
+    ["thigh_left_cm", tr("left_thigh"), "cm"],
+    ["thigh_right_cm", tr("right_thigh"), "cm"],
+    ["calf_left_cm", tr("left_calf"), "cm"],
+    ["calf_right_cm", tr("right_calf"), "cm"],
+  ] as const;
+export type MeasureKey = ReturnType<typeof measureFields>[number][0];
 export type MeasureValues = Partial<Record<MeasureKey, number | null>>;
 export interface Measurement extends MeasureValues {
   id: string;

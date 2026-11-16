@@ -1,0 +1,31 @@
+# Your LifeOS applications
+
+After signing in, **Home** shows the applications enabled for your account. Choose **Open** on a card to use an application.
+
+## Choose applications
+
+1. Open **Library** in navigation or **Manage my applications** from Home.
+2. Use the **Enable / Disable** switch on an application’s card. It also works with Tab and Space.
+3. Return Home to see your saved selection.
+
+The selection belongs to your account. It survives reloads and sign-out and is available on other devices. A network error is shown without pretending that a change was saved.
+
+Disabling an application preserves **all its data**, including archives, dates, preferences and history. It removes the application from Home and blocks its business API routes. A direct link offers to open the library. Enable it again to access the same data. Disabling does not archive or complete tasks, cancel training or reset dates.
+
+When every application is disabled, Home offers to explore the library. Sign-in, appearance, language and the library remain available. An open tab refreshes the application list when it returns to the foreground; a disabled application’s rejected request also offers a return to the library. Changes are not pushed instantly between devices.
+
+## Available applications
+
+**Tasks** is enabled by default, including for existing accounts. It provides [workspaces, an upcoming agenda, lists, boards and recurrence](taches.md).
+
+**Sport** is available and disabled by default. Enable it for [exercises, programs, training, body measurements and statistics](sport.md).
+
+OKRs, household chores and plants are future ideas, not available applications. New applications appear in the library when released and start disabled unless a documented migration requires otherwise.
+
+## Account, language and appearance
+
+All applications share one session and the **system / light / dark** appearance setting. The account menu also contains **Language** and **Sign out**. On mobile, open navigation to reach it. Language and appearance are independent, persistent account preferences.
+
+**English** translates the interface and supplied exercise catalogue. Your personal text stays unchanged, including customizable labels originally created in French. Newly created Tasks workspaces receive initial statuses in the language currently selected. After signing out, the sign-in page returns to the browser’s language; signing back in restores your account preference.
+
+An expired session returns to sign-in and removes private views. HTML pages contain no private records; the API loads them only after authentication and activation checks. All preferences and application activation are also available through the [versioned API](../api.md), documented in French.

@@ -1,3 +1,4 @@
+import { tr } from "../i18n";
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import { Icon } from "./Icon";
 
@@ -56,7 +57,11 @@ export function Dialog({
     >
       <header className="dialog-header">
         <h2 id={titleId}>{title}</h2>
-        <button className="icon-button" aria-label="Fermer" onClick={onClose}>
+        <button
+          className="icon-button"
+          aria-label={tr("close")}
+          onClick={onClose}
+        >
           <Icon name="x" />
         </button>
       </header>

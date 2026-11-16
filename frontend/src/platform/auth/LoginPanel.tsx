@@ -1,4 +1,7 @@
-import { useState, type FormEvent } from "react";
+import { tr } from "../../shared/i18n";
+import { useTranslation } from "react-i18next";
+import { setLanguage, type Locale } from "../i18n";
+import { useEffect, useState, type FormEvent } from "react";
 import { api } from "../api";
 import type { Session } from "./types";
 import { Icon } from "../../shared/ui/Icon";
@@ -11,6 +14,10 @@ export function LoginPanel({
   onLogin: (session: Session) => void;
   initialError?: string;
 }) {
+  const { i18n } = useTranslation();
+  useEffect(() => {
+    document.title = `${tr("sign_in")} · LifeOS`;
+  }, [i18n.language]);
   const [error, setError] = useState(initialError);
   const [busy, setBusy] = useState(false);
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -39,11 +46,29 @@ export function LoginPanel({
         </span>
         LifeOS<span className="brand-period">.</span>
       </a>
+      <label className="theme-select">
+        <span className="sr-only">{tr("language")}</span>
+        <select
+          value={i18n.language}
+          disabled={busy}
+          onChange={(event) => {
+            setError("");
+            setLanguage(event.target.value as Locale);
+          }}
+        >
+          <option value="fr" lang="fr">
+            Français
+          </option>
+          <option value="en" lang="en">
+            English
+          </option>
+        </select>
+      </label>
       <section className="login-card">
-        <h1>Connexion</h1>
+        <h1>{tr("sign_in")}</h1>
         <form onSubmit={submit} className="stack-form">
           <label>
-            Identifiant
+            {tr("username")}
             <input
               name="username"
               autoComplete="username"
@@ -53,7 +78,7 @@ export function LoginPanel({
             />
           </label>
           <label>
-            Mot de passe
+            {tr("password")}
             <input
               name="password"
               type="password"
@@ -64,7 +89,7 @@ export function LoginPanel({
           </label>
           <ErrorMessage message={error} />
           <button className="primary-button" disabled={busy}>
-            {busy ? "Connexion…" : "Se connecter"}
+            {busy ? tr("signing_in") : tr("sign_in_action")}
             <Icon name="arrow" />
           </button>
         </form>

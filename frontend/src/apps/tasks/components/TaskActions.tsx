@@ -1,3 +1,4 @@
+import { tr } from "../i18n";
 import {
   createContext,
   useCallback,
@@ -143,7 +144,7 @@ export function TaskActions({
       await api(`/tasks/${task.id}/duplicate`, "POST", {
         expected_version: task.version,
       });
-      onRefresh("Tâche dupliquée.");
+      onRefresh(tr("task_duplicated"));
     } catch (error) {
       setError((error as Error).message);
     } finally {
@@ -162,7 +163,7 @@ export function TaskActions({
               onRefresh();
             }}
           >
-            Recharger les tâches
+            {tr("reload_tasks")}
           </button>
         )}
         <div className="selection-entry">
@@ -176,7 +177,7 @@ export function TaskActions({
             }}
           >
             <Icon name="select" size={16} />
-            {selecting ? "Quitter la sélection" : "Sélectionner"}
+            {selecting ? tr("exit_selection") : tr("select")}
           </button>
         </div>
         <div
@@ -200,9 +201,7 @@ export function TaskActions({
             const card = (event.target as HTMLElement).closest<HTMLElement>(
               "[data-task-id]",
             );
-            const task = tasks.find(
-              (task) => task.id === card?.dataset.taskId,
-            );
+            const task = tasks.find((task) => task.id === card?.dataset.taskId);
             if (task) {
               event.preventDefault();
               if (performance.now() >= suppressClick.current)
@@ -236,12 +235,11 @@ export function TaskActions({
           <div
             className="task-selection-bar"
             role="region"
-            aria-label="Actions de la sélection"
+            aria-label={tr("selection_actions")}
             data-selection-toolbar
           >
             <span className="selection-count" role="status">
-              {selectedTasks.length} sélectionnée
-              {selectedTasks.length > 1 ? "s" : ""}
+              {tr("selected_count", { count: selectedTasks.length })}
             </span>
             <div className="selection-buttons">
               <button
@@ -255,7 +253,7 @@ export function TaskActions({
                 }
               >
                 <Icon name="calendar" />
-                Replanifier
+                {tr("reschedule")}
               </button>
               <button
                 disabled={
@@ -268,7 +266,7 @@ export function TaskActions({
                 }
               >
                 <Icon name="folder" />
-                Déplacer
+                {tr("move")}
               </button>
               <button
                 className="danger-text"
@@ -282,22 +280,20 @@ export function TaskActions({
                 }
               >
                 <Icon name="trash" />
-                Supprimer
+                {tr("delete")}
               </button>
             </div>
             <button
               className="selection-clear"
               disabled={saving || !!dialog}
               onClick={clear}
-              aria-label="Tout désélectionner"
+              aria-label={tr("deselect_all")}
             >
               <Icon name="x" />
-              <span>Tout désélectionner</span>
+              <span>{tr("deselect_all")}</span>
             </button>
             {selectedTasks.length > 500 && (
-              <p role="alert">
-                Sélectionnez au maximum 500 tâches par opération.
-              </p>
+              <p role="alert">{tr("select_up_to_500_tasks_per_operation")}</p>
             )}
           </div>
         )}

@@ -1,3 +1,4 @@
+import { tr } from "../i18n";
 import { useState, type FormEvent } from "react";
 import { api } from "../../../platform/api";
 import type { Workspace } from "../types";
@@ -34,43 +35,42 @@ export function WorkspaceDialog({
     }
   }
   return (
-    <Dialog title="Créer un espace" onClose={onClose}>
+    <Dialog title={tr("create_a_workspace")} onClose={onClose}>
       <form className="stack-form dialog-body" onSubmit={submit}>
         <p className="muted">
-          Un espace pour vos projets, votre quotidien ou ce qui compte pour
-          vous.
+          {tr("a_workspace_for_your_projects_daily_life_or_whatever_matters")}
         </p>
         <label>
-          Nom de l’espace
+          {tr("workspace_name")}
           <input
             name="name"
             autoFocus
             required
             maxLength={120}
-            placeholder="Personnel, Travail, Un nouveau projet…"
+            placeholder={tr("personal_work_a_new_project")}
           />
         </label>
         <WorkspaceParentSelect workspaces={workspaces} />
         <label>
-          Description
+          {tr("description")}
           <textarea
             name="description"
             rows={3}
             maxLength={20000}
-            placeholder="À quoi cet espace est-il dédié ?"
+            placeholder={tr("what_is_this_workspace_for")}
           />
         </label>
         <label className="color-field">
-          Couleur
+          {tr("color")}
           <input name="color" type="color" defaultValue="#c05a45" />
         </label>
         <ErrorMessage message={error} />
         <div className="dialog-actions">
           <button className="secondary-button" type="button" onClick={onClose}>
-            Annuler
+            {tr("cancel")}
           </button>
           <button className="primary-button" disabled={busy}>
-            {busy ? "Création…" : "Créer l’espace"}
+            {busy ? tr("creating") : tr("create_workspace")}
           </button>
         </div>
       </form>

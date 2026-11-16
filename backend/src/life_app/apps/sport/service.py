@@ -10,21 +10,28 @@ from sqlalchemy import func, select
 
 from life_app.apps.sport import models as m
 from life_app.apps.sport import schemas as s
-from life_app.apps.sport.catalogue import BY_ID, CATALOGUE, searchable
+from life_app.apps.sport.catalogue import (
+    BY_ID,
+    catalogue,
+    default_exercise,
+    localized_snapshot,
+    searchable,
+)
 from life_app.apps.sport.kinds import KINDS, performance, validate_values
+from life_app.apps.sport.messages import tr
 from life_app.core.database import utcnow
 
 
 def owned(db, model, owner, id):
     item = db.scalar(select(model).where(model.id == id, model.owner_id == owner.id))
     if item is None:
-        raise HTTPException(404, "Élément introuvable.")
+        raise HTTPException(404, tr("item_not_found"))
     return item
 
 
 def version(item, expected):
     if item.version != expected:
-        raise HTTPException(409, "Cet élément a changé. Rechargez-le avant de réessayer.")
+        raise HTTPException(409, tr("this_item_has_changed_reload_it_before_trying_again"))
 
 
 def touch(item):
@@ -48,14 +55,14 @@ def exercise_output(item):
 
 def exercise(db, user, id, *, active=True):
     if id in BY_ID:
-        return BY_ID[id]
+        return default_exercise(id)
     try:
         key = UUID(id)
     except ValueError as error:
-        raise HTTPException(404, "Exercice introuvable.") from error
+        raise HTTPException(404, tr("exercise_not_found")) from error
     result = exercise_output(owned(db, m.Exercise, user, key))
     if active and result.archived_at:
-        raise HTTPException(409, "Restaurez cet exercice avant de l’utiliser.")
+        raise HTTPException(409, tr("restore_this_exercise_before_using_it"))
     return result
 
 
@@ -66,14 +73,24 @@ def exercises(db, user, query, kind, muscle, equipment, archived, offset, limit)
             m.Exercise.archived_at.is_not(None) if archived else m.Exercise.archived_at.is_(None),
         )
     ).all()
-    items = ([] if archived else list(CATALOGUE)) + [exercise_output(e) for e in personal]
+    items = ([] if archived else list(catalogue())) + [exercise_output(e) for e in personal]
     tokens = searchable(query).split()
     items = [
         e
         for e in items
         if (not kind or e.kind == kind)
-        and (not muscle or e.muscle_group == muscle)
-        and (not equipment or e.equipment == equipment)
+        and (
+            not muscle
+            or muscle in {e.muscle_id, e.muscle_group}
+            or e.builtin
+            and BY_ID[e.id].muscle_group == muscle
+        )
+        and (
+            not equipment
+            or equipment in {e.equipment_id, e.equipment}
+            or e.builtin
+            and BY_ID[e.id].equipment == equipment
+        )
         and all(
             t in searchable(" ".join([e.name, e.muscle_group, e.equipment, *e.aliases]))
             for t in tokens
@@ -103,10 +120,28 @@ def settings(db, user):
 
 
 def training_output(item):
-    return s.TrainingOutput(
+    output = s.TrainingOutput(
         **{key: getattr(item, key) for key in s.TrainingOutput.model_fields if key != "server_now"},
         server_now=utcnow(),
     )
+    output.entries = [
+        s.TrainingEntry(**localized_snapshot(entry.model_dump())) for entry in output.entries
+    ]
+    output.metrics = [
+        s.Metric(
+            **{**localized_snapshot(entry.model_dump()), "unit": tr(f"kind_{entry.kind}_unit")}
+        )
+        for entry in output.metrics
+    ]
+    return output
+
+
+def workout_output(item):
+    output = s.WorkoutOutput.model_validate(item)
+    output.entries = [
+        s.SnapshotEntry(**localized_snapshot(entry.model_dump())) for entry in output.entries
+    ]
+    return output
 
 
 def entry_keys(entries):
@@ -151,12 +186,14 @@ def start(db, user, payload):
     workout = owned(db, m.Workout, user, payload.workout_id)
     version(workout, payload.expected_version)
     if workout.archived_at:
-        raise HTTPException(409, "Restaurez ce programme avant de démarrer un entraînement.")
+        raise HTTPException(409, tr("restore_this_program_before_starting_a_training_session"))
     active = db.scalar(
         select(m.Training.id).where(m.Training.owner_id == user.id, m.Training.status == "active")
     )
     if active:
-        raise HTTPException(409, "Un entraînement est déjà en cours. Reprenez-le ou abandonnez-le.")
+        raise HTTPException(
+            409, tr("a_training_session_is_already_in_progress_resume_or_cancel_it")
+        )
     # Re-resolve active exercises at start; historical snapshots remain independent afterwards.
     entries = snapshot(
         db,
@@ -191,13 +228,13 @@ def active_session(db, user, id, expected):
     item = owned(db, m.Training, user, id)
     version(item, expected)
     if item.status != "active":
-        raise HTTPException(409, "Cet entraînement est terminé ; son historique est conservé.")
+        raise HTTPException(409, tr("this_training_session_has_ended_its_history_is_preserved"))
     return item
 
 
 def set_position(item, entry, index):
     if not 0 <= entry < len(item.entries) or not 0 <= index < item.entries[entry]["sets"]:
-        raise HTTPException(404, "Série introuvable.")
+        raise HTTPException(404, tr("set_not_found"))
 
 
 def save_set(db, user, id, entry, index, payload):
@@ -258,7 +295,7 @@ def finish(db, user, id, payload):
     item = active_session(db, user, id, payload.expected_version)
     if payload.outcome == "completed":
         if len(item.sets) != sum(e["sets"] for e in item.entries):
-            raise HTTPException(409, "Validez toutes les séries avant de terminer l’entraînement.")
+            raise HTTPException(409, tr("complete_all_sets_before_finishing_the_training_session"))
         item.metrics = metrics(item)
         baseline = db.scalar(
             select(m.Training)
@@ -315,7 +352,9 @@ def check_measurement_day(db, user, day, except_id=None):
     if except_id:
         query = query.where(m.Measurement.id != except_id)
     if db.scalar(query):
-        raise HTTPException(409, "Une mesure existe déjà à cette date. Modifiez-la ou archivez-la.")
+        raise HTTPException(
+            409, tr("a_measurement_already_exists_for_this_date_edit_or_archive_it")
+        )
 
 
 def save_measurement(db, user, payload, item=None):
@@ -323,7 +362,7 @@ def save_measurement(db, user, payload, item=None):
     if item:
         version(item, payload.expected_version)
         if item.archived_at:
-            raise HTTPException(409, "Restaurez cette mesure avant de la modifier.")
+            raise HTTPException(409, tr("restore_this_measurement_before_editing_it"))
         touch(item)
     else:
         item = m.Measurement(owner_id=user.id)
@@ -362,7 +401,7 @@ def history(db, user, offset, limit):
 
 def statistics(db, user, since, until):
     if since > until or (until - since).days > 3660 or until == date.max:
-        raise HTTPException(422, "Choisissez une période ordonnée de dix ans maximum.")
+        raise HTTPException(422, tr("choose_a_date_range_in_chronological_order_up_to_ten_years"))
     trainings = db.scalars(
         select(m.Training)
         .where(

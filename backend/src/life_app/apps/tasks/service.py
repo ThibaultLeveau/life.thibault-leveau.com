@@ -8,6 +8,7 @@ from sqlalchemy import delete, func, or_, select
 
 from life_app.apps.tasks import models as m
 from life_app.apps.tasks import schemas as s
+from life_app.apps.tasks.messages import tr
 from life_app.apps.tasks.recurrence import Recurrence, dates, next_due
 from life_app.core.database import utcnow
 
@@ -17,16 +18,16 @@ def workspace(db, user, workspace_id, *, active=False):
         select(m.Workspace).where(m.Workspace.id == workspace_id, m.Workspace.owner_id == user.id)
     )
     if item is None:
-        raise HTTPException(404, "Espace introuvable.")
+        raise HTTPException(404, tr("workspace_not_found"))
     if active and item.archived_at:
-        raise HTTPException(409, "Restaurez cet espace avant de le modifier.")
+        raise HTTPException(409, tr("restore_this_workspace_before_editing_it"))
     return item
 
 
 def member(db, model, item_id, workspace_id):
     item = db.scalar(select(model).where(model.id == item_id, model.workspace_id == workspace_id))
     if item is None:
-        raise HTTPException(404, "Élément introuvable dans cet espace.")
+        raise HTTPException(404, tr("item_not_found_in_this_workspace"))
     return item
 
 
@@ -37,7 +38,7 @@ def task(db, user, task_id):
         .where(m.Task.id == task_id, m.Workspace.owner_id == user.id)
     )
     if item is None:
-        raise HTTPException(404, "Tâche introuvable.")
+        raise HTTPException(404, tr("task_not_found"))
     return item
 
 
@@ -47,7 +48,7 @@ def next_position(db, model, condition):
 
 def reorder(db, items, ids):
     if len(set(ids)) != len(ids) or set(ids) != {item.id for item in items}:
-        raise HTTPException(409, "L'ordre doit contenir chaque élément exactement une fois.")
+        raise HTTPException(409, tr("the_order_must_contain_each_item_exactly_once"))
     by_id = {item.id: item for item in items}
     for position, item_id in enumerate(ids):
         by_id[item_id].position = position
@@ -74,9 +75,9 @@ def create_workspace(db, user, payload):
     db.flush()
     for position, (name, color, complete) in enumerate(
         [
-            ("À faire", "#8b929c", False),
-            ("En cours", "#c79238", False),
-            ("Terminé", "#4d9470", True),
+            (tr("status_todo"), "#8b929c", False),
+            (tr("status_progress"), "#c79238", False),
+            (tr("status_done"), "#4d9470", True),
         ]
     ):
         db.add(
@@ -103,7 +104,7 @@ def patch_workspace(db, user, item, payload):
         visited = {item.id}
         while parent is not None:
             if parent.id in visited:
-                raise HTTPException(409, "Un espace ne peut pas être son propre ancêtre.")
+                raise HTTPException(409, tr("a_workspace_cannot_be_its_own_ancestor"))
             visited.add(parent.id)
             parent = workspace(db, user, parent.parent_id) if parent.parent_id else None
     if payload.archived is True and db.scalar(
@@ -111,7 +112,7 @@ def patch_workspace(db, user, item, payload):
         .where(m.Workspace.parent_id == item.id, m.Workspace.archived_at.is_(None))
         .limit(1)
     ):
-        raise HTTPException(409, "Archivez ou déplacez d’abord les sous-espaces actifs.")
+        raise HTTPException(409, tr("archive_or_move_the_active_subspaces_first"))
     patch_entity(item, payload)
 
 
@@ -123,15 +124,13 @@ def ensure_status_groups(db, workspace_id, excluded_id=None, changed=None):
         if item.id != excluded_id or changed is not None
     }
     if groups != {True, False}:
-        raise HTTPException(409, "Conservez au moins un statut ouvert et un statut terminé.")
+        raise HTTPException(409, tr("keep_at_least_one_open_status_and_one_completed_status"))
 
 
 def patch_status(db, item, payload):
     if payload.is_completed is not None and payload.is_completed != item.is_completed:
         if db.scalar(select(m.Task.id).where(m.Task.status_id == item.id).limit(1)):
-            raise HTTPException(
-                409, "Ce statut est utilisé. Créez un statut et déplacez les tâches."
-            )
+            raise HTTPException(409, tr("this_status_is_in_use_create_a_status_and_move_the_tasks"))
         ensure_status_groups(db, item.workspace_id, item.id, payload.is_completed)
     patch_entity(item, payload)
 
@@ -143,9 +142,9 @@ def remove_status(db, item, replacement_id):
     if replacement_id:
         replacement = member(db, m.Status, replacement_id, item.workspace_id)
         if replacement.id == item.id or replacement.is_completed != item.is_completed:
-            raise HTTPException(409, "Choisissez un autre statut du même type ouvert/terminé.")
+            raise HTTPException(409, tr("choose_another_status_of_the_same_open_or_completed_type"))
     if tasks and replacement is None:
-        raise HTTPException(409, "Un statut de remplacement est nécessaire.")
+        raise HTTPException(409, tr("a_replacement_status_is_required"))
     for current in tasks:
         previous = context(db, current)
         current.status_id = replacement.id
@@ -163,18 +162,18 @@ def validate_destination(db, user, workspace_id, section_id, status_id):
     if section_id:
         section = member(db, m.Section, section_id, workspace_id)
         if section.archived_at:
-            raise HTTPException(409, "Restaurez la section de destination.")
+            raise HTTPException(409, tr("restore_the_destination_section"))
     return member(db, m.Status, status_id, workspace_id)
 
 
 def validate_labels(db, workspace_id, label_ids):
     if len(label_ids) != len(set(label_ids)):
-        raise HTTPException(422, "Une étiquette ne peut être répétée.")
+        raise HTTPException(422, tr("a_label_cannot_be_repeated"))
     labels = db.scalars(
         select(m.Label).where(m.Label.workspace_id == workspace_id, m.Label.id.in_(label_ids))
     ).all()
     if len(labels) != len(label_ids):
-        raise HTTPException(404, "Étiquette introuvable dans cet espace.")
+        raise HTTPException(404, tr("label_not_found_in_this_workspace"))
     return labels
 
 
@@ -256,15 +255,15 @@ def touch(item):
 
 def check_version(item, expected_version):
     if item.version != expected_version:
-        raise HTTPException(409, "Cette tâche a changé. Rechargez-la avant de réessayer.")
+        raise HTTPException(409, tr("this_task_has_changed_reload_it_before_trying_again"))
 
 
 def check_active(db, user, item, *, restoring=False):
     workspace(db, user, item.workspace_id, active=True)
     if item.section_id and db.get(m.Section, item.section_id).archived_at:
-        raise HTTPException(409, "Restaurez la section avant de modifier cette tâche.")
+        raise HTTPException(409, tr("restore_the_section_before_editing_this_task"))
     if item.archived_at and not restoring:
-        raise HTTPException(409, "Restaurez la tâche avant de la modifier.")
+        raise HTTPException(409, tr("restore_the_task_before_editing_it"))
 
 
 def transition(db, item, target, previous):
@@ -307,18 +306,18 @@ def apply_schedule(item, values, *, copying=False):
         due = values.get("due_date", item.due_date)
         if due is None and "due_date" in values:
             raise HTTPException(
-                422, "Une tâche récurrente exige une échéance. Retirez aussi sa récurrence."
+                422, tr("a_recurring_task_requires_a_due_date_remove_its_recurrence_too")
             )
         if changed:
             upcoming = dates(rule, rule.start_date, inclusive=True, limit=1)
             if not upcoming:
                 raise HTTPException(
-                    422, "Cette règle ne produit aucune date. Vérifiez jours, exclusions et fin."
+                    422, tr("this_rule_produces_no_dates_check_the_days_exclusions_and_end_date")
                 )
             if "due_date" not in values:
                 due = upcoming[0]
         if due is None:
-            raise HTTPException(422, "Une tâche récurrente exige une échéance.")
+            raise HTTPException(422, tr("a_recurring_task_requires_a_due_date"))
         # Completion-based intervals can move before the original starting date
         # when the first (future-dated) occurrence is finished early.
         lower_bound = (
@@ -332,10 +331,10 @@ def apply_schedule(item, values, *, copying=False):
         )
         if due < lower_bound or (rule.end_date and due > rule.end_date):
             raise HTTPException(
-                422, "L’échéance doit être comprise entre le début et la fin de la récurrence."
+                422, tr("the_due_date_must_fall_between_the_recurrence_start_and_end_dates")
             )
         if due in rule.excluded_dates:
-            raise HTTPException(422, "Cette échéance est une date exclue de la récurrence.")
+            raise HTTPException(422, tr("this_due_date_is_excluded_from_the_recurrence"))
         values["due_date"] = due
     if rule_data != item.recurrence:
         item.recurrence_completed = 0
@@ -358,7 +357,7 @@ def create_task(db, user, payload, *, copying=False):
     target = validate_destination(db, user, payload.workspace_id, payload.section_id, status_id)
     if payload.recurrence and target.is_completed:
         raise HTTPException(
-            422, "Créez la série dans un statut ouvert avant de terminer sa première occurrence."
+            422, tr("create_the_recurring_task_with_an_open_status_before_completing_its_first")
         )
     validate_labels(db, payload.workspace_id, payload.label_ids)
     values = payload.model_dump(exclude={"label_ids", "status_id", "recurrence"})
@@ -432,7 +431,7 @@ def complete_task(db, user, item, payload, completed):
         .limit(1)
     )
     if target is None:
-        raise HTTPException(409, "Aucun statut compatible.")
+        raise HTTPException(409, tr("no_compatible_status"))
     touch(item)
     transition(db, item, target, previous)
     return item
@@ -457,12 +456,12 @@ def undo_complete(db, user, item, payload):
         or before["workspace_id"] != str(item.workspace_id)
     ):
         raise HTTPException(
-            409, "La tâche a changé depuis sa résolution ; cette annulation n’est plus disponible."
+            409, tr("the_task_has_changed_since_completion_undo_is_no_longer_available")
         )
     previous = context(db, item)
     destination = member(db, m.Status, UUID(before["status_id"]), item.workspace_id)
     if destination.is_completed:
-        raise HTTPException(409, "Le statut précédent ne permet plus cette annulation.")
+        raise HTTPException(409, tr("the_previous_status_no_longer_allows_this_undo_operation"))
     item.status_id = destination.id
     item.completed_at = None
     item.due_date = date.fromisoformat(before["due_date"]) if before["due_date"] else None
@@ -479,14 +478,14 @@ def move_task(db, user, item, payload):
         db, user, payload.workspace_id, payload.section_id, payload.status_id
     )
     if payload.before_id == item.id:
-        raise HTTPException(422, "Une tâche ne peut pas être placée avant elle-même.")
+        raise HTTPException(422, tr("a_task_cannot_be_placed_before_itself"))
     before = task(db, user, payload.before_id) if payload.before_id else None
     if before and (
         before.workspace_id != payload.workspace_id
         or before.section_id != payload.section_id
         or before.archived_at
     ):
-        raise HTTPException(409, "La position cible doit appartenir à la section de destination.")
+        raise HTTPException(409, tr("the_target_position_must_belong_to_the_destination_section"))
     previous = context(db, item)
     if item.workspace_id != payload.workspace_id:
         old_labels = db.scalars(
@@ -581,7 +580,9 @@ def bulk_tasks(db, user, payload):
                     .limit(1)
                 )
                 if status_id is None:
-                    raise HTTPException(409, "Aucun statut compatible dans l’espace cible.")
+                    raise HTTPException(
+                        409, tr("no_compatible_status_in_the_destination_workspace")
+                    )
             move_task(
                 db,
                 user,
@@ -706,9 +707,7 @@ def agenda_tasks(db, user, today, offset, limit):
         start = today + timedelta(days=1 if settings.period == "tomorrow" else 0)
         end = start + timedelta(days=days - 1 if settings.period in {"week", "custom"} else 0)
     except OverflowError as error:
-        raise HTTPException(
-            422, "La période dépasse les dates calendaires prises en charge."
-        ) from error
+        raise HTTPException(422, tr("the_period_exceeds_the_supported_calendar_dates")) from error
     page = list_tasks(
         db,
         user,

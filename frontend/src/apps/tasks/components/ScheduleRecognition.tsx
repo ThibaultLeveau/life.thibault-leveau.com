@@ -1,3 +1,5 @@
+import { formatLocale } from "../../../shared/i18n";
+import { tr } from "../i18n";
 import { relativeDate } from "../dates";
 import type { useScheduleRecognition } from "../scheduling";
 import { localDate } from "../types";
@@ -27,19 +29,29 @@ export function ScheduleRecognition({
                   ? suggestion.label
                   : relativeDate(suggestion.due_date!, localDate()).label}
                 {suggestion.recurrence &&
-                  ` · dès le ${new Date(`${suggestion.due_date}T12:00:00`).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}`}
+                  tr("starting_date", {
+                    date: new Date(
+                      `${suggestion.due_date}T12:00:00`,
+                    ).toLocaleDateString(formatLocale(), {
+                      day: "numeric",
+                      month: "short",
+                    }),
+                  })}
               </span>
               {suggestion.recurrence && (
                 <span
                   className="detected-dates"
-                  aria-label="Prochaines dates prévues"
+                  aria-label={tr("next_scheduled_dates")}
                 >
                   {suggestion.dates.slice(0, 3).map((day) => (
                     <time key={day} dateTime={day}>
-                      {new Date(`${day}T12:00:00`).toLocaleDateString("fr-FR", {
-                        day: "numeric",
-                        month: "short",
-                      })}
+                      {new Date(`${day}T12:00:00`).toLocaleDateString(
+                        formatLocale(),
+                        {
+                          day: "numeric",
+                          month: "short",
+                        },
+                      )}
                     </time>
                   ))}
                 </span>
@@ -48,8 +60,8 @@ export function ScheduleRecognition({
             <button
               type="button"
               className="icon-button"
-              aria-label="Garder ces mots dans le titre"
-              title="Garder ces mots dans le titre"
+              aria-label={tr("keep_these_words_in_the_title")}
+              title={tr("keep_these_words_in_the_title")}
               onClick={() => dismiss()}
             >
               <Icon name="x" size={14} />
@@ -59,21 +71,21 @@ export function ScheduleRecognition({
         {!suggestion && (
           <span className="schedule-hint">
             {error
-              ? "Analyse indisponible. Réessayez ou gardez le texte."
+              ? tr("parsing_unavailable_try_again_or_keep_the_text")
               : diagnostic
                 ? diagnostic
                 : pending
-                  ? "Lecture de la date…"
+                  ? tr("reading_date")
                   : ignored
-                    ? "Ces mots resteront dans le titre."
-                    : "Essayez « demain » ou « tous les lundis »."}
+                    ? tr("these_words_will_stay_in_the_title")
+                    : tr("try_tomorrow_or_every_monday")}
             {(ignored || error || diagnostic) && (
               <button
                 type="button"
                 className="text-button"
                 onClick={() => (ignored ? restore() : dismiss())}
               >
-                {ignored ? "Reconnaître la date" : "Garder le texte"}
+                {ignored ? tr("recognize_date") : tr("keep_text")}
               </button>
             )}
           </span>

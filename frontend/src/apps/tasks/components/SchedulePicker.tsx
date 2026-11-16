@@ -1,3 +1,5 @@
+import { formatLocale } from "../../../shared/i18n";
+import { tr } from "../i18n";
 import { useEffect, useId, useRef, useState } from "react";
 import { api } from "../../../platform/api";
 import { relativeDate, useLocalToday } from "../dates";
@@ -107,7 +109,7 @@ export function SchedulePicker({
       if (!result.matched_text || result.title) {
         setError(
           result.diagnostic ||
-            "Date non reconnue. Essayez « demain », « 25/12/2026 » ou « tous les mercredis toutes les trois semaines ».",
+            tr("date_not_recognized_try_tomorrow_25_12_2026_or_every"),
         );
         return;
       }
@@ -124,7 +126,7 @@ export function SchedulePicker({
   }
   return (
     <div className="schedule-picker">
-      <span className="schedule-label">Échéance et récurrence</span>
+      <span className="schedule-label">{tr("due_date_and_recurrence")}</span>
       <button
         ref={trigger}
         type="button"
@@ -148,7 +150,7 @@ export function SchedulePicker({
         <span>
           {value.due_date
             ? relativeDate(value.due_date, today).label
-            : "Choisir une date"}
+            : tr("choose_a_date")}
           {value.recurrence && (
             <small>{shortRecurrence(value.recurrence)}</small>
           )}
@@ -170,12 +172,12 @@ export function SchedulePicker({
           <div
             className="schedule-tabs"
             role="tablist"
-            aria-label="Planification"
+            aria-label={tr("scheduling")}
           >
             {(
               [
-                ["date", "Date", "calendar"],
-                ["repeat", "Répéter", "repeat"],
+                ["date", tr("date"), "calendar"],
+                ["repeat", tr("repeat"), "repeat"],
               ] as const
             ).map(([name, label, icon]) => (
               <button
@@ -208,12 +210,12 @@ export function SchedulePicker({
           >
             <div className="schedule-natural">
               <label>
-                Date ou récurrence
+                {tr("date_or_recurrence")}
                 <input
                   value={text}
                   disabled={busy}
                   onChange={(e) => setText(e.target.value)}
-                  placeholder="Demain, 25/12/2026, tous les lundis…"
+                  placeholder={tr("tomorrow_25_12_2026_every_monday")}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       e.preventDefault();
@@ -225,7 +227,7 @@ export function SchedulePicker({
               <button
                 type="button"
                 className="icon-button"
-                aria-label="Interpréter la date"
+                aria-label={tr("interpret_date")}
                 onClick={interpret}
                 disabled={busy || !text.trim()}
               >
@@ -244,13 +246,13 @@ export function SchedulePicker({
               <>
                 <div className="date-shortcuts">
                   <button type="button" onClick={() => choose(today)}>
-                    Aujourd’hui
+                    {tr("today")}
                   </button>
                   <button
                     type="button"
                     onClick={() => choose(plusDays(today, 1))}
                   >
-                    Demain
+                    {tr("tomorrow")}
                   </button>
                   <button
                     type="button"
@@ -259,7 +261,7 @@ export function SchedulePicker({
                       choose(plusDays(today, (8 - weekday) % 7 || 7));
                     }}
                   >
-                    Lundi prochain
+                    {tr("next_monday")}
                   </button>
                 </div>
                 <Calendar
@@ -270,8 +272,9 @@ export function SchedulePicker({
                 />
                 {value.recurrence && (
                   <p className="field-help">
-                    Changer la date reporte seulement l’occurrence en cours. Le
-                    calendrier de répétition est conservé.
+                    {tr(
+                      "changing_the_date_postpones_only_the_current_occurrence_the_repeat",
+                    )}
                   </p>
                 )}
                 <button
@@ -280,7 +283,7 @@ export function SchedulePicker({
                   onClick={() => choose(null)}
                 >
                   <Icon name="x" size={14} />
-                  Sans échéance ni récurrence
+                  {tr("no_due_date_or_recurrence")}
                 </button>
               </>
             ) : (
@@ -291,7 +294,7 @@ export function SchedulePicker({
                   aria-live="polite"
                   aria-atomic="true"
                 >
-                  <strong>Prochaines occurrences</strong>
+                  <strong>{tr("next_occurrences")}</strong>
                   {current ? (
                     <>
                       <p>{current.label}</p>
@@ -300,7 +303,7 @@ export function SchedulePicker({
                           <li key={day}>
                             <time dateTime={day}>
                               {new Date(`${day}T12:00:00`).toLocaleDateString(
-                                "fr-FR",
+                                formatLocale(),
                                 {
                                   weekday: "short",
                                   day: "numeric",
@@ -315,7 +318,7 @@ export function SchedulePicker({
                       <small>{current.explanation}</small>
                     </>
                   ) : (
-                    <p>{previewError || "Vérification du calendrier…"}</p>
+                    <p>{previewError || tr("checking_schedule")}</p>
                   )}
                 </div>
                 <div className="schedule-panel-actions">
@@ -328,7 +331,7 @@ export function SchedulePicker({
                         close();
                       }}
                     >
-                      Ne plus répéter
+                      {tr("stop_repeating")}
                     </button>
                   )}
                   <button
@@ -345,7 +348,7 @@ export function SchedulePicker({
                       close();
                     }}
                   >
-                    Appliquer la récurrence
+                    {tr("apply_recurrence")}
                   </button>
                 </div>
               </>

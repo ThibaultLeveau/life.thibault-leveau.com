@@ -121,3 +121,9 @@ Les compteurs et graphiques excluent les abandons et les relevés archivés. Les
 Résoudre l’identifiant de l’exercice par `GET /exercises?q=course%20sur%20tapis` avant d’envoyer cet exemple. Pour modifier, envoyer le même corps avec `expected_version` ; pour effacer la date, remplacer `competition_date` par `null`. Les protections session, activation, propriétaire, CSRF et conflit **409** restent celles des programmes.
 
 Les réponses des programmes et des séances (actives, historique, statistiques) exposent `competition_date`. Le serveur copie la date au démarrage, sans modifier les séances précédentes. Une ancienne séance renvoie `null`. La date reste indépendante du titre en stockage ; le client affiche l’habillage seulement si le titre contient `hyrox` sans distinction de casse. Le compte à rebours se calcule dans le fuseau local du client à partir de cette date, sans stockage supplémentaire ni nouveau paramètre de session. Un client API peut donc gérer entièrement la même fonctionnalité.
+
+## Catalogue bilingue
+
+`builtin: true` identifie un exercice par défaut ; `false` un exercice personnel. Les réponses exposent aussi `muscle_id` et `equipment_id` (codes stables pour les exercices fournis, `null` pour les personnels), distincts de `muscle_group` et `equipment` destinés à l’affichage. Ces champs de réponse ne s’envoient pas lors d’une création personnelle.
+
+La langue du compte localise les noms, notes, alias, facettes et `/kinds`, ainsi que les noms des exercices fournis dans programmes, entraînements, métriques et statistiques. `q` cherche dans les libellés de cette langue ; les filtres `muscle`/`equipment` acceptent les codes stables, les libellés courants et les anciens libellés français. Les textes personnels, résultats, dates, versions, signatures et scores restent inchangés. Les instantanés ne sont pas réécrits à la lecture. Voir [langue de compte et exemples HTTP](internationalisation.md#api-independante-de-linterface).

@@ -9,8 +9,8 @@ Toutes les fonctions métier de l'interface passent par `/api/v1`. Les schémas 
 | `POST /auth/session` | `{username,password}` → session 200 + cookie `life_session` |
 | `GET /auth/session` | Session actuelle, expiration, thème et `csrf_token` |
 | `DELETE /auth/session` | Révocation et suppression du cookie, 204 |
-| `GET /preferences` | `{theme}` |
-| `PUT /preferences` | `{theme: "system" | "light" | "dark"}` → préférences |
+| `GET /preferences` | `{theme, locale}` |
+| `PUT /preferences` | `{theme?: "system" | "light" | "dark", locale?: "fr" | "en"}` → préférences ; champs omis conservés |
 
 Le cookie est HttpOnly, SameSite=Lax et Secure en production. Le mot de passe n'est jamais renvoyé. L'identifiant est normalisé en minuscules par `casefold` et sans espaces extérieurs ; le mot de passe reste exact. Une session expire après `LIFE_SESSION_HOURS` (168 heures par défaut), sans prolongation automatique.
 
@@ -25,7 +25,7 @@ Swagger montre les contrats, mais le navigateur ne peut pas définir lui-même u
 | `GET /applications` | Liste ordonnée des applications disponibles et de l’état du compte connecté |
 | `PUT /applications/{id}` | `{ "enabled": true }` ou `{ "enabled": false }` → application enregistrée, 200 |
 
-Une entrée contient `id`, `name`, `description`, `path`, `icon`, `enabled` et `updated_at` (instant UTC ou `null` avant le premier réglage explicite). Seule Tâches (`tasks`, `/tasks`) est actuellement disponible. La liste provient du registre livré, sans applications futures factices. Aucune préférence absente n’est créée par GET : le défaut de Tâches est `true`, celui des futures applications est `false`.
+Une entrée contient `id`, `name`, `description`, `path`, `icon`, `enabled` et `updated_at` (instant UTC ou `null` avant le premier réglage explicite). Tâches (`tasks`, `/tasks`) et Sport (`sport`, `/sport`) sont disponibles ; `name` et `description` suivent la langue du compte. La liste provient du registre livré, sans applications futures factices. Aucune préférence absente n’est créée par GET : le défaut de Tâches est `true`, celui de Sport et des futures applications est `false`.
 
 PUT exige un booléen JSON strict (pas une chaîne, un nombre ou `null`), refuse les champs inconnus et ne permet pas de choisir le propriétaire (422). Identifiant non enregistré : 404 ; session absente/expirée : 401 ; origine ou CSRF invalide : 403. L’écriture utilise le verrou utilisateur commun. Répéter le même PUT ne change ni état ni `updated_at` après le premier enregistrement. Deux écritures concurrentes sont sérialisées ; la dernière validée devient l’état courant, sans création de doublon.
 
@@ -208,7 +208,7 @@ Ces routes utilisent la même session, le même jeton CSRF et le même contrôle
 | `POST /api/v1/scheduling/preview` | `recurrence`, `after` inclusif facultatif, `limit` 1–12 (6 par défaut), `completed` 0–10000 | `label`, `dates`, `explanation` |
 | `POST /api/v1/tasks/{id}/undo-complete` | `expected_version` | Tâche restaurée avant sa dernière résolution |
 
-L’analyse retourne `status` (`none`, `recognized`, `incomplete`, `invalid`) et `diagnostic` (explication française nullable). `recognized` expose la règle/date et son aperçu. `none` conserve un texte littéral. `incomplete` et `invalid` conservent également le titre intact, avec `matched_text:null`, `recurrence:null`, `due_date:null`, `dates:[]` : aucune composition partielle n’est appliquée. Ces diagnostics d’interprétation sont des réponses HTTP 200 ; le client doit proposer une correction ou le choix explicite de garder le texte. Une entrée hors contrat (plus de 1000 caractères, date de référence ou fuseau invalides), une règle explicite invalide, un aperçu vide ou une échéance récurrente absente donnent 422. Sans session : 401 ; sans CSRF/origine valide : 403. Les tâches d’un autre propriétaire restent 404.
+L’analyse retourne `status` (`none`, `recognized`, `incomplete`, `invalid`) et `diagnostic` (explication localisée nullable). `recognized` expose la règle/date et son aperçu. `none` conserve un texte littéral. `incomplete` et `invalid` conservent également le titre intact, avec `matched_text:null`, `recurrence:null`, `due_date:null`, `dates:[]` : aucune composition partielle n’est appliquée. Ces diagnostics d’interprétation sont des réponses HTTP 200 ; le client doit proposer une correction ou le choix explicite de garder le texte. Une entrée hors contrat (plus de 1000 caractères, date de référence ou fuseau invalides), une règle explicite invalide, un aperçu vide ou une échéance récurrente absente donnent 422. Sans session : 401 ; sans CSRF/origine valide : 403. Les tâches d’un autre propriétaire restent 404.
 
 Une date seule peut laisser un titre vide : le client doit demander un titre avant de créer la tâche. Les indices sont des points de code Unicode Python, pas des unités UTF-16 JavaScript. Les guillemets et le texte non reconnu restent littéraux. Les [raccourcis composables](taches.md#composer-les-raccourcis-francais) utilisent les mêmes contraintes et le même moteur que l’aperçu : nombres en lettres, cadence, sélections de jours/mois/positions, bornes et exclusions dans différents ordres. Pour un intervalle associé à une sélection calendaire, l’analyse aligne l’ancre sur la première date compatible avant d’appliquer les exclusions. Cela concerne la création par analyse ; les règles stockées et les RRULE envoyées directement restent inchangées.
 
@@ -364,3 +364,9 @@ response.raise_for_status()
 ## Sport
 
 L’application Sport expose exercices, programmes, entraînements/séries/repos, réglages, mensurations et statistiques sous `/api/v1/sport`. Voir les [routes, contrats et exemple client complet](sport-api.md). Le garde d’activation commun couvre tout le routeur, et les objets privés sont isolés par propriétaire.
+
+## Langue des réponses
+
+La session expose également `locale`. La préférence de compte prévaut sur `Accept-Language` ; sans compte authentifié, cet en-tête négocie `fr/en`, avec repli français. Les réponses privées annoncent `Content-Language`, `Vary: Accept-Language, Cookie` et `Cache-Control: no-store`. Les codes et identifiants restent indépendants de la langue.
+
+Une erreur HTTP expose `{detail, code}` ; la validation de structure 422 expose `detail: [{loc, type, code, msg}]`, sans valeur d’entrée. Les détails sont traduits, les codes stables. `/scheduling/parse` reconnaît le vocabulaire de la langue du compte, par exemple `Read every Monday and Thursday for three times`, avec les mêmes RRULE, règles de validation, protections et indices Unicode. Les dates numériques restent jour/mois/année ; ISO est accepté. Voir [exemples et contrats de langue](internationalisation.md#api-independante-de-linterface).

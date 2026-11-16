@@ -191,3 +191,9 @@ Sur un compte de recette isolé, saisir deux séries de charges/répétitions di
 Publier avec la sauvegarde habituelle puis la migration additive `0007_hyrox`. Aucun service ou secret supplémentaire ; consulter les [contraintes de retour arrière](sauvegardes.md#migration-0007-hyrox). Les programmes et séances existants reçoivent une date nulle, sans réécriture des données.
 
 Sur le compte de recette isolé, créer un programme contenant « Hyrox », choisir la date, ajouter un exercice, enregistrer et démarrer une séance. Vérifier logo et compteur dans la liste, l’éditeur/catalogue et la séance, les champs en mobile et thèmes clair/sombre, la persistance après rechargement et l’indépendance de la date de séance après modification du programme. Vérifier le SHA de l’image exécutée, les sondes et les routes HTTPS Sport, OpenAPI et documentation ; consigner sauvegarde, révision et résultats dans l’issue.
+
+## Livraison français/anglais
+
+Publier le `main` validé avec la procédure habituelle : sauvegarde, migration additive `0008_locale`, nouvelle image et vérification du SHA réellement exécuté. Aucune nouvelle variable, secret, base ou service. Les comptes existants restent en français et leurs contenus ne sont pas transformés. Le downgrade refuse la perte des préférences anglaises ; voir [sauvegarde et compatibilité](sauvegardes.md#migration-0008-langue-du-compte).
+
+Sur le compte synthétique isolé, vérifier le sélecteur Langue/Language, sa persistance et l’indépendance du thème, Tâches et Sport, les noms fournis traduits et les noms personnels conservés. Contrôler aussi `/documentation/en/`, `/documentation/en/taches/` et `/documentation/en/sport/`, ainsi que les sondes et routes publiques habituelles. Consigner résultats et SHA dans l’issue.

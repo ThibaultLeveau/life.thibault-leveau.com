@@ -9,6 +9,7 @@ export default defineConfig({
   retries: 0,
   reporter: "list",
   use: {
+    locale: "fr-FR",
     baseURL: process.env.LIFE_E2E_URL ?? "http://127.0.0.1:18106",
     viewport: { width: 1440, height: 1000 },
     trace: "retain-on-failure",

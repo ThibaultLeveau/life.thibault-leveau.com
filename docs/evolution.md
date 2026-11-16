@@ -27,7 +27,7 @@ frontend/src/apps/<id>/
 └── styles.css
 ```
 
-1. Choisir un identifiant immuable : lettre minuscule suivie de lettres/chiffres/underscores, 50 caractères maximum. Garder les libellés français dans le manifeste backend. Réserver un chemin HTML unique (hors `/`, `/applications`, `/api`, `/documentation`, `/assets`).
+1. Choisir un identifiant immuable : lettre minuscule suivie de lettres/chiffres/underscores, 50 caractères maximum. Fournir les noms/descriptions français et anglais dans le manifeste backend, selon l’[ADR 004](decisions/004-internationalisation.md). Réserver un chemin HTML unique (hors `/`, `/applications`, `/api`, `/documentation`, `/assets`).
 2. Définir les contrats Pydantic, contrôles de propriétaire et services transactionnels. Les schémas refusent les champs inconnus ; le propriétaire vient de `CurrentUser`. Les routeurs committent les mutations après validation. Réutiliser `core.database.Database` et les sessions existantes ; aucune couche générique de dépôt.
 3. Définir les tables propres au métier et une migration dans la chaîne globale `migrations/versions/` si nécessaire. Le manifeste importe le routeur, qui charge les modèles de l’application. L’import du registre lors des migrations doit charger toutes les métadonnées ORM. Ne pas modifier une ancienne migration.
 4. Fournir `manifest.py` avec une `ApplicationDefinition` et l’importer dans `apps/registry.py`. L’ordre du tuple définit celui du catalogue. Le défaut est désactivé ; toute exception demande une justification de migration. L’assemblage API monte le routeur et lui applique automatiquement le contrôle d’activation. Les nouvelles routes métier utilisent un préfixe propre à l’application pour éviter les collisions ; Tâches garde ses URL historiques.
@@ -67,3 +67,7 @@ La bibliothèque conserve uniquement les activations personnelles. Désactiver n
 Créer une nouvelle migration pour chaque changement du schéma livré. Tester contraintes, aller/retour, compatibilité avec l’image précédente et restauration sur données synthétiques. La migration reste une commande explicite de publication. Une image précédente n’annule jamais le schéma.
 
 Pour Tâches, préserver les événements `completed`, `reopened`, `rescheduled` et `completion_undone`, leurs instants UTC et contexte historique. Les futures statistiques doivent distinguer résolutions, tâches distinctes et délais par cycle ; l’archivage et la désactivation ne sont pas des résolutions. Voir [les invariants](donnees.md).
+
+## Traductions livrées avec les fonctionnalités
+
+Chaque application fournit ses catalogues FR/EN dans son propre dossier, avec des clés sémantiques et des phrases complètes. Réutiliser le moteur commun, les pluriels i18next et les formats de langue ; ne jamais traduire les textes personnels. Ajouter les erreurs serveur et exemples de planification dans les deux langues et étendre les tests de parité. Voir [Internationalisation](internationalisation.md#organisation-des-traductions).

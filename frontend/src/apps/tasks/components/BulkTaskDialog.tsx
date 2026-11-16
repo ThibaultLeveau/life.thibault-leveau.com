@@ -1,3 +1,4 @@
+import { tr } from "../i18n";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { api, ApiError } from "../../../platform/api";
 import { relativeDate } from "../dates";
@@ -37,11 +38,10 @@ export function BulkTaskDialog({
   const calendar = useRef<HTMLFieldSetElement>(null);
   const verb =
     action === "archive"
-      ? "Supprimer"
+      ? tr("delete")
       : action === "move"
-        ? "Déplacer"
-        : "Replanifier";
-  const count = `${tasks.length} tâche${tasks.length > 1 ? "s" : ""}`;
+        ? tr("move")
+        : tr("reschedule");
   useEffect(() => {
     if (action !== "move") return;
     const controller = new AbortController();
@@ -81,9 +81,7 @@ export function BulkTaskDialog({
           ? { workspace_id: spaceId, section_id: sectionId || null }
           : {}),
       });
-      onSaved(
-        `${count} ${action === "archive" ? "supprimée" : action === "move" ? "déplacée" : "replanifiée"}${tasks.length > 1 ? "s" : ""}.`,
-      );
+      onSaved(tr(`bulk_${action}`, { count: tasks.length }));
     } catch (error) {
       setError((error as Error).message);
       setConflict(
@@ -95,21 +93,14 @@ export function BulkTaskDialog({
   }
   return (
     <Dialog
-      title={`${verb} ${count}`}
+      title={tr(`bulk_title_${action}`, { count: tasks.length })}
       onClose={() => {
         if (!busy) onClose();
       }}
     >
-      <form
-        className="dialog-body stack-form bulk-task-form"
-        onSubmit={submit}
-      >
+      <form className="dialog-body stack-form bulk-task-form" onSubmit={submit}>
         {action === "archive" && (
-          <p>
-            Ces tâches seront retirées de vos listes. Vous pourrez les
-            restaurer depuis les archives de leur espace ; leur historique
-            sera conservé.
-          </p>
+          <p>{tr("these_tasks_will_be_removed_from_your_lists_you_can")}</p>
         )}
         {action === "reschedule" && (
           <>
@@ -120,7 +111,7 @@ export function BulkTaskDialog({
                 disabled={busy}
                 onClick={() => setDate(today)}
               >
-                Aujourd’hui
+                {tr("today")}
               </button>
               <button
                 type="button"
@@ -128,7 +119,7 @@ export function BulkTaskDialog({
                 disabled={busy}
                 onClick={() => setDate(plusDays(today, 1))}
               >
-                Demain
+                {tr("tomorrow")}
               </button>
               <button
                 type="button"
@@ -136,15 +127,11 @@ export function BulkTaskDialog({
                 disabled={busy || tasks.some((task) => !!task.recurrence)}
                 onClick={() => setDate(null)}
               >
-                Sans date
+                {tr("no_date")}
               </button>
             </div>
-            <fieldset
-              ref={calendar}
-              disabled={busy}
-              className="bulk-calendar"
-            >
-              <legend className="sr-only">Nouvelle échéance</legend>
+            <fieldset ref={calendar} disabled={busy} className="bulk-calendar">
+              <legend className="sr-only">{tr("new_due_date")}</legend>
               <Calendar
                 key={date?.slice(0, 7) ?? today.slice(0, 7)}
                 value={date}
@@ -162,12 +149,15 @@ export function BulkTaskDialog({
               />
             </fieldset>
             <p role="status">
-              {date ? relativeDate(date, today).full : "Aucune échéance"}
+              {date
+                ? relativeDate(date, today).full
+                : tr("no_due_date_selected")}
             </p>
             {tasks.some((task) => !!task.recurrence) && (
               <p className="muted small-text">
-                Les récurrences sont conservées. La date doit respecter les
-                bornes et exceptions de chaque série.
+                {tr(
+                  "recurrences_are_preserved_the_date_must_respect_the_bounds_and",
+                )}
               </p>
             )}
           </>
@@ -175,7 +165,7 @@ export function BulkTaskDialog({
         {action === "move" && (
           <>
             <label>
-              Espace
+              {tr("workspace")}
               <select
                 value={spaceId}
                 disabled={busy}
@@ -189,13 +179,13 @@ export function BulkTaskDialog({
               </select>
             </label>
             <label>
-              Section
+              {tr("section")}
               <select
                 value={sectionId}
                 disabled={busy || loading}
                 onChange={(event) => setSectionId(event.target.value)}
               >
-                <option value="">Sans section</option>
+                <option value="">{tr("no_section")}</option>
                 {sections.map((section) => (
                   <option key={section.id} value={section.id}>
                     {section.name}
@@ -204,17 +194,13 @@ export function BulkTaskDialog({
               </select>
             </label>
             <p className="muted small-text">
-              Les tâches seront placées en fin de section. Leur état ouvert ou
-              terminé et leurs étiquettes seront conservés.
+              {tr("tasks_will_be_placed_at_the_end_of_the_section")}
             </p>
           </>
         )}
         <ErrorMessage message={error} />
         {conflict && (
-          <p>
-            Aucune tâche n’a été modifiée. Rechargez la vue puis vérifiez
-            votre sélection avant de réessayer.
-          </p>
+          <p>{tr("no_tasks_were_changed_reload_the_view_and_check_your")}</p>
         )}
         <div className="dialog-actions">
           <button
@@ -223,7 +209,7 @@ export function BulkTaskDialog({
             disabled={busy}
             onClick={onClose}
           >
-            Annuler
+            {tr("cancel")}
           </button>
           {conflict ? (
             <button
@@ -234,14 +220,14 @@ export function BulkTaskDialog({
                 onRefresh();
               }}
             >
-              Recharger les tâches
+              {tr("reload_tasks")}
             </button>
           ) : (
             <button
               className={`primary-button ${action === "archive" ? "danger-button" : ""}`}
               disabled={busy || loading}
             >
-              {busy ? "Enregistrement…" : verb}
+              {busy ? tr("saving") : verb}
             </button>
           )}
         </div>

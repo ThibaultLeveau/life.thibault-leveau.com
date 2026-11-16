@@ -1,32 +1,23 @@
+import { formatLocale } from "../../shared/i18n";
+import { tr } from "./i18n";
 import { useEffect, useState } from "react";
 import { api } from "../../platform/api";
 import { useLocalToday } from "./dates";
 import type { Recurrence, ScheduleSuggestion } from "./types";
 
-export const weekdays = [
-  "lundi",
-  "mardi",
-  "mercredi",
-  "jeudi",
-  "vendredi",
-  "samedi",
-  "dimanche",
-];
+export const weekdays = () =>
+  Array.from({ length: 7 }, (_, day) =>
+    new Date(2026, 10, 16 + day, 12).toLocaleDateString(formatLocale(), {
+      weekday: "long",
+    }),
+  );
 export const dayCodes = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"];
-export const months = [
-  "janvier",
-  "février",
-  "mars",
-  "avril",
-  "mai",
-  "juin",
-  "juillet",
-  "août",
-  "septembre",
-  "octobre",
-  "novembre",
-  "décembre",
-];
+export const months = () =>
+  Array.from({ length: 12 }, (_, month) =>
+    new Date(2026, month, 1, 12).toLocaleDateString(formatLocale(), {
+      month: "long",
+    }),
+  );
 export function timezone() {
   return Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Paris";
 }
@@ -51,19 +42,30 @@ export function newRecurrence(start: string): Recurrence {
 }
 function positionedDay(day: string, value: string) {
   const positions: Record<string, string> = {
-    "1": "premier",
-    "2": "deuxième",
-    "3": "troisième",
-    "4": "quatrième",
-    "5": "cinquième",
-    "-1": "dernier",
-    "-2": "avant-dernier",
+    "1": tr("ordinal_first"),
+    "2": tr("ordinal_second"),
+    "3": tr("ordinal_third"),
+    "4": tr("ordinal_fourth"),
+    "5": tr("ordinal_fifth"),
+    "-1": tr("ordinal_last"),
+    "-2": tr("ordinal_penultimate"),
   };
   if (!value) return day;
   if (positions[value]) return `${positions[value]} ${day}`;
-  return Number(value) < 0
-    ? `${Math.abs(Number(value))}ᵉ ${day} en partant de la fin`
-    : `${value}ᵉ ${day}`;
+  const number = Math.abs(Number(value));
+  const category = new Intl.PluralRules(formatLocale(), {
+    type: "ordinal",
+  }).select(number);
+  const suffixes: Record<string, string> = {
+    one: tr("ordinal_suffix_one"),
+    two: tr("ordinal_suffix_two"),
+    few: tr("ordinal_suffix_few"),
+    other: tr("ordinal_suffix_other"),
+  };
+  return tr(Number(value) < 0 ? "ordinal_negative" : "ordinal_positive", {
+    number: `${number}${suffixes[category] ?? suffixes.other}`,
+    day,
+  });
 }
 export function shortRecurrence(rule: Recurrence) {
   const parts: Record<string, string> = Object.fromEntries(
@@ -71,26 +73,28 @@ export function shortRecurrence(rule: Recurrence) {
   );
   const interval = Number(parts.INTERVAL || 1);
   const units: Record<string, string> = {
-    DAILY: "jours",
-    WEEKLY: "semaines",
-    MONTHLY: "mois",
-    YEARLY: "ans",
+    DAILY: tr("days"),
+    WEEKLY: tr("weeks"),
+    MONTHLY: tr("months"),
+    YEARLY: tr("years"),
   };
   const labels: Record<string, string> = {
-    DAILY: "Chaque jour",
-    WEEKLY: "Chaque semaine",
-    MONTHLY: "Chaque mois",
-    YEARLY: "Chaque année",
+    DAILY: tr("every_day"),
+    WEEKLY: tr("every_week"),
+    MONTHLY: tr("every_month"),
+    YEARLY: tr("every_year"),
   };
   let label =
     interval === 1
-      ? labels[parts.FREQ] || "Récurrence personnalisée"
-      : `${parts.FREQ === "WEEKLY" ? "Toutes les" : "Tous les"} ${interval} ${units[parts.FREQ]}`;
-  const group = ({
-    "MO,TU,WE,TH,FR": "jour ouvré",
-    "MO,TU,WE,TH,FR,SA": "jour ouvrable",
-    "SA,SU": "jour du week-end",
-  } as Record<string, string>)[parts.BYDAY];
+      ? labels[parts.FREQ] || tr("custom_recurrence")
+      : `${parts.FREQ === "WEEKLY" ? tr("every") : tr("every_interval")} ${interval} ${units[parts.FREQ]}`;
+  const group = (
+    {
+      "MO,TU,WE,TH,FR": tr("business_day"),
+      "MO,TU,WE,TH,FR,SA": tr("working_day"),
+      "SA,SU": tr("weekend_day"),
+    } as Record<string, string>
+  )[parts.BYDAY];
   const groupedPosition = parts.BYSETPOS && group;
   if (groupedPosition)
     label += ` · ${parts.BYSETPOS.split(",")
@@ -99,21 +103,26 @@ export function shortRecurrence(rule: Recurrence) {
   else if (parts.BYDAY)
     label += ` · ${parts.BYDAY.split(",")
       .map((day) =>
-        positionedDay(weekdays[dayCodes.indexOf(day.slice(-2))], day.slice(0, -2)),
+        positionedDay(
+          weekdays()[dayCodes.indexOf(day.slice(-2))],
+          day.slice(0, -2),
+        ),
       )
       .join(", ")}`;
   if (parts.BYMONTHDAY)
     label += ` · ${parts.BYMONTHDAY.split(",")
       .map((value) =>
-        Number(value) < 0 ? positionedDay("jour", value) : `le ${value}`,
+        Number(value) < 0
+          ? positionedDay(tr("calendar_day"), value)
+          : tr("day_number", { number: value }),
       )
       .join(", ")}`;
   if (parts.BYMONTH)
     label += ` · ${parts.BYMONTH.split(",")
-      .map((month) => months[Number(month) - 1])
+      .map((month) => months()[Number(month) - 1])
       .join(", ")}`;
-  if (parts.BYWEEKNO || parts.BYYEARDAY) label += " · calendrier personnalisé";
-  if (rule.mode === "completion") label += " après résolution";
+  if (parts.BYWEEKNO || parts.BYYEARDAY) label += tr("custom_schedule");
+  if (rule.mode === "completion") label += tr("after_completion_suffix");
   return label;
 }
 export async function parseSchedule(
@@ -173,7 +182,7 @@ export function useScheduleRecognition(text: string, enabled = true) {
         : null;
       if (parsed?.diagnostic)
         throw new Error(
-          `${parsed.diagnostic} Corrigez la saisie ou choisissez « Garder le texte ».`,
+          tr("correct_schedule_input", { diagnostic: parsed.diagnostic }),
         );
       return parsed;
     },

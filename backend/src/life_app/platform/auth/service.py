@@ -11,6 +11,7 @@ from sqlalchemy import case, delete, select
 from sqlalchemy.dialects.postgresql import insert
 
 from life_app.core.database import Database, utcnow
+from life_app.platform.auth.messages import tr
 from life_app.platform.auth.models import LoginLimit, LoginSession, User
 
 COOKIE = "life_session"
@@ -28,7 +29,7 @@ def check_origin(request: Request) -> None:
     if request.app.state.settings.environment != "production":
         allowed.add(str(request.base_url).rstrip("/"))
     if origin is not None and origin not in allowed:
-        raise HTTPException(403, "Origine de requête refusée.")
+        raise HTTPException(403, tr("request_origin_is_not_allowed"))
 
 
 def current_user(
@@ -38,22 +39,23 @@ def current_user(
     csrf: Annotated[str | None, Header(alias="X-CSRF-Token")] = None,
 ) -> User:
     if not token or len(token) > 200:
-        raise HTTPException(401, "Connexion requise.")
+        raise HTTPException(401, tr("sign_in_to_continue"))
     session = db.get(LoginSession, digest(token))
     if session is None or session.expires_at <= utcnow():
-        raise HTTPException(401, "Session expirée ou invalide.")
+        raise HTTPException(401, tr("your_session_has_expired_or_is_invalid"))
     mutation = request.method not in {"GET", "HEAD", "OPTIONS"}
-    if mutation:
-        check_origin(request)
-        if not secrets.compare_digest(digest(csrf or ""), session.csrf_hash):
-            raise HTTPException(403, "Jeton CSRF absent ou invalide.")
     query = select(User).where(User.id == session.user_id)
     if mutation:
         # One owner's writes are serialized, including cross-workspace moves and ordering.
         query = query.with_for_update().execution_options(populate_existing=True)
     user = db.scalar(query)
     if user is None:
-        raise HTTPException(401, "Session invalide.")
+        raise HTTPException(401, tr("your_session_is_invalid"))
+    request.state.locale = user.locale
+    if mutation:
+        check_origin(request)
+        if not secrets.compare_digest(digest(csrf or ""), session.csrf_hash):
+            raise HTTPException(403, tr("the_csrf_token_is_missing_or_invalid"))
     if mutation:
         session = db.scalar(
             select(LoginSession)
@@ -61,7 +63,7 @@ def current_user(
             .execution_options(populate_existing=True)
         )
         if session is None or session.expires_at <= utcnow():
-            raise HTTPException(401, "Session révoquée ou expirée.")
+            raise HTTPException(401, tr("your_session_has_been_revoked_or_has_expired"))
     request.state.login_session = session
     request.state.csrf_token = digest(token + ":csrf")
     return user
@@ -96,7 +98,7 @@ def check_login_limit(db, request: Request, username: str) -> None:
     db.commit()  # Failed requests must still consume attempts.
     if limited:
         raise HTTPException(
-            429, "Trop de tentatives. Réessayez dans 15 minutes.", headers={"Retry-After": "900"}
+            429, tr("too_many_attempts_try_again_in_15_minutes"), headers={"Retry-After": "900"}
         )
 
 
@@ -108,9 +110,10 @@ def login(db, request: Request, username: str, password: str):
     try:
         hasher.verify(user.password_hash if user else dummy_hash, password)
     except VerificationError:
-        raise HTTPException(401, "Identifiants incorrects.") from None
+        raise HTTPException(401, tr("incorrect_username_or_password")) from None
     if user is None:
-        raise HTTPException(401, "Identifiants incorrects.")
+        raise HTTPException(401, tr("incorrect_username_or_password"))
+    request.state.locale = user.locale
     if hasher.check_needs_rehash(user.password_hash):
         user.password_hash = hasher.hash(password)
     now = utcnow()

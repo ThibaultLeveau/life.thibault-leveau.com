@@ -2,7 +2,7 @@
 
 `life_app.main:create_app` assemble FastAPI, la configuration, les connexions, les routes et les fichiers statiques. L'installation `backend/src/` expose aussi la commande `life` ; aucun ajustement manuel de `PYTHONPATH` n'est nécessaire.
 
-`apps/tasks/recurrence.py` valide les règles de jours/semaines/mois/années et calcule les dates avec python-dateutil. La recherche saute les phases calendaires anciennes et borne la vérification d’une règle impossible par le cycle grégorien. Les combinaisons impossibles usuelles (31 février, jour incompatible avec un intervalle de sept jours) sont rejetées sans parcourir des millénaires. `scheduling.py` analyse le français et conserve les indices du texte original, y compris accents combinés et emoji. Analyse et aperçu ne modifient pas de tâche ; résolutions, déplacements et éditions de statut partagent la même transition atomique. Voir les [invariants d’occurrence](donnees.md#recurrences-et-occurrences) et les [contrats](api.md#planification-et-recurrences).
+`apps/tasks/recurrence.py` valide les règles de jours/semaines/mois/années et calcule les dates avec python-dateutil. La recherche saute les phases calendaires anciennes et borne la vérification d’une règle impossible par le cycle grégorien. Les combinaisons impossibles usuelles (31 février, jour incompatible avec un intervalle de sept jours) sont rejetées sans parcourir des millénaires. `scheduling.py` analyse le français ou l’anglais du compte et conserve les indices du texte original, y compris accents combinés et emoji. Analyse et aperçu ne modifient pas de tâche ; résolutions, déplacements et éditions de statut partagent la même transition atomique. Voir les [invariants d’occurrence](donnees.md#recurrences-et-occurrences) et les [contrats](api.md#planification-et-recurrences).
 
 | Module | Responsabilité |
 | --- | --- |
@@ -55,3 +55,9 @@ Ne jamais réécrire une migration déjà publiée. Le fichier `alembic.ini` fac
 `/`, `/applications` et les chemins des manifestes (actuellement `/tasks`) servent le shell React. `/tasks?space=<UUID>` ouvre directement un espace autorisé ; un identifiant inconnu revient au premier espace actif. `/assets/`, `/favicon.svg` et `/documentation/` servent leurs artefacts dédiés. Les autres chemins restent 404, y compris une route API inconnue. Aucun répertoire de travail, secret ou sauvegarde n'est exposé.
 
 Les tests combinent artefacts temporaires pour le routage et PostgreSQL réel pour les fonctions privées. Voir [Tests](tests.md) et [Référence API](api.md).
+
+## Messages et langue
+
+`core/i18n.py` lie un contexte à chaque requête ; la résolution de la session y applique la préférence du propriétaire. Ce contexte est isolé entre requêtes concurrentes et fonctionne aussi dans les dépendances synchrones FastAPI. Chaque domaine possède un `messages.py` et ses JSON FR/EN. `Message` garde un code stable avec le texte traduit. Le gestionnaire de validation expose les erreurs localisées sans les valeurs soumises.
+
+`scheduling_english.py` adapte le vocabulaire anglais vers les jetons de la grammaire commune, en conservant les indices Unicode du texte original. Aucun modèle externe ni nouveau format de règle. Les aides des deux langues sont testées. Voir [Langue et API](internationalisation.md#api-independante-de-linterface).

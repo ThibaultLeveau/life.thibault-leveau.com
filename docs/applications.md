@@ -27,3 +27,7 @@ Les objectifs OKR, les tâches ménagères et les plantes sont des pistes future
 L’accueil, la bibliothèque et les applications partagent la même connexion et le thème clair/sombre/système. Le menu du compte permet de changer l’apparence ou de se déconnecter. Une session expirée ramène au formulaire de connexion et retire les données privées de l’écran. Les pages HTML ne contiennent aucune donnée personnelle ; elles sont chargées par l’API après connexion.
 
 Le catalogue et l’activation sont aussi accessibles par l’[API versionnée](api.md#bibliotheque-et-activation), indépendamment de l’interface.
+
+## Français ou anglais
+
+Le menu du compte propose **Langue / Language**, disponible aussi dans la navigation mobile. Le choix est enregistré pour tout LifeOS, indépendamment du thème, et conservé après reconnexion. Les textes personnels restent intacts. Les comptes existants commencent en français ; avant connexion, le navigateur choisit la langue du formulaire. Voir [les règles détaillées](internationalisation.md) et le [guide anglais](en/applications.md).

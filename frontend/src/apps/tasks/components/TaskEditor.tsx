@@ -1,3 +1,5 @@
+import { formatLocale } from "../../../shared/i18n";
+import { tr } from "../i18n";
 import { useState, type FormEvent } from "react";
 import { api, ApiError } from "../../../platform/api";
 import type {
@@ -16,17 +18,17 @@ import type { Schedule } from "../types";
 import { SchedulePicker } from "./SchedulePicker";
 import { ScheduleRecognition } from "./ScheduleRecognition";
 
-const eventNames: Record<string, string> = {
-  created: "Tâche créée",
-  updated: "Tâche modifiée",
-  moved: "Tâche déplacée",
-  completed: "Tâche terminée",
-  reopened: "Tâche rouverte",
-  archived: "Tâche archivée",
-  restored: "Tâche restaurée",
-  rescheduled: "Prochaine occurrence planifiée",
-  completion_undone: "Résolution annulée",
-};
+const eventNames = (): Record<string, string> => ({
+  created: tr("task_created"),
+  updated: tr("task_updated"),
+  moved: tr("event_moved"),
+  completed: tr("event_completed"),
+  reopened: tr("event_reopened"),
+  archived: tr("task_archived"),
+  restored: tr("task_restored"),
+  rescheduled: tr("next_occurrence_scheduled"),
+  completion_undone: tr("completion_undone"),
+});
 
 export function TaskEditor({
   task,
@@ -90,9 +92,7 @@ export function TaskEditor({
       const parsed = await recognition.resolve();
       if (parsed?.matched_text) {
         if (!parsed.title.trim())
-          throw new Error(
-            "Ajoutez un titre à côté de la date, par exemple « Lire demain ».",
-          );
+          throw new Error(tr("add_a_title_next_to_the_date_for_example_read"));
         data.title = parsed.title;
         data.due_date = parsed.due_date;
         data.recurrence = parsed.recurrence;
@@ -159,7 +159,7 @@ export function TaskEditor({
   }
   return (
     <Dialog
-      title={task ? "Détails de la tâche" : "Une nouvelle tâche"}
+      title={task ? tr("task_details") : tr("a_new_task")}
       onClose={onClose}
     >
       <form onSubmit={submit} className="stack-form dialog-body">
@@ -168,7 +168,7 @@ export function TaskEditor({
           {workspace.name}
         </p>
         <label>
-          Titre
+          {tr("title")}
           <input
             name="title"
             required
@@ -176,7 +176,7 @@ export function TaskEditor({
             value={title}
             onChange={(event) => setTitle(event.target.value)}
             autoFocus
-            placeholder="Lire demain, courir tous les lundis…"
+            placeholder={tr("read_tomorrow_run_every_monday")}
             disabled={busy || !!task?.archived_at}
           />
         </label>
@@ -197,36 +197,33 @@ export function TaskEditor({
         />
         {task?.recurrence && (
           <p className="field-help">
-            {task.recurrence_completed} occurrence
-            {task.recurrence_completed > 1 ? "s" : ""} terminée
-            {task.recurrence_completed > 1 ? "s" : ""}
+            {tr("completed_occurrences", { count: task.recurrence_completed })}
             {task.recurrence.max_occurrences
-              ? ` sur ${task.recurrence.max_occurrences}`
+              ? tr("out_of_total", { total: task.recurrence.max_occurrences })
               : ""}
-            . Modifier la règle recommence ce compteur ; l’historique reste
-            conservé.
+            {tr("changing_the_rule_restarts_this_count_history_is_preserved")}
           </p>
         )}
         <label>
-          Description
+          {tr("description")}
           <textarea
             name="description"
             rows={4}
             maxLength={20000}
             defaultValue={task?.description}
-            placeholder="Quelques détails pour y voir plus clair…"
+            placeholder={tr("a_few_details_to_make_things_clearer")}
             disabled={!!task?.archived_at}
           />
         </label>
         <div className="form-grid">
           <label>
-            Section
+            {tr("section")}
             <select
               name="section_id"
               defaultValue={task?.section_id ?? initialSection ?? ""}
               disabled={!!task?.archived_at}
             >
-              <option value="">Sans section</option>
+              <option value="">{tr("no_section")}</option>
               {sections.map((section) => (
                 <option key={section.id} value={section.id}>
                   {section.name}
@@ -235,7 +232,7 @@ export function TaskEditor({
             </select>
           </label>
           <label>
-            Statut
+            {tr("status")}
             <select
               name="status_id"
               defaultValue={
@@ -253,22 +250,22 @@ export function TaskEditor({
             </select>
           </label>
           <label>
-            Priorité
+            {tr("priority")}
             <select
               name="priority"
               defaultValue={task?.priority ?? 4}
               disabled={!!task?.archived_at}
             >
-              <option value={1}>P1 · Urgente</option>
-              <option value={2}>P2 · Haute</option>
-              <option value={3}>P3 · Normale</option>
-              <option value={4}>P4 · Aucune</option>
+              <option value={1}>{tr("p1_urgent")}</option>
+              <option value={2}>{tr("p2_high")}</option>
+              <option value={3}>{tr("p3_normal")}</option>
+              <option value={4}>{tr("p4_none")}</option>
             </select>
           </label>
         </div>
         {labels.length > 0 && (
           <fieldset className="label-fieldset">
-            <legend>Étiquettes</legend>
+            <legend>{tr("labels")}</legend>
             <div className="label-picker">
               {labels.map((label) => (
                 <label key={label.id} className="label-choice">
@@ -302,7 +299,7 @@ export function TaskEditor({
             onClick={reload}
             disabled={busy}
           >
-            Recharger la tâche enregistrée
+            {tr("reload_saved_task")}
           </button>
         )}
         <div className="dialog-actions">
@@ -314,12 +311,12 @@ export function TaskEditor({
               onClick={archive}
             >
               <Icon name={task.archived_at ? "restore" : "archive"} />
-              {task.archived_at ? "Restaurer" : "Archiver"}
+              {task.archived_at ? tr("restore") : tr("archive")}
             </button>
           )}
           <span className="spacer" />
           <button type="button" className="secondary-button" onClick={onClose}>
-            Annuler
+            {tr("cancel")}
           </button>
           {!task?.archived_at && (
             <button
@@ -327,15 +324,13 @@ export function TaskEditor({
               disabled={busy || scheduleOpen}
               title={
                 scheduleOpen
-                  ? "Choisissez une date, appliquez la récurrence ou refermez le calendrier."
+                  ? tr(
+                      "choose_a_date_apply_the_recurrence_or_close_the_calendar",
+                    )
                   : undefined
               }
             >
-              {busy
-                ? "Enregistrement…"
-                : task
-                  ? "Enregistrer"
-                  : "Ajouter la tâche"}
+              {busy ? tr("saving") : task ? tr("save") : tr("add_task")}
             </button>
           )}
         </div>
@@ -349,12 +344,12 @@ export function TaskEditor({
               disabled={busy || historyTotal !== null}
             >
               <Icon name="restore" />
-              Historique
+              {tr("history")}
             </button>
             {!task.archived_at && (
               <button className="text-button" onClick={() => onMove(task)}>
                 <Icon name="arrow" />
-                Déplacer et réordonner
+                {tr("move_and_reorder")}
               </button>
             )}
           </div>
@@ -367,12 +362,12 @@ export function TaskEditor({
                     <strong>
                       {event.kind === "completed" &&
                       event.context.after.recurrence
-                        ? "Occurrence terminée"
-                        : (eventNames[event.kind] ?? event.kind)}
+                        ? tr("occurrence_completed")
+                        : (eventNames()[event.kind] ?? event.kind)}
                     </strong>
                     <span>
                       {event.context.after.workspace_name} ·{" "}
-                      {event.context.after.section_name ?? "Sans section"} ·{" "}
+                      {event.context.after.section_name ?? tr("no_section")} ·{" "}
                       {event.context.after.status_name}
                     </span>
                     {event.context.after.due_date &&
@@ -382,18 +377,21 @@ export function TaskEditor({
                         "completion_undone",
                       ].includes(event.kind) && (
                         <span>
-                          Échéance du{" "}
+                          {tr("due_on")}{" "}
                           {new Date(
                             `${event.context.after.due_date}T12:00:00`,
-                          ).toLocaleDateString("fr-FR")}
+                          ).toLocaleDateString(formatLocale())}
                         </span>
                       )}
                   </div>
                   <time dateTime={event.occurred_at}>
-                    {new Date(event.occurred_at).toLocaleString("fr-FR", {
-                      dateStyle: "short",
-                      timeStyle: "short",
-                    })}
+                    {new Date(event.occurred_at).toLocaleString(
+                      formatLocale(),
+                      {
+                        dateStyle: "short",
+                        timeStyle: "short",
+                      },
+                    )}
                   </time>
                 </li>
               ))}
@@ -405,11 +403,12 @@ export function TaskEditor({
               onClick={loadHistory}
               disabled={busy}
             >
-              Charger la suite
+              {tr("load_more")}
             </button>
           )}
           <p className="muted small-text">
-            Créée le {new Date(task.created_at).toLocaleString("fr-FR")}
+            {tr("created_on")}{" "}
+            {new Date(task.created_at).toLocaleString(formatLocale())}
           </p>
         </div>
       )}

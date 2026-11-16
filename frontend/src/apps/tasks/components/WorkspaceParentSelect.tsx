@@ -1,3 +1,4 @@
+import { tr } from "../i18n";
 import type { Workspace } from "../types";
 import { workspaceTree } from "../workspaceTree";
 
@@ -10,9 +11,9 @@ export function WorkspaceParentSelect({
 }) {
   return (
     <label>
-      Espace parent
+      {tr("parent_workspace")}
       <select name="parent_id" defaultValue={workspace?.parent_id ?? ""}>
-        <option value="">Aucun — à la racine</option>
+        <option value="">{tr("none_at_the_root")}</option>
         {workspaceTree(workspaces, workspace?.id).map(({ space, path }) => (
           <option key={space.id} value={space.id}>
             {path}

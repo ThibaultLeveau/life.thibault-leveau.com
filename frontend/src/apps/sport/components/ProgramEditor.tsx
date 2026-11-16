@@ -1,3 +1,4 @@
+import { tr } from "../i18n";
 import { useEffect, useRef, useState } from "react";
 import { ErrorMessage } from "../../../shared/ui/Dialog";
 import { Icon } from "../../../shared/ui/Icon";
@@ -50,21 +51,22 @@ function ProgramForm({
     JSON.stringify({ name, notes, competitionDate, entries: payloadEntries }),
   );
   const dirty =
-    JSON.stringify({ name, notes, competitionDate, entries: payloadEntries }) !== original.current;
+    JSON.stringify({
+      name,
+      notes,
+      competitionDate,
+      entries: payloadEntries,
+    }) !== original.current;
   const total = entries.reduce((sum, entry) => sum + entry.sets, 0);
   const limit =
-    total > 300
-      ? "Un programme contient au maximum 300 séries. Réduisez le nombre de séries pour enregistrer."
-      : "";
+    total > 300 ? tr("a_program_can_contain_up_to_300_sets_reduce_the") : "";
 
   useEffect(() => {
     registerGuard(
       () =>
         !action.busy &&
         (!dirty ||
-          window.confirm(
-            "Quitter ce programme sans enregistrer vos modifications ?",
-          )),
+          window.confirm(tr("leave_this_program_without_saving_your_changes"))),
     );
     const unload = (event: BeforeUnloadEvent) => {
       event.preventDefault();
@@ -110,7 +112,7 @@ function ProgramForm({
     <form
       ref={form}
       className={`stack-form sport-program-form ${hyrox ? "sport-hyrox" : ""}`}
-      aria-label={workout ? "Modifier le programme" : "Nouveau programme"}
+      aria-label={workout ? tr("edit_program") : tr("new_program")}
       onSubmit={(event) => {
         event.preventDefault();
         if (!entries.length || limit) return;
@@ -137,17 +139,16 @@ function ProgramForm({
           className="sport-program-info"
           aria-labelledby="program-info-title"
         >
-          <h2 id="program-info-title">Votre programme</h2>
+          <h2 id="program-info-title">{tr("your_program")}</h2>
           <p className="muted">
-            Préparez vos exercices une fois, puis retrouvez-les à chaque
-            entraînement.
+            {tr("prepare_your_exercises_once_then_use_them_for_every_training")}
           </p>
           <label>
-            Nom du programme
+            {tr("program_name")}
             <input
               required
               maxLength={160}
-              placeholder="Haut du corps, course du samedi…"
+              placeholder={tr("upper_body_saturday_run")}
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -155,8 +156,8 @@ function ProgramForm({
           {hyrox && (
             <div className="sport-hyrox-date">
               <label>
-                Date de votre prochain HYROX
-                <span className="muted">Facultatif</span>
+                {tr("hyrox_competition_date")}
+                <span className="muted">{tr("optional")}</span>
                 <input
                   type="date"
                   min="0001-01-01"
@@ -167,8 +168,7 @@ function ProgramForm({
                 />
               </label>
               <p id="competition-date-help" className="muted small-text">
-                Votre compte à rebours suit cette date. Vous pourrez la modifier
-                à tout moment.
+                {tr("hyrox_date_help")}
               </p>
               {competitionDate && (
                 <button
@@ -176,17 +176,18 @@ function ProgramForm({
                   className="text-button"
                   onClick={() => setCompetitionDate("")}
                 >
-                  Effacer la date de compétition
+                  {tr("clear_competition_date")}
                 </button>
               )}
             </div>
           )}
           <label>
-            Notes de préparation <span className="muted">Facultatif</span>
+            {tr("preparation_notes")}{" "}
+            <span className="muted">{tr("optional")}</span>
             <textarea
               value={notes}
               maxLength={4000}
-              placeholder="Échauffement, matériel à prévoir…"
+              placeholder={tr("warm_up_equipment_to_bring")}
               onChange={(e) => setNotes(e.target.value)}
             />
           </label>
@@ -194,18 +195,23 @@ function ProgramForm({
         <section aria-labelledby="program-exercises-title">
           <div className="sport-section-heading">
             <div>
-              <h2 id="program-exercises-title">Exercices du programme</h2>
+              <h2 id="program-exercises-title">{tr("program_exercises")}</h2>
               <p className="muted small-text" role="status">
-                {entries.length} / 50 exercices · {total} / 300 séries
+                {tr("program_limits", {
+                  exercises: entries.length,
+                  sets: total,
+                })}
               </p>
             </div>
             {hyrox && (
-              <span className="sport-hyrox-stamp"><HyroxMark /></span>
+              <span className="sport-hyrox-stamp">
+                <HyroxMark />
+              </span>
             )}
           </div>
           {!entries.length && (
             <div className="sport-empty">
-              <p>Ajoutez votre premier exercice pour composer ce programme.</p>
+              <p>{tr("add_your_first_exercise_to_build_this_program")}</p>
             </div>
           )}
           {entries.map((entry, index) => (
@@ -213,7 +219,10 @@ function ProgramForm({
               className="sport-plan-entry"
               key={entry.key}
               data-entry-key={entry.key}
-              aria-label={`Exercice ${index + 1} : ${entry.name}`}
+              aria-label={tr("named_exercise", {
+                number: index + 1,
+                name: entry.name,
+              })}
             >
               <div className="sport-section-heading">
                 <h3>
@@ -224,7 +233,7 @@ function ProgramForm({
                   <button
                     type="button"
                     className="icon-button"
-                    aria-label={`Monter ${entry.name}`}
+                    aria-label={tr("move_up", { name: entry.name })}
                     disabled={index === 0}
                     onClick={() => move(index, -1)}
                   >
@@ -233,7 +242,7 @@ function ProgramForm({
                   <button
                     type="button"
                     className="icon-button"
-                    aria-label={`Descendre ${entry.name}`}
+                    aria-label={tr("move_down", { name: entry.name })}
                     disabled={index === entries.length - 1}
                     onClick={() => move(index, 1)}
                   >
@@ -242,7 +251,7 @@ function ProgramForm({
                   <button
                     type="button"
                     className="icon-button"
-                    aria-label={`Retirer ${entry.name}`}
+                    aria-label={tr("remove_named", { name: entry.name })}
                     onClick={() => {
                       focusEntry.current =
                         entries[index + 1]?.key ??
@@ -257,7 +266,7 @@ function ProgramForm({
                 </div>
               </div>
               <label>
-                Nombre de séries
+                {tr("number_of_sets")}
                 <input
                   type="number"
                   inputMode="numeric"
@@ -271,7 +280,7 @@ function ProgramForm({
                 />
               </label>
               <p className="muted small-text">
-                Objectif par série (facultatif)
+                {tr("target_per_set_optional")}
               </p>
               <ValuesFields
                 kind={kinds.find((k) => k.id === entry.kind)!}
@@ -290,14 +299,14 @@ function ProgramForm({
             onClick={() => setPicking((value) => !value)}
           >
             <Icon name={picking ? "x" : "plus"} />
-            {picking ? "Fermer le catalogue" : "Ajouter un exercice"}
+            {picking ? tr("close_catalogue") : tr("add_an_exercise")}
           </button>
           {picking && (
             <div id="program-picker">
               {hyrox && (
                 <div className="sport-hyrox-picker-heading">
                   <HyroxMark />
-                  <span>Composez votre prochaine séance.</span>
+                  <span>{tr("build_next_session")}</span>
                 </div>
               )}
               <ExercisePicker
@@ -323,8 +332,7 @@ function ProgramForm({
           )}
           {entries.length >= 50 && (
             <p className="muted">
-              Limite de 50 exercices atteinte. Retirez un exercice pour en
-              ajouter un autre.
+              {tr("limit_of_50_exercises_reached_remove_an_exercise_to_add")}
             </p>
           )}
         </section>
@@ -332,8 +340,8 @@ function ProgramForm({
         <div className="sport-program-actions">
           <p className="muted small-text">
             {entries.length
-              ? "Vos modifications seront enregistrées dans ce programme."
-              : "Ajoutez au moins un exercice pour enregistrer."}
+              ? tr("your_changes_will_be_saved_in_this_program")
+              : tr("add_at_least_one_exercise_to_save")}
           </p>
           <div className="sport-inline">
             <button
@@ -341,13 +349,13 @@ function ProgramForm({
               className="secondary-button"
               onClick={onClose}
             >
-              Annuler
+              {tr("cancel")}
             </button>
             <button
               className="primary-button"
               disabled={!entries.length || !!limit}
             >
-              {action.busy ? "Enregistrement…" : "Enregistrer le programme"}
+              {action.busy ? tr("saving") : tr("save_program")}
             </button>
           </div>
         </div>

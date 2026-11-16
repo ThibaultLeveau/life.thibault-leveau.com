@@ -25,6 +25,7 @@ def login(payload: LoginInput, request: Request, response: Response, db: Databas
         user_id=user.id,
         username=user.username,
         theme=user.theme,
+        locale=user.locale,
         expires_at=session.expires_at,
         csrf_token=csrf,
     )
@@ -37,6 +38,7 @@ def session(request: Request, user: CurrentUser):
         user_id=user.id,
         username=user.username,
         theme=user.theme,
+        locale=user.locale,
         expires_at=request.state.login_session.expires_at,
         csrf_token=request.state.csrf_token,
     )
@@ -62,7 +64,10 @@ def preferences(user: CurrentUser):
 
 
 @router.put("/preferences", response_model=Preferences)
-def set_preferences(payload: Preferences, user: CurrentUser, db: Database):
-    user.theme = payload.theme
+def set_preferences(payload: Preferences, request: Request, user: CurrentUser, db: Database):
+    """Update supplied preferences only; omitted fields retain their stored values."""
+    for key, value in payload.model_dump(exclude_unset=True).items():
+        setattr(user, key, value)
     db.commit()
+    request.state.locale = user.locale
     return user

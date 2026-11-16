@@ -1,3 +1,4 @@
+import { tr, documentationPath } from "../../shared/i18n";
 import { AccountMenu } from "../../platform/auth/AccountMenu";
 import { Icon } from "../../shared/ui/Icon";
 export function Navbar() {
@@ -5,7 +6,7 @@ export function Navbar() {
   return (
     <header className="site-header">
       <div className="header-inner">
-        <a className="brand" href="/" aria-label="LifeOS, accueil">
+        <a className="brand" href="/" aria-label={tr("lifeos_home")}>
           <span className="brand-symbol">
             <Icon name="grid" size={25} />
           </span>
@@ -13,10 +14,10 @@ export function Navbar() {
             LifeOS<span className="brand-period">.</span>
           </span>
         </a>
-        <nav className="navigation" aria-label="Navigation principale">
+        <nav className="navigation" aria-label={tr("main_navigation")}>
           {[
-            { path: "/", name: "Accueil" },
-            { path: "/applications", name: "Bibliothèque" },
+            { path: "/", name: tr("home") },
+            { path: "/applications", name: tr("library") },
           ].map((item) => (
             <a
               key={item.path}
@@ -27,8 +28,8 @@ export function Navbar() {
               {item.name}
             </a>
           ))}
-          <a className="nav-link" href="/documentation/">
-            Documentation
+          <a className="nav-link" href={documentationPath("")}>
+            {tr("documentation")}
           </a>
         </nav>
         <AccountMenu />

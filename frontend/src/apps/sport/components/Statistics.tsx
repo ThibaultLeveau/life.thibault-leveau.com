@@ -1,3 +1,4 @@
+import { tr } from "../i18n";
 import { useEffect, useId, useRef, useState } from "react";
 import { sportApi } from "../api";
 import { measureFields, type KindDefinition, type MeasureKey } from "../types";
@@ -25,7 +26,7 @@ function Chart({
     return () => observer.disconnect();
   }, [hasPoints]);
   if (!points.length)
-    return <Empty title={title}>Aucune donnée sur cette période.</Empty>;
+    return <Empty title={title}>{tr("no_data_for_this_period")}</Empty>;
   const min = Math.min(...points.map((p) => p.value));
   const max = Math.max(...points.map((p) => p.value));
   const spread = max - min || Math.max(1, max * 0.05);
@@ -50,7 +51,7 @@ function Chart({
       {points.length > 1 && (
         <p className="muted">
           {change > 0 ? "+" : ""}
-          {number(change)} {unit} entre le premier et le dernier relevé
+          {number(change)} {unit} {tr("between_the_first_and_last_records")}
         </p>
       )}
       <svg
@@ -60,8 +61,13 @@ function Chart({
         aria-labelledby={id}
       >
         <title id={id}>
-          {title} : {points.length} relevés, de {number(first.value)} à{" "}
-          {number(last.value)} {unit}. Valeurs détaillées dans le tableau.
+          {tr("chart_summary", {
+            title,
+            count: points.length,
+            first: number(first.value),
+            last: number(last.value),
+            unit,
+          })}
         </title>
         {[min, max]
           .filter((v, i, a) => a.indexOf(v) === i)
@@ -111,12 +117,12 @@ function Chart({
         )}
       </svg>
       <details>
-        <summary>Voir les valeurs</summary>
+        <summary>{tr("view_values")}</summary>
         <div className="sport-table-wrap">
           <table>
             <thead>
               <tr>
-                <th>Date</th>
+                <th>{tr("date")}</th>
                 <th>
                   {title} ({unit})
                 </th>
@@ -171,7 +177,7 @@ export function Statistics({ kinds }: { kinds: KindDefinition[] }) {
   const selectedWorkout = comparable.some(([id]) => id === workout)
     ? workout
     : comparable[0]?.[0];
-  const field = measureFields.find(([key]) => key === measurement)!;
+  const field = measureFields().find(([key]) => key === measurement)!;
   const performance = availableExercises.find(
     ([id]) => id === selectedExercise,
   )?.[1];
@@ -179,7 +185,7 @@ export function Statistics({ kinds }: { kinds: KindDefinition[] }) {
     <>
       <div className="sport-filters">
         <label>
-          Du
+          {tr("from")}
           <input
             type="date"
             required
@@ -190,7 +196,7 @@ export function Statistics({ kinds }: { kinds: KindDefinition[] }) {
           />
         </label>
         <label>
-          Au
+          {tr("period_end")}
           <input
             type="date"
             required
@@ -206,21 +212,21 @@ export function Statistics({ kinds }: { kinds: KindDefinition[] }) {
         <>
           <div className="sport-summary">
             <div>
-              <span>Entraînements</span>
+              <span>{tr("training_sessions")}</span>
               <strong>{stats.completed_sessions}</strong>
             </div>
             <div>
-              <span>Séries validées</span>
+              <span>{tr("completed_sets")}</span>
               <strong>{stats.total_sets}</strong>
             </div>
             <div>
-              <span>Volume soulevé</span>
+              <span>{tr("weight_lifted")}</span>
               <strong>
                 {number(stats.total_volume_kg)} <small>kg</small>
               </strong>
             </div>
             <div>
-              <span>Distance totale</span>
+              <span>{tr("total_distance")}</span>
               <strong>
                 {number(stats.total_distance_m / 1000)} <small>km</small>
               </strong>
@@ -229,12 +235,12 @@ export function Statistics({ kinds }: { kinds: KindDefinition[] }) {
           <div className="sport-stats-grid">
             <section>
               <label className="sport-chart-select">
-                Mensuration
+                {tr("body_measurement")}
                 <select
                   value={measurement}
                   onChange={(e) => setMeasurement(e.target.value as MeasureKey)}
                 >
-                  {measureFields.map(([key, label, unit]) => (
+                  {measureFields().map(([key, label, unit]) => (
                     <option key={key} value={key}>
                       {label} ({unit})
                     </option>
@@ -254,13 +260,13 @@ export function Statistics({ kinds }: { kinds: KindDefinition[] }) {
             </section>
             <section>
               <label className="sport-chart-select">
-                Performance par exercice
+                {tr("performance_by_exercise")}
                 <select
                   value={selectedExercise ?? ""}
                   onChange={(e) => setExercise(e.target.value)}
                 >
                   <option value="" disabled>
-                    Choisir un exercice
+                    {tr("choose_an_exercise")}
                   </option>
                   {availableExercises.map(([id, m]) => (
                     <option value={id} key={id}>
@@ -270,7 +276,7 @@ export function Statistics({ kinds }: { kinds: KindDefinition[] }) {
                 </select>
               </label>
               <Chart
-                title={performance?.name ?? "Performance à l’entraînement"}
+                title={performance?.name ?? tr("training_performance")}
                 unit={performance?.unit ?? ""}
                 points={stats.sessions.flatMap((s) =>
                   s.metrics
@@ -288,42 +294,35 @@ export function Statistics({ kinds }: { kinds: KindDefinition[] }) {
             </section>
           </div>
           <label className="sport-chart-select">
-            Programmes et références
+            {tr("programs_and_baselines")}
             <select
               value={selectedWorkout ?? ""}
               onChange={(e) => setWorkout(e.target.value)}
             >
               <option value="" disabled>
-                Choisir un programme
+                {tr("choose_a_program")}
               </option>
               {comparable.map(([id, name], i) => (
                 <option value={id} key={id}>
-                  {name} · référence {i + 1}
+                  {name} {tr("baseline")} {i + 1}
                 </option>
               ))}
             </select>
           </label>
           <Chart
-            title="Score de l’entraînement"
+            title={tr("training_score")}
             unit="points"
             points={stats.sessions
               .filter((s) => (s.baseline_id ?? s.id) === selectedWorkout)
               .map((s) => ({ label: day(s.started_at), value: s.score! }))}
           />
           <details className="sport-score-explained">
-            <summary>Comment est calculé le score ?</summary>
+            <summary>{tr("how_is_the_score_calculated")}</summary>
             <p>
-              La première session terminée d’un programme vaut 100. Les
-              suivantes comparent la performance de chaque exercice à cette
-              référence, puis font la moyenne des rapports, avec le même poids
-              pour chaque exercice. 110 représente une hausse moyenne de 10 %
-              selon ces mesures.
+              {tr("the_first_completed_session_of_a_program_scores_100_later")}
             </p>
             <p>
-              Seules les sessions d’un même programme, avec les mêmes exercices,
-              types, ordre et nombres de séries, partagent une référence. Les
-              objectifs peuvent évoluer. Les entraînements abandonnés ne
-              comptent pas.
+              {tr("only_sessions_of_the_same_program_with_the_same_exercises")}
             </p>
             <ul>
               {kinds.map((k) => (
@@ -333,11 +332,7 @@ export function Statistics({ kinds }: { kinds: KindDefinition[] }) {
               ))}
             </ul>
             <p>
-              Le « + 1 » permet de comparer une charge ou une assistance nulle.
-              Le score suit des mesures : il ne juge ni la technique, ni la
-              difficulté ressentie, ni la santé. Pour le cardio, la vitesse peut
-              augmenter sur une distance plus courte ; consultez aussi la
-              distance. Les dates des entraînements sont regroupées en UTC.
+              {tr("the_1_allows_comparisons_when_weight_or_assistance_is_zero")}
             </p>
           </details>
         </>

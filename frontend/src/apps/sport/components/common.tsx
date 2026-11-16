@@ -1,3 +1,5 @@
+import { formatLocale } from "../../../shared/i18n";
+import { tr } from "../i18n";
 import {
   useEffect,
   useRef,
@@ -79,13 +81,13 @@ export function LoadState({
     <>
       {loading && (
         <p role="status" className="sport-empty">
-          Chargement…
+          {tr("loading")}
         </p>
       )}
       <ErrorMessage message={error} />
       {error && (
         <button className="secondary-button" onClick={reload}>
-          Réessayer
+          {tr("try_again")}
         </button>
       )}
     </>
@@ -146,7 +148,7 @@ export function ValuesFields({
   );
 }
 export const number = (n: number) =>
-  new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 }).format(n);
+  new Intl.NumberFormat(formatLocale(), { maximumFractionDigits: 2 }).format(n);
 export function valuesText(kind: KindDefinition, values: Values) {
   return kind.fields
     .filter((f) => values[f.key] != null)
@@ -159,12 +161,12 @@ export function localDay() {
 }
 export function day(value: string) {
   return new Date(`${value.slice(0, 10)}T12:00:00`).toLocaleDateString(
-    "fr-FR",
+    formatLocale(),
     { day: "numeric", month: "short", year: "numeric" },
   );
 }
 export function moment(value: string) {
-  return new Date(value).toLocaleString("fr-FR", {
+  return new Date(value).toLocaleString(formatLocale(), {
     day: "numeric",
     month: "short",
     hour: "2-digit",
