@@ -76,7 +76,7 @@ export function TaskDragProvider({
     >
       <div className="ui-scope tasks-shell">
         {children}
-        <DragOverlay>
+        <DragOverlay style={{ pointerEvents: "none" }}>
           {dragged && (
             <div className="task-card drag-overlay">
               <span className={`task-checkbox priority-${dragged.priority}`} />
