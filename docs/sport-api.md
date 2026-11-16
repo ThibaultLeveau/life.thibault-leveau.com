@@ -103,3 +103,21 @@ Mensuration : `POST /sport/measurements` avec `{"measured_on":"2026-11-14","weig
 - **422** : champ inconnu, type invalide, bornes dépassées, champs incompatibles, mensuration vide/future ou période incorrecte.
 
 Les compteurs et graphiques excluent les abandons et les relevés archivés. Les périodes de sessions utilisent `started_at` UTC, les relevés leur date civile enregistrée. L’accès aux données des autres comptes ne révèle pas leur existence.
+
+## Date de compétition HYROX
+
+`POST /workouts` et `PUT /workouts/{uuid}` acceptent `competition_date`, une date civile ISO `YYYY-MM-DD` ou `null`. Elle est facultative ; les nombres, dates inexistantes, chaînes vides et valeurs avec heure sont refusés avec **422**. Les années vont de 0001 à 9999, dates passées comprises. Un remplacement PUT omettant ce champ le remet à `null`, comme les autres champs facultatifs. Renvoyer la date lue pour la conserver lors d’une modification indépendante.
+
+```json
+{
+  "name": "HYROX — préparation",
+  "competition_date": "2027-04-17",
+  "notes": "Préparation de ma prochaine compétition",
+  "entries": [{"exercise_id": "builtin-da98dd6929927833d279", "sets": 1,
+               "target": {"distance_m": 1000, "duration_seconds": 300}}]
+}
+```
+
+Résoudre l’identifiant de l’exercice par `GET /exercises?q=course%20sur%20tapis` avant d’envoyer cet exemple. Pour modifier, envoyer le même corps avec `expected_version` ; pour effacer la date, remplacer `competition_date` par `null`. Les protections session, activation, propriétaire, CSRF et conflit **409** restent celles des programmes.
+
+Les réponses des programmes et des séances (actives, historique, statistiques) exposent `competition_date`. Le serveur copie la date au démarrage, sans modifier les séances précédentes. Une ancienne séance renvoie `null`. La date reste indépendante du titre en stockage ; le client affiche l’habillage seulement si le titre contient `hyrox` sans distinction de casse. Le compte à rebours se calcule dans le fuseau local du client à partir de cette date, sans stockage supplémentaire ni nouveau paramètre de session. Un client API peut donc gérer entièrement la même fonctionnalité.

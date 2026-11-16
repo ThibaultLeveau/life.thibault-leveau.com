@@ -185,3 +185,9 @@ Le renommage en programmes et les pages de création/modification conservent `00
 Publier avec la sauvegarde habituelle ; aucun secret, service ni migration SQL supplémentaire (`0006_sport`). Les nouvelles propositions sont conservées dans les instantanés JSONB : respecter la [compatibilité de retour arrière](sauvegardes.md#propositions-de-series-sport), qui ne se déduit pas de la seule révision Alembic.
 
 Sur un compte de recette isolé, saisir deux séries de charges/répétitions différentes directement, vérifier correction et annulation, défilement avec compteur fixe, puis terminer et relancer le programme. Vérifier les valeurs proposées et leur conservation après rechargement, avec aucune série déjà validée. Contrôler le petit écran, les thèmes, le clavier, l’accès aux dernières commandes et les erreurs/conflits. Comparer SHA exécuté, sondes, `/sport`, OpenAPI et documentation en HTTPS ; consigner sauvegarde et résultats dans l’issue.
+
+### Branding HYROX Sport
+
+Publier avec la sauvegarde habituelle puis la migration additive `0007_hyrox`. Aucun service ou secret supplémentaire ; consulter les [contraintes de retour arrière](sauvegardes.md#migration-0007-hyrox). Les programmes et séances existants reçoivent une date nulle, sans réécriture des données.
+
+Sur le compte de recette isolé, créer un programme contenant « Hyrox », choisir la date, ajouter un exercice, enregistrer et démarrer une séance. Vérifier logo et compteur dans la liste, l’éditeur/catalogue et la séance, les champs en mobile et thèmes clair/sombre, la persistance après rechargement et l’indépendance de la date de séance après modification du programme. Vérifier le SHA de l’image exécutée, les sondes et les routes HTTPS Sport, OpenAPI et documentation ; consigner sauvegarde, révision et résultats dans l’issue.

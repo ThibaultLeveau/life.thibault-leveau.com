@@ -5,6 +5,8 @@ import { sportApi } from "../api";
 import type { Entry, KindDefinition, Workout } from "../types";
 import { LoadState, useAction, useResource, ValuesFields } from "./common";
 import { ExercisePicker } from "./Exercises";
+import { isHyrox } from "../hyrox";
+import { HyroxBrand, HyroxMark } from "./HyroxBrand";
 
 type EditorProps = {
   kinds: KindDefinition[];
@@ -23,6 +25,10 @@ function ProgramForm({
 }: EditorProps & { workout?: Workout }) {
   const [name, setName] = useState(workout?.name ?? "");
   const [notes, setNotes] = useState(workout?.notes ?? "");
+  const [competitionDate, setCompetitionDate] = useState(
+    workout?.competition_date ?? "",
+  );
+  const hyrox = isHyrox(name);
   const [entries, setEntries] = useState<DraftEntry[]>(() =>
     (workout?.entries ?? []).map((entry, i) => ({
       ...entry,
@@ -41,11 +47,10 @@ function ProgramForm({
     target,
   }));
   const original = useRef(
-    JSON.stringify({ name, notes, entries: payloadEntries }),
+    JSON.stringify({ name, notes, competitionDate, entries: payloadEntries }),
   );
   const dirty =
-    JSON.stringify({ name, notes, entries: payloadEntries }) !==
-    original.current;
+    JSON.stringify({ name, notes, competitionDate, entries: payloadEntries }) !== original.current;
   const total = entries.reduce((sum, entry) => sum + entry.sets, 0);
   const limit =
     total > 300
@@ -104,7 +109,7 @@ function ProgramForm({
   return (
     <form
       ref={form}
-      className="stack-form sport-program-form"
+      className={`stack-form sport-program-form ${hyrox ? "sport-hyrox" : ""}`}
       aria-label={workout ? "Modifier le programme" : "Nouveau programme"}
       onSubmit={(event) => {
         event.preventDefault();
@@ -116,6 +121,7 @@ function ProgramForm({
               {
                 name,
                 notes,
+                competition_date: competitionDate || null,
                 entries: payloadEntries,
                 ...(workout ? { expected_version: workout.version } : {}),
               },
@@ -125,6 +131,7 @@ function ProgramForm({
         );
       }}
     >
+      {hyrox && <HyroxBrand date={competitionDate || null} />}
       <fieldset className="sport-fieldset" disabled={action.busy}>
         <section
           className="sport-program-info"
@@ -145,6 +152,35 @@ function ProgramForm({
               onChange={(e) => setName(e.target.value)}
             />
           </label>
+          {hyrox && (
+            <div className="sport-hyrox-date">
+              <label>
+                Date de votre prochain HYROX
+                <span className="muted">Facultatif</span>
+                <input
+                  type="date"
+                  min="0001-01-01"
+                  max="9999-12-31"
+                  value={competitionDate}
+                  aria-describedby="competition-date-help"
+                  onChange={(e) => setCompetitionDate(e.target.value)}
+                />
+              </label>
+              <p id="competition-date-help" className="muted small-text">
+                Votre compte à rebours suit cette date. Vous pourrez la modifier
+                à tout moment.
+              </p>
+              {competitionDate && (
+                <button
+                  type="button"
+                  className="text-button"
+                  onClick={() => setCompetitionDate("")}
+                >
+                  Effacer la date de compétition
+                </button>
+              )}
+            </div>
+          )}
           <label>
             Notes de préparation <span className="muted">Facultatif</span>
             <textarea
@@ -163,6 +199,9 @@ function ProgramForm({
                 {entries.length} / 50 exercices · {total} / 300 séries
               </p>
             </div>
+            {hyrox && (
+              <span className="sport-hyrox-stamp"><HyroxMark /></span>
+            )}
           </div>
           {!entries.length && (
             <div className="sport-empty">
@@ -255,6 +294,12 @@ function ProgramForm({
           </button>
           {picking && (
             <div id="program-picker">
+              {hyrox && (
+                <div className="sport-hyrox-picker-heading">
+                  <HyroxMark />
+                  <span>Composez votre prochaine séance.</span>
+                </div>
+              )}
               <ExercisePicker
                 kinds={kinds}
                 onPick={(exercise) => {

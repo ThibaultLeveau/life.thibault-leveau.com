@@ -643,3 +643,140 @@ def test_empty_measurement_update_and_restore_collision_are_rejected(client):
         409,
     )
     call(client, "GET", "/statistics?since=9999-12-30&until=9999-12-31", status=422)
+
+
+@pytest.mark.parametrize(
+    "invalid_date",
+    ["2027-02-29", "2028-13-01", "2028-01-01T00:00:00Z", "20280101", "2028-W01-1", "", 0, True],
+)
+def test_competition_date_requires_an_iso_civil_date(client, invalid_date):
+    payload = {
+        "name": "Prépa hYrOx",
+        "competition_date": invalid_date,
+        "entries": [{"exercise_id": exercise(client)["id"]}],
+    }
+    call(client, "POST", "/workouts", payload, 422)
+    assert call(client, "GET", "/workouts") == []
+
+
+def test_competition_date_parity_snapshot_and_lifecycle(client, app):
+    payload = {
+        "name": "Prépa hYrOx",
+        "competition_date": "2028-02-29",
+        "entries": [{"exercise_id": exercise(client)["id"], "sets": 1}],
+    }
+    w = call(client, "POST", "/workouts", payload, 201)
+    assert w["competition_date"] == "2028-02-29"
+    assert call(client, "GET", "/workouts")[0] == w
+    t = start(client, w)
+    assert t["competition_date"] == w["competition_date"]
+    changed = call(
+        client,
+        "PUT",
+        f"/workouts/{w['id']}",
+        {**payload, "competition_date": "2029-03-11", "expected_version": 1},
+    )
+    call(client, "PUT", f"/workouts/{w['id']}", {**payload, "expected_version": 1}, 409)
+    # Rename without HYROX keeps the explicitly supplied date; branding is presentation only.
+    changed = call(
+        client,
+        "PUT",
+        f"/workouts/{w['id']}",
+        {
+            **payload,
+            "name": "Préparation",
+            "competition_date": changed["competition_date"],
+            "expected_version": changed["version"],
+        },
+    )
+    for archived in (True, False):
+        changed = call(
+            client,
+            "PUT",
+            f"/workouts/{w['id']}/archive",
+            {"expected_version": changed["version"], "archived": archived},
+        )
+        assert changed["competition_date"] == "2029-03-11"
+    client.put("/api/v1/applications/sport", json={"enabled": False})
+    call(client, "GET", f"/workouts/{w['id']}", status=403)
+    client.put("/api/v1/applications/sport", json={"enabled": True})
+    assert call(client, "GET", f"/workouts/{w['id']}") == changed
+    restored = call(client, "GET", "/sessions/active")
+    assert restored["competition_date"] == "2028-02-29" and restored["name"] == payload["name"]
+    t = record(client, restored, {"weight_kg": 20, "reps": 10})
+    t = finish(client, t)
+    assert t["competition_date"] == "2028-02-29"
+    assert call(client, "GET", "/sessions")["items"][0]["competition_date"] == "2028-02-29"
+    assert call(client, "GET", "/statistics")["sessions"][0]["competition_date"] == "2028-02-29"
+    next_session = start(client, changed)
+    assert next_session["competition_date"] == "2029-03-11"
+    finish(client, next_session, "cancelled")
+    with TestClient(app) as bob:
+        response = bob.post(
+            "/api/v1/auth/session",
+            json={
+                "username": "bob",
+                "password": "synthetic-test-password",
+            },
+        )
+        bob.headers["X-CSRF-Token"] = response.json()["csrf_token"]
+        bob.put("/api/v1/applications/sport", json={"enabled": True})
+        call(bob, "GET", f"/workouts/{w['id']}", status=404)
+        call(bob, "GET", f"/sessions/{t['id']}", status=404)
+        call(
+            bob,
+            "PUT",
+            f"/workouts/{w['id']}",
+            {**payload, "expected_version": changed["version"]},
+            404,
+        )
+    with TestClient(app) as no_csrf:
+        no_csrf.cookies.update(dict(client.cookies))
+        call(
+            no_csrf,
+            "PUT",
+            f"/workouts/{w['id']}",
+            {**payload, "expected_version": changed["version"]},
+            403,
+        )
+    for change in ({"competition_date": None}, {"competition_date": "2020-01-01"}, {}):
+        changed = call(
+            client,
+            "PUT",
+            f"/workouts/{w['id']}",
+            {
+                "name": "HYROX",
+                "entries": payload["entries"],
+                "expected_version": changed["version"],
+                **change,
+            },
+        )
+        assert changed["competition_date"] == change.get("competition_date")
+    assert start(client, changed)["competition_date"] is None
+    assert call(client, "GET", f"/sessions/{t['id']}")["competition_date"] == "2028-02-29"
+
+
+def test_hyrox_migration_preserves_existing_data_and_refuses_date_loss(client, engine):
+    w = workout(client)
+    t = start(client, w)
+    config = migration_config()
+    with engine.begin() as conn:
+        config.attributes["connection"] = conn
+        command.downgrade(config, "0006_sport")
+        assert conn.scalar(text("SELECT name FROM sport_workouts")) == w["name"]
+        command.upgrade(config, "head")
+    assert call(client, "GET", f"/workouts/{w['id']}") == w
+    restored = call(client, "GET", f"/sessions/{t['id']}")
+    assert {k: v for k, v in restored.items() if k != "server_now"} == {
+        k: v for k, v in t.items() if k != "server_now"
+    }
+    # Each column independently prevents a destructive downgrade, including historical sessions.
+    for table in ("sport_workouts", "sport_sessions"):
+        with engine.begin() as conn:
+            conn.execute(text(f"UPDATE {table} SET competition_date='2028-02-29'"))
+        with pytest.raises(RuntimeError, match="dates de compétition"), engine.begin() as conn:
+            config.attributes["connection"] = conn
+            command.downgrade(config, "0006_sport")
+        with engine.begin() as conn:
+            assert str(conn.scalar(text(f"SELECT competition_date FROM {table}"))) == "2028-02-29"
+            conn.execute(text(f"UPDATE {table} SET competition_date=NULL"))

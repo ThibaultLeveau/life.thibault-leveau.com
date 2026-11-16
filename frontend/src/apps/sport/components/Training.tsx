@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { Dialog, ErrorMessage } from "../../../shared/ui/Dialog";
 import { Icon } from "../../../shared/ui/Icon";
 import { sportApi } from "../api";
+import { isHyrox } from "../hyrox";
+import { HyroxBrand, HyroxMark } from "./HyroxBrand";
 import type { KindDefinition, Training, Values } from "../types";
 import {
   Empty,
@@ -65,7 +67,8 @@ export function RestTimer({
       )
     : 0;
   return (
-    <div ref={bar} className={`sport-rest ${left ? "is-running" : ""}`}>
+    <div ref={bar} className={`sport-rest ${left ? "is-running" : ""} ${isHyrox(training.name) ? "sport-hyrox" : ""}`}>
+      {isHyrox(training.name) && <span className="sport-hyrox-stamp"><HyroxMark /></span>}
       <div>
         <span className="eyebrow">RÉCUPÉRATION</span>
         <strong role="timer" aria-label="Temps de repos restant">
@@ -196,7 +199,8 @@ export function ActiveTraining({
     );
   const total = training.entries.reduce((sum, e) => sum + e.sets, 0);
   return (
-    <div className="sport-training">
+    <div className={`sport-training ${isHyrox(training.name) ? "sport-hyrox" : ""}`}>
+      {isHyrox(training.name) && <HyroxBrand date={training.competition_date} />}
       <div className="sport-toolbar">
         <div>
           <h2>{training.name}</h2>

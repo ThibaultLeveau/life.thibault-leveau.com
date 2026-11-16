@@ -178,6 +178,7 @@ def start(db, user, payload):
         owner_id=user.id,
         workout_id=workout.id,
         name=workout.name,
+        competition_date=workout.competition_date,
         entries=entries,
         signature=signature,
     )

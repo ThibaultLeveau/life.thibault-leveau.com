@@ -62,6 +62,7 @@ export interface Entry {
 export interface Workout {
   id: string;
   name: string;
+  competition_date: string | null;
   notes: string;
   entries: Entry[];
   version: number;
@@ -90,6 +91,7 @@ export interface Training {
   id: string;
   workout_id: string;
   name: string;
+  competition_date: string | null;
   entries: (Entry & { suggested_values: (Values | null)[] })[];
   sets: SetRecord[];
   status: "active" | "completed" | "cancelled";
