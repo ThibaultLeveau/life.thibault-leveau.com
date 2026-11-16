@@ -2,7 +2,7 @@
 
 [Guide français](../progression.md)
 
-Tasks, Sport and Tracking each have their own XP, level, title and streak. Open the badge at the top right to see your progress and the three unfinished quests closest to completion. Enter opens the panel; Escape closes it and returns focus.
+Tasks, Sport, Tracking and OKR Goals each have their own XP, level, title and streak. Open the badge at the top right to see your progress and the three unfinished quests closest to completion. Enter opens the panel; Escape closes it and returns focus.
 
 In **Tracking → Achievements**, choose an enabled application to explore its **60 quests**, filter completed or unfinished quests, search objectives and browse the points journal. The title journey shows all ten milestones. Disabling an application preserves its progress; Tasks and Sport still work when Tracking is disabled.
 
@@ -35,3 +35,7 @@ Changing timezone does not move previously recorded activity dates. Weekend and 
 An explicit import for a named account can recover verifiable historical activity. Existing Tracking periods retain their former 10–30 XP; new confirmations use the new scale. Imported activities keep their original date; newly unlocked quests use the import date. Missing historical task priorities are not inferred. Repeating an import never duplicates rewards.
 
 All features use the [versioned progression API](../api.md#progression-par-application). The older `/tracking/achievements` remains a compatible historical calculation of current tracking entries and five badges. The new wall, titles and shared badge use `/progression`, whose rewards remain earned after corrections.
+
+## OKR quests
+
+OKR adds 60 quests across completed objectives, key results reached, personal goals, professional goals, active days and streaks. First completion earns 100 XP per objective; first attainment earns 15 XP per key result within an objective. Corrections and reopening keep rewards without duplicating them. Snapshot areas are fixed at first success. The badge works without Tracking. [OKR details](okr.md#tracking-and-quests).

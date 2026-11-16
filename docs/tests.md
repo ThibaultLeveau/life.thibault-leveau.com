@@ -128,3 +128,9 @@ Le changement ne modifie ni tables, migrations, contrats HTTP, récurrences ni j
 
 
 La progression est couverte par `test_progression.py` (barèmes, niveaux, 180 quêtes, concurrence, propriétaires, calendrier/DST, vacances, reprise ciblée, journal immuable et refus de perte), les contrats de `test_architecture.py` et `progression.spec.ts` (badge en direct, dropdown clavier, mur, filtres, réglages, garde des brouillons, erreurs, expiration, FR/EN et thèmes à 320 px). Le test conteneur exerce deux reprises idempotentes du seul compte synthétique et compare les quatre tables après restauration, avec vérification du trigger des récompenses. Les tests de migrations anciennes utilisent une fixture sans nouvelle attribution afin d’isoler leurs propres invariants ; la protection de la migration 0010 est testée séparément avec de vrais gains.
+
+## Objectifs OKR
+
+`test_okr.py` couvre précision progressive, parents, frontière du mois (dont janvier et année bissextile), résultats croissants/décroissants, ordre, concurrence, clôture selon fuseau à une frontière de trimestre, instantanés, réouvertures et récompenses uniques, propriétaires, activation, archives, contraintes et migration aller/retour/refus de perte. Les tests communs parcourent toutes les routes désactivées, manifestes, fournisseurs, traductions et quêtes.
+
+`okr.spec.ts` vérifie API/interface, parcours guidé, kanban, rétrospective, Suivi, brouillons, erreurs, petit écran et clavier. Les parcours de navigation communs incluent OKR. Le test conteneur restaure les trois tables et compare leurs valeurs intégralement, puis vérifie l’immuabilité du journal restauré. La recette de publication emploie un compte isolé sans modifier les données personnelles.

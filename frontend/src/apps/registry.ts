@@ -4,4 +4,6 @@ import { application as sport } from "./sport/manifest";
 
 import { application as tracking } from "./tracking/manifest";
 
-export const applications = [tasks, sport, tracking];
+import { application as okr } from "./okr/manifest";
+
+export const applications = [tasks, sport, tracking, okr];

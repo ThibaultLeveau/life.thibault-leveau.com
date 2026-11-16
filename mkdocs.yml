@@ -58,6 +58,8 @@ nav:
   - API Sport: sport-api.md
   - Utiliser Suivi: tracking.md
   - API Suivi: tracking-api.md
+  - Utiliser Objectifs OKR: okr.md
+  - API Objectifs OKR: okr-api.md
   - Réussites et progression: progression.md
   - Intégrations de données: integrations.md
   - Français et anglais: internationalisation.md
@@ -67,6 +69,7 @@ nav:
       - Tasks: en/taches.md
       - Sport: en/sport.md
       - Tracking: en/tracking.md
+      - OKR Goals: en/okr.md
       - Achievements: en/progression.md
   - Développer:
       - Démarrage: demarrage.md

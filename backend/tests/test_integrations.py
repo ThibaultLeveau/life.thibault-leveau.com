@@ -34,7 +34,7 @@ def evaluate(client, metric, application="tasks", filters=None, aggregation="cou
 def test_provider_catalogue_filters_and_owner_boundary(authenticated_client, app):
     client = authenticated_client
     sources = client.get("/api/v1/integrations").json()
-    assert {s["id"] for s in sources} == {"tasks", "sport"}
+    assert {s["id"] for s in sources} == {"tasks", "sport", "okr"}
     assert len(sources[0]["metrics"]) >= 19 and len(sources[1]["metrics"]) >= 31
     assert not sources[1]["enabled"]
     space, _ = create_space(client, "Private")

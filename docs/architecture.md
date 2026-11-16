@@ -49,7 +49,7 @@ React ne conserve pas de base métier parallèle dans localStorage. Les champs e
 
 ## HTTP et compilation
 
-`/` (accueil), `/applications` (bibliothèque) et les chemins des manifestes (`/tasks`, `/sport` et `/tracking`) sont les seules routes HTML React. Les assets sont sous `/assets/`, l'API sous `/api/v1`, Swagger sous `/api/docs` et MkDocs sous `/documentation/`. Tout chemin inconnu reste 404. Le frontend utilise des URL API relatives, sans service réseau distinct pour le rendu.
+`/` (accueil), `/applications` (bibliothèque) et les chemins des manifestes (`/tasks`, `/sport`, `/tracking` et `/okr`) sont les seules routes HTML React. Les assets sont sous `/assets/`, l'API sous `/api/v1`, Swagger sous `/api/docs` et MkDocs sous `/documentation/`. Tout chemin inconnu reste 404. Le frontend utilise des URL API relatives, sans service réseau distinct pour le rendu.
 
 ![Construction multi-étapes : frontend et documentation compilés rejoignent le runtime Python.](assets/diagrams/build.svg)
 
@@ -96,3 +96,7 @@ Le client HTTP et les types de métriques réutilisables sont dans `frontend/src
 L’[ADR 006](decisions/006-progression-applications.md), approuvé le 16 novembre 2026 dans l’issue #58, ajoute `platform/progression` : moteur partagé de niveaux/séries, préférences et journal PostgreSQL. Le manifeste porte un fournisseur optionnel `progression` ; chaque application possède son catalogue et transforme uniquement ses propres données en activités. Le registre reste le seul assemblage. Les confirmations enregistrent leurs faits et gains dans la transaction métier, sans effet de bord sur les lectures HTTP. La reprise historique est une commande explicite pour un compte nommé.
 
 Le frontend `platform/progression` fournit le client API, les réglages et le badge injecté par les Pages dans le slot neutre `status` d’`ApplicationTopbar`. `shared` ne dépend toujours ni du socle ni des applications. Suivi possède la composition du mur et du journal ; le badge des autres applications fonctionne indépendamment de son activation. La progression conserve propriétaire, CSRF, contrôles d’activation et protection des réponses obsolètes. Voir [contrats](api.md#progression-par-application), [données](donnees.md#donnees-de-progression) et [guide](progression.md).
+
+## Objectifs OKR
+
+`apps/okr` ajoute un métier selon l’ADR 003 : objectifs, résultats clés et historique trimestriel. Ses fournisseurs `integrations.py` et `progression.py` suivent les ADR 005/006 existants. Les deux registres sont les seuls assemblages ; aucune modification des frontières ni nouvelle infrastructure. La migration additive `0011_okr` ajoute trois tables. Les valeurs de résultats clés et les instantanés restent JSONB dans PostgreSQL ; seuls les brouillons sont transitoires dans React. Voir [guide](okr.md), [API](okr-api.md) et [données](donnees.md#donnees-okr).

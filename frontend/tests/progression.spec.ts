@@ -18,7 +18,7 @@ test.beforeAll(async ({ browser }) => {
   expect(login.ok()).toBeTruthy();
   headers = { "X-CSRF-Token": (await login.json()).csrf_token };
   cookies = await auth.cookies();
-  for (const id of ["tasks", "sport", "tracking"])
+  for (const id of ["tasks", "sport", "okr", "tracking"])
     expect(
       (
         await auth.request.put(`/api/v1/applications/${id}`, {
@@ -159,7 +159,7 @@ test("Week-ends et vacances : enregistrement, garde du brouillon et persistance"
   ).json();
   expect(settings.exclude_weekends.tasks).toBe(true);
   expect(settings.vacations).toHaveLength(1);
-  for (const id of ["tasks", "sport", "tracking"])
+  for (const id of ["tasks", "sport", "okr", "tracking"])
     expect(
       (await (await page.request.get(`/api/v1/progression/${id}`)).json())
         .paused_today,
@@ -181,7 +181,7 @@ test("Parité mobile 320 px et bureau, FR/EN et thèmes ; séries conservées ap
         data: { locale, theme },
       });
       await page.setViewportSize({ width: 320, height: 820 });
-      for (const id of ["tasks", "sport", "tracking"]) {
+      for (const id of ["tasks", "sport", "okr", "tracking"]) {
         await page.goto(
           `/${id}${id === "tracking" ? "?tab=achievements&application=tracking" : ""}`,
         );
@@ -212,7 +212,12 @@ test("Parité mobile 320 px et bureau, FR/EN et thèmes ; séries conservées ap
     (await auth.request.get("/api/v1/progression/tasks/history")).status(),
   ).toBe(403);
   await page.goto("/tracking?tab=achievements");
-  await expect(page.locator(".progression-app-picker button")).toHaveCount(2);
+  await expect(page.locator(".progression-app-picker button")).toHaveCount(3);
+  await expect(
+    page
+      .locator(".progression-app-picker")
+      .getByRole("button", { name: /OKR Goals/ }),
+  ).toBeVisible();
   await auth.request.put("/api/v1/applications/tasks", {
     headers,
     data: { enabled: true },

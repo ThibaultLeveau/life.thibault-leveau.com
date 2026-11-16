@@ -227,4 +227,11 @@
   .application-breadcrumb > a + span {
     display: none;
   }
+  .application-breadcrumb > span:not([aria-hidden]) {
+    flex-shrink: 1;
+    min-width: 0;
+    max-width: 45%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }

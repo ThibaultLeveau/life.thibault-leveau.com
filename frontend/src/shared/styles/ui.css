@@ -344,6 +344,10 @@
   border-bottom: 1px solid var(--ui-border);
   background: var(--ui-paper);
 }
+.dialog-header .icon-button {
+  width: 44px;
+  height: 44px;
+}
 .dialog-header h2 {
   font-size: 16px;
 }

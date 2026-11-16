@@ -2,7 +2,7 @@
 
 [English guide](en/progression.md)
 
-Chaque application possède ses points d’expérience, son niveau, son titre et sa série. Le badge en haut à droite de Tâches, Sport et Suivi donne votre progression et les trois quêtes inachevées les plus proches de leur objectif. Ouvrez-le au clavier avec Entrée ; Échap ferme le panneau et rend le focus au bouton.
+Chaque application possède ses points d’expérience, son niveau, son titre et sa série. Le badge en haut à droite de Tâches, Sport, Suivi et Objectifs OKR donne votre progression et les trois quêtes inachevées les plus proches de leur objectif. Ouvrez-le au clavier avec Entrée ; Échap ferme le panneau et rend le focus au bouton.
 
 Dans **Suivi → Réussites**, choisissez une application : le mur présente ses **60 quêtes**, leurs conditions, leur progression et leurs points. Filtrez les quêtes à accomplir ou accomplies, ou recherchez un objectif. Le parcours des titres montre tous les paliers ; le journal détaille chaque gain, avec pagination. Seules les applications activées sont consultables. Désactiver conserve tout ; la progression de Tâches et Sport reste utilisable lorsque Suivi est désactivé.
 
@@ -60,3 +60,7 @@ Les brouillons de réglages sont protégés lors d’une navigation, d’un chan
 Une reprise explicite peut convertir les activités antérieures vérifiables, sans modifier les tâches, séances ou saisies. Les périodes Suivi existantes gardent leur ancien montant de 10 à 30 XP ; les nouvelles confirmations suivent le nouveau barème. Les quêtes reprises sont datées du moment de l’import, les activités gardent leur date réelle. Les priorités absentes d’un ancien événement Tâches ne sont pas inventées depuis l’état courant. Une reprise répétée ne crée pas de doublons. Voir [la procédure de publication](deploiement.md#livraison-de-la-progression).
 
 L’[API de progression](api.md#progression-par-application) fournit toutes les lectures et préférences. L’ancien `GET /tracking/achievements` reste un contrat historique compatible (XP recalculés sur les saisies courantes et cinq badges), utilisé par les anciennes statistiques de périodes ; le mur, les titres et le badge utilisent exclusivement `/progression`. Ces deux scores répondent à des règles différentes : le nouveau journal conserve les gains acquis.
+
+## Quêtes Objectifs OKR
+
+OKR ajoute 60 quêtes : objectifs accomplis, résultats clés atteints, objectifs personnels, professionnels, jours actifs et séries (dix paliers par famille). Une première clôture vaut 100 XP ; une première atteinte de résultat clé vaut 15 XP. Les identifiants de l’objectif et du résultat dans cet objectif dédupliquent les gains, même après correction/réouverture. Les instantanés fixent les domaines au premier succès. Le badge fonctionne sans Suivi ; le mur et les réglages communs sont disponibles dans Suivi. [Règles et exemples](okr.md#suivi-quetes-et-motivation).

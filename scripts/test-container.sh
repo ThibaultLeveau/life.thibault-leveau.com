@@ -142,6 +142,13 @@ for tracking_table in tracking_trackers tracking_definitions tracking_entries tr
   restored_tracking=$(docker exec "$db" psql -U life -d life_restored -Atc "$tracking_query")
   [[ "$source_tracking" != '[]' && "$source_tracking" == "$restored_tracking" ]]
 done
+# OKR parent links, targets, dates, immutable quarterly snapshots and timezone survive intact.
+for okr_table in okr_objectives okr_events okr_settings; do
+  okr_query="SELECT coalesce(jsonb_agg(to_jsonb(t) ORDER BY to_jsonb(t)::text), '[]'::jsonb) FROM $okr_table t"
+  source_okr=$(docker exec "$db" psql -U life -d life -Atc "$okr_query")
+  restored_okr=$(docker exec "$db" psql -U life -d life_restored -Atc "$okr_query")
+  [[ "$source_okr" != '[]' && "$source_okr" == "$restored_okr" ]]
+done
 # Progression preferences, first confirmations, rewards and import markers survive intact.
 for progression_table in progression_settings progression_activity progression_rewards progression_imports; do
   progression_query="SELECT coalesce(jsonb_agg(to_jsonb(t) ORDER BY to_jsonb(t)::text), '[]'::jsonb) FROM $progression_table t"
@@ -170,6 +177,10 @@ if docker exec "$db" psql -U life -d life_restored --set ON_ERROR_STOP=1 -c "UPD
 fi
 if docker exec "$db" psql -U life -d life_restored --set ON_ERROR_STOP=1 -c "UPDATE progression_rewards SET xp = xp + 1" >"$temporary/progression-immutable-check" 2>&1; then
   echo 'Le journal de progression restauré doit rester immuable.' >&2
+  exit 1
+fi
+if docker exec "$db" psql -U life -d life_restored --set ON_ERROR_STOP=1 -c "UPDATE okr_events SET kind = 'updated'" >"$temporary/okr-immutable-check" 2>&1; then
+  echo 'Le journal OKR restauré doit rester immuable.' >&2
   exit 1
 fi
 printf 'Image, navigateur, rôle PostgreSQL et restauration vérifiés (%s événements conservés).\n' "$source_count"

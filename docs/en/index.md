@@ -15,3 +15,5 @@ Changing language reloads the current view. Save temporary form entries first; S
 The technical and operations documentation is maintained in French: [architecture](../architecture.md), [API](../api.md), [language contracts](../internationalisation.md), [deployment](../deploiement.md) and [backups](../sauvegardes.md).
 
 [Tracking](tracking.md) adds personal habits and goals, Tasks/Sport data sources, guided entry, a responsive calendar, statistics and rewards.
+
+[OKR Goals](okr.md) connects your 10-year, 3-year, annual and quarterly goals with measurable key results, a quarterly board, accomplishment snapshots, Tracking metrics and 60 quests.
