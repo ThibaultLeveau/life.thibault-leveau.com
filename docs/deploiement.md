@@ -197,3 +197,9 @@ Sur le compte de recette isolé, créer un programme contenant « Hyrox », choi
 Publier le `main` validé avec la procédure habituelle : sauvegarde, migration additive `0008_locale`, nouvelle image et vérification du SHA réellement exécuté. Aucune nouvelle variable, secret, base ou service. Les comptes existants restent en français et leurs contenus ne sont pas transformés. Le downgrade refuse la perte des préférences anglaises ; voir [sauvegarde et compatibilité](sauvegardes.md#migration-0008-langue-du-compte).
 
 Sur le compte synthétique isolé, vérifier le sélecteur Langue/Language, sa persistance et l’indépendance du thème, Tâches et Sport, les noms fournis traduits et les noms personnels conservés. Contrôler aussi `/documentation/en/`, `/documentation/en/taches/` et `/documentation/en/sport/`, ainsi que les sondes et routes publiques habituelles. Consigner résultats et SHA dans l’issue.
+
+### Fin de séance Sport incomplète
+
+Publier avec la sauvegarde habituelle, sans nouvelle migration SQL ni variable (révision `0008_locale`). Les résultats JSONB à zéro et le marqueur `skipped` imposent de respecter la [compatibilité de retour arrière](sauvegardes.md#fin-de-seance-sport-incomplete).
+
+Sur un compte synthétique isolé, démarrer plusieurs séries, en valider une puis terminer. Vérifier la confirmation FR/EN, le maintien des saisies en cours, les séries restantes à zéro dans l’historique, les dates préservées, le repos arrêté et le compteur de séries réellement effectuées. Recharger puis relancer le programme : les zéros automatiques ne doivent pas remplacer les derniers résultats proposés. Terminer également une séance sans série validée et contrôler l’absence d’erreur de score, en mobile à 320 px et au clavier. Contrôler le SHA exécuté, les sondes, `/sport`, OpenAPI et les guides français/anglais en HTTPS, puis consigner sauvegarde et résultats dans l’issue.

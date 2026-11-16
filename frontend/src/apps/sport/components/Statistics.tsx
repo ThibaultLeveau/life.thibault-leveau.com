@@ -170,8 +170,9 @@ export function Statistics({ kinds }: { kinds: KindDefinition[] }) {
   // Separate score references when an edited workout changes exercise order/count/type.
   const comparable = Array.from(
     new Map(
-      stats?.sessions.map((s) => [s.baseline_id ?? s.id, s.name] as const) ??
-        [],
+      stats?.sessions
+        .filter((s) => s.score != null)
+        .map((s) => [s.baseline_id ?? s.id, s.name] as const) ?? [],
     ).entries(),
   );
   const selectedWorkout = comparable.some(([id]) => id === workout)
@@ -313,7 +314,11 @@ export function Statistics({ kinds }: { kinds: KindDefinition[] }) {
             title={tr("training_score")}
             unit="points"
             points={stats.sessions
-              .filter((s) => (s.baseline_id ?? s.id) === selectedWorkout)
+              .filter(
+                (s) =>
+                  s.score != null &&
+                  (s.baseline_id ?? s.id) === selectedWorkout,
+              )
               .map((s) => ({ label: day(s.started_at), value: s.score! }))}
           />
           <details className="sport-score-explained">

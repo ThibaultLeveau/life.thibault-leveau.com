@@ -45,9 +45,9 @@ Creation and editing open a dedicated page. **All programs** or **Cancel** retur
 2. Rest starts automatically. Set its duration in **Settings**, from 0 to 3,600 seconds; the default is 90. A changed duration applies to the next completed set.
 3. The recovery timer stays at the bottom while a training session is active, including when scrolling or switching Sport tabs. It uses a server deadline and remains correct after reload or returning from the background. **Skip rest** ends it. There is no system notification or audible alarm.
 4. Edit a completed set and choose **Correct set** to keep its original completion time without restarting rest. **Undo completion** removes its recorded result and stops rest while keeping the values on screen. **Discard entry** restores saved or suggested values.
-5. Once every set is complete, **Finish training session** saves results, notes and score. **Cancel training session** preserves recorded sets in history but excludes the session from statistics and scoring.
+5. **Finish training session** is available even if fatigue prevents you from completing every set, including when none has been confirmed. Confirmation explains that unconfirmed sets will be saved with **0 reps**, or zero for their other measurements (weight, assistance, duration, distance, calories). Confirmed results and timestamps are preserved and rest ends. History labels zero-filled sets **Not performed**. You can add notes. **Cancel training session** preserves only confirmed sets in history and excludes the session from statistics and scoring.
 
-The last recorded results are suggested next time, **set by set**, for the same program and exercise type. Suggestions do not complete sets and remain editable. Recorded results from cancelled sessions also count as suggestions; undone or never-completed sets do not erase earlier results. Empty sessions do not hide the last recorded values.
+The last recorded results are suggested next time, **set by set**, for the same program and exercise type. Suggestions do not complete sets and remain editable. Recorded results from cancelled sessions also count as suggestions; undone sets and sets automatically saved with zero values at completion do not erase earlier results or become suggestions. Empty sessions do not hide the last recorded values.
 
 Matching uses exercise identity and type even after reordering. Repeated occurrences of one exercise track their own results by occurrence order. New programs or changed types start without past results. Without a historical value, the last completed preceding set in the current session is used, then the program target. Targets remain unchanged. Suggestions are fixed when training starts and survive reloads and disable/enable cycles.
 
@@ -61,9 +61,9 @@ Add a dated record with weight, body fat, neck, shoulders, chest, waist, hips, l
 
 ## Statistics and score
 
-**Statistics** shows completed sessions, sets, actual lifted volume (kg × reps) and total distance. Choose a period, body measurement, exercise and program baseline. Charts include an accessible data table. The horizontal axis follows observations in chronological order; spacing does not represent elapsed time. The period includes both endpoint dates, uses UTC training dates, defaults to one year and is limited to ten years.
+**Statistics** shows completed sessions, including incomplete ones, actually performed sets (excluding unperformed sets), actual lifted volume (kg × reps) and total distance. Choose a period, body measurement, exercise and program baseline. Charts include an accessible data table. The horizontal axis follows observations in chronological order; spacing does not represent elapsed time. The period includes both endpoint dates, uses UTC training dates, defaults to one year and is limited to ten years.
 
-The first completed session of a program scores **100**. Later sessions compare each exercise’s current performance with that baseline and average the ratios × 100, giving every exercise equal weight. Scores of 120 or 80 represent an average increase or decrease of 20% according to those measurements. The score does not assess health, technique or perceived difficulty.
+The first completed session of a program with a positive performance for every exercise scores **100** and becomes the baseline. Later sessions compare each exercise’s current performance with that baseline and average the ratios × 100, giving every exercise equal weight. Scores of 120 or 80 represent an average increase or decrease of 20% according to those measurements. The score does not assess health, technique or perceived difficulty.
 
 | Type | Compared performance |
 | --- | --- |
@@ -79,6 +79,8 @@ The first completed session of a program scores **100**. Later sessions compare 
 | Energy and duration | total displayed energy / total duration × 60 |
 
 The `+ 1` supports zero weight or assistance; these comparison points differ from actual lifted volume. Higher speed over a shorter distance may increase the cardio score, so also check distance. Longer stretching duration does not imply better health results.
+
+An entirely unperformed exercise has zero performance, including speed metrics with zero duration. Until a valid baseline exists, a session containing such an exercise has no score (shown as “—”), while remaining in history and statistics. Once the baseline exists, unperformed exercises contribute zero and an entirely unperformed session scores 0. Skipped sets add no reps, volume or distance; speed metrics still compare the measurements actually performed. Earlier scores remain unchanged.
 
 Only sessions of the same program with identical exercise IDs, types, order and numbers of sets share a baseline. Changing targets preserves the comparison family; changing structure creates another. Scores and metrics are saved at completion and are not recalculated retroactively. Language changes only how default exercise names and units are presented, never results or baseline identity.
 

@@ -171,6 +171,8 @@ def suggest_previous_values(db, user, workout, entries):
     for previous in history:
         keys = list(entry_keys(previous.entries))
         for record in previous.sets:
+            if record.get("skipped", False):
+                continue
             values = suggestions.get(keys[record["entry_index"]])
             index = record["set_index"]
             if values is not None and index < len(values) and values[index] is None:
@@ -293,9 +295,21 @@ def metrics(item):
 
 def finish(db, user, id, payload):
     item = active_session(db, user, id, payload.expected_version)
+    finished_at = utcnow()
     if payload.outcome == "completed":
-        if len(item.sets) != sum(e["sets"] for e in item.entries):
-            raise HTTPException(409, tr("complete_all_sets_before_finishing_the_training_session"))
+        recorded = {(v["entry_index"], v["set_index"]): v for v in item.sets}
+        item.sets = [
+            recorded.get((i, j))
+            or dict(
+                entry_index=i,
+                set_index=j,
+                values={field.key: 0 for field in KINDS[entry["kind"]].fields},
+                completed_at=finished_at.isoformat(),
+                skipped=True,
+            )
+            for i, entry in enumerate(item.entries)
+            for j in range(entry["sets"])
+        ]
         item.metrics = metrics(item)
         baseline = db.scalar(
             select(m.Training)
@@ -304,6 +318,9 @@ def finish(db, user, id, payload):
                 m.Training.workout_id == item.workout_id,
                 m.Training.signature == item.signature,
                 m.Training.status == "completed",
+                # The earliest scored session has positive metrics for every
+                # exercise, so it provides valid denominators for future scores.
+                m.Training.score.is_not(None),
             )
             .order_by(m.Training.finished_at, m.Training.id)
             .limit(1)
@@ -321,9 +338,11 @@ def finish(db, user, id, payload):
             )
             if baseline
             else 100.0
+            if all(metric["value"] > 0 for metric in item.metrics)
+            else None
         )
     item.status = payload.outcome
-    item.finished_at = utcnow()
+    item.finished_at = finished_at
     item.rest_until = None
     item.notes = payload.notes
     touch(item)
@@ -424,7 +443,7 @@ def statistics(db, user, since, until):
     ).all()
     return s.Statistics(
         completed_sessions=len(trainings),
-        total_sets=sum(len(t.sets) for t in trainings),
+        total_sets=sum(not s.get("skipped", False) for t in trainings for s in t.sets),
         total_volume_kg=sum(v["volume_kg"] for t in trainings for v in t.metrics),
         total_distance_m=sum(v["distance_m"] for t in trainings for v in t.metrics),
         sessions=[training_output(t) for t in trainings],
