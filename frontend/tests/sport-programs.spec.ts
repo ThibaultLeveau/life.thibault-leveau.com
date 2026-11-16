@@ -520,19 +520,19 @@ test("Cartes de programme compactes : ordinateur, mobile, thèmes et langues", a
   await page.clock.install({ time: new Date("2028-03-25T11:00:00Z") });
   const exercises = [];
   for (const name of ["Course sur tapis", "SkiErg", "Rameur", "Burpees"]) {
-    exercises.push(
-      await write<{ id: string }>(page, "/sport/exercises", {
-        name,
-        kind: "reps",
-        muscle_group: "Général",
-        equipment: "Sans matériel",
-      }),
+    const response = await page.request.get(
+      `/api/v1/sport/exercises?q=${encodeURIComponent(name)}`,
     );
+    expect(response.ok()).toBeTruthy();
+    const catalogue: ExercisePage = await response.json();
+    const exercise = catalogue.items.find((item) => item.builtin);
+    expect(exercise, `Default catalogue exercise: ${name}`).toBeDefined();
+    exercises.push(exercise!);
   }
   const entries = exercises.map((exercise) => ({
     exercise_id: exercise.id,
     sets: 3,
-    target: { reps: 10 },
+    target: {},
   }));
   const regular = await write<Workout>(page, "/sport/workouts", {
     name: "Programme haut du corps",
