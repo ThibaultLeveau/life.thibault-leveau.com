@@ -134,7 +134,7 @@ test("un échec restaure uniquement la tâche concernée et conserve la validati
   );
 });
 
-test("création, édition et duplication restent utilisables pendant l’enregistrement", async ({
+test("création puis validation et édition restent utilisables pendant l’enregistrement", async ({
   page,
 }) => {
   const { tasks } = await seed(page);

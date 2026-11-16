@@ -314,10 +314,17 @@ export function TaskSyncProvider({ children }: { children: ReactNode }) {
     loadingSpaces.current.set(id, load);
     return load;
   }
+  async function idle() {
+    let tail: Promise<void>;
+    do {
+      tail = writes.current;
+      await tail;
+    } while (tail !== writes.current && !controller.current.signal.aborted);
+  }
   async function refresh() {
     const signal = controller.current.signal;
     const reading = ++reads.current;
-    await writes.current;
+    await idle();
     if (signal.aborted) return;
     const stamp = revision.current;
     try {
@@ -610,16 +617,7 @@ export function TaskSyncProvider({ children }: { children: ReactNode }) {
         canonicalId: (id) => aliases.current.get(id) ?? id,
         keyFor: (id) => clientIds.current.get(id) ?? id,
         mutate,
-        idle: async () => {
-          let tail: Promise<void>;
-          do {
-            tail = writes.current;
-            await tail;
-          } while (
-            tail !== writes.current &&
-            !controller.current.signal.aborted
-          );
-        },
+        idle,
       }}
     >
       {children}
