@@ -49,6 +49,7 @@ class Workout(Owned, Base):
         ),
     )
     name: Mapped[str] = mapped_column(String(160))
+    competition_date: Mapped[date | None] = mapped_column(Date)
     notes: Mapped[str] = mapped_column(Text, default="")
     entries: Mapped[list] = mapped_column(JSONB)
 
@@ -80,6 +81,7 @@ class Training(Base):
     owner_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
     workout_id: Mapped[UUID] = mapped_column()
     name: Mapped[str] = mapped_column(String(160))
+    competition_date: Mapped[date | None] = mapped_column(Date)
     entries: Mapped[list] = mapped_column(JSONB)
     sets: Mapped[list] = mapped_column(JSONB, default=list)
     status: Mapped[str] = mapped_column(String(12), default="active")

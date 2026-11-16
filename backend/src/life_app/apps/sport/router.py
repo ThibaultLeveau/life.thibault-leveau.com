@@ -123,6 +123,7 @@ def create_workout(payload: s.WorkoutInput, user: CurrentUser, db: Database):
     item = m.Workout(
         owner_id=user.id,
         name=payload.name,
+        competition_date=payload.competition_date,
         notes=payload.notes,
         entries=svc.snapshot(db, user, payload.entries),
     )
@@ -136,6 +137,7 @@ def update_workout(workout_id: UUID, payload: s.WorkoutUpdate, user: CurrentUser
     item = svc.owned(db, m.Workout, user, workout_id)
     svc.version(item, payload.expected_version)
     item.name, item.notes = payload.name, payload.notes
+    item.competition_date = payload.competition_date
     item.entries = svc.snapshot(db, user, payload.entries)
     svc.touch(item)
     return commit(db, item, s.WorkoutOutput.model_validate)

@@ -113,6 +113,10 @@ recurrence_query="SELECT string_agg(id::text || recurrence::text || recurrence_c
 source_recurrence=$(docker exec "$db" psql -U life -d life -Atc "$recurrence_query")
 restored_recurrence=$(docker exec "$db" psql -U life -d life_restored -Atc "$recurrence_query")
 [[ -n "$source_recurrence" && "$source_recurrence" == "$restored_recurrence" ]]
+# Both kinds of competition date must be present in the dump acceptance fixture.
+for sport_table in sport_workouts sport_sessions; do
+  [[ $(docker exec "$db" psql -U life -d life_restored -Atc "SELECT count(*) FROM $sport_table WHERE competition_date IS NOT NULL") -gt 0 ]]
+done
 # Compare every persisted Sport field, including session snapshots, scores and recovery dates.
 for sport_table in sport_exercises sport_workouts sport_sessions sport_measurements sport_settings; do
   sport_query="SELECT coalesce(jsonb_agg(to_jsonb(t) ORDER BY to_jsonb(t)::text), '[]'::jsonb) FROM $sport_table t"

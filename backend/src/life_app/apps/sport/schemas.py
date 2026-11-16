@@ -2,7 +2,7 @@ from datetime import date, datetime
 from typing import Annotated, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 Kind = Literal[
     "weight_reps",
@@ -109,8 +109,28 @@ class TrainingEntry(SnapshotEntry):
 
 class WorkoutInput(Contract):
     name: Name
+    competition_date: date | None = Field(
+        None,
+        description=(
+            "Date civile de compétition facultative (YYYY-MM-DD), sans heure ni fuseau. "
+            "Affichée avec le branding si le titre contient Hyrox, sans distinction de casse. "
+            "null ou omission lors d'un remplacement efface la date."
+        ),
+    )
     notes: str = Field("", max_length=4000)
     entries: list[TemplateEntry] = Field(min_length=1, max_length=50)
+
+    @field_validator("competition_date", mode="before")
+    @classmethod
+    def calendar_date(cls, value):
+        if value is None or type(value) is date:
+            return value
+        if not isinstance(value, str) or len(value) != 10:
+            raise ValueError("Utilisez une date au format AAAA-MM-JJ, sans heure.")
+        parsed = date.fromisoformat(value)
+        if parsed.isoformat() != value:
+            raise ValueError("Utilisez une date au format AAAA-MM-JJ, sans heure.")
+        return parsed
 
     @model_validator(mode="after")
     def limit_sets(self):
@@ -126,6 +146,7 @@ class WorkoutUpdate(WorkoutInput, Version):
 class WorkoutOutput(Contract):
     id: UUID
     name: str
+    competition_date: date | None
     notes: str
     entries: list[SnapshotEntry]
     version: int
@@ -175,6 +196,9 @@ class TrainingOutput(Contract):
     id: UUID
     workout_id: UUID
     name: str
+    competition_date: date | None = Field(
+        description="Date de compétition figée au démarrage ; null pour les anciens entraînements."
+    )
     entries: list[TrainingEntry]
     sets: list[SetOutput]
     status: Literal["active", "completed", "cancelled"]

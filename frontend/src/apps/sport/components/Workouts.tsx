@@ -1,6 +1,8 @@
 import { ErrorMessage } from "../../../shared/ui/Dialog";
 import { Icon } from "../../../shared/ui/Icon";
 import { sportApi } from "../api";
+import { isHyrox } from "../hyrox";
+import { HyroxBrand, HyroxMark } from "./HyroxBrand";
 import type { KindDefinition, Training } from "../types";
 import { Empty, LoadState, useAction, useResource, valuesText } from "./common";
 
@@ -27,7 +29,8 @@ export function Workouts({
   return (
     <>
       {active && (
-        <button className="sport-active-banner" onClick={() => onStarted()}>
+        <button className={`sport-active-banner ${isHyrox(active.name) ? "sport-hyrox" : ""}`} onClick={() => onStarted()}>
+          {isHyrox(active.name) && <span className="sport-hyrox-stamp"><HyroxMark /></span>}
           <span>
             <strong>{active.name}</strong>
             <small>
@@ -68,7 +71,8 @@ export function Workouts({
       )}
       <div className="sport-workout-grid">
         {resource.data?.map((w) => (
-          <article className="sport-workout" key={w.id}>
+          <article className={`sport-workout ${isHyrox(w.name) ? "sport-hyrox" : ""}`} key={w.id}>
+            {isHyrox(w.name) && <HyroxBrand date={w.competition_date} compact />}
             <div className="sport-workout-top">
               <span className="sport-tag">
                 {w.entries.length} exercices ·{" "}

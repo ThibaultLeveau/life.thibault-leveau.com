@@ -1033,3 +1033,250 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* The HYROX palette is scoped to the program, never to the LifeOS shell. */
+.sport-hyrox {
+  --ui-accent: #171717;
+  --ui-accent-bg: #f0f0f0;
+  --ui-button-text: #fff;
+  --ui-paper: #fff;
+  --ui-sidebar: #f5f5f5;
+  --ui-hover: #e8e8e8;
+  --ui-border: #d9d9d9;
+  --ui-text: #171717;
+  --ui-muted: #626262;
+  color: var(--ui-text);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .sport-hyrox {
+    --ui-accent: #f5f5f5;
+    --ui-accent-bg: #252525;
+    --ui-button-text: #111;
+    --ui-paper: #191919;
+    --ui-sidebar: #222;
+    --ui-hover: #303030;
+    --ui-border: #414141;
+    --ui-text: #f5f5f5;
+    --ui-muted: #b4b4b4;
+  }
+}
+:root[data-theme="dark"] .sport-hyrox {
+  --ui-accent: #f5f5f5;
+  --ui-accent-bg: #252525;
+  --ui-button-text: #111;
+  --ui-paper: #191919;
+  --ui-sidebar: #222;
+  --ui-hover: #303030;
+  --ui-border: #414141;
+  --ui-text: #f5f5f5;
+  --ui-muted: #b4b4b4;
+}
+.sport-hyrox-brand {
+  isolation: isolate;
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 28px;
+  padding: 32px;
+  border: 1px solid #454545;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #101010;
+  color: #fff;
+}
+.sport-hyrox-brand::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(120deg, #ffffff0c, transparent 55%),
+    repeating-linear-gradient(0deg, transparent 0 27px, #ffffff05 27px 28px),
+    repeating-linear-gradient(90deg, transparent 0 27px, #ffffff05 27px 28px);
+  pointer-events: none;
+}
+.sport-hyrox-identity {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 22px;
+}
+.sport-hyrox-kicker {
+  font-size: 9px;
+  line-height: 1.5;
+  font-weight: 650;
+  letter-spacing: .16em;
+  color: #c4c4c4;
+}
+.sport-hyrox-logo {
+  display: block;
+  width: min(100%, 260px);
+  height: auto;
+}
+.sport-hyrox-motto {
+  font-size: 13px;
+  color: #dedede;
+}
+.sport-hyrox-countdown {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  border-left: 1px solid #ffffff40;
+  padding-left: 28px;
+  max-width: 300px;
+}
+.sport-hyrox-countdown strong {
+  font-size: clamp(28px, 4vw, 54px);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -.055em;
+  font-variant-numeric: tabular-nums;
+}
+.sport-hyrox-countdown > span:not(.sport-hyrox-kicker) {
+  font-size: 12px;
+}
+.sport-hyrox-countdown time {
+  color: #bdbdbd;
+  font-size: 11px;
+  margin-top: 4px;
+}
+.sport-hyrox-track {
+  position: absolute;
+  z-index: -1;
+  width: 330px;
+  height: 280px;
+  left: 25%;
+  top: 30%;
+  transform: rotate(-35deg);
+  opacity: .16;
+  pointer-events: none;
+}
+.sport-hyrox-track i {
+  position: absolute;
+  inset: 0;
+  border: 1px solid #fff;
+  border-radius: 80px;
+}
+.sport-hyrox-track i:nth-child(2) { inset: 12px; }
+.sport-hyrox-track i:nth-child(3) { inset: 24px; }
+.sport-hyrox-track i:nth-child(4) { inset: 36px; }
+.sport-hyrox-track i:nth-child(5) { inset: 48px; }
+.sport-workout.sport-hyrox {
+  background: var(--ui-paper);
+  border-color: var(--ui-border);
+}
+.sport-workout > .sport-hyrox-brand {
+  margin: -22px -22px 20px;
+  border-radius: 11px 11px 0 0;
+  border-width: 0 0 1px;
+}
+.sport-hyrox-brand.is-compact {
+  padding: 22px;
+  gap: 20px;
+  grid-template-columns: 1fr;
+}
+.is-compact .sport-hyrox-identity {
+  gap: 14px;
+}
+.is-compact .sport-hyrox-logo {
+  width: 180px;
+}
+.is-compact .sport-hyrox-motto {
+  display: none;
+}
+.is-compact .sport-hyrox-countdown {
+  padding: 16px 0 0;
+  border-left: 0;
+  border-top: 1px solid #ffffff40;
+  max-width: none;
+  width: 100%;
+}
+.is-compact .sport-hyrox-countdown strong {
+  font-size: 38px;
+}
+.sport-hyrox-stamp {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  background: #111;
+  border: 1px solid #454545;
+  border-radius: 5px;
+  padding: 10px 12px;
+  width: 106px;
+}
+.sport-hyrox-stamp .sport-hyrox-logo {
+  width: 100%;
+  min-width: 0;
+}
+.sport-active-banner .sport-hyrox-stamp {
+  flex: 0 0 106px;
+}
+.sport-active-banner .sport-hyrox-stamp + span {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+.sport-hyrox-picker-heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  padding: 16px;
+  border-radius: 8px 8px 0 0;
+  background: #111;
+  color: #ddd;
+  font-size: 12px;
+}
+.sport-hyrox-picker-heading .sport-hyrox-logo {
+  width: 120px;
+}
+.sport-hyrox-picker-heading + .sport-picker {
+  border-radius: 0 0 8px 8px;
+}
+.sport-hyrox-date {
+  display: grid;
+  gap: 8px;
+  border-top: 1px solid var(--ui-border);
+  padding-top: 18px;
+}
+.sport-hyrox-date label {
+  max-width: 320px;
+}
+.sport-hyrox-date .text-button {
+  justify-self: start;
+}
+.sport-hyrox .sport-plan-entry,
+.sport-hyrox .sport-program-actions,
+.sport-hyrox.sport-training {
+  background: var(--ui-paper);
+}
+.sport-hyrox .sport-plan-entry,
+.sport-hyrox .sport-session-exercise {
+  border-left: 3px solid var(--ui-accent);
+}
+.sport-rest.sport-hyrox {
+  background: var(--ui-sidebar);
+  color: var(--ui-text);
+}
+@media (max-width: 600px) {
+  .sport-hyrox-brand {
+    grid-template-columns: 1fr;
+    padding: 22px;
+    gap: 24px;
+  }
+  .sport-hyrox-identity { gap: 18px; }
+  .sport-hyrox-logo { width: 210px; }
+  .sport-hyrox-countdown {
+    border-left: 0;
+    border-top: 1px solid #ffffff40;
+    padding: 18px 0 0;
+    width: 100%;
+    max-width: none;
+  }
+  .sport-hyrox-countdown strong { font-size: 40px; }
+  .sport-rest .sport-hyrox-stamp {
+    width: 75px;
+    padding: 8px;
+  }
+  .sport-rest.sport-hyrox > div { flex-basis: 130px; }
+}
