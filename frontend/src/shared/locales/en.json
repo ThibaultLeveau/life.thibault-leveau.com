@@ -56,5 +56,8 @@
   "activation_enabled": "{{name}} enabled.",
   "activation_disabled": "{{name}} disabled.",
   "enable_application": "Enable {{name}}",
-  "description": "LifeOS, your applications for organizing daily life."
+  "description": "LifeOS, your applications for organizing daily life.",
+  "open_navigation": "Open navigation",
+  "close_navigation": "Close navigation",
+  "breadcrumb": "Breadcrumb"
 }

@@ -375,5 +375,6 @@
   "sync_pending_other": "{{count}} actions en cours d’enregistrement…",
   "dependent_action_cancelled": "Cette action dépendait d’un enregistrement qui a échoué. Vérifiez la tâche avant de la reprendre.",
   "resume_input": "Reprendre la saisie",
-  "check_before_resubmitting": "Vérifiez les données enregistrées avant de renouveler cette action."
+  "check_before_resubmitting": "Vérifiez les données enregistrées avant de renouveler cette action.",
+  "tasks": "Tâches"
 }

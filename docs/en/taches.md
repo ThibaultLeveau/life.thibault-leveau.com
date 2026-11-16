@@ -1,5 +1,7 @@
 # Using Tasks
 
+Navigation shares its design with Sport. The footer contains the library, Tasks documentation, theme, language and user/sign-out controls. Workspace archives remain among the application links. See [shared navigation](applications.md#shared-navigation).
+
 Tasks is enabled by default in LifeOS. Open it from Home or enable it again in the [library](applications.md). Disabling Tasks blocks access without changing your records or history.
 
 ## Immediate interactions

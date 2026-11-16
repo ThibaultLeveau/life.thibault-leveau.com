@@ -56,5 +56,8 @@
   "activation_enabled": "{{name}} activée.",
   "activation_disabled": "{{name}} désactivée.",
   "enable_application": "Activer {{name}}",
-  "description": "LifeOS, vos applications pour organiser votre quotidien."
+  "description": "LifeOS, vos applications pour organiser votre quotidien.",
+  "open_navigation": "Ouvrir la navigation",
+  "close_navigation": "Fermer la navigation",
+  "breadcrumb": "Fil d’Ariane"
 }

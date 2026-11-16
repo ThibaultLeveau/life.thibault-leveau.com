@@ -2,6 +2,14 @@
 
 React, TypeScript et Vite conservent l'outillage du socle. `App.tsx` assemble la connexion commune, l’accueil `/`, la bibliothèque `/applications` et les Pages enregistrées, sans routeur supplémentaire ni fallback général. Sans espace indiqué, `/tasks` ouvre l’agenda global (`?view=agenda`). L'espace actif peut être référencé avec `?space=<UUID>` ; les accès sont toujours contrôlés côté serveur.
 
+## Navigation commune des applications
+
+Tâches et Sport composent la même `ApplicationSidebar` et la même `ApplicationTopbar` depuis `shared/ui/ApplicationNavigation.tsx`. Le fichier `shared/styles/navigation.css` possède leurs styles : largeur de sidebar de 252 px sur bureau, barre supérieure de 66 px (64 px sur mobile), mêmes liens et états visuels. Les applications fournissent leur nom, icône, fil d’Ariane et liens métier, sans surcharger cet habillage.
+
+`platform/auth/ApplicationFooter` assemble dans cet ordre la bibliothèque, la documentation courante localisée, le thème, la langue et le compte/déconnexion via `AccountMenu`. Les préférences restent dans l’API commune ; les gardes de brouillon Sport et l’attente des écritures Tâches en arrière-plan sont conservées. Les archives des espaces sont parmi les liens métier. Le prénom et le rechargement global ne figurent plus dans la top bar ; les commandes de récupération après erreur restent dans le contenu métier.
+
+À 800 px et moins, une même sidebar coulissante remplace la navigation de bureau. Elle prend le rôle de dialogue modal, rend le contenu inerte, place le focus sur la fermeture et confine Tab/Maj+Tab. Échap ou le fond la ferment ; le focus revient au déclencheur sauf si une action l’a déjà placé dans le contenu ou un dialogue. Un passage au bureau libère le contenu et le verrouillage du défilement. Les contrôles mesurent au moins 44 px et les animations respectent la réduction des mouvements.
+
 ## Module tâches
 
 `SchedulePicker` réunit le calendrier accessible (`ScheduleCalendar`) et les réglages (`RecurrenceFields`) dans le flux du dialogue. `useScheduleRecognition` interroge `/scheduling/parse` après 180 ms de pause ; les requêtes précédentes sont annulées et seules les réponses correspondant au texte et à la date courants sont présentées. La sauvegarde attend l’analyse la plus récente, même si on valide immédiatement. `ScheduleRecognition` montre le texte détecté et permet de le garder littéral. Le même comportement équipe l’éditeur et l’ajout rapide.

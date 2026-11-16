@@ -1,8 +1,11 @@
-import { formatLocale, documentationPath } from "../../shared/i18n";
 import { tr } from "./i18n";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSession } from "../../platform/auth/SessionProvider";
-import { AccountMenu } from "../../platform/auth/AccountMenu";
+import { ApplicationFooter } from "../../platform/auth/ApplicationFooter";
+import {
+  ApplicationSidebar,
+  ApplicationTopbar,
+} from "../../shared/ui/ApplicationNavigation";
 import { relativeDate, useLocalToday } from "./dates";
 import { AgendaView } from "./components/AgendaView";
 import { TaskActions } from "./components/TaskActions";
@@ -72,8 +75,6 @@ function TasksPage() {
   const [notice, setNotice] = useState("");
   const [undoTask, setUndoTask] = useState<Task | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const sidebarRef = useRef<HTMLElement>(null);
-  const mainRef = useRef<HTMLElement>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [showDisplay, setShowDisplay] = useState(false);
   const [createSpace, setCreateSpace] = useState(false);
@@ -95,51 +96,6 @@ function TasksPage() {
     ({ space }) => space.archived_at,
   );
   const workspace = workspaces.find((space) => space.id === workspaceId);
-
-  useEffect(() => {
-    if (!sidebarOpen || !matchMedia("(max-width: 800px)").matches) return;
-    const sidebar = sidebarRef.current;
-    const main = mainRef.current;
-    if (!sidebar || !main) return;
-    const previous = document.activeElement as HTMLElement | null;
-    const overflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    main.inert = true;
-    sidebar.setAttribute("role", "dialog");
-    sidebar.setAttribute("aria-modal", "true");
-    sidebar.querySelector<HTMLElement>("button.mobile-only")?.focus();
-    const trap = (event: KeyboardEvent) => {
-      if (event.key !== "Tab" || document.querySelector("dialog[open]")) return;
-      const items = Array.from(
-        sidebar.querySelectorAll<HTMLElement>(
-          "button:not(:disabled), a[href], select",
-        ),
-      ).filter((item) => item.getClientRects().length);
-      const index = items.indexOf(document.activeElement as HTMLElement);
-      if (event.shiftKey && index <= 0) {
-        event.preventDefault();
-        items.at(-1)?.focus();
-      } else if (!event.shiftKey && index === items.length - 1) {
-        event.preventDefault();
-        items[0]?.focus();
-      }
-    };
-    const resize = () => {
-      if (innerWidth > 800) setSidebarOpen(false);
-    };
-    window.addEventListener("keydown", trap);
-    window.addEventListener("resize", resize);
-    return () => {
-      document.body.style.overflow = overflow;
-      main.inert = false;
-      sidebar.removeAttribute("role");
-      sidebar.removeAttribute("aria-modal");
-      window.removeEventListener("keydown", trap);
-      window.removeEventListener("resize", resize);
-      if (!document.querySelector("dialog[open]"))
-        previous?.focus({ preventScroll: true });
-    };
-  }, [sidebarOpen]);
 
   useEffect(() => {
     if (!agenda && data && workspaceId) void sync.ensureSpace(workspaceId);
@@ -335,41 +291,23 @@ function TasksPage() {
     view.due !== "all" ||
     !view.show_completed;
   return (
-    <div
-      className={`ui-scope tasks-shell ${sidebarOpen ? "sidebar-open" : ""}`}
-    >
-      <a href="#tasks-content" className="skip-link">
-        {tr("skip_to_tasks")}
-      </a>
-      {sidebarOpen && (
-        <button
-          className="mobile-scrim"
-          onClick={() => setSidebarOpen(false)}
-          aria-label={tr("close_navigation")}
-        />
-      )}
-      <aside
-        ref={sidebarRef}
-        className="task-sidebar"
-        aria-label={tr("task_navigation")}
+    <div className="ui-scope tasks-shell">
+      <ApplicationSidebar
+        name={tr("tasks")}
+        icon="check"
+        label={tr("task_navigation")}
+        mainId="tasks-content"
+        open={sidebarOpen}
+        onOpenChange={setSidebarOpen}
+        footer={
+          <ApplicationFooter
+            documentation="taches"
+            beforeSessionChange={sync.idle}
+          />
+        }
       >
-        <div className="sidebar-top">
-          <a href="/" className="app-brand">
-            <span className="app-brand-icon">
-              <Icon name="check" size={22} />
-            </span>
-            LifeOS<span className="brand-period">.</span>
-          </a>
-          <button
-            className="icon-button mobile-only"
-            aria-label={tr("close_navigation")}
-            onClick={() => setSidebarOpen(false)}
-          >
-            <Icon name="x" />
-          </button>
-        </div>
         <button
-          className="sidebar-add"
+          className="application-nav-item"
           disabled={!workspace || loading}
           onClick={() => {
             setAgenda(false);
@@ -377,18 +315,19 @@ function TasksPage() {
             setSidebarOpen(false);
           }}
         >
-          <span>
-            <Icon name="plus" size={17} />
-          </span>
+          <Icon name="plus" />
           {tr("add_a_task")}
         </button>
-        <button className="sidebar-search" onClick={searchTasks}>
+        <button
+          className="application-nav-item sidebar-search"
+          onClick={searchTasks}
+        >
           <Icon name="search" />
           {tr("search")}
           <kbd>⌘ K</kbd>
         </button>
         <button
-          className={`workspace-link agenda-link ${agenda ? "is-active" : ""}`}
+          className={`application-nav-item workspace-link agenda-link ${agenda ? "is-active" : ""}`}
           aria-current={agenda ? "page" : undefined}
           onClick={() => {
             setAgenda(true);
@@ -420,7 +359,7 @@ function TasksPage() {
               style={{ paddingInlineStart: 12 + Math.min(depth, 6) * 16 }}
               title={path}
               aria-label={depth ? `# ${path}` : undefined}
-              className={`workspace-link ${!agenda && workspaceId === space.id ? "is-active" : ""}`}
+              className={`application-nav-item workspace-link ${!agenda && workspaceId === space.id ? "is-active" : ""}`}
               aria-current={
                 !agenda && workspaceId === space.id ? "page" : undefined
               }
@@ -441,7 +380,7 @@ function TasksPage() {
           ))}
         </nav>
         <button
-          className="sidebar-new-space"
+          className="application-nav-item"
           disabled={spacesLoading}
           onClick={() => {
             setSidebarOpen(false);
@@ -451,61 +390,30 @@ function TasksPage() {
           <Icon name="plus" size={16} />
           {tr("new_workspace")}
         </button>
-        <div className="sidebar-bottom">
-          <a href="/applications" className="sidebar-subtle">
-            <Icon name="grid" size={17} />
-            {tr("application_library")}
-          </a>
-          <a href={documentationPath("taches")} className="sidebar-subtle">
-            <Icon name="info" size={17} />
-            {tr("guide_and_documentation")}
-            <Icon name="arrow" size={14} />
-          </a>
-          <button
-            className="sidebar-subtle"
-            onClick={() => {
-              setSidebarOpen(false);
-              setManageSpaces(true);
-            }}
-          >
-            <Icon name="archive" size={17} />
-            {tr("workspace_archives")}
-          </button>
-          <AccountMenu beforeSessionChange={sync.idle} />
-        </div>
-      </aside>
-      <main
-        ref={mainRef}
-        className="tasks-main"
-        id="tasks-content"
-        tabIndex={-1}
-      >
-        <header className="task-topbar">
-          <div className="task-breadcrumb">
-            <button
-              className="icon-button mobile-only"
-              aria-label={tr("open_navigation")}
-              onClick={() => setSidebarOpen(true)}
-            >
-              <Icon name="menu" />
-            </button>
-            <span>{agenda ? tr("my_tasks") : tr("my_workspaces_title")}</span>
-            <Icon name="chevron" size={12} />
-            <strong>
-              {agenda
-                ? tr("upcoming")
-                : (spaceTree.find(({ space }) => space.id === workspaceId)
-                    ?.path ?? tr("welcome"))}
-            </strong>
-          </div>
-          <span className="topbar-date">
-            {new Date().toLocaleDateString(formatLocale(), {
-              weekday: "long",
-              day: "numeric",
-              month: "long",
-            })}
-          </span>
-        </header>
+        <button
+          className="application-nav-item"
+          onClick={() => {
+            setSidebarOpen(false);
+            setManageSpaces(true);
+          }}
+        >
+          <Icon name="archive" size={17} />
+          {tr("workspace_archives")}
+        </button>
+      </ApplicationSidebar>
+      <main className="tasks-main" id="tasks-content" tabIndex={-1}>
+        <ApplicationTopbar
+          name={tr("tasks")}
+          current={
+            agenda
+              ? tr("upcoming")
+              : (spaceTree.find(({ space }) => space.id === workspaceId)
+                  ?.path ?? tr("welcome"))
+          }
+          mainId="tasks-content"
+          open={sidebarOpen}
+          onOpenChange={setSidebarOpen}
+        />
         <div className="task-page-content">
           <SyncFeedback />
           {notice && (
