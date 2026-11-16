@@ -1034,8 +1034,9 @@
   }
 }
 
-/* The HYROX palette is scoped to the program, never to the LifeOS shell. */
-.sport-hyrox {
+/* Only bounded surfaces inherit HYROX colors; page layouts keep the LifeOS theme. */
+.sport-hyrox:where(:not(.sport-training, .sport-program-form)),
+.sport-hyrox :where(.sport-program-info, .sport-plan-entry, .sport-picker, .sport-session-exercise) {
   --ui-accent: #171717;
   --ui-accent-bg: #f0f0f0;
   --ui-button-text: #fff;
@@ -1048,7 +1049,8 @@
   color: var(--ui-text);
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .sport-hyrox {
+  :root:not([data-theme="light"]) .sport-hyrox:where(:not(.sport-training, .sport-program-form)),
+  :root:not([data-theme="light"]) .sport-hyrox :where(.sport-program-info, .sport-plan-entry, .sport-picker, .sport-session-exercise) {
     --ui-accent: #f5f5f5;
     --ui-accent-bg: #252525;
     --ui-button-text: #111;
@@ -1060,7 +1062,8 @@
     --ui-muted: #b4b4b4;
   }
 }
-:root[data-theme="dark"] .sport-hyrox {
+:root[data-theme="dark"] .sport-hyrox:where(:not(.sport-training, .sport-program-form)),
+:root[data-theme="dark"] .sport-hyrox :where(.sport-program-info, .sport-plan-entry, .sport-picker, .sport-session-exercise) {
   --ui-accent: #f5f5f5;
   --ui-accent-bg: #252525;
   --ui-button-text: #111;
@@ -1246,8 +1249,7 @@
   justify-self: start;
 }
 .sport-hyrox .sport-plan-entry,
-.sport-hyrox .sport-program-actions,
-.sport-hyrox.sport-training {
+.sport-hyrox .sport-session-exercise {
   background: var(--ui-paper);
 }
 .sport-hyrox .sport-plan-entry,
