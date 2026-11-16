@@ -29,3 +29,9 @@ All applications share one session and the **system / light / dark** appearance 
 **English** translates the interface and supplied exercise catalogue. Your personal text stays unchanged, including customizable labels originally created in French. Newly created Tasks workspaces receive initial statuses in the language currently selected. After signing out, the sign-in page returns to the browser’s language; signing back in restores your account preference.
 
 An expired session returns to sign-in and removes private views. HTML pages contain no private records; the API loads them only after authentication and activation checks. All preferences and application activation are also available through the [versioned API](../api.md), documented in French.
+
+## Shared navigation
+
+Tasks and Sport share the same top bar and sidebar. The breadcrumb identifies the application and current view. On mobile, **Open navigation** shows the same links and footer; **Escape** or **Close navigation** closes the menu.
+
+The footer contains, in order, the **Application library**, **Documentation** for the current application and language, the **light / dark / system** theme, **Language**, then the user and **Sign out**. Theme and language are saved to the account through the API. Business archives and settings remain among each application's navigation links.

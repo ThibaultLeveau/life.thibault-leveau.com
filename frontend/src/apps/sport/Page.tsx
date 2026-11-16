@@ -1,9 +1,10 @@
-import { documentationPath } from "../../shared/i18n";
 import { tr } from "./i18n";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AccountMenu } from "../../platform/auth/AccountMenu";
-import { useSession } from "../../platform/auth/SessionProvider";
-import { Dialog } from "../../shared/ui/Dialog";
+import { ApplicationFooter } from "../../platform/auth/ApplicationFooter";
+import {
+  ApplicationSidebar,
+  ApplicationTopbar,
+} from "../../shared/ui/ApplicationNavigation";
 import { Icon, type IconName } from "../../shared/ui/Icon";
 import { sportApi } from "./api";
 import { LoadState, useAction, useResource } from "./components/common";
@@ -39,7 +40,6 @@ function readView() {
   };
 }
 export function Page() {
-  const { session } = useSession();
   const [view, setView] = useState(readView);
   const { tab, program, archived } = view;
   const guard = useRef<() => boolean>(() => true);
@@ -124,7 +124,7 @@ export function Page() {
       {tabs().map(([id, label, icon]) => (
         <button
           key={id}
-          className={`sport-nav-item ${tab === id ? "is-active" : ""}`}
+          className={`application-nav-item ${tab === id ? "is-active" : ""}`}
           aria-label={label}
           aria-current={tab === id ? "page" : undefined}
           onClick={() => choose(id)}
@@ -143,64 +143,30 @@ export function Page() {
       ref={shell}
       className={`ui-scope sport-shell ${active ? "has-active-training" : ""}`}
     >
-      <a
-        className="sport-skip"
-        href="#sport-main"
-        onClick={(event) => {
-          event.preventDefault();
-          document.getElementById("sport-main")?.focus();
-        }}
+      <ApplicationSidebar
+        name={tr("sport")}
+        icon="flag"
+        label={tr("sport_navigation")}
+        mainId="sport-main"
+        open={navigation}
+        onOpenChange={setNavigation}
+        footer={
+          <ApplicationFooter
+            documentation="sport"
+            beforeSessionChange={() => guard.current()}
+          />
+        }
       >
-        {tr("skip_to_content")}
-      </a>
-      <aside className="sport-sidebar">
-        <a className="app-brand" href="/" aria-label={tr("lifeos_home")}>
-          <span className="app-brand-icon">
-            <Icon name="grid" />
-          </span>
-          LifeOS<span className="brand-period">.</span>
-        </a>
-        <div className="sport-app-label">
-          <Icon name="flag" />
-          {tr("sport_eyebrow")}
-        </div>
         {nav}
-        <div className="sport-sidebar-bottom">
-          <a href="/applications">
-            <Icon name="grid" />
-            {tr("application_library")}
-          </a>
-          <a href={documentationPath("sport")}>
-            <Icon name="info" />
-            {tr("sport_guide")}
-          </a>
-          <AccountMenu beforeSessionChange={() => guard.current()} />
-        </div>
-      </aside>
+      </ApplicationSidebar>
       <main className="sport-main" id="sport-main" tabIndex={-1}>
-        <header className="sport-topbar">
-          <button
-            className="icon-button sport-mobile"
-            aria-label={tr("open_navigation")}
-            onClick={() => setNavigation(true)}
-          >
-            <Icon name="menu" />
-          </button>
-          <a href="/">LifeOS</a>
-          <span>/</span>
-          <span>{tr("sport")}</span>
-          <div className="spacer" />
-          <button
-            className="icon-button"
-            aria-label={tr("refresh_training_session")}
-            onClick={activeResource.reload}
-          >
-            <Icon name="restore" />
-          </button>
-          <span className="sport-user" title={session.username}>
-            {session.username}
-          </span>
-        </header>
+        <ApplicationTopbar
+          name={tr("sport")}
+          current={title}
+          mainId="sport-main"
+          open={navigation}
+          onOpenChange={setNavigation}
+        />
         <div className="sport-content">
           {program && (
             <button
@@ -308,19 +274,6 @@ export function Page() {
             }, changeActive)
           }
         />
-      )}
-      {navigation && (
-        <Dialog
-          title={tr("sport_navigation")}
-          initialFocus="close"
-          onClose={() => setNavigation(false)}
-        >
-          <div className="dialog-body sport-mobile-nav">
-            {nav}
-            <a href="/applications">{tr("application_library")}</a>
-            <AccountMenu beforeSessionChange={() => guard.current()} />
-          </div>
-        </Dialog>
       )}
     </div>
   );

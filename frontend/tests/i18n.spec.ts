@@ -392,7 +392,7 @@ test("language changes respect unsaved programs; mobile navigation and measureme
     await page.keyboard.press("Enter");
     const dialog = page.getByRole("dialog", { name: "Sport navigation" });
     await expect(
-      dialog.getByRole("button", { name: "Close", exact: true }),
+      dialog.getByRole("button", { name: "Close navigation", exact: true }),
     ).toBeFocused();
     const selector = dialog.getByRole("combobox", { name: "Language" });
     await selector.focus();
@@ -443,6 +443,6 @@ test("translated errors and expired sessions clear private views", async ({
   await expect(
     page.getByRole("heading", { name: "Connexion", exact: true }),
   ).toBeVisible();
-  await expect(page.locator(".sport-sidebar")).toHaveCount(0);
+  await expect(page.locator(".application-sidebar")).toHaveCount(0);
   await expect(page.locator(".sport-exercise")).toHaveCount(0);
 });
