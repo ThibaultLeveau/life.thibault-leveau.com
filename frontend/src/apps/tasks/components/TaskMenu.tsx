@@ -1,3 +1,4 @@
+import { tr } from "../i18n";
 import { useLayoutEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import type { Task } from "../types";
@@ -38,8 +39,7 @@ export function TaskMenu({
       if (menu.contains(event.target as Node)) return;
       // A scroll already completed before the click can dispatch its event later.
       const current = anchor.trigger.getBoundingClientRect();
-      if (current.top !== origin.top || current.left !== origin.left)
-        onClose();
+      if (current.top !== origin.top || current.left !== origin.left) onClose();
     };
     document.addEventListener("pointerdown", outside);
     window.addEventListener("resize", onClose);
@@ -56,7 +56,7 @@ export function TaskMenu({
     <div
       ref={ref}
       role="menu"
-      aria-label={`Actions : ${anchor.task.title}`}
+      aria-label={tr("actions_for", { name: anchor.task.title })}
       className="task-context-menu"
       onContextMenu={(event) => event.preventDefault()}
       onKeyDown={(event) => {
@@ -88,15 +88,15 @@ export function TaskMenu({
     >
       <button role="menuitem" onClick={() => onAction("edit")}>
         <Icon name="edit" />
-        Modifier
+        {tr("edit")}
       </button>
       <button role="menuitem" onClick={() => onAction("duplicate")}>
         <Icon name="copy" />
-        Dupliquer
+        {tr("duplicate")}
       </button>
       <button role="menuitem" onClick={() => onAction("select")}>
         <Icon name="select" />
-        Sélectionner
+        {tr("select")}
       </button>
       <div role="separator" />
       <button
@@ -105,7 +105,7 @@ export function TaskMenu({
         onClick={() => onAction("archive")}
       >
         <Icon name="trash" />
-        Supprimer
+        {tr("delete")}
       </button>
     </div>,
     document.body,

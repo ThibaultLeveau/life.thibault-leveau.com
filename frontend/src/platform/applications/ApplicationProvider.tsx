@@ -1,3 +1,4 @@
+import { tr } from "../../shared/i18n";
 import {
   createContext,
   useCallback,
@@ -86,7 +87,11 @@ export function ApplicationProvider({ children }: { children: ReactNode }) {
         (items) =>
           items?.map((item) => (item.id === id ? result : item)) ?? null,
       );
-      setNotice(`${result.name} ${result.enabled ? "activée" : "désactivée"}.`);
+      setNotice(
+        tr(result.enabled ? "activation_enabled" : "activation_disabled", {
+          name: result.name,
+        }),
+      );
     } catch (error) {
       if (mounted.current) setActionError((error as Error).message);
     } finally {

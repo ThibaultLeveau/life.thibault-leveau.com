@@ -1,8 +1,16 @@
+import { tr } from "../shared/i18n";
+import i18next from "i18next";
 import type { Session } from "./auth/types";
 
 let csrf = "";
+let epoch = 0;
+i18next.on("languageChanged", () => {
+  epoch += 1;
+});
 export function setApiSession(session: Session | null) {
-  csrf = session?.csrf_token ?? "";
+  const token = session?.csrf_token ?? "";
+  if (token !== csrf) epoch += 1;
+  csrf = token;
 }
 
 export class ApiError extends Error {
@@ -20,7 +28,13 @@ export async function api<T>(
   body?: unknown,
   signal?: AbortSignal,
 ): Promise<T> {
+  const requestEpoch = epoch;
   const requestCsrf = csrf;
+  const requestLanguage = i18next.language;
+  const ensureCurrent = () => {
+    if (requestEpoch !== epoch || signal?.aborted)
+      throw new DOMException("Obsolete response", "AbortError");
+  };
   let response: Response;
   try {
     response = await fetch(`/api/v1${path}`, {
@@ -28,6 +42,7 @@ export async function api<T>(
       credentials: "same-origin",
       signal,
       headers: {
+        "Accept-Language": requestLanguage,
         ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
         ...(csrf ? { "X-CSRF-Token": csrf } : {}),
       },
@@ -36,21 +51,24 @@ export async function api<T>(
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError")
       throw error;
+    ensureCurrent();
     throw new ApiError(
-      "Connexion interrompue. Vérifiez votre réseau et réessayez.",
+      tr("connection_interrupted_check_your_network_and_try_again"),
       0,
     );
   }
+  ensureCurrent();
   if (!response.ok) {
     const data = await response.json().catch(() => ({}));
+    ensureCurrent();
     const message =
       response.status === 503
-        ? "Le service est momentanément indisponible. Réessayez dans un instant."
+        ? tr("the_service_is_temporarily_unavailable_try_again_shortly")
         : typeof data.detail === "string"
           ? data.detail
           : Array.isArray(data.detail)
             ? data.detail.map((item: { msg: string }) => item.msg).join(" · ")
-            : "L’opération n’a pas pu être enregistrée.";
+            : tr("the_operation_could_not_be_saved");
     if (
       response.status === 401 &&
       (path !== "/auth/session" || method === "DELETE") &&
@@ -64,5 +82,7 @@ export async function api<T>(
       );
     throw new ApiError(message, response.status);
   }
-  return response.status === 204 ? (undefined as T) : response.json();
+  const result = response.status === 204 ? undefined : await response.json();
+  ensureCurrent();
+  return result as T;
 }

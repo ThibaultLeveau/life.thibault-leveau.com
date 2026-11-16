@@ -7,6 +7,7 @@ from datetime import date, timedelta
 
 from dateutil.relativedelta import relativedelta
 
+from life_app.apps.tasks.messages import tr
 from life_app.apps.tasks.recurrence import DAY_NAMES
 
 MONTHS = (
@@ -234,7 +235,7 @@ def calendar_date(day: int, month: int, year: int | None, today: date) -> date:
             continue
         if result >= today:
             return result
-    raise ValueError("Cette date n’existe pas dans le calendrier.")
+    raise ValueError(tr("this_calendar_date_does_not_exist"))
 
 
 def read_date(tokens: list[Token], index: int, today: date) -> tuple[date, int] | None:
@@ -246,6 +247,8 @@ def read_date(tokens: list[Token], index: int, today: date) -> tuple[date, int] 
         index += 2
     value = word(tokens, index)
     tail = [t.value for t in tokens[index : index + 4]]
+    if value == "hier":
+        return today - timedelta(days=1), index + 1
     if value == "demain":
         return today + timedelta(days=1), index + 1
     if tail[:2] == ["apres", "demain"]:

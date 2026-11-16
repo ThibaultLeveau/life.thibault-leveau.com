@@ -14,6 +14,7 @@ class LoginInput(BaseModel):
 class Preferences(BaseModel):
     model_config = ConfigDict(extra="forbid", from_attributes=True)
     theme: Literal["system", "light", "dark"] = "system"
+    locale: Literal["fr", "en"] = "fr"
 
 
 class SessionOutput(BaseModel):
@@ -22,3 +23,4 @@ class SessionOutput(BaseModel):
     csrf_token: str
     expires_at: datetime
     theme: Literal["system", "light", "dark"]
+    locale: Literal["fr", "en"]

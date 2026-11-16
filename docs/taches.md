@@ -200,3 +200,9 @@ Avant d'archiver un espace parent, archiver ou déplacer ses sous-espaces actifs
 Un échec de sauvegarde affiche un message et conserve le formulaire. Si la tâche a changé dans un autre onglet, le serveur refuse l'édition : **Recharger la tâche enregistrée** récupère la version actuelle ; recopier au préalable toute saisie à conserver. Les actions d'ordre ou de déplacement nécessitent également une version actuelle.
 
 La synchronisation entre onglets n'est pas instantanée : recharger pour consulter les changements externes. Aucun mode hors connexion, partage, rappel, pièce jointe ou tableau statistique n'est inclus. Toutes les fonctions présentées sont accessibles par [API](api.md).
+
+## Utiliser Tâches en anglais
+
+Choisir **English** dans **Langue** traduit l’interface, l’aide et les messages. La reconnaissance suit ce choix : `Read tomorrow`, `Run every Monday and Thursday`, `Check every last business day of the month`, `Read every day for five times except tomorrow`. Les dates numériques sont jour/mois/année ; le format ISO est accepté. Les heures et jours fériés ne sont pas interprétés. Toujours vérifier l’aperçu ou garder le texte littéral.
+
+Les titres, espaces, sections, étiquettes et statuts enregistrés ne sont jamais traduits automatiquement. Les nouveaux espaces initialisent **To do / In progress / Done** en anglais ; changer la langue ne renomme pas les colonnes existantes. Les échéances, règles, compteurs et événements restent identiques. Voir [Langues](internationalisation.md) et le [guide anglais](en/taches.md).

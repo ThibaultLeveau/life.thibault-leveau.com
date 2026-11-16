@@ -5,6 +5,7 @@ from sqlalchemy import select
 
 from life_app.core.database import utcnow
 from life_app.platform.applications.definition import ApplicationDefinition
+from life_app.platform.applications.messages import tr
 from life_app.platform.applications.models import ApplicationPreference
 from life_app.platform.applications.schemas import ApplicationOutput
 
@@ -13,14 +14,15 @@ def find_application(definitions, application_id: str) -> ApplicationDefinition:
     for definition in definitions:
         if definition.id == application_id:
             return definition
-    raise HTTPException(404, "Application introuvable.")
+    raise HTTPException(404, tr("application_not_found"))
 
 
 def output(definition, preference) -> ApplicationOutput:
+    name, description = definition.localized_metadata()
     return ApplicationOutput(
         id=definition.id,
-        name=definition.name,
-        description=definition.description,
+        name=name,
+        description=description,
         path=definition.path,
         icon=definition.icon,
         enabled=preference.enabled if preference else definition.default_enabled,

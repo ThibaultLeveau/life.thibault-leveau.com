@@ -1,3 +1,5 @@
+import { formatLocale, documentationPath } from "../../shared/i18n";
+import { tr } from "./i18n";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { allTasks } from "./api";
 import { api } from "../../platform/api";
@@ -122,7 +124,7 @@ export function Page() {
   }, [sidebarOpen]);
 
   useEffect(() => {
-    document.title = "Tâches · LifeOS";
+    document.title = tr("tasks_lifeos");
     return () => {
       sessionEpoch.current += 1;
     };
@@ -249,7 +251,7 @@ export function Page() {
       viewWrites.current = viewWrites.current
         .then(() => api(`/workspaces/${id}/view`, "PUT", next))
         .catch((error) =>
-          setError(`Réglages non enregistrés : ${error.message}`),
+          setError(tr("settings_unsaved", { message: error.message })),
         );
     },
     [loading, spacesLoading],
@@ -338,12 +340,14 @@ export function Page() {
       },
       () =>
         task.completed_at
-          ? "Tâche rouverte."
+          ? tr("task_reopened")
           : saved.recurrence && !saved.completed_at
-            ? `Occurrence terminée. Prochaine : ${relativeDate(saved.due_date!, today).full}.`
+            ? tr("occurrence_next", {
+                date: relativeDate(saved.due_date!, today).full,
+              })
             : saved.recurrence
-              ? "Dernière occurrence terminée."
-              : "Un pas de plus. Tâche terminée.",
+              ? tr("last_occurrence_completed")
+              : tr("one_step_forward_task_completed"),
     );
   }
   async function move(task: Task, destination: Destination) {
@@ -355,7 +359,7 @@ export function Page() {
           workspace_id: task.workspace_id,
           expected_version: task.version,
         }),
-      "Tâche déplacée.",
+      tr("task_moved"),
     );
   }
   async function quickAdd(
@@ -375,7 +379,7 @@ export function Page() {
     });
     setTaskLoading(true);
     setReloadTasks((value) => value + 1);
-    setNotice("Tâche ajoutée.");
+    setNotice(tr("task_added"));
   }
   async function orderSpaces(space: Workspace, delta: number) {
     const siblings = workspaces.filter(
@@ -393,14 +397,14 @@ export function Page() {
         ids: [...ids, ...archivedSpaces.map((space) => space.id)],
       });
       await loadWorkspaces();
-    }, "Ordre des espaces enregistré.");
+    }, tr("workspace_order_saved"));
   }
   function savedTask() {
     setEditor(null);
     setMoving(null);
     setTaskLoading(true);
     setReloadTasks((value) => value + 1);
-    setNotice("Tâche enregistrée.");
+    setNotice(tr("task_saved"));
   }
 
   const visibleTasks = tasks.filter(
@@ -425,19 +429,19 @@ export function Page() {
       className={`ui-scope tasks-shell ${sidebarOpen ? "sidebar-open" : ""}`}
     >
       <a href="#tasks-content" className="skip-link">
-        Aller aux tâches
+        {tr("skip_to_tasks")}
       </a>
       {sidebarOpen && (
         <button
           className="mobile-scrim"
           onClick={() => setSidebarOpen(false)}
-          aria-label="Fermer la navigation"
+          aria-label={tr("close_navigation")}
         />
       )}
       <aside
         ref={sidebarRef}
         className="task-sidebar"
-        aria-label="Navigation des tâches"
+        aria-label={tr("task_navigation")}
       >
         <div className="sidebar-top">
           <a href="/" className="app-brand">
@@ -448,7 +452,7 @@ export function Page() {
           </a>
           <button
             className="icon-button mobile-only"
-            aria-label="Fermer la navigation"
+            aria-label={tr("close_navigation")}
             onClick={() => setSidebarOpen(false)}
           >
             <Icon name="x" />
@@ -466,11 +470,12 @@ export function Page() {
           <span>
             <Icon name="plus" size={17} />
           </span>
-          Ajouter une tâche
+          {tr("add_a_task")}
         </button>
         <button className="sidebar-search" onClick={searchTasks}>
           <Icon name="search" />
-          Rechercher<kbd>⌘ K</kbd>
+          {tr("search")}
+          <kbd>⌘ K</kbd>
         </button>
         <button
           className={`workspace-link agenda-link ${agenda ? "is-active" : ""}`}
@@ -483,14 +488,14 @@ export function Page() {
           }}
         >
           <Icon name="calendar" size={18} />
-          <span>À venir</span>
+          <span>{tr("upcoming")}</span>
         </button>
         <div className="sidebar-divider" />
         <div className="sidebar-label">
-          <span>MES ESPACES</span>
+          <span>{tr("my_workspaces")}</span>
           <button
             className="icon-button"
-            aria-label="Gérer et réordonner les espaces"
+            aria-label={tr("manage_and_reorder_workspaces")}
             onClick={() => {
               setSidebarOpen(false);
               setManageSpaces(true);
@@ -499,7 +504,7 @@ export function Page() {
             <Icon name="settings" size={15} />
           </button>
         </div>
-        <nav className="workspace-nav" aria-label="Espaces">
+        <nav className="workspace-nav" aria-label={tr("workspaces")}>
           {spaceTree.map(({ space, depth, path }) => (
             <button
               key={space.id}
@@ -534,16 +539,16 @@ export function Page() {
           }}
         >
           <Icon name="plus" size={16} />
-          Nouvel espace
+          {tr("new_workspace")}
         </button>
         <div className="sidebar-bottom">
           <a href="/applications" className="sidebar-subtle">
             <Icon name="grid" size={17} />
-            Bibliothèque des applications
+            {tr("application_library")}
           </a>
-          <a href="/documentation/" className="sidebar-subtle">
+          <a href={documentationPath("taches")} className="sidebar-subtle">
             <Icon name="info" size={17} />
-            Guide et documentation
+            {tr("guide_and_documentation")}
             <Icon name="arrow" size={14} />
           </a>
           <button
@@ -554,11 +559,11 @@ export function Page() {
             }}
           >
             <Icon name="archive" size={17} />
-            Archives des espaces
+            {tr("workspace_archives")}
           </button>
           <AccountMenu
             disabled={busy}
-            beforeLogout={() => viewWrites.current.then(() => {})}
+            beforeSessionChange={() => viewWrites.current.then(() => {})}
           />
         </div>
       </aside>
@@ -572,22 +577,22 @@ export function Page() {
           <div className="task-breadcrumb">
             <button
               className="icon-button mobile-only"
-              aria-label="Ouvrir la navigation"
+              aria-label={tr("open_navigation")}
               onClick={() => setSidebarOpen(true)}
             >
               <Icon name="menu" />
             </button>
-            <span>{agenda ? "Mes tâches" : "Mes espaces"}</span>
+            <span>{agenda ? tr("my_tasks") : tr("my_workspaces_title")}</span>
             <Icon name="chevron" size={12} />
             <strong>
               {agenda
-                ? "À venir"
+                ? tr("upcoming")
                 : (spaceTree.find(({ space }) => space.id === workspaceId)
-                    ?.path ?? "Bienvenue")}
+                    ?.path ?? tr("welcome"))}
             </strong>
           </div>
           <span className="topbar-date">
-            {new Date().toLocaleDateString("fr-FR", {
+            {new Date().toLocaleDateString(formatLocale(), {
               weekday: "long",
               day: "numeric",
               month: "long",
@@ -605,7 +610,7 @@ export function Page() {
                 setReloadTasks((value) => value + 1);
               }}
             >
-              Réessayer
+              {tr("try_again")}
             </button>
           )}
           {notice && (
@@ -622,17 +627,17 @@ export function Page() {
                         api(`/tasks/${undoTask.id}/undo-complete`, "POST", {
                           expected_version: undoTask.version,
                         }),
-                      "Résolution annulée. L’échéance précédente est restaurée.",
+                      tr("completion_undone_the_previous_due_date_is_restored"),
                     )
                   }
                 >
-                  Annuler la résolution
+                  {tr("undo_completion")}
                 </button>
               )}
               <button
                 className="icon-button"
                 onClick={() => setNotice("")}
-                aria-label="Fermer le message"
+                aria-label={tr("close_message")}
               >
                 <Icon name="x" size={12} />
               </button>
@@ -640,7 +645,7 @@ export function Page() {
           )}
           {agenda ? (
             spacesLoading ? (
-              <p role="status">Chargement des espaces…</p>
+              <p role="status">{tr("loading_workspaces")}</p>
             ) : (
               <AgendaView
                 key={session.user_id}
@@ -658,12 +663,9 @@ export function Page() {
               <span className="empty-symbol">
                 <Icon name="folder" size={32} />
               </span>
-              <p className="eyebrow">VOTRE PROCHAIN CHAPITRE</p>
-              <h1>Faites de la place à vos idées.</h1>
-              <p className="muted">
-                Créez un espace, organisez vos tâches et avancez une chose à la
-                fois.
-              </p>
+              <p className="eyebrow">{tr("your_next_chapter")}</p>
+              <h1>{tr("make_room_for_your_ideas")}</h1>
+              <p className="muted">{tr("create_workspace_introduction")}</p>
               <button
                 className="primary-button"
                 onClick={() => {
@@ -672,15 +674,15 @@ export function Page() {
                 }}
               >
                 <Icon name="plus" />
-                Créer mon premier espace
+                {tr("create_my_first_workspace")}
               </button>
-              {spacesLoading && <p role="status">Chargement…</p>}
+              {spacesLoading && <p role="status">{tr("loading")}</p>}
             </section>
           ) : (
             <>
               <div className="workspace-heading">
                 <div>
-                  <p className="eyebrow">VOTRE ESPACE, VOTRE RYTHME</p>
+                  <p className="eyebrow">{tr("your_space_your_pace")}</p>
                   <h1>
                     <span
                       className="heading-hash"
@@ -692,12 +694,12 @@ export function Page() {
                   </h1>
                   <p className="workspace-description">
                     {workspace.description ||
-                      "Un peu d’ordre pour garder l’essentiel en vue."}
+                      tr("a_little_order_to_keep_what_matters_in_sight")}
                   </p>
                 </div>
                 <button
                   className="icon-button workspace-config"
-                  aria-label="Configurer l’espace"
+                  aria-label={tr("configure_workspace")}
                   disabled={loading}
                   onClick={() => setSettingsTab("space")}
                 >
@@ -705,14 +707,14 @@ export function Page() {
                 </button>
               </div>
               <div className="task-toolbar">
-                <div className="view-switch" aria-label="Vue des tâches">
+                <div className="view-switch" aria-label={tr("task_view")}>
                   <button
                     disabled={loading}
                     aria-pressed={view.layout === "list"}
                     onClick={() => changeView({ layout: "list" })}
                   >
                     <Icon name="list" size={16} />
-                    Liste
+                    {tr("list")}
                   </button>
                   <button
                     disabled={loading}
@@ -720,7 +722,7 @@ export function Page() {
                     onClick={() => changeView({ layout: "board" })}
                   >
                     <Icon name="board" size={16} />
-                    Tableau
+                    {tr("board")}
                   </button>
                 </div>
                 <div className="toolbar-actions">
@@ -729,10 +731,10 @@ export function Page() {
                     <input
                       id="task-search"
                       disabled={loading}
-                      aria-label="Rechercher des tâches"
+                      aria-label={tr("search_tasks")}
                       value={search}
                       onChange={(event) => setSearch(event.target.value)}
-                      placeholder="Rechercher…"
+                      placeholder={tr("search_placeholder")}
                       maxLength={500}
                     />
                   </div>
@@ -745,7 +747,7 @@ export function Page() {
                     }}
                   >
                     <Icon name="settings" size={16} />
-                    <span>Filtres</span>
+                    <span>{tr("filters")}</span>
                     {hasFilters && <span className="filter-dot" />}
                   </button>
                   <button
@@ -757,21 +759,21 @@ export function Page() {
                     }}
                   >
                     <Icon name="more" size={18} />
-                    <span>Afficher</span>
+                    <span>{tr("show")}</span>
                   </button>
                 </div>
               </div>
               {showFilters && (
                 <div className="filter-panel">
                   <label>
-                    Statut
+                    {tr("status")}
                     <select
                       value={view.status_id ?? ""}
                       onChange={(event) =>
                         changeView({ status_id: event.target.value || null })
                       }
                     >
-                      <option value="">Tous les statuts</option>
+                      <option value="">{tr("all_statuses")}</option>
                       {statuses.map((status) => (
                         <option key={status.id} value={status.id}>
                           {status.name}
@@ -780,7 +782,7 @@ export function Page() {
                     </select>
                   </label>
                   <label>
-                    Priorité
+                    {tr("priority")}
                     <select
                       value={view.priority ?? ""}
                       onChange={(event) =>
@@ -791,23 +793,23 @@ export function Page() {
                         })
                       }
                     >
-                      <option value="">Toutes les priorités</option>
+                      <option value="">{tr("all_priorities")}</option>
                       {[1, 2, 3, 4].map((value) => (
                         <option key={value} value={value}>
-                          Priorité {value}
+                          {tr("priority")} {value}
                         </option>
                       ))}
                     </select>
                   </label>
                   <label>
-                    Étiquette
+                    {tr("label")}
                     <select
                       value={view.label_id ?? ""}
                       onChange={(event) =>
                         changeView({ label_id: event.target.value || null })
                       }
                     >
-                      <option value="">Toutes les étiquettes</option>
+                      <option value="">{tr("all_labels")}</option>
                       {labels.map((label) => (
                         <option key={label.id} value={label.id}>
                           {label.name}
@@ -816,7 +818,7 @@ export function Page() {
                     </select>
                   </label>
                   <label>
-                    Échéance
+                    {tr("due_date")}
                     <select
                       value={view.due}
                       onChange={(event) =>
@@ -825,11 +827,11 @@ export function Page() {
                         })
                       }
                     >
-                      <option value="all">Toutes les dates</option>
-                      <option value="overdue">En retard</option>
-                      <option value="today">Aujourd’hui</option>
-                      <option value="upcoming">À venir</option>
-                      <option value="none">Sans échéance</option>
+                      <option value="all">{tr("all_dates")}</option>
+                      <option value="overdue">{tr("overdue")}</option>
+                      <option value="today">{tr("today")}</option>
+                      <option value="upcoming">{tr("upcoming")}</option>
+                      <option value="none">{tr("no_due_date")}</option>
                     </select>
                   </label>
                   <button
@@ -846,14 +848,14 @@ export function Page() {
                       });
                     }}
                   >
-                    Effacer les filtres
+                    {tr("clear_filters")}
                   </button>
                 </div>
               )}
               {showDisplay && (
                 <div className="filter-panel display-panel">
                   <label>
-                    Trier par
+                    {tr("sort_by")}
                     <select
                       value={view.sort}
                       onChange={(event) =>
@@ -862,13 +864,13 @@ export function Page() {
                         })
                       }
                     >
-                      <option value="manual">Ordre manuel</option>
-                      <option value="priority">Priorité</option>
-                      <option value="due_date">Échéance</option>
+                      <option value="manual">{tr("manual_order")}</option>
+                      <option value="priority">{tr("priority")}</option>
+                      <option value="due_date">{tr("due_date")}</option>
                     </select>
                   </label>
                   <label>
-                    Densité
+                    {tr("density")}
                     <select
                       value={view.density}
                       onChange={(event) =>
@@ -878,8 +880,8 @@ export function Page() {
                         })
                       }
                     >
-                      <option value="comfortable">Confortable</option>
-                      <option value="compact">Compacte</option>
+                      <option value="comfortable">{tr("comfortable")}</option>
+                      <option value="compact">{tr("compact")}</option>
                     </select>
                   </label>
                   <label className="check-label">
@@ -890,13 +892,13 @@ export function Page() {
                         changeView({ show_completed: event.target.checked })
                       }
                     />
-                    Afficher les tâches terminées
+                    {tr("show_completed_tasks")}
                   </label>
                   <button
                     className="text-button"
                     onClick={() => setSettingsTab("sections")}
                   >
-                    Configurer les sections et colonnes
+                    {tr("configure_sections_and_columns")}
                     <Icon name="arrow" size={14} />
                   </button>
                 </div>
@@ -904,14 +906,15 @@ export function Page() {
               <div className="task-summary">
                 <span>
                   {loading || taskLoading
-                    ? "Chargement des tâches…"
-                    : `${visibleTasks.length} ${hasFilters ? "résultat" : "tâche"}${visibleTasks.length > 1 ? "s" : ""}`}
+                    ? tr("loading_tasks")
+                    : tr(hasFilters ? "result_count" : "task_count", {
+                        count: visibleTasks.length,
+                      })}
                   <span className="summary-dot">·</span>
-                  {visibleTasks.filter((task) => task.completed_at).length}{" "}
-                  terminée
-                  {visibleTasks.filter((task) => task.completed_at).length > 1
-                    ? "s"
-                    : ""}
+                  {tr("completed_count", {
+                    count: visibleTasks.filter((task) => task.completed_at)
+                      .length,
+                  })}
                 </span>
                 <button
                   className="text-button"
@@ -919,43 +922,42 @@ export function Page() {
                   onClick={() => setEditor("new")}
                 >
                   <Icon name="plus" size={15} />
-                  Nouvelle tâche
+                  {tr("new_task")}
                 </button>
               </div>
               {hiddenCount > 0 && !loading && (
                 <p className="sort-hint">
-                  {hiddenCount} tâche{hiddenCount > 1 ? "s" : ""} dans des
-                  sections masquées pour cette vue.{" "}
+                  {tr("hidden_tasks", { count: hiddenCount })}{" "}
                   <button
                     className="text-button"
                     onClick={() => setSettingsTab("sections")}
                   >
-                    Configurer les sections
+                    {tr("configure_sections")}
                   </button>
                 </p>
               )}
               {view.sort !== "manual" && (
                 <p className="sort-hint">
-                  Le tri automatique est actif.{" "}
+                  {tr("automatic_sorting_is_enabled")}{" "}
                   <button
                     className="text-button"
                     onClick={() => changeView({ sort: "manual" })}
                   >
-                    Passer à l’ordre manuel
+                    {tr("switch_to_manual_order")}
                   </button>{" "}
-                  pour utiliser le glisser-déposer.
+                  {tr("to_use_drag_and_drop")}
                 </p>
               )}
               {hasFilters && !taskLoading && tasks.length === 0 && (
                 <p className="empty-filter">
-                  Aucune tâche ne correspond à ces filtres.
+                  {tr("no_tasks_match_these_filters")}
                 </p>
               )}
               {loading || !statuses.length ? (
                 <div
                   className="task-skeleton"
                   role="status"
-                  aria-label="Chargement de l’espace"
+                  aria-label={tr("loading_workspace")}
                 >
                   <span />
                   <span />
@@ -1056,11 +1058,14 @@ export function Page() {
         />
       )}
       {manageSpaces && (
-        <Dialog title="Mes espaces" onClose={() => setManageSpaces(false)}>
+        <Dialog
+          title={tr("my_workspaces_title")}
+          onClose={() => setManageSpaces(false)}
+        >
           <div className="dialog-body space-management">
-            <h3>Ordre des espaces</h3>
+            <h3>{tr("workspace_order")}</h3>
             <p className="muted small-text">
-              Les flèches changent l’ordre des espaces ayant le même parent.
+              {tr("the_arrows_reorder_workspaces_that_share_the_same_parent")}
             </p>
             {spaceTree.map(({ space, depth, path }) => (
               <div
@@ -1085,7 +1090,7 @@ export function Page() {
                         (item) => item.parent_id === space.parent_id,
                       )[0]?.id === space.id
                     }
-                    aria-label={`Monter ${space.name}`}
+                    aria-label={tr("move_up", { name: space.name })}
                     onClick={() => orderSpaces(space, -1)}
                   >
                     <Icon name="up" />
@@ -1098,7 +1103,7 @@ export function Page() {
                         .filter((item) => item.parent_id === space.parent_id)
                         .at(-1)?.id === space.id
                     }
-                    aria-label={`Descendre ${space.name}`}
+                    aria-label={tr("move_down", { name: space.name })}
                     onClick={() => orderSpaces(space, 1)}
                   >
                     <Icon name="down" />
@@ -1106,9 +1111,9 @@ export function Page() {
                 </div>
               </div>
             ))}
-            <h3>Espaces archivés</h3>
+            <h3>{tr("archived_workspaces")}</h3>
             {!archivedSpaces.length && (
-              <p className="muted">Aucun espace archivé.</p>
+              <p className="muted">{tr("no_archived_workspaces")}</p>
             )}
             {archivedTree.map(({ space, path }) => (
               <div className="archive-row" key={space.id}>
@@ -1118,7 +1123,7 @@ export function Page() {
                     (item) => item.id === space.parent_id,
                   ) && (
                     <small className="muted">
-                      Restaurez d’abord son espace parent.
+                      {tr("restore_its_parent_workspace_first")}
                     </small>
                   )}
                 </span>
@@ -1134,11 +1139,11 @@ export function Page() {
                         archived: false,
                       });
                       await loadWorkspaces();
-                    }, "Espace restauré.")
+                    }, tr("workspace_restored"))
                   }
                 >
                   <Icon name="restore" size={14} />
-                  Restaurer
+                  {tr("restore")}
                 </button>
               </div>
             ))}

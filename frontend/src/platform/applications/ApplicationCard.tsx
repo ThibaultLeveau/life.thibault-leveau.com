@@ -1,3 +1,4 @@
+import { tr } from "../../shared/i18n";
 import { Icon, type IconName } from "../../shared/ui/Icon";
 import type { Application } from "./types";
 export function ApplicationCard({
@@ -22,7 +23,7 @@ export function ApplicationCard({
           <span
             className={`application-state ${application.enabled ? "is-enabled" : ""}`}
           >
-            {application.enabled ? "Activée" : "Désactivée"}
+            {application.enabled ? tr("enabled") : tr("disabled")}
           </span>
         )}
       </div>
@@ -33,9 +34,9 @@ export function ApplicationCard({
           <a
             className="application-open"
             href={application.path}
-            aria-label={`Ouvrir ${application.name}`}
+            aria-label={tr("open_application", { name: application.name })}
           >
-            Ouvrir <Icon name="arrow" />
+            {tr("open")} <Icon name="arrow" />
           </a>
         )}
         {library && (
@@ -43,14 +44,14 @@ export function ApplicationCard({
             className="application-toggle"
             role="switch"
             aria-checked={application.enabled}
-            aria-label={`Activer ${application.name}`}
+            aria-label={tr("enable_application", { name: application.name })}
             disabled={busy}
             onClick={onToggle}
           >
             <span className="toggle-track" aria-hidden="true">
               <span />
             </span>
-            <span>{application.enabled ? "Désactiver" : "Activer"}</span>
+            <span>{application.enabled ? tr("disable") : tr("enable")}</span>
           </button>
         )}
       </div>

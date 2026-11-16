@@ -1,3 +1,4 @@
+import { tr } from "../i18n";
 import { ErrorMessage } from "../../../shared/ui/Dialog";
 import { Icon } from "../../../shared/ui/Icon";
 import { sportApi } from "../api";
@@ -29,15 +30,23 @@ export function Workouts({
   return (
     <>
       {active && (
-        <button className={`sport-active-banner ${isHyrox(active.name) ? "sport-hyrox" : ""}`} onClick={() => onStarted()}>
-          {isHyrox(active.name) && <span className="sport-hyrox-stamp"><HyroxMark /></span>}
+        <button
+          className={`sport-active-banner ${isHyrox(active.name) ? "sport-hyrox" : ""}`}
+          onClick={() => onStarted()}
+        >
+          {isHyrox(active.name) && (
+            <span className="sport-hyrox-stamp">
+              <HyroxMark />
+            </span>
+          )}
           <span>
             <strong>{active.name}</strong>
             <small>
-              {active.sets.length} séries validées · entraînement en cours
+              {active.sets.length}{" "}
+              {tr("completed_sets_training_session_in_progress")}
             </small>
           </span>
-          <span>Reprendre →</span>
+          <span>{tr("resume")}</span>
         </button>
       )}
       <div className="sport-toolbar">
@@ -47,11 +56,11 @@ export function Workouts({
             checked={archived}
             onChange={(e) => onArchivedChange(e.target.checked)}
           />
-          Programmes archivés
+          {tr("archived_programs")}
         </label>
         <button className="primary-button" onClick={() => onEdit("new")}>
           <Icon name="plus" />
-          Nouveau programme
+          {tr("new_program")}
         </button>
       </div>
       <LoadState {...resource} />
@@ -60,27 +69,34 @@ export function Workouts({
         <Empty
           title={
             archived
-              ? "Aucun programme archivé"
-              : "Votre prochain entraînement commence ici"
+              ? tr("no_archived_programs")
+              : tr("your_next_training_session_starts_here")
           }
         >
           {archived
-            ? "Vos programmes archivés restent disponibles pour être restaurés."
-            : "Composez un programme avec les exercices du catalogue, puis utilisez-le à chaque entraînement."}
+            ? tr("your_archived_programs_remain_available_to_restore")
+            : tr("build_a_program_using_catalogue_exercises_then_use_it_for")}
         </Empty>
       )}
       <div className="sport-workout-grid">
         {resource.data?.map((w) => (
-          <article className={`sport-workout ${isHyrox(w.name) ? "sport-hyrox" : ""}`} key={w.id}>
-            {isHyrox(w.name) && <HyroxBrand date={w.competition_date} compact />}
+          <article
+            className={`sport-workout ${isHyrox(w.name) ? "sport-hyrox" : ""}`}
+            key={w.id}
+          >
+            {isHyrox(w.name) && (
+              <HyroxBrand date={w.competition_date} compact />
+            )}
             <div className="sport-workout-top">
               <span className="sport-tag">
-                {w.entries.length} exercices ·{" "}
-                {w.entries.reduce((sum, e) => sum + e.sets, 0)} séries
+                {tr("exercise_count", { count: w.entries.length })} ·{" "}
+                {tr("set_count", {
+                  count: w.entries.reduce((sum, e) => sum + e.sets, 0),
+                })}
               </span>
               <button
                 className="icon-button"
-                aria-label={`Modifier ${w.name}`}
+                aria-label={tr("edit_named", { name: w.name })}
                 onClick={() => onEdit(w.id)}
               >
                 <Icon name="edit" />
@@ -93,7 +109,7 @@ export function Workouts({
                 <li key={i}>
                   <span>{entry.name}</span>
                   <small>
-                    {entry.sets} séries
+                    {tr("set_count", { count: entry.sets })}
                     {valuesText(
                       kinds.find((k) => k.id === entry.kind)!,
                       entry.target,
@@ -123,7 +139,7 @@ export function Workouts({
                     )
                   }
                 >
-                  Démarrer l’entraînement <Icon name="arrow" />
+                  {tr("start_training_session")} <Icon name="arrow" />
                 </button>
               )}
               <button
@@ -140,7 +156,7 @@ export function Workouts({
                   )
                 }
               >
-                {archived ? "Restaurer" : "Archiver"}
+                {archived ? tr("restore") : tr("archive")}
               </button>
             </div>
           </article>

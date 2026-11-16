@@ -1,3 +1,5 @@
+import { documentationPath } from "../../../shared/i18n";
+import { tr } from "../i18n";
 import { useState } from "react";
 import { ErrorMessage } from "../../../shared/ui/Dialog";
 import { sportApi } from "../api";
@@ -18,9 +20,9 @@ function SettingsForm({ initial }: { initial: number }) {
         );
       }}
     >
-      <h2>Le rythme de vos entraînements</h2>
+      <h2>{tr("your_training_rhythm")}</h2>
       <label>
-        Temps de repos entre les séries (secondes)
+        {tr("rest_time_between_sets_seconds")}
         <input
           type="number"
           inputMode="numeric"
@@ -36,17 +38,15 @@ function SettingsForm({ initial }: { initial: number }) {
         />
       </label>
       <p className="muted">
-        Le compte à rebours démarre quand vous validez une série. Il reprend
-        après un rechargement. La nouvelle durée s’applique à la prochaine série
-        ; 0 désactive le repos.
+        {tr("the_countdown_starts_when_you_complete_a_set_and_resumes")}
       </p>
       <button className="primary-button" disabled={action.busy}>
-        Enregistrer les réglages
+        {tr("save_settings")}
       </button>
       <ErrorMessage message={action.error} />
-      {saved && <p role="status">Réglages enregistrés.</p>}
-      <a className="text-button" href="/documentation/sport/">
-        Guide de l’application Sport →
+      {saved && <p role="status">{tr("settings_saved")}</p>}
+      <a className="text-button" href={documentationPath("sport")}>
+        {tr("sport_application_guide")}
       </a>
     </form>
   );

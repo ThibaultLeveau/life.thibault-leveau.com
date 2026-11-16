@@ -81,6 +81,8 @@ def request(path, data, method='POST', headers=None):
 session = request('/auth/session', {'username': 'browser-test', 'password': 'synthetic-browser-password'})
 result = request('/applications/tasks', {'enabled': False}, 'PUT', {'X-CSRF-Token': session['csrf_token']})
 assert result['enabled'] is False
+preferences = request('/preferences', {'locale': 'en'}, 'PUT', {'X-CSRF-Token': session['csrf_token']})
+assert preferences['locale'] == 'en'
 PY
 
 # Restore into a separate throwaway database; never destroy the source under test.
@@ -99,7 +101,12 @@ source_parents=$(docker exec "$db" psql -U life -d life -Atc 'SELECT id, parent_
 restored_parents=$(docker exec "$db" psql -U life -d life_restored -Atc 'SELECT id, parent_id FROM workspaces WHERE parent_id IS NOT NULL ORDER BY id')
 [[ -n "$source_parents" && "$source_parents" == "$restored_parents" ]]
 
-# Compare actual saved preferences, not only the existence of the new table.
+# Compare actual saved preferences, including the account language.
+users_query="SELECT string_agg(id::text || theme || locale, ',' ORDER BY id) FROM users"
+source_users=$(docker exec "$db" psql -U life -d life -Atc "$users_query")
+restored_users=$(docker exec "$db" psql -U life -d life_restored -Atc "$users_query")
+[[ -n "$source_users" && "$source_users" == "$restored_users" ]]
+[[ $(docker exec "$db" psql -U life -d life_restored -Atc "SELECT locale FROM users WHERE username='browser-test'") == en ]]
 agenda_query="SELECT string_agg(user_id::text || settings::text, ',' ORDER BY user_id) FROM agenda_preferences"
 source_agenda=$(docker exec "$db" psql -U life -d life -Atc "$agenda_query")
 restored_agenda=$(docker exec "$db" psql -U life -d life_restored -Atc "$agenda_query")

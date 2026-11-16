@@ -1,0 +1,10 @@
+{
+  "request_origin_is_not_allowed": "Origine de requête refusée.",
+  "sign_in_to_continue": "Connexion requise.",
+  "your_session_has_expired_or_is_invalid": "Session expirée ou invalide.",
+  "your_session_is_invalid": "Session invalide.",
+  "too_many_attempts_try_again_in_15_minutes": "Trop de tentatives. Réessayez dans 15 minutes.",
+  "incorrect_username_or_password": "Identifiants incorrects.",
+  "the_csrf_token_is_missing_or_invalid": "Jeton CSRF absent ou invalide.",
+  "your_session_has_been_revoked_or_has_expired": "Session révoquée ou expirée."
+}

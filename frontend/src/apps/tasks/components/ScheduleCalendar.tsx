@@ -1,3 +1,4 @@
+import { tr } from "../i18n";
 import { useRef, useState, type KeyboardEvent } from "react";
 import { relativeDate } from "../dates";
 import { dateString, months, plusDays } from "../scheduling";
@@ -66,7 +67,7 @@ export function Calendar({
         <button
           type="button"
           className="icon-button"
-          aria-label="Mois précédent"
+          aria-label={tr("previous_month")}
           onClick={() => navigate(-1)}
         >
           <span className="rotate-180">
@@ -74,26 +75,31 @@ export function Calendar({
           </span>
         </button>
         <span aria-live="polite">
-          {months[monthNumber - 1]} {year}
+          {months()[monthNumber - 1]} {year}
         </span>
         <button
           type="button"
           className="icon-button"
-          aria-label="Mois suivant"
+          aria-label={tr("next_month")}
           onClick={() => navigate(1)}
         >
           <Icon name="chevron" />
         </button>
       </div>
       <div className="calendar-weekdays" aria-hidden="true">
-        {["L", "M", "M", "J", "V", "S", "D"].map((d, i) => (
-          <span key={i}>{d}</span>
-        ))}
+        {tr("weekday_initials")
+          .split(",")
+          .map((d, i) => (
+            <span key={i}>{d}</span>
+          ))}
       </div>
       <div
         ref={grid}
         role="grid"
-        aria-label={`Calendrier ${months[monthNumber - 1]} ${year}`}
+        aria-label={tr("calendar_title", {
+          month: months()[monthNumber - 1],
+          year,
+        })}
         className="calendar-grid"
       >
         {Array.from({ length: 6 }, (_, week) => (

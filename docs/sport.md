@@ -6,7 +6,7 @@ Sur mobile, l’ouverture du menu place le focus sur **Fermer**, sans ouvrir le 
 
 ## Exercices prêts à utiliser
 
-Le catalogue fournit **680 exercices en français**, couvrant musculation, poids du corps, cardio, gymnastique, portés, mobilité, étirements et mouvements chronométrés. Recherchez par nom, muscle ou matériel, avec ou sans accents, puis filtrez par type. Il n’y a aucun import à effectuer ni compte externe à connecter.
+Le catalogue fournit **680 exercices disponibles en français et en anglais**, couvrant musculation, poids du corps, cardio, gymnastique, portés, mobilité, étirements et mouvements chronométrés. Recherchez par nom, muscle ou matériel, avec ou sans accents, puis filtrez par type. Il n’y a aucun import à effectuer ni compte externe à connecter.
 
 **Nouvel exercice** crée votre propre mouvement. **Personnaliser** copie les caractéristiques d’un exercice fourni dans un exercice personnel : vous pouvez changer son nom, son type, son matériel et ses notes. Le catalogue commun reste stable. Les exercices personnels se modifient et s’archivent ; l’affichage des archives permet de les restaurer.
 
@@ -86,7 +86,7 @@ Le catalogue est embarqué, sans images, vidéos, coaching ou requête réseau e
 
 ## Catalogue et provenance
 
-Le catalogue français est une sélection éditoriale versionnée dans `apps/sport/catalogue.json`, constituée à partir de la nomenclature courante des mouvements et de la consultation du [jeu public free-exercise-db](https://github.com/yuhonas/free-exercise-db) le 14 novembre 2026 ([licence Unlicense](https://github.com/yuhonas/free-exercise-db/blob/main/LICENSE.md)). Il comporte des variantes nommées pour le matériel, la prise, l’unilatéral, les sports d’endurance et les types de mesure. Il ne prétend pas recenser tous les exercices possibles. Les textes d’instructions et images de ce jeu ne sont pas importés. Les noms et la classification français sont propres à cette livraison ; le catalogue consulté ne définit pas notre formule de score.
+Le catalogue est une sélection éditoriale versionnée : identifiants et classification dans `apps/sport/catalogue.json`, textes dans `locales/exercises.fr.json` et `exercises.en.json`, constituée à partir de la nomenclature courante des mouvements et de la consultation du [jeu public free-exercise-db](https://github.com/yuhonas/free-exercise-db) le 14 novembre 2026 ([licence Unlicense](https://github.com/yuhonas/free-exercise-db/blob/main/LICENSE.md)). Il comporte des variantes nommées pour le matériel, la prise, l’unilatéral, les sports d’endurance et les types de mesure. Il ne prétend pas recenser tous les exercices possibles. Les textes d’instructions et images de ce jeu ne sont pas importés. Les noms et la classification français sont propres à cette livraison ; le catalogue consulté ne définit pas notre formule de score.
 
 Les identifiants `builtin-…` de cette version sont stables ; toute correction de libellé doit préserver l’identifiant. Les exercices personnels utilisent des UUID. Ajouter un exercice au catalogue demande une livraison, sans migration des données privées. Voir l’[API Sport](sport-api.md), le [modèle de données](donnees.md#sport) et les [sauvegardes](sauvegardes.md#migration-0006-sport).
 
@@ -101,3 +101,7 @@ Le compteur compare les jours civils du fuseau du navigateur, indépendamment de
 Au démarrage d’une séance, son nom et sa date de compétition sont figés. Modifier ensuite le programme n’altère pas une séance en cours ou historique. Les séances antérieures à cette livraison n’ont pas de date, même si le programme en reçoit une ensuite. Archivage/restauration et désactivation/réactivation conservent les dates.
 
 Le [logo HYROX](https://hyrox.com/wp-content/uploads/2022/03/HYROX-Logo.svg), consulté le 16 novembre 2026 sur le site de la marque, est embarqué localement dans Sport ; aucune requête vers HYROX n’est nécessaire pendant l’utilisation. La marque et son logo appartiennent à leurs titulaires. Cet habillage identifie la préparation personnelle et n’indique aucun partenariat officiel.
+
+## Langue et exercices personnels
+
+Le menu du compte propose **Langue / Language**. Les exercices fournis portent le badge **Par défaut / Default** et suivent la langue choisie, y compris dans les programmes et historiques. Les exercices **Personnels / Personal**, leurs notes et vos autres textes ne sont jamais traduits automatiquement. Personnaliser crée une copie personnelle dans la langue affichée à cet instant. Changer la langue n’altère aucun résultat, score, date ou identifiant. Voir [Langues](internationalisation.md) et le [guide anglais](en/sport.md).

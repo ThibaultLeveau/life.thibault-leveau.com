@@ -1,3 +1,5 @@
+import { formatLocale } from "../../shared/i18n";
+import { tr } from "./i18n";
 import { useEffect, useState } from "react";
 import { localDate } from "./types";
 
@@ -8,19 +10,19 @@ export function relativeDate(value: string, today: string) {
       86_400_000,
   );
   const date = new Date(`${value}T12:00:00`);
-  const full = date.toLocaleDateString("fr-FR", { dateStyle: "full" });
+  const full = date.toLocaleDateString(formatLocale(), { dateStyle: "full" });
   const label =
     days === -1
-      ? "Hier"
+      ? tr("yesterday")
       : days === 0
-        ? "Aujourd’hui"
+        ? tr("today")
         : days === 1
-          ? "Demain"
+          ? tr("tomorrow")
           : days === 2
-            ? "Après-demain"
+            ? tr("day_after_tomorrow")
             : days > 2 && days < 7
-              ? date.toLocaleDateString("fr-FR", { weekday: "long" })
-              : date.toLocaleDateString("fr-FR", {
+              ? date.toLocaleDateString(formatLocale(), { weekday: "long" })
+              : date.toLocaleDateString(formatLocale(), {
                   day: "numeric",
                   month: "short",
                   ...(value.slice(0, 4) !== today.slice(0, 4)

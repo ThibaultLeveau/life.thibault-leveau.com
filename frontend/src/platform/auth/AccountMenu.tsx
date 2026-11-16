@@ -1,3 +1,5 @@
+import { tr } from "../../shared/i18n";
+import type { Locale } from "../i18n";
 import { useState } from "react";
 import { ErrorMessage } from "../../shared/ui/Dialog";
 import { Icon } from "../../shared/ui/Icon";
@@ -6,12 +8,12 @@ import type { Theme } from "./types";
 
 export function AccountMenu({
   disabled = false,
-  beforeLogout,
+  beforeSessionChange,
 }: {
   disabled?: boolean;
-  beforeLogout?: () => Promise<void>;
+  beforeSessionChange?: () => boolean | void | Promise<boolean | void>;
 }) {
-  const { session, changeTheme, logout } = useSession();
+  const { session, changeTheme, changeLocale, logout } = useSession();
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   async function act(operation: () => Promise<void>) {
@@ -29,7 +31,7 @@ export function AccountMenu({
     <div className="account-menu">
       <label className="theme-select">
         <Icon name={session.theme === "dark" ? "moon" : "sun"} />
-        <span className="sr-only">Apparence</span>
+        <span className="sr-only">{tr("appearance")}</span>
         <select
           disabled={busy || disabled}
           value={session.theme}
@@ -37,19 +39,40 @@ export function AccountMenu({
             void act(() => changeTheme(event.target.value as Theme))
           }
         >
-          <option value="system">Thème du système</option>
-          <option value="light">Thème clair</option>
-          <option value="dark">Thème sombre</option>
+          <option value="system">{tr("system_theme")}</option>
+          <option value="light">{tr("light_theme")}</option>
+          <option value="dark">{tr("dark_theme")}</option>
+        </select>
+      </label>
+      <label className="theme-select">
+        <span className="sr-only">{tr("language")}</span>
+        <select
+          disabled={busy || disabled}
+          value={session.locale}
+          onChange={(event) => {
+            const locale = event.target.value as Locale;
+            void act(async () => {
+              if ((await beforeSessionChange?.()) === false) return;
+              await changeLocale(locale);
+            });
+          }}
+        >
+          <option value="fr" lang="fr">
+            Français
+          </option>
+          <option value="en" lang="en">
+            English
+          </option>
         </select>
       </label>
       <span className="account-name">{session.username}</span>
       <button
         className="icon-button"
-        aria-label="Se déconnecter"
+        aria-label={tr("sign_out")}
         disabled={busy || disabled}
         onClick={() =>
           void act(async () => {
-            await beforeLogout?.();
+            if ((await beforeSessionChange?.()) === false) return;
             await logout();
           })
         }

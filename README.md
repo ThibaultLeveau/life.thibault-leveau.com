@@ -4,7 +4,7 @@ LifeOS réunit des applications personnelles dans une bibliothèque. Activez cel
 
 Un espace personnel pour organiser ses tâches : espaces et sous-espaces, sections, listes à cocher et kanban en glisser-déposer, avec thèmes clair et sombre. Une vue **À venir** réunit les échéances de tous les espaces, avec périodes configurables et dates en langage humain. Les sections forment les listes et les **lignes** du tableau ; les statuts deviennent ses colonnes.
 
-Les titres reconnaissent les dates et récurrences françaises pendant la saisie : « Lire demain », « Courir tous les lundis ». Le planificateur propose un calendrier, des récurrences personnalisées avec aperçu, des exceptions et une fin de série. Chaque résolution conserve son historique et prépare la prochaine occurrence.
+Les titres reconnaissent les dates et récurrences françaises ou anglaises, selon la langue du compte, pendant la saisie : « Lire demain », « Courir tous les lundis ». Le planificateur propose un calendrier, des récurrences personnalisées avec aperçu, des exceptions et une fin de série. Chaque résolution conserve son historique et prépare la prochaine occurrence.
 
 Les raccourcis se composent : « tous les mercredis toutes les trois semaines », « les 1er et 21 de chaque mois » ou « un jour sur deux pour cinq fois sauf demain ». Les nombres peuvent s’écrire en lettres. L’aperçu affiche les prochaines dates ; une composition incomplète ou contradictoire est expliquée avant l’enregistrement.
 
@@ -72,3 +72,5 @@ La première activation nécessite les secrets PostgreSQL, la migration et la cr
 Toutes les opérations de l'interface sont accessibles par [API](docs/api.md). L’application **Sport** propose 680 exercices, programmes, entraînements avec repos, mensurations et statistiques. Les programmes HYROX bénéficient d’un habillage monochrome et d’un compte à rebours de compétition. [Guide Sport](docs/sport.md). Les statistiques de tâches et les objectifs restent à développer. Les tâches, sections et espaces sont archivables, sans suppression définitive dans cette version.
 
 Les trois points et le clic droit ouvrent les actions de tâche : modifier, dupliquer et supprimer (avec restauration dans les archives). Sélectionner plusieurs tâches par rectangle souris ou appui long mobile permet de les replanifier, déplacer ou supprimer ensemble. La navigation et les commandes s’adaptent aux petits écrans ; voir le [guide des tâches](docs/taches.md#selectionner-plusieurs-taches).
+
+LifeOS, Tâches et Sport sont disponibles en **français et en anglais**, avec un choix de langue conservé par compte. Les 680 exercices par défaut sont traduits ; les contenus personnels restent intacts. Voir [Langues et traductions](docs/internationalisation.md) et l’[ADR 004](docs/decisions/004-internationalisation.md).

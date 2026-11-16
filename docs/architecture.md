@@ -43,7 +43,7 @@ Les services métier utilisent SQLAlchemy directement : aucune couche génériqu
 1. Le navigateur ouvre une session via l'API et reçoit un cookie opaque HttpOnly.
 2. Les lectures vérifient la session, l’activation de l’application et le propriétaire. Les écritures vérifient aussi l'origine et le jeton CSRF.
 3. Le routeur appelle le service : validation, mutation et événements dans la même transaction PostgreSQL.
-4. L'interface recharge les données enregistrées. Les préférences de vue et de thème passent par la même API.
+4. L'interface recharge les données enregistrées. Les préférences de vue, de thème et de langue passent par la même API.
 
 React ne conserve pas de base métier parallèle dans localStorage. Les champs en cours de saisie et l'état des dialogues restent transitoires. Les mutations de tâche exigent `expected_version` et retournent un conflit 409 si une autre écriture a changé la tâche.
 
@@ -63,7 +63,7 @@ Les verrous uv/npm sont versionnés. Les images portent le SHA complet des sourc
 
 L'application reste personnelle : pas de partage d'espaces, inscription publique, SSO, synchronisation temps réel, pièces jointes ou synchronisation hors ligne. Sport fournit ses statistiques internes ; les statistiques de tâches restent futures. Le modèle conserve les événements nécessaires aux statistiques futures. La recherche est une recherche SQL de sous-chaîne, et le frontend charge toutes les tâches de la vue : des volumes importants nécessiteront pagination visuelle/indexation après mesure.
 
-Les récurrences restent dans `apps/tasks` : `recurrence.py` valide et calcule les dates calendaires avec python-dateutil ; `scheduling.py` analyse les expressions françaises. La résolution avance la tâche dans la transaction existante, sans ordonnanceur ni service supplémentaire. Le frontend demande l’analyse et l’aperçu à l’API et ne conserve que le brouillon transitoire.
+Les récurrences restent dans `apps/tasks` : `recurrence.py` valide et calcule les dates calendaires avec python-dateutil ; `scheduling.py` analyse les expressions françaises ou anglaises selon le compte. La résolution avance la tâche dans la transaction existante, sans ordonnanceur ni service supplémentaire. Le frontend demande l’analyse et l’aperçu à l’API et ne conserve que le brouillon transitoire.
 
 L’analyse française délègue son vocabulaire et ses nombres à `scheduling_language.py`, puis la lecture et la combinaison des clauses à `scheduling_grammar.py`. Ce sont des helpers internes au même module tâches. Ils compilent vers le contrat `Recurrence` existant ; ni nouveau format persistant, ni dépendance, ni service d’interprétation externe.
 
@@ -76,3 +76,7 @@ Le registre backend est injecté par la composition dans `app.state.applications
 `platform/auth/SessionProvider` possède la session et le thème. `platform/applications/ApplicationProvider` charge les activations et les rafraîchit au retour au premier plan. Le shell démonte une Page sur désactivation, expiration ou déconnexion. Le garde serveur appliqué par `api/router.py` reste l’autorité, y compris pour les appels directs. Les composants partagés ne nécessitent pas le chargement du CSS Tâches.
 
 Voir les [contrats et invariants](donnees.md#activations-des-applications), l’[API](api.md#bibliotheque-et-activation) et la [procédure d’ajout](evolution.md).
+
+## Internationalisation approuvée
+
+L’[ADR 004](decisions/004-internationalisation.md) ajoute la langue au compte et i18next/react-i18next au frontend. `platform/i18n/` initialise le moteur ; `shared/locales` possède les textes communs et chaque application ses ressources. `core/i18n.py` fournit le contexte serveur sans importer de métier ; les domaines chargent leurs propres messages. Les métadonnées localisées restent dans les manifestes backend. Le catalogue Sport sépare identifiants et textes, et localise les réponses sans réécrire les instantanés. L’adaptateur `scheduling_english.py` rejoint la grammaire existante. Voir les [contrats et frontières détaillés](internationalisation.md).

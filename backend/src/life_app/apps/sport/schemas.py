@@ -4,6 +4,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from life_app.apps.sport.messages import tr
+
 Kind = Literal[
     "weight_reps",
     "reps",
@@ -43,8 +45,12 @@ class Values(Contract):
 class ExerciseInput(Contract):
     name: Name
     kind: Kind
-    muscle_group: str = Field("Général", min_length=1, max_length=80)
-    equipment: str = Field("Sans matériel", min_length=1, max_length=80)
+    muscle_group: str = Field(
+        default_factory=lambda: tr("default_muscle"), min_length=1, max_length=80
+    )
+    equipment: str = Field(
+        default_factory=lambda: tr("default_equipment"), min_length=1, max_length=80
+    )
     notes: str = Field("", max_length=4000)
 
 
@@ -55,6 +61,8 @@ class ExerciseUpdate(ExerciseInput, Version):
 class ExerciseOutput(ExerciseInput):
     id: str
     builtin: bool = False
+    muscle_id: str | None = None
+    equipment_id: str | None = None
     aliases: list[str] = []
     archived_at: datetime | None = None
     version: int = 1
@@ -126,16 +134,19 @@ class WorkoutInput(Contract):
         if value is None or type(value) is date:
             return value
         if not isinstance(value, str) or len(value) != 10:
-            raise ValueError("Utilisez une date au format AAAA-MM-JJ, sans heure.")
-        parsed = date.fromisoformat(value)
+            raise ValueError(tr("competition_date_format"))
+        try:
+            parsed = date.fromisoformat(value)
+        except ValueError:
+            raise ValueError(tr("competition_date_format")) from None
         if parsed.isoformat() != value:
-            raise ValueError("Utilisez une date au format AAAA-MM-JJ, sans heure.")
+            raise ValueError(tr("competition_date_format"))
         return parsed
 
     @model_validator(mode="after")
     def limit_sets(self):
         if sum(entry.sets for entry in self.entries) > 300:
-            raise ValueError("Un programme contient au maximum 300 séries.")
+            raise ValueError(tr("a_program_can_contain_up_to_300_sets"))
         return self
 
 
@@ -240,7 +251,7 @@ class MeasurementInput(Contract):
     @model_validator(mode="after")
     def has_measurement(self):
         if self.measured_on > date.today():
-            raise ValueError("Une mensuration ne peut pas être datée dans le futur.")
+            raise ValueError(tr("a_body_measurement_cannot_have_a_future_date"))
         if not any(
             v is not None
             for k, v in self.model_dump().items()
@@ -256,7 +267,7 @@ class MeasurementInput(Contract):
                 "archived_at",
             }
         ):
-            raise ValueError("Renseignez au moins une mensuration.")
+            raise ValueError(tr("enter_at_least_one_body_measurement"))
         return self
 
 

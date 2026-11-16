@@ -7,7 +7,7 @@ from sqlalchemy import select
 from life_app.apps.sport import models as m
 from life_app.apps.sport import schemas as s
 from life_app.apps.sport import service as svc
-from life_app.apps.sport.kinds import KINDS
+from life_app.apps.sport.kinds import kind_definitions
 from life_app.core.database import Database
 from life_app.platform.auth.service import CurrentUser
 
@@ -34,7 +34,7 @@ def commit(db, item, output):
 @router.get("/kinds", response_model=list[s.KindDefinition])
 def kinds(user: CurrentUser):
     """Types, champs, unités, bornes et formule de performance : source des formulaires."""
-    return list(KINDS.values())
+    return list(kind_definitions().values())
 
 
 @router.get("/exercises", response_model=s.ExercisePage)
@@ -101,20 +101,23 @@ def update_settings(payload: s.Settings, user: CurrentUser, db: Database):
 @router.get("/workouts", response_model=list[s.WorkoutOutput])
 def workouts(user: CurrentUser, db: Database, archived: bool = False):
     """Programmes réutilisables actifs, ou archivés avec archived=true."""
-    return db.scalars(
-        select(m.Workout)
-        .where(
-            m.Workout.owner_id == user.id,
-            m.Workout.archived_at.is_not(None) if archived else m.Workout.archived_at.is_(None),
-        )
-        .order_by(m.Workout.updated_at.desc(), m.Workout.id)
-    ).all()
+    return [
+        svc.workout_output(item)
+        for item in db.scalars(
+            select(m.Workout)
+            .where(
+                m.Workout.owner_id == user.id,
+                m.Workout.archived_at.is_not(None) if archived else m.Workout.archived_at.is_(None),
+            )
+            .order_by(m.Workout.updated_at.desc(), m.Workout.id)
+        ).all()
+    ]
 
 
 @router.get("/workouts/{workout_id}", response_model=s.WorkoutOutput)
 def get_workout(workout_id: UUID, user: CurrentUser, db: Database):
     """Lire un programme, même archivé, pour sa page de modification."""
-    return svc.owned(db, m.Workout, user, workout_id)
+    return svc.workout_output(svc.owned(db, m.Workout, user, workout_id))
 
 
 @router.post("/workouts", response_model=s.WorkoutOutput, status_code=201)
@@ -128,7 +131,7 @@ def create_workout(payload: s.WorkoutInput, user: CurrentUser, db: Database):
         entries=svc.snapshot(db, user, payload.entries),
     )
     db.add(item)
-    return commit(db, item, s.WorkoutOutput.model_validate)
+    return commit(db, item, svc.workout_output)
 
 
 @router.put("/workouts/{workout_id}", response_model=s.WorkoutOutput)
@@ -140,14 +143,12 @@ def update_workout(workout_id: UUID, payload: s.WorkoutUpdate, user: CurrentUser
     item.competition_date = payload.competition_date
     item.entries = svc.snapshot(db, user, payload.entries)
     svc.touch(item)
-    return commit(db, item, s.WorkoutOutput.model_validate)
+    return commit(db, item, svc.workout_output)
 
 
 @router.put("/workouts/{workout_id}/archive", response_model=s.WorkoutOutput)
 def archive_workout(workout_id: UUID, payload: s.Archive, user: CurrentUser, db: Database):
-    return commit(
-        db, svc.archive(db, user, m.Workout, workout_id, payload), s.WorkoutOutput.model_validate
-    )
+    return commit(db, svc.archive(db, user, m.Workout, workout_id, payload), svc.workout_output)
 
 
 @router.get("/sessions", response_model=s.SessionPage)

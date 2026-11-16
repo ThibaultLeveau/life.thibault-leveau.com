@@ -27,6 +27,12 @@ def test_applications_have_matching_manifests_and_standard_structure():
     assert all(re.fullmatch(r"[a-z][a-z0-9_]{0,49}", item.id) for item in APPLICATIONS)
     operations = set()
     for item in APPLICATIONS:
+        assert item.name and item.description
+        assert set(item.translations) == {"en"}
+        assert all(item.translations["en"])
+        for base in (BACKEND, FRONTEND):
+            for language in ("fr", "en"):
+                assert (base / "apps" / item.id / "locales" / f"{language}.json").is_file()
         for route in item.router.routes:
             for method in route.methods:
                 operation = (method, route.path)

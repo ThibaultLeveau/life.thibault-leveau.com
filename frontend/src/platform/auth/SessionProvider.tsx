@@ -1,3 +1,6 @@
+import { tr } from "../../shared/i18n";
+import { useTranslation } from "react-i18next";
+import { browserLocale, setLanguage, type Locale } from "../i18n";
 import {
   createContext,
   useCallback,
@@ -14,19 +17,22 @@ import type { Session, Theme } from "./types";
 interface SessionContext {
   session: Session;
   changeTheme: (theme: Theme) => Promise<void>;
+  changeLocale: (locale: Locale) => Promise<void>;
   logout: () => Promise<void>;
 }
 const Context = createContext<SessionContext | null>(null);
 
 export function SessionProvider({ children }: { children: ReactNode }) {
+  useTranslation();
   const [session, setSession] = useState<Session | null>(null);
   const [checking, setChecking] = useState(true);
   const [error, setError] = useState("");
   const current = useRef<Session | null>(null);
-  const themeWrites = useRef<Promise<unknown>>(Promise.resolve());
+  const preferenceWrites = useRef<Promise<unknown>>(Promise.resolve());
   const accept = useCallback((value: Session | null) => {
     current.current = value;
     setApiSession(value);
+    setLanguage(value?.locale ?? browserLocale());
     setSession(value);
     document.documentElement.dataset.theme = value?.theme ?? "system";
   }, []);
@@ -48,7 +54,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       });
     const expired = () => {
       accept(null);
-      setError("Votre session a expiré. Connectez-vous à nouveau.");
+      setError(tr("your_session_has_expired_sign_in_again"));
     };
     window.addEventListener("life-session-expired", expired);
     return () => {
@@ -56,21 +62,27 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       window.removeEventListener("life-session-expired", expired);
     };
   }, [accept]);
-  async function changeTheme(theme: Theme) {
+  async function changePreferences(
+    patch: Partial<Pick<Session, "theme" | "locale">>,
+  ) {
     const token = current.current?.csrf_token;
-    const write = themeWrites.current
+    const write = preferenceWrites.current
       .catch(() => {})
       .then(async () => {
         if (!token || current.current?.csrf_token !== token) return;
-        await api("/preferences", "PUT", { theme });
+        const preferences = await api<Pick<Session, "theme" | "locale">>(
+          "/preferences",
+          "PUT",
+          patch,
+        );
         if (current.current?.csrf_token === token)
-          accept({ ...current.current, theme });
+          accept({ ...current.current, ...preferences });
       });
-    themeWrites.current = write;
+    preferenceWrites.current = write;
     await write;
   }
   async function logout() {
-    await themeWrites.current.catch(() => {});
+    await preferenceWrites.current.catch(() => {});
     await api("/auth/session", "DELETE");
     accept(null);
     setError("");
@@ -78,7 +90,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   if (checking)
     return (
       <main className="auth-page">
-        <p role="status">Ouverture de votre espace…</p>
+        <p role="status">{tr("opening_your_space")}</p>
       </main>
     );
   if (!session)
@@ -93,8 +105,13 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     );
   return (
     <Context.Provider
-      key={session.user_id}
-      value={{ session, changeTheme, logout }}
+      key={`${session.user_id}:${session.locale}`}
+      value={{
+        session,
+        changeTheme: (theme) => changePreferences({ theme }),
+        changeLocale: (locale) => changePreferences({ locale }),
+        logout,
+      }}
     >
       {children}
     </Context.Provider>

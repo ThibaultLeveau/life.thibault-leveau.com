@@ -112,3 +112,11 @@ Le préremplissage ajoute `suggested_values` aux nouvelles entrées JSONB de `sp
 Sauvegarder avec la procédure habituelle avant `0007_hyrox`. Cette migration ajoute deux colonnes `competition_date DATE NULL` dans les programmes et séances Sport, sans modifier les autres champs. Les données existantes restent identiques et sans date. Le code précédent peut continuer ses écritures pendant l’ajout, mais sa sonde exige sa révision Alembic exacte : un simple retour d’image est refusé après migration.
 
 La restauration transactionnelle habituelle conserve ces colonnes et l’intégralité des tables Sport. La recette conteneur compare leurs valeurs, y compris des dates différentes entre un programme et sa séance. Les tests de migration vérifient l’aller-retour sans date et la préservation des lignes existantes. Une rétrogradation vers `0006_sport` refuse toute date présente, même uniquement dans une séance historique. Préférer une correction en avant ; une restauration de sauvegarde antérieure exige l’arrêt des écritures et la prise en compte des données créées depuis, selon la procédure complète ci-dessus. Ne jamais effacer des dates de production pour contourner ce refus.
+
+## Migration 0008 langue du compte
+
+`0008_locale`, après `0007_hyrox`, ajoute `users.locale`, non nul, défaut `fr`, contrainte `fr/en`. Les comptes existants restent en français. Aucun historique ni instantané métier n’est réécrit. Sauvegarder avant migration et terminer avec la nouvelle image : l’ancienne sonde ne reconnaît pas cette révision.
+
+Le downgrade vers `0007_hyrox` refuse dès qu’un compte a choisi `en`. Ne pas modifier les préférences pour forcer un retour en production : privilégier une correction en avant ou restaurer explicitement un dump connu avec l’image compatible. L’aller/retour sans préférence anglaise et le refus de perte sont testés.
+
+Le dump contient la langue comme le thème. Les traductions des 680 exercices et les messages sont embarqués : conserver l’image et son SHA avec la sauvegarde. La recette conteneur enregistre `en` via l’API avant le dump et compare les préférences restaurées, en plus des cinq tables Sport, des récurrences et de l’historique immuable. Vérifier après restauration la reconnexion, les deux langues, un exercice fourni et un exercice personnel homonyme sur un compte de recette.

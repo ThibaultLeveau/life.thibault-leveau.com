@@ -9,12 +9,16 @@ from life_app.core.database import Base, utcnow
 
 class User(Base):
     __tablename__ = "users"
-    __table_args__ = (CheckConstraint("theme IN ('system', 'light', 'dark')"),)
+    __table_args__ = (
+        CheckConstraint("theme IN ('system', 'light', 'dark')"),
+        CheckConstraint("locale IN ('fr', 'en')", name="ck_user_locale"),
+    )
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     username: Mapped[str] = mapped_column(String(80), unique=True)
     password_hash: Mapped[str] = mapped_column(Text)
     theme: Mapped[str] = mapped_column(String(10), default="system")
+    locale: Mapped[str] = mapped_column(String(2), default="fr", server_default="fr")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
 

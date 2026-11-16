@@ -4,6 +4,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from life_app.apps.tasks.messages import tr
 from life_app.apps.tasks.recurrence import Recurrence
 
 Name = Annotated[str, Field(min_length=1, max_length=120)]
@@ -20,7 +21,7 @@ class Patch(Schema):
     def reject_null_required_fields(self):
         for field in self.model_fields_set - {"section_id", "due_date", "parent_id", "recurrence"}:
             if getattr(self, field) is None:
-                raise ValueError(f"{field} ne peut pas être null")
+                raise ValueError(tr("field_cannot_be_null", field=field))
         return self
 
 
@@ -161,7 +162,7 @@ class BulkTasks(Schema):
     @model_validator(mode="after")
     def unique_tasks(self):
         if len({item.id for item in self.tasks}) != len(self.tasks):
-            raise ValueError("Une tâche ne peut apparaître qu’une fois dans le lot.")
+            raise ValueError(tr("a_task_can_appear_only_once_in_a_batch"))
         return self
 
 

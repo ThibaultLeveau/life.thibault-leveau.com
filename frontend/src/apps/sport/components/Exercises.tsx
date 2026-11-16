@@ -1,3 +1,4 @@
+import { tr } from "../i18n";
 import { useEffect, useRef, useState } from "react";
 import { Dialog, ErrorMessage } from "../../../shared/ui/Dialog";
 import { Icon } from "../../../shared/ui/Icon";
@@ -32,7 +33,7 @@ export function ExercisePicker({
     <section className="sport-picker">
       <div className="sport-filters">
         <label>
-          Rechercher un exercice
+          {tr("search_for_an_exercise")}
           <input
             ref={search}
             type="search"
@@ -41,13 +42,13 @@ export function ExercisePicker({
             onKeyDown={(e) => {
               if (e.key === "Enter") e.preventDefault();
             }}
-            placeholder="Développé, course, farmer…"
+            placeholder={tr("bench_press_running_farmer_carry")}
           />
         </label>
         <label>
-          Type
+          {tr("type")}
           <select value={kind} onChange={(e) => setKind(e.target.value)}>
-            <option value="">Tous les types</option>
+            <option value="">{tr("all_types")}</option>
             {kinds.map((k) => (
               <option value={k.id} key={k.id}>
                 {k.name}
@@ -76,11 +77,11 @@ export function ExercisePicker({
         ))}
       </div>
       {resource.data?.total === 0 && (
-        <p>Aucun exercice trouvé. Créez-le dans l’onglet Exercices.</p>
+        <p>{tr("no_exercises_found_create_one_in_the_exercises_tab")}</p>
       )}
       {resource.data && resource.data.total > 20 && (
         <p className="muted small-text">
-          20 résultats sur {resource.data.total} — précisez votre recherche.
+          {tr("search_limit", { total: resource.data.total })}
         </p>
       )}
     </section>
@@ -100,15 +101,15 @@ function ExerciseForm({
   const editing = exercise && !exercise.builtin;
   const [name, setName] = useState(exercise?.name ?? "");
   const [kind, setKind] = useState(exercise?.kind ?? "weight_reps");
-  const [muscle, setMuscle] = useState(exercise?.muscle_group ?? "Général");
+  const [muscle, setMuscle] = useState(exercise?.muscle_group ?? tr("general"));
   const [equipment, setEquipment] = useState(
-    exercise?.equipment ?? "Sans matériel",
+    exercise?.equipment ?? tr("no_equipment"),
   );
   const [notes, setNotes] = useState(exercise?.notes ?? "");
   const action = useAction();
   return (
     <Dialog
-      title={editing ? "Modifier l’exercice" : "Nouvel exercice"}
+      title={editing ? tr("edit_exercise") : tr("new_exercise")}
       onClose={onClose}
     >
       <form
@@ -135,7 +136,7 @@ function ExerciseForm({
       >
         <fieldset disabled={action.busy} className="sport-fieldset">
           <label>
-            Nom de l’exercice
+            {tr("exercise_name")}
             <input
               required
               maxLength={160}
@@ -144,7 +145,7 @@ function ExerciseForm({
             />
           </label>
           <label>
-            Type de saisie
+            {tr("input_type")}
             <select
               value={kind}
               onChange={(e) => setKind(e.target.value as Exercise["kind"])}
@@ -164,7 +165,7 @@ function ExerciseForm({
           </p>
           <div className="form-grid">
             <label>
-              Groupe musculaire
+              {tr("muscle_group")}
               <input
                 required
                 maxLength={80}
@@ -173,7 +174,7 @@ function ExerciseForm({
               />
             </label>
             <label>
-              Matériel
+              {tr("equipment")}
               <input
                 required
                 maxLength={80}
@@ -183,7 +184,7 @@ function ExerciseForm({
             </label>
           </div>
           <label>
-            Notes
+            {tr("notes")}
             <textarea
               maxLength={4000}
               value={notes}
@@ -192,7 +193,7 @@ function ExerciseForm({
           </label>
           <ErrorMessage message={action.error} />
           <div className="dialog-actions">
-            <button className="primary-button">Enregistrer l’exercice</button>
+            <button className="primary-button">{tr("save_exercise")}</button>
           </div>
         </fieldset>
       </form>
@@ -223,19 +224,21 @@ export function Exercises({ kinds }: { kinds: KindDefinition[] }) {
     <>
       <div className="sport-toolbar">
         <p className="muted">
-          {resource.data?.total ?? "…"} exercices · un catalogue prêt à utiliser
+          {resource.data
+            ? tr("catalogue_count", { count: resource.data.total })
+            : tr("loading")}
         </p>
         <button className="primary-button" onClick={() => setForm("new")}>
-          Nouvel exercice
+          {tr("new_exercise")}
         </button>
       </div>
       <div className="sport-filters">
         <label>
-          Rechercher
+          {tr("search")}
           <input
             type="search"
             value={query}
-            placeholder="Nom, muscle ou matériel"
+            placeholder={tr("name_muscle_or_equipment")}
             onChange={(e) => {
               setQuery(e.target.value);
               setOffset(0);
@@ -243,7 +246,7 @@ export function Exercises({ kinds }: { kinds: KindDefinition[] }) {
           />
         </label>
         <label>
-          Type d’exercice
+          {tr("exercise_type")}
           <select
             value={kind}
             onChange={(e) => {
@@ -251,7 +254,7 @@ export function Exercises({ kinds }: { kinds: KindDefinition[] }) {
               setOffset(0);
             }}
           >
-            <option value="">Tous les types</option>
+            <option value="">{tr("all_types")}</option>
             {kinds.map((k) => (
               <option value={k.id} key={k.id}>
                 {k.name}
@@ -260,25 +263,25 @@ export function Exercises({ kinds }: { kinds: KindDefinition[] }) {
           </select>
         </label>
         <label>
-          Afficher
+          {tr("show")}
           <select
-            aria-label="Afficher"
+            aria-label={tr("show")}
             value={String(archived)}
             onChange={(e) => {
               setArchived(e.target.value === "true");
               setOffset(0);
             }}
           >
-            <option value="false">Catalogue et mes exercices</option>
-            <option value="true">Mes exercices archivés</option>
+            <option value="false">{tr("catalogue_and_my_exercises")}</option>
+            <option value="true">{tr("my_archived_exercises")}</option>
           </select>
         </label>
       </div>
       <LoadState {...resource} />
       <ErrorMessage message={action.error} />
       {resource.data?.total === 0 && (
-        <Empty title="Aucun exercice">
-          Essayez une autre recherche ou créez votre exercice.
+        <Empty title={tr("no_exercises")}>
+          {tr("try_another_search_or_create_your_own_exercise")}
         </Empty>
       )}
       <div className="sport-exercise-list">
@@ -301,7 +304,7 @@ export function Exercises({ kinds }: { kinds: KindDefinition[] }) {
               <p>{kinds.find((k) => k.id === ex.kind)?.name}</p>
               <small>
                 {ex.muscle_group} · {ex.equipment}
-                {!ex.builtin && " · Personnel"}
+                {ex.builtin ? ` · ${tr("default_exercise")}` : tr("personal")}
               </small>
               {ex.notes && <p>{ex.notes}</p>}
             </div>
@@ -310,7 +313,7 @@ export function Exercises({ kinds }: { kinds: KindDefinition[] }) {
                 className="secondary-button small-button"
                 onClick={() => setForm(ex)}
               >
-                {ex.builtin ? "Personnaliser" : "Modifier"}
+                {ex.builtin ? tr("customize") : tr("edit")}
               </button>
               {!ex.builtin && (
                 <button
@@ -327,7 +330,7 @@ export function Exercises({ kinds }: { kinds: KindDefinition[] }) {
                     )
                   }
                 >
-                  {archived ? "Restaurer" : "Archiver"}
+                  {archived ? tr("restore") : tr("archive")}
                 </button>
               )}
             </div>
@@ -341,18 +344,21 @@ export function Exercises({ kinds }: { kinds: KindDefinition[] }) {
             disabled={offset === 0}
             onClick={() => setOffset(Math.max(0, offset - 40))}
           >
-            Précédent
+            {tr("previous")}
           </button>
           <span>
-            {offset + 1}–{Math.min(offset + 40, resource.data.total)} sur{" "}
-            {resource.data.total}
+            {tr("page_range", {
+              first: offset + 1,
+              last: Math.min(offset + 40, resource.data.total),
+              total: resource.data.total,
+            })}
           </span>
           <button
             className="secondary-button"
             disabled={offset + 40 >= resource.data.total}
             onClick={() => setOffset(offset + 40)}
           >
-            Suivant
+            {tr("next")}
           </button>
         </div>
       )}

@@ -5,6 +5,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from life_app.core.config import Settings
+from life_app.core.messages import tr
 
 
 def register_static_routes(app: FastAPI, settings: Settings) -> None:
@@ -31,7 +32,7 @@ def register_static_routes(app: FastAPI, settings: Settings) -> None:
     async def home() -> FileResponse:
         index = frontend / "index.html"
         if not index.is_file():
-            raise HTTPException(status_code=503, detail="Frontend build unavailable")
+            raise HTTPException(status_code=503, detail=tr("frontend_unavailable"))
         return FileResponse(index, headers={"Cache-Control": "no-cache"})
 
     for path in ("/", "/applications", *(item.path for item in app.state.applications)):

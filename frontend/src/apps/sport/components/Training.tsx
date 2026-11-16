@@ -1,3 +1,4 @@
+import { tr } from "../i18n";
 import { useEffect, useRef, useState } from "react";
 import { Dialog, ErrorMessage } from "../../../shared/ui/Dialog";
 import { Icon } from "../../../shared/ui/Icon";
@@ -67,23 +68,28 @@ export function RestTimer({
       )
     : 0;
   return (
-    <div ref={bar} className={`sport-rest ${left ? "is-running" : ""} ${isHyrox(training.name) ? "sport-hyrox" : ""}`}>
-      {isHyrox(training.name) && <span className="sport-hyrox-stamp"><HyroxMark /></span>}
+    <div
+      ref={bar}
+      className={`sport-rest ${left ? "is-running" : ""} ${isHyrox(training.name) ? "sport-hyrox" : ""}`}
+    >
+      {isHyrox(training.name) && (
+        <span className="sport-hyrox-stamp">
+          <HyroxMark />
+        </span>
+      )}
       <div>
-        <span className="eyebrow">RÉCUPÉRATION</span>
-        <strong role="timer" aria-label="Temps de repos restant">
+        <span className="eyebrow">{tr("recovery")}</span>
+        <strong role="timer" aria-label={tr("remaining_rest_time")}>
           {String(Math.floor(left / 60)).padStart(2, "0")}:
           {String(left % 60).padStart(2, "0")}
         </strong>
         <span role="status">
-          {left
-            ? "Prenez le temps de récupérer"
-            : "Prêt pour la prochaine série"}
+          {left ? tr("take_time_to_recover") : tr("ready_for_the_next_set")}
         </span>
       </div>
       {left > 0 && (
         <button className="secondary-button" disabled={busy} onClick={onSkip}>
-          Passer le repos
+          {tr("skip_rest")}
         </button>
       )}
       <ErrorMessage message={error} />
@@ -101,15 +107,15 @@ export function TrainingDetail({
     <>
       <div className="sport-summary">
         <div>
-          <span>Début</span>
+          <span>{tr("start")}</span>
           <strong>{moment(training.started_at)}</strong>
         </div>
         <div>
-          <span>Séries validées</span>
+          <span>{tr("completed_sets")}</span>
           <strong>{training.sets.length}</strong>
         </div>
         <div>
-          <span>Score de l’entraînement</span>
+          <span>{tr("training_score")}</span>
           <strong>
             {training.score == null ? "—" : number(training.score)}
           </strong>
@@ -118,8 +124,12 @@ export function TrainingDetail({
       {training.score != null && (
         <p className="muted">
           {training.baseline_id
-            ? "100 = votre premier entraînement terminé avec ces exercices et ce nombre de séries. Un score supérieur indique une meilleure performance selon les mesures choisies."
-            : "Premier entraînement comparable : il devient votre référence à 100 points."}
+            ? tr(
+                "100_your_first_completed_training_session_with_these_exercises_and",
+              )
+            : tr(
+                "first_comparable_training_session_it_becomes_your_baseline_at_100",
+              )}
         </p>
       )}
       {training.entries.map((entry, i) => (
@@ -129,11 +139,8 @@ export function TrainingDetail({
             .filter((s) => s.entry_index === i)
             .map((s) => (
               <p key={s.set_index}>
-                Série {s.set_index + 1} ·{" "}
-                {valuesText(
-                  kinds.find((k) => k.id === entry.kind)!,
-                  s.values,
-                )}
+                {tr("set")} {s.set_index + 1} ·{" "}
+                {valuesText(kinds.find((k) => k.id === entry.kind)!, s.values)}
               </p>
             ))}
         </section>
@@ -171,7 +178,9 @@ export function ActiveTraining({
         !action.busy &&
         (!dirty ||
           window.confirm(
-            "Quitter l’entraînement sans enregistrer les saisies en cours ?",
+            tr(
+              "leave_the_training_session_without_saving_your_current_entries",
+            ),
           )),
     );
     const unload = (event: BeforeUnloadEvent) => {
@@ -193,26 +202,34 @@ export function ActiveTraining({
   }
   if (!training)
     return (
-      <Empty title="Aucun entraînement en cours">
-        Démarrez un entraînement depuis l’onglet Programmes.
+      <Empty title={tr("no_training_session_in_progress")}>
+        {tr("start_a_training_session_from_the_programs_tab")}
       </Empty>
     );
   const total = training.entries.reduce((sum, e) => sum + e.sets, 0);
   return (
-    <div className={`sport-training ${isHyrox(training.name) ? "sport-hyrox" : ""}`}>
-      {isHyrox(training.name) && <HyroxBrand date={training.competition_date} />}
+    <div
+      className={`sport-training ${isHyrox(training.name) ? "sport-hyrox" : ""}`}
+    >
+      {isHyrox(training.name) && (
+        <HyroxBrand date={training.competition_date} />
+      )}
       <div className="sport-toolbar">
         <div>
           <h2>{training.name}</h2>
-          <p className="muted">Démarré le {moment(training.started_at)}</p>
+          <p className="muted">
+            {tr("started_on")} {moment(training.started_at)}
+          </p>
         </div>
         <span className="sport-tag" aria-live="polite">
-          {training.sets.length} / {total} séries
+          {tr("progress_sets", {
+            completed: training.sets.length,
+            count: total,
+          })}
         </span>
       </div>
       <p className="muted small-text">
-        Saisissez vos résultats puis validez chaque série. Les valeurs
-        enregistrées seront proposées au prochain entraînement.
+        {tr("enter_your_results_then_complete_each_set_saved_values_will")}
       </p>
       {training.entries.map((entry, i) => (
         <section
@@ -233,7 +250,9 @@ export function ActiveTraining({
           </div>
           {entry.kind.startsWith("weight") && (
             <p className="muted small-text">
-              Charge totale : barre comprise et deux haltères additionnés.
+              {tr(
+                "total_weight_include_the_bar_and_add_both_dumbbells_together",
+              )}
             </p>
           )}
           <div className="sport-set-list">
@@ -257,7 +276,10 @@ export function ActiveTraining({
                 <form
                   className={`sport-set ${record ? "is-complete" : ""}`}
                   key={j}
-                  aria-label={`${entry.name}, série ${j + 1}`}
+                  aria-label={tr("named_set", {
+                    name: entry.name,
+                    number: j + 1,
+                  })}
                   onSubmit={(event) => {
                     event.preventDefault();
                     void action.run(
@@ -276,7 +298,9 @@ export function ActiveTraining({
                   }}
                 >
                   <fieldset className="sport-set-fields" disabled={action.busy}>
-                    <legend className="sr-only">Série {j + 1}</legend>
+                    <legend className="sr-only">
+                      {tr("set")} {j + 1}
+                    </legend>
                     <div className="sport-set-row">
                       <span className="sport-set-number" aria-hidden="true">
                         {j + 1}
@@ -295,22 +319,22 @@ export function ActiveTraining({
                           record ? "secondary-button" : "primary-button"
                         }
                         aria-label={
-                          record ? "Corriger la série" : "Valider la série"
+                          record ? tr("correct_set") : tr("complete_set")
                         }
                       >
-                        {record ? "Corriger" : "Valider"}
+                        {record ? tr("correct") : tr("confirm")}
                       </button>
                     </div>
                     <div className="sport-set-actions">
                       <span className="sport-set-state">
                         {record && <Icon name="check" size={14} />}
                         {drafts[key]
-                          ? "Saisie à enregistrer"
+                          ? tr("entry_to_save")
                           : record
-                            ? "Validée"
+                            ? tr("completed")
                             : suggested
-                              ? "Derniers résultats"
-                              : "À valider"}
+                              ? tr("previous_results")
+                              : tr("to_complete")}
                       </span>
                       {record && (
                         <button
@@ -333,7 +357,7 @@ export function ActiveTraining({
                             )
                           }
                         >
-                          Annuler la validation
+                          {tr("undo_completion")}
                         </button>
                       )}
                       {drafts[key] && (
@@ -342,7 +366,7 @@ export function ActiveTraining({
                           className="text-button"
                           onClick={() => clearDraft(key)}
                         >
-                          Annuler la saisie
+                          {tr("discard_entry")}
                         </button>
                       )}
                     </div>
@@ -362,33 +386,35 @@ export function ActiveTraining({
             if (
               !dirty ||
               window.confirm(
-                "Abandonner sans enregistrer les saisies en cours ?",
+                tr(
+                  "cancel_the_training_session_without_saving_your_current_entries",
+                ),
               )
             )
               setEnding("cancelled");
           }}
         >
-          Abandonner l’entraînement
+          {tr("cancel_training_session")}
         </button>
         <button
           className="primary-button"
           disabled={action.busy || dirty || training.sets.length !== total}
           onClick={() => setEnding("completed")}
         >
-          Terminer l’entraînement
+          {tr("finish_training_session")}
         </button>
       </div>
       {dirty && (
         <p className="muted small-text">
-          Validez, corrigez ou annulez les saisies en cours avant de terminer.
+          {tr("save_correct_or_discard_your_current_entries_before_finishing")}
         </p>
       )}
       {ending && (
         <Dialog
           title={
             ending === "completed"
-              ? "Terminer l’entraînement"
-              : "Abandonner l’entraînement"
+              ? tr("finish_training_session")
+              : tr("cancel_training_session")
           }
           onClose={() => setEnding(null)}
         >
@@ -418,11 +444,13 @@ export function ActiveTraining({
           >
             <p>
               {ending === "completed"
-                ? "Vos résultats seront conservés et votre score calculé."
-                : "Les séries déjà saisies restent dans l’historique. Cet entraînement ne comptera pas dans les statistiques."}
+                ? tr("your_results_will_be_saved_and_your_score_calculated")
+                : tr(
+                    "sets_already_recorded_remain_in_your_history_this_training_session",
+                  )}
             </p>
             <label>
-              Ressenti et notes
+              {tr("how_it_felt_and_notes")}
               <textarea
                 maxLength={4000}
                 value={notes}
@@ -432,8 +460,8 @@ export function ActiveTraining({
             <ErrorMessage message={scope === "finish" ? action.error : ""} />
             <button disabled={action.busy} className="primary-button">
               {ending === "completed"
-                ? "Enregistrer les résultats"
-                : "Confirmer l’abandon"}
+                ? tr("save_results")
+                : tr("confirm_cancellation")}
             </button>
           </form>
         </Dialog>
@@ -452,9 +480,10 @@ export function History({ kinds }: { kinds: KindDefinition[] }) {
     <>
       <LoadState {...resource} />
       {resource.data?.total === 0 && (
-        <Empty title="Votre historique se construit ici">
-          Vos entraînements terminés et abandonnés sont conservés avec chaque
-          série.
+        <Empty title={tr("your_history_starts_here")}>
+          {tr(
+            "your_completed_and_cancelled_training_sessions_are_kept_with_every",
+          )}
         </Empty>
       )}
       <div className="sport-history">
@@ -467,17 +496,18 @@ export function History({ kinds }: { kinds: KindDefinition[] }) {
             <span>
               <strong>{t.name}</strong>
               <small>
-                {moment(t.started_at)} · {t.sets.length} séries ·{" "}
+                {moment(t.started_at)} ·{" "}
+                {tr("set_count", { count: t.sets.length })} ·{" "}
                 {t.status === "completed"
-                  ? "Terminé"
+                  ? tr("session_completed")
                   : t.status === "cancelled"
-                    ? "Abandonné"
-                    : "En cours"}
+                    ? tr("cancelled")
+                    : tr("in_progress")}
               </small>
             </span>
             <span className="sport-score">
               {t.score === null ? "—" : number(t.score)}
-              <small>score</small>
+              <small>{tr("score")}</small>
             </span>
           </button>
         ))}
@@ -489,10 +519,10 @@ export function History({ kinds }: { kinds: KindDefinition[] }) {
             disabled={!offset}
             onClick={() => setOffset(offset - 30)}
           >
-            Précédent
+            {tr("previous")}
           </button>
           <span>
-            {offset + 1}–{Math.min(offset + 30, resource.data.total)} sur{" "}
+            {offset + 1}–{Math.min(offset + 30, resource.data.total)} {tr("of")}{" "}
             {resource.data.total}
           </span>
           <button
@@ -500,7 +530,7 @@ export function History({ kinds }: { kinds: KindDefinition[] }) {
             disabled={offset + 30 >= resource.data.total}
             onClick={() => setOffset(offset + 30)}
           >
-            Suivant
+            {tr("next")}
           </button>
         </div>
       )}

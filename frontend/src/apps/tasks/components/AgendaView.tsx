@@ -1,3 +1,5 @@
+import { formatLocale } from "../../../shared/i18n";
+import { tr } from "../i18n";
 import { useEffect, useRef, useState, type MutableRefObject } from "react";
 import { api } from "../../../platform/api";
 import { relativeDate } from "../dates";
@@ -19,12 +21,13 @@ import { MoveDialog } from "./MoveDialog";
 import { TaskActions } from "./TaskActions";
 
 type SpaceData = { sections: Section[]; statuses: Status[]; labels: Label[] };
-const periods = [
-  ["today", "Aujourd’hui"],
-  ["tomorrow", "Demain"],
-  ["week", "Semaine"],
-  ["custom", "Personnalisé"],
-] as const;
+const periods = () =>
+  [
+    ["today", tr("today")],
+    ["tomorrow", tr("tomorrow")],
+    ["week", tr("week")],
+    ["custom", tr("custom")],
+  ] as const;
 
 export function AgendaView({
   workspaces,
@@ -130,7 +133,7 @@ export function AgendaView({
     } catch (error) {
       if (mounted.current) {
         setSettings(previous);
-        setError(`Réglages non enregistrés : ${(error as Error).message}`);
+        setError(tr("settings_unsaved", { message: (error as Error).message }));
       }
     } finally {
       if (mounted.current) setBusy(false);
@@ -150,12 +153,14 @@ export function AgendaView({
       setUndoTask(task.completed_at ? null : result);
       setNotice(
         task.completed_at
-          ? "Tâche rouverte."
+          ? tr("task_reopened")
           : result.recurrence && !result.completed_at
-            ? `Occurrence terminée. Prochaine : ${relativeDate(result.due_date!, today).full}.`
+            ? tr("occurrence_next", {
+                date: relativeDate(result.due_date!, today).full,
+              })
             : result.recurrence
-              ? "Dernière occurrence terminée."
-              : "Tâche terminée.",
+              ? tr("last_occurrence_completed")
+              : tr("task_completed"),
       );
       setReload((value) => value + 1);
     } catch (error) {
@@ -167,7 +172,7 @@ export function AgendaView({
   function saved() {
     setEditor(null);
     setMoving(null);
-    setNotice("Tâche enregistrée.");
+    setNotice(tr("task_saved"));
     setUndoTask(null);
     setReload((value) => value + 1);
   }
@@ -187,9 +192,9 @@ export function AgendaView({
     <div className="agenda-view">
       <div className="workspace-heading">
         <div>
-          <h1>À venir</h1>
+          <h1>{tr("upcoming")}</h1>
           <p className="workspace-description">
-            Vos échéances, tous espaces réunis.
+            {tr("your_due_dates_across_all_workspaces")}
           </p>
         </div>
         <Icon name="calendar" size={28} />
@@ -198,9 +203,9 @@ export function AgendaView({
         <>
           <div
             className="agenda-periods view-switch"
-            aria-label="Période des tâches"
+            aria-label={tr("task_period")}
           >
-            {periods.map(([period, label]) => (
+            {periods().map(([period, label]) => (
               <button
                 key={period}
                 aria-pressed={settings.period === period}
@@ -226,7 +231,7 @@ export function AgendaView({
                 }}
               >
                 <label>
-                  Nombre de jours
+                  {tr("number_of_days")}
                   <input
                     name="days"
                     type="number"
@@ -241,7 +246,7 @@ export function AgendaView({
                   className="secondary-button small-button"
                   disabled={busy || loading}
                 >
-                  Appliquer
+                  {tr("apply")}
                 </button>
               </form>
             )}
@@ -254,7 +259,7 @@ export function AgendaView({
                   change({ include_overdue: event.target.checked })
                 }
               />
-              Inclure les retards
+              {tr("include_overdue_tasks")}
             </label>
             <label className="check-label">
               <input
@@ -265,7 +270,7 @@ export function AgendaView({
                   change({ show_completed: event.target.checked })
                 }
               />
-              Afficher les tâches terminées
+              {tr("show_completed_tasks")}
             </label>
           </div>
         </>
@@ -277,7 +282,7 @@ export function AgendaView({
           disabled={busy || loading}
           onClick={() => setReload((value) => value + 1)}
         >
-          Réessayer
+          {tr("try_again")}
         </button>
       )}
       {notice && (
@@ -295,7 +300,7 @@ export function AgendaView({
                     expected_version: undoTask.version,
                   });
                   setNotice(
-                    "Résolution annulée. L’échéance précédente est restaurée.",
+                    tr("completion_undone_the_previous_due_date_is_restored"),
                   );
                   setUndoTask(null);
                   setReload((v) => v + 1);
@@ -306,25 +311,25 @@ export function AgendaView({
                 }
               }}
             >
-              Annuler la résolution
+              {tr("undo_completion")}
             </button>
           )}
         </p>
       )}
       {loading && !page ? (
-        <p role="status">Chargement des échéances…</p>
+        <p role="status">{tr("loading_due_dates")}</p>
       ) : (
         page && (
           <>
             <div className="task-summary" role="status">
               <span>
                 {loading
-                  ? "Actualisation des échéances…"
-                  : `${page.items.length} tâche${page.items.length !== 1 ? "s" : ""}`}
+                  ? tr("refreshing_due_dates")
+                  : tr("task_count", { count: page.items.length })}
               </span>
               <span>
                 {new Date(`${page.start_date}T12:00:00`).toLocaleDateString(
-                  "fr-FR",
+                  formatLocale(),
                   { day: "numeric", month: "long", year: "numeric" },
                 )}
                 {page.end_date !== page.start_date && (
@@ -332,7 +337,7 @@ export function AgendaView({
                     {" "}
                     —{" "}
                     {new Date(`${page.end_date}T12:00:00`).toLocaleDateString(
-                      "fr-FR",
+                      formatLocale(),
                       { day: "numeric", month: "long", year: "numeric" },
                     )}
                   </>
@@ -342,7 +347,7 @@ export function AgendaView({
             {!page.items.length && (
               <div className="empty-filter">
                 <Icon name="check" size={24} />
-                <p>Aucune tâche à cette échéance.</p>
+                <p>{tr("no_tasks_due_on_this_date")}</p>
               </div>
             )}
             <TaskActions
@@ -372,7 +377,7 @@ export function AgendaView({
                       className={key === "overdue" ? "agenda-overdue" : ""}
                     >
                       {key === "overdue"
-                        ? "En retard"
+                        ? tr("overdue")
                         : relativeDate(key, today).label}
                     </h2>
                     <span className="section-count">{tasks.length}</span>
@@ -412,8 +417,7 @@ export function AgendaView({
                                 className="color-dot"
                                 style={{ background: space?.color }}
                               />
-                              {spacePaths.get(task.workspace_id) ??
-                                space?.name}
+                              {spacePaths.get(task.workspace_id) ?? space?.name}
                               {section && ` / ${section.name}`}
                             </button>
                           }

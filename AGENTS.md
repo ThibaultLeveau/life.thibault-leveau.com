@@ -11,7 +11,7 @@ Ces règles s'appliquent à l'ensemble du dépôt et à chaque requête concerna
 
 ## Applications LifeOS : structure et frontières obligatoires
 
-L'[ADR 003](docs/decisions/003-applications-lifeos.md) définit le socle modulaire approuvé. Toutes les applications suivent **la même structure**, dans des dossiers distincts. Identifiants stables en anglais (`tasks`, puis les identifiants des futures applications) ; libellés utilisateur en français.
+L'[ADR 003](docs/decisions/003-applications-lifeos.md) définit le socle modulaire approuvé. Toutes les applications suivent **la même structure**, dans des dossiers distincts. Identifiants stables en anglais (`tasks`, puis les identifiants des futures applications) ; libellés utilisateur en français et en anglais selon l’[ADR 004](docs/decisions/004-internationalisation.md).
 
 ```text
 backend/src/life_app/apps/<id>/

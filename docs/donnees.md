@@ -8,7 +8,7 @@
 
 | Table | Données et contraintes |
 | --- | --- |
-| `users` | UUID, identifiant unique normalisé, hash Argon2, thème |
+| `users` | UUID, identifiant unique normalisé, hash Argon2, thème, `locale` non nulle `fr/en` (défaut `fr`) |
 | `login_sessions` | Hash du cookie opaque, utilisateur, hash CSRF, expiration UTC |
 | `application_preferences` | Clé composée utilisateur/application, activation booléenne et instant UTC de dernière modification |
 | `login_limits` | Clé hachée du compte ou de l'IP, compteur, expiration |
@@ -139,3 +139,7 @@ Les métriques et scores sont calculés et enregistrés dans la même transactio
 La migration additive `0007_hyrox`, après `0006_sport`, ajoute `competition_date DATE NULL` à `sport_workouts` et `sport_sessions`. Les lignes antérieures reçoivent `NULL`, sans déduction du titre ni réécriture de l’historique. La date sans fuseau est facultative et validée par le contrat API (ISO, années 0001–9999). Le nom détermine uniquement l’habillage visuel ; renommer ne force pas l’effacement de la date.
 
 Le programme garde sa date lors d’un archivage ou d’une désactivation. `service.start` la copie avec le nom dans la séance ; mises à jour ultérieures du programme, validations de séries et fin de séance ne la changent pas. Elle n’intervient ni dans les scores, ni dans la signature de comparaison, ni dans le repos. La sauvegarde SQL des tables Sport conserve programmes et instantanés. Le downgrade refuse toute date non nulle dans l’une ou l’autre table afin de prévenir une perte silencieuse.
+
+## Langue et textes fournis
+
+La migration `0008_locale` ajoute la préférence de compte sans modifier les contenus existants. Les écritures partielles de préférences conservent les champs absents. Les 680 exercices Sport restent des ressources embarquées ; leurs identifiants, types et codes de facettes sont indépendants de leurs libellés FR/EN. Une réponse peut présenter un nom traduit sans réécrire `sport_workouts.entries`, `sport_sessions.entries` ou `metrics`, ni changer score, signature, dates ou référence. Les UUID personnels ne sont jamais localisés, même en cas d’homonymie. Les statuts personnalisables déjà en base restent leurs textes historiques. Voir [Internationalisation](internationalisation.md#donnees-et-exploitation).

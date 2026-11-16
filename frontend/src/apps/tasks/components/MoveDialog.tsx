@@ -1,3 +1,4 @@
+import { tr } from "../i18n";
 import { useEffect, useState, type FormEvent } from "react";
 import { api } from "../../../platform/api";
 import { allTasks } from "../api";
@@ -96,11 +97,11 @@ export function MoveDialog({
     }
   }
   return (
-    <Dialog title="Déplacer la tâche" onClose={onClose}>
+    <Dialog title={tr("move_task")} onClose={onClose}>
       <form className="stack-form dialog-body" onSubmit={submit}>
         <p className="move-task-title">{task.title}</p>
         <label>
-          Espace
+          {tr("workspace")}
           <select
             value={spaceId}
             onChange={(event) => setSpaceId(event.target.value)}
@@ -114,7 +115,7 @@ export function MoveDialog({
         </label>
         <div className="form-grid">
           <label>
-            Section
+            {tr("section")}
             <select
               value={sectionId}
               disabled={loading}
@@ -123,7 +124,7 @@ export function MoveDialog({
                 setBeforeId("");
               }}
             >
-              <option value="">Sans section</option>
+              <option value="">{tr("no_section")}</option>
               {sections.map((section) => (
                 <option key={section.id} value={section.id}>
                   {section.name}
@@ -132,7 +133,7 @@ export function MoveDialog({
             </select>
           </label>
           <label>
-            Statut
+            {tr("status")}
             <select
               value={statusId}
               disabled={loading}
@@ -147,13 +148,13 @@ export function MoveDialog({
           </label>
         </div>
         <label>
-          Position
+          {tr("position")}
           <select
             value={beforeId}
             disabled={loading}
             onChange={(event) => setBeforeId(event.target.value)}
           >
-            <option value="">En fin de liste</option>
+            <option value="">{tr("end_of_list")}</option>
             {tasks
               .filter(
                 (item) =>
@@ -161,26 +162,26 @@ export function MoveDialog({
               )
               .map((item) => (
                 <option key={item.id} value={item.id}>
-                  Avant : {item.title}
+                  {tr("before")} {item.title}
                 </option>
               ))}
           </select>
         </label>
         {spaceId !== task.workspace_id && (
           <p className="muted small-text">
-            Les étiquettes seront reprises dans l’espace choisi.
+            {tr("labels_will_be_carried_over_to_the_selected_workspace")}
           </p>
         )}
         <ErrorMessage message={error} />
         <div className="dialog-actions">
           <button type="button" className="secondary-button" onClick={onClose}>
-            Annuler
+            {tr("cancel")}
           </button>
           <button
             className="primary-button"
             disabled={loading || busy || !statusId}
           >
-            {busy ? "Déplacement…" : "Déplacer"}
+            {busy ? tr("moving") : tr("move")}
           </button>
         </div>
       </form>

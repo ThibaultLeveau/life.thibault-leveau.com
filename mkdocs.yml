@@ -56,6 +56,12 @@ nav:
   - Utiliser les tâches: taches.md
   - Utiliser Sport: sport.md
   - API Sport: sport-api.md
+  - Français et anglais: internationalisation.md
+  - English user guides:
+      - Welcome: en/index.md
+      - Your applications: en/applications.md
+      - Tasks: en/taches.md
+      - Sport: en/sport.md
   - Développer:
       - Démarrage: demarrage.md
       - Architecture: architecture.md
@@ -76,3 +82,4 @@ nav:
       - Décision initiale: decisions/001-architecture-initiale.md
       - Tâches et persistance: decisions/002-gestion-taches.md
       - Applications LifeOS: decisions/003-applications-lifeos.md
+      - Français et anglais: decisions/004-internationalisation.md

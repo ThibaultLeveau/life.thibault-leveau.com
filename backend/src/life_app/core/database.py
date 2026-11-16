@@ -8,6 +8,8 @@ from fastapi import Depends, HTTPException, Request
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
+from life_app.core.messages import tr
+
 
 class Base(DeclarativeBase):
     pass
@@ -32,7 +34,7 @@ def configure_database(app, settings) -> None:
 
 def database(request: Request) -> Iterator[Session]:
     if request.app.state.sessions is None:
-        raise HTTPException(503, "Base de données non configurée.")
+        raise HTTPException(503, tr("database_is_not_configured"))
     with request.app.state.sessions() as session:
         yield session
 

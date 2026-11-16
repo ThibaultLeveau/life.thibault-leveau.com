@@ -1,11 +1,13 @@
-"""French scheduling shared by live input, the planner and independent API clients."""
+"""Bilingual scheduling shared by live input, planner and independent API clients."""
 
 import re
 from datetime import date
 
 from pydantic import ValidationError
 
-from life_app.apps.tasks.recurrence import dates, describe
+from life_app.apps.tasks.messages import tr
+from life_app.apps.tasks.recurrence import date_label, dates, describe
+from life_app.apps.tasks.scheduling_english import tokenize_english
 from life_app.apps.tasks.scheduling_grammar import Grammar, ScheduleError
 from life_app.apps.tasks.scheduling_language import (
     ALIASES,
@@ -16,10 +18,11 @@ from life_app.apps.tasks.scheduling_language import (
     unit,
     word,
 )
+from life_app.core.i18n import locale
 
 
 def parse_date(text: str, today: date) -> date | None:
-    tokens = tokenize(text.strip())
+    tokens = tokenize_english(text.strip()) if locale() == "en" else tokenize(text.strip())
     try:
         result = read_date(tokens, 0, today)
         return result[0] if result and result[1] == len(tokens) else None
@@ -28,8 +31,8 @@ def parse_date(text: str, today: date) -> date | None:
 
 
 def parse_schedule(text: str, today: date, timezone: str) -> dict:
-    tokens = tokenize(text)
-    quoted = [m.span() for m in re.finditer(r'"[^"\n]*"|«[^»\n]*»', text)]
+    tokens = tokenize_english(text) if locale() == "en" else tokenize(text)
+    quoted = [m.span() for m in re.finditer(r'"[^"\n]*"|«[^»\n]*»|“[^”\n]*”', text)]
 
     def literal(begin, end):
         return any(begin < right and end > left for left, right in quoted)
@@ -86,8 +89,7 @@ def parse_schedule(text: str, today: date, timezone: str) -> dict:
             upcoming = dates(recurrence, recurrence.start_date, inclusive=True)
             if not upcoming:
                 raise ScheduleError(
-                    "Ces réglages ne donnent aucune date. "
-                    "Vérifiez les jours, les exclusions et la fin."
+                    tr("these_settings_produce_no_dates_check_the_days_exclusions_and_end_date")
                 )
             found.append((index, parser.pos, recurrence, upcoming))
             index = parser.pos
@@ -100,16 +102,12 @@ def parse_schedule(text: str, today: date, timezone: str) -> dict:
             elif isinstance(error, ScheduleError):
                 message = str(error)
             else:
-                message = (
-                    "Une date ou une durée est hors du calendrier. "
-                    "Vérifiez les jours, mois et années."
-                )
+                message = tr("calendar_overflow")
             return empty | {"status": getattr(error, "status", "invalid"), "diagnostic": message}
     if len(found) > 1:
         return empty | {
             "status": "invalid",
-            "diagnostic": "Plusieurs récurrences séparées sont indiquées. "
-            "Regroupez leurs réglages ou créez des tâches distinctes.",
+            "diagnostic": tr("multiple_recurrences"),
         }
     if found:
         begin, end, recurrence, upcoming = found[0]
@@ -140,7 +138,7 @@ def parse_schedule(text: str, today: date, timezone: str) -> dict:
         "matched_text": text[begin:end],
         "start": begin,
         "end": end,
-        "label": describe(recurrence) if recurrence else upcoming[0].strftime("%d/%m/%Y"),
+        "label": describe(recurrence) if recurrence else date_label(upcoming[0]),
         "dates": upcoming,
         "status": "recognized",
         "diagnostic": None,

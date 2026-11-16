@@ -1,3 +1,4 @@
+import { tr } from "../shared/i18n";
 import { useApplications } from "../platform/applications/ApplicationProvider";
 import { ApplicationCard } from "../platform/applications/ApplicationCard";
 import { ErrorMessage } from "../shared/ui/Dialog";
@@ -6,12 +7,9 @@ export function LibraryPage() {
   return (
     <>
       <section className="library-heading" aria-labelledby="library-title">
-        <p className="eyebrow">À VOTRE MESURE</p>
-        <h1 id="library-title">Bibliothèque des applications</h1>
-        <p>
-          Activez ce qui vous est utile. Retrouvez vos applications sur
-          l’accueil.
-        </p>
+        <p className="eyebrow">{tr("tailored_to_you")}</p>
+        <h1 id="library-title">{tr("application_library")}</h1>
+        <p>{tr("enable_what_you_need_find_your_applications_on_the_home")}</p>
       </section>
       <ErrorMessage message={actionError} />
       <p className="library-notice" role="status">
@@ -30,10 +28,9 @@ export function LibraryPage() {
           />
         ))}
       </div>
-      {!items?.length && <p>Aucune application disponible pour le moment.</p>}
+      {!items?.length && <p>{tr("no_applications_available_yet")}</p>}
       <p className="library-footnote">
-        Vous pouvez désactiver une application à tout moment. Vos données sont
-        conservées.
+        {tr("you_can_disable_an_application_at_any_time_your_data")}
       </p>
     </>
   );

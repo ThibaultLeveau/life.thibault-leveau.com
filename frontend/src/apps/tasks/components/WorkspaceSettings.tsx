@@ -1,3 +1,4 @@
+import { tr } from "../i18n";
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { api } from "../../../platform/api";
 import { allTasks } from "../api";
@@ -51,7 +52,7 @@ function EntityForm({
       <div className="entity-main">
         <label className="entity-color">
           <span className="sr-only">
-            Couleur {item?.name ?? "du nouvel élément"}
+            {tr("color")} {item?.name ?? tr("of_the_new_item")}
           </span>
           <input
             type="color"
@@ -61,7 +62,7 @@ function EntityForm({
         </label>
         <label className="entity-name">
           <span className="sr-only">
-            Nom {item?.name ?? "du nouvel élément"}
+            {tr("name")} {item?.name ?? tr("of_the_new_item")}
           </span>
           <input
             name="name"
@@ -70,10 +71,10 @@ function EntityForm({
             defaultValue={item?.name}
             placeholder={
               kind === "sections"
-                ? "Nom de la section"
+                ? tr("section_name")
                 : kind === "statuses"
-                  ? "Nom de la colonne"
-                  : "Nom de l’étiquette"
+                  ? tr("column_name")
+                  : tr("label_name")
             }
           />
         </label>
@@ -85,29 +86,29 @@ function EntityForm({
           }
           disabled={disabled}
         >
-          {item ? "Enregistrer" : "Ajouter"}
+          {item ? tr("save") : tr("add")}
         </button>
       </div>
       {kind === "sections" && (
         <div className="entity-detail">
           <label>
-            Description
+            {tr("description")}
             <input
               name="description"
               maxLength={20000}
               defaultValue={section?.description}
-              placeholder="Facultative"
+              placeholder={tr("optional")}
             />
           </label>
           <label>
-            Afficher dans
+            {tr("show_in")}
             <select
               name="visibility"
               defaultValue={section?.visibility ?? "both"}
             >
-              <option value="both">Liste et tableau</option>
-              <option value="list">Liste uniquement</option>
-              <option value="board">Tableau uniquement</option>
+              <option value="both">{tr("list_and_board")}</option>
+              <option value="list">{tr("list_only")}</option>
+              <option value="board">{tr("board_only")}</option>
             </select>
           </label>
         </div>
@@ -119,7 +120,7 @@ function EntityForm({
             type="checkbox"
             defaultChecked={item ? (item as Status).is_completed : false}
           />
-          Les tâches de cette colonne sont terminées
+          {tr("tasks_in_this_column_are_completed")}
         </label>
       )}
       {children && <div className="entity-actions">{children}</div>}
@@ -172,7 +173,7 @@ export function WorkspaceSettings({
     try {
       await api(path, method, payload);
       await onChanged();
-      setNotice("Modifications enregistrées.");
+      setNotice(tr("changes_saved"));
       return true;
     } catch (error) {
       setError((error as Error).message);
@@ -221,11 +222,11 @@ export function WorkspaceSettings({
     }
   }
   const tabs: [SettingsTab, string][] = [
-    ["space", "Espace"],
-    ["sections", "Sections"],
-    ["statuses", "Colonnes"],
-    ["labels", "Étiquettes"],
-    ["archives", "Archives"],
+    ["space", tr("workspace")],
+    ["sections", tr("sections")],
+    ["statuses", tr("columns")],
+    ["labels", tr("labels")],
+    ["archives", tr("archives")],
   ];
   const entities: Entity[] =
     tab === "sections"
@@ -234,11 +235,11 @@ export function WorkspaceSettings({
         ? statuses
         : labels;
   return (
-    <Dialog title="Configurer l’espace" onClose={onClose} wide>
+    <Dialog title={tr("configure_workspace")} onClose={onClose} wide>
       <div
         className="settings-tabs"
         role="tablist"
-        aria-label="Réglages de l’espace"
+        aria-label={tr("workspace_settings")}
       >
         {tabs.map(([value, label], index) => (
           <button
@@ -287,7 +288,7 @@ export function WorkspaceSettings({
           <>
             <form className="stack-form" onSubmit={saveSpace}>
               <label>
-                Nom
+                {tr("name")}
                 <input
                   name="name"
                   required
@@ -300,7 +301,7 @@ export function WorkspaceSettings({
                 workspace={workspace}
               />
               <label>
-                Description
+                {tr("description")}
                 <textarea
                   name="description"
                   rows={3}
@@ -309,7 +310,7 @@ export function WorkspaceSettings({
                 />
               </label>
               <label className="color-field">
-                Couleur
+                {tr("color")}
                 <input
                   type="color"
                   name="color"
@@ -318,17 +319,15 @@ export function WorkspaceSettings({
               </label>
               <div className="dialog-actions">
                 <button className="primary-button" disabled={busy}>
-                  Enregistrer
+                  {tr("save")}
                 </button>
               </div>
             </form>
             <div className="archive-space">
               <div>
-                <strong>Archiver cet espace</strong>
+                <strong>{tr("archive_this_workspace")}</strong>
                 <p className="muted small-text">
-                  Vous pourrez le restaurer depuis les archives. Les tâches et
-                  leur historique sont conservés. Archivez ou déplacez d’abord
-                  les sous-espaces actifs.
+                  {tr("you_can_restore_it_from_the_archives_tasks_and_their")}
                 </p>
               </div>
               <button
@@ -337,7 +336,7 @@ export function WorkspaceSettings({
                 onClick={archiveSpace}
               >
                 <Icon name="archive" />
-                Archiver
+                {tr("archive")}
               </button>
             </div>
           </>
@@ -346,10 +345,16 @@ export function WorkspaceSettings({
           <>
             <p className="settings-explanation muted">
               {tab === "sections"
-                ? "Les sections forment vos listes et les lignes du tableau. Choisissez où chacune apparaît."
+                ? tr(
+                    "sections_form_your_lists_and_board_rows_choose_where_each",
+                  )
                 : tab === "statuses"
-                  ? "Les statuts deviennent les colonnes du tableau. Conservez au moins une colonne ouverte et une terminée."
-                  : "Retrouvez vos tâches grâce à des étiquettes propres à cet espace."}
+                  ? tr(
+                      "statuses_become_board_columns_keep_at_least_one_open_column",
+                    )
+                  : tr(
+                      "find_your_tasks_using_labels_specific_to_this_workspace",
+                    )}
             </p>
             <div className="entity-list">
               {entities.map((item, index) => (
@@ -372,7 +377,7 @@ export function WorkspaceSettings({
                         type="button"
                         className="icon-button"
                         disabled={busy || index === 0}
-                        aria-label={`Monter ${item.name}`}
+                        aria-label={tr("move_up", { name: item.name })}
                         onClick={() => reorder(tab, index, -1)}
                       >
                         <Icon name="up" size={16} />
@@ -381,7 +386,7 @@ export function WorkspaceSettings({
                         type="button"
                         className="icon-button"
                         disabled={busy || index === entities.length - 1}
-                        aria-label={`Descendre ${item.name}`}
+                        aria-label={tr("move_down", { name: item.name })}
                         onClick={() => reorder(tab, index, 1)}
                       >
                         <Icon name="down" size={16} />
@@ -401,7 +406,7 @@ export function WorkspaceSettings({
                       }
                     >
                       <Icon name="archive" size={14} />
-                      Archiver
+                      {tr("archive")}
                     </button>
                   )}
                   {tab === "labels" && (
@@ -412,20 +417,22 @@ export function WorkspaceSettings({
                       onClick={() => {
                         if (
                           window.confirm(
-                            `Supprimer l’étiquette « ${item.name} » de toutes les tâches ?`,
+                            tr("delete_label_confirmation", {
+                              name: item.name,
+                            }),
                           )
                         )
                           void run(`${base}/labels/${item.id}`, "DELETE");
                       }}
                     >
-                      Supprimer
+                      {tr("delete")}
                     </button>
                   )}
                   {tab === "statuses" && (
                     <>
                       <label className="replacement-label">
                         <span className="sr-only">
-                          Remplacer {item.name} par
+                          {tr("replace")} {item.name} {tr("with")}
                         </span>
                         <select
                           value={replacements[item.id] ?? ""}
@@ -436,7 +443,7 @@ export function WorkspaceSettings({
                             }))
                           }
                         >
-                          <option value="">Remplacer par…</option>
+                          <option value="">{tr("replace_with")}</option>
                           {statuses
                             .filter(
                               (status) =>
@@ -458,7 +465,9 @@ export function WorkspaceSettings({
                         onClick={() => {
                           if (
                             window.confirm(
-                              `Retirer la colonne « ${item.name} » ? Ses tâches seront réaffectées au statut choisi.`,
+                              tr("remove_column_confirmation", {
+                                name: item.name,
+                              }),
                             )
                           )
                             void run(
@@ -467,7 +476,7 @@ export function WorkspaceSettings({
                             );
                         }}
                       >
-                        Retirer
+                        {tr("remove")}
                       </button>
                     </>
                   )}
@@ -476,10 +485,10 @@ export function WorkspaceSettings({
             </div>
             <h3 className="settings-add-title">
               {tab === "sections"
-                ? "Nouvelle section"
+                ? tr("new_section")
                 : tab === "statuses"
-                  ? "Nouvelle colonne"
-                  : "Nouvelle étiquette"}
+                  ? tr("new_column")
+                  : tr("new_label")}
             </h3>
             <EntityForm
               key={tab}
@@ -491,9 +500,9 @@ export function WorkspaceSettings({
         )}
         {tab === "archives" && (
           <>
-            <h3>Sections archivées</h3>
+            <h3>{tr("archived_sections")}</h3>
             {sections.filter((section) => section.archived_at).length === 0 && (
-              <p className="muted">Aucune section archivée.</p>
+              <p className="muted">{tr("no_archived_sections")}</p>
             )}
             {sections
               .filter((section) => section.archived_at)
@@ -510,13 +519,13 @@ export function WorkspaceSettings({
                     }
                   >
                     <Icon name="restore" size={14} />
-                    Restaurer
+                    {tr("restore")}
                   </button>
                 </div>
               ))}
-            <h3>Tâches archivées</h3>
+            <h3>{tr("archived_tasks")}</h3>
             {archivedTasks.length === 0 && (
-              <p className="muted">Aucune tâche archivée.</p>
+              <p className="muted">{tr("no_archived_tasks")}</p>
             )}
             {archivedTasks.map((task) => {
               const parentArchived = sections.some(
@@ -529,7 +538,7 @@ export function WorkspaceSettings({
                     <span>{task.title}</span>
                     {parentArchived && (
                       <small className="muted">
-                        Restaurez d’abord sa section.
+                        {tr("restore_its_section_first")}
                       </small>
                     )}
                   </div>
@@ -550,7 +559,7 @@ export function WorkspaceSettings({
                       }}
                     >
                       <Icon name="restore" size={14} />
-                      Restaurer
+                      {tr("restore")}
                     </button>
                   )}
                 </div>

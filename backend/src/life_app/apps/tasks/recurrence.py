@@ -11,6 +11,8 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from dateutil.rrule import rrulestr
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from life_app.apps.tasks.messages import tr
+
 WEEKDAYS = ("MO", "TU", "WE", "TH", "FR", "SA", "SU")
 DAY_NAMES = ("lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche")
 
@@ -21,20 +23,20 @@ def validate_rule(value: str) -> str:
     for part in rule.split(";"):
         key, separator, content = part.partition("=")
         if not separator or key in parts or not content:
-            raise ValueError("Règle de récurrence invalide ou champ répété.")
+            raise ValueError(tr("invalid_recurrence_rule_or_repeated_field"))
         parts[key] = content
     frequency = parts.get("FREQ")
     if frequency not in {"DAILY", "WEEKLY", "MONTHLY", "YEARLY"}:
-        raise ValueError("Choisissez une fréquence par jour, semaine, mois ou année.")
+        raise ValueError(tr("choose_a_daily_weekly_monthly_or_yearly_frequency"))
     for key, content in parts.items():
         if key == "FREQ":
             continue
         if key == "INTERVAL":
             if not content.isdigit() or not 1 <= int(content) <= 1000:
-                raise ValueError("L’intervalle doit être compris entre 1 et 1000.")
+                raise ValueError(tr("the_interval_must_be_between_1_and_1000"))
         elif key == "WKST":
             if content not in WEEKDAYS:
-                raise ValueError("Premier jour de semaine invalide.")
+                raise ValueError(tr("invalid_first_day_of_the_week"))
         elif key == "BYDAY":
             for day in content.split(","):
                 match = re.fullmatch(r"([+-]?\d{1,2})?(MO|TU|WE|TH|FR|SA|SU)", day)
@@ -47,7 +49,7 @@ def validate_rule(value: str) -> str:
                         or "BYWEEKNO" in parts
                     )
                 ):
-                    raise ValueError("Jour ou position de semaine invalide.")
+                    raise ValueError(tr("invalid_weekday_or_week_position"))
         elif key in {"BYMONTHDAY", "BYMONTH", "BYSETPOS", "BYYEARDAY", "BYWEEKNO"}:
             maximum = {
                 "BYMONTHDAY": 31,
@@ -58,21 +60,21 @@ def validate_rule(value: str) -> str:
             }[key]
             for number in content.split(","):
                 if not re.fullmatch(r"[+-]?\d{1,3}", number):
-                    raise ValueError("Les sélections calendaires doivent être des entiers.")
+                    raise ValueError(tr("calendar_selections_must_be_integers"))
                 if not 0 < abs(int(number)) <= maximum or (key == "BYMONTH" and int(number) < 0):
-                    raise ValueError("Sélection calendaire hors limites.")
+                    raise ValueError(tr("calendar_selection_is_out_of_range"))
             if key in {"BYYEARDAY", "BYWEEKNO"} and frequency != "YEARLY":
-                raise ValueError("Les jours de l’année et numéros de semaine exigent une année.")
+                raise ValueError(tr("days_of_the_year_and_week_numbers_require_a_yearly_frequency"))
             if key == "BYMONTHDAY" and frequency == "WEEKLY":
-                raise ValueError("Les jours du mois exigent une autre fréquence que la semaine.")
+                raise ValueError(tr("days_of_the_month_require_a_frequency_other_than_weekly"))
         else:
-            raise ValueError(f"Champ {key} non pris en charge. Réglez la fin séparément.")
+            raise ValueError(tr("unsupported_rule_field", key=key))
     if "BYSETPOS" in parts and not any(k.startswith("BY") and k != "BYSETPOS" for k in parts):
-        raise ValueError("Une position exige une sélection de jours ou de mois.")
+        raise ValueError(tr("a_position_requires_a_selection_of_days_or_months"))
     if "BYSETPOS" in parts:
         capacity = {"DAILY": 1, "WEEKLY": 7, "MONTHLY": 31, "YEARLY": 366}[frequency]
         if all(abs(int(position)) > capacity for position in parts["BYSETPOS"].split(",")):
-            raise ValueError("Cette position n’existe pas dans la période choisie.")
+            raise ValueError(tr("this_position_does_not_exist_in_the_selected_period"))
     # Canonical order makes equivalent edits stable and keeps the anchor intact.
     return ";".join(f"{key}={parts[key]}" for key in sorted(parts, key=lambda k: (k != "FREQ", k)))
 
@@ -100,19 +102,19 @@ class Recurrence(BaseModel):
         try:
             ZoneInfo(value)
         except (ZoneInfoNotFoundError, ValueError) as error:
-            raise ValueError("Fuseau horaire IANA inconnu.") from error
+            raise ValueError(tr("unknown_iana_time_zone")) from error
         return value
 
     @model_validator(mode="after")
     def validate_calendar(self):
         if self.end_date is not None and self.end_date < self.start_date:
-            raise ValueError("La fin doit suivre le début de la récurrence.")
+            raise ValueError(tr("the_recurrence_end_must_be_on_or_after_its_start"))
         if self.end_date is not None and self.max_occurrences is not None:
-            raise ValueError("Choisissez une fin par date ou par nombre d’occurrences.")
+            raise ValueError(tr("choose_an_end_date_or_an_occurrence_count"))
         if self.mode == "completion" and any(
             part.split("=")[0] not in {"FREQ", "INTERVAL"} for part in self.rrule.split(";")
         ):
-            raise ValueError("Après résolution : utilisez un simple intervalle, sans jours fixes.")
+            raise ValueError(tr("after_completion_use_a_simple_interval_without_fixed_days"))
         self.excluded_dates = sorted(set(self.excluded_dates))
         return self
 
@@ -219,93 +221,94 @@ def next_due(rule: Recurrence, due: date, now: datetime, completed: int) -> date
     return result[0] if result else None
 
 
+def date_label(value: date) -> str:
+    return tr(
+        "date_label",
+        day=value.day,
+        month=value.month,
+        year=value.year,
+        month_name=tr(f"month_{value.month}"),
+    )
+
+
 def describe(rule: Recurrence) -> str:
     parts = dict(part.split("=") for part in rule.rrule.split(";"))
     interval = int(parts.get("INTERVAL", "1"))
-    frequency = parts["FREQ"]
-    singular, plural = {
-        "DAILY": ("jour", "jours"),
-        "WEEKLY": ("semaine", "semaines"),
-        "MONTHLY": ("mois", "mois"),
-        "YEARLY": ("année", "ans"),
-    }[frequency]
-    every = "Toutes les" if frequency == "WEEKLY" else "Tous les"
-    label = f"{every} {interval} {plural}" if interval != 1 else f"Chaque {singular}"
+    frequency = {"DAILY": "day", "WEEKLY": "week", "MONTHLY": "month", "YEARLY": "year"}[
+        parts["FREQ"]
+    ]
+    label = tr(f"every_{frequency}" + ("s" if interval != 1 else ""), count=interval)
     byday = parts.get("BYDAY", "")
     positions = {
-        "1": "premier",
-        "2": "deuxième",
-        "3": "troisième",
-        "4": "quatrième",
-        "5": "cinquième",
-        "-1": "dernier",
-        "-2": "avant-dernier",
+        "1": "first",
+        "2": "second",
+        "3": "third",
+        "4": "fourth",
+        "5": "fifth",
+        "-1": "last",
+        "-2": "penultimate",
     }
 
     def positioned(day, value):
         if not value:
             return day
         if value in positions:
-            return positions[value] + " " + day
-        if int(value) < 0:
-            return f"{abs(int(value))}ᵉ {day} en partant de la fin"
-        return f"{value}ᵉ {day}"
+            return tr(f"ordinal_{positions[value]}", day=day)
+        number = abs(int(value))
+        suffix = (
+            "th" if 10 <= number % 100 <= 20 else {1: "st", 2: "nd", 3: "rd"}.get(number % 10, "th")
+        )
+        return tr(
+            "ordinal_negative" if int(value) < 0 else "ordinal_positive",
+            number=number,
+            suffix=suffix,
+            day=day,
+        )
 
     group = {
-        "MO,TU,WE,TH,FR": "jour ouvré",
-        "MO,TU,WE,TH,FR,SA": "jour ouvrable",
-        "SA,SU": "jour du week-end",
+        "MO,TU,WE,TH,FR": "business_day",
+        "MO,TU,WE,TH,FR,SA": "working_day",
+        "SA,SU": "weekend_day",
     }.get(byday)
     grouped_position = group and parts.get("BYSETPOS")
     if grouped_position:
-        label += " · " + ", ".join(positioned(group, p) for p in parts["BYSETPOS"].split(","))
-    elif byday and all(day in WEEKDAYS for day in byday.split(",")):
-        names = [DAY_NAMES[WEEKDAYS.index(day)] for day in byday.split(",")]
-        label += " · " + ", ".join(names)
+        label += " · " + ", ".join(positioned(tr(group), p) for p in parts["BYSETPOS"].split(","))
     elif byday:
         label += " · " + ", ".join(
-            positioned(DAY_NAMES[WEEKDAYS.index(day[-2:])], day[:-2]) for day in byday.split(",")
+            positioned(tr(f"weekday_{day[-2:]}"), day[:-2]) for day in byday.split(",")
         )
     if "BYMONTHDAY" in parts:
         label += " · " + ", ".join(
-            positioned("jour", d) if int(d) < 0 else f"jour {d}"
+            positioned(tr("calendar_day"), d) if int(d) < 0 else tr("day_number", number=d)
             for d in parts["BYMONTHDAY"].split(",")
         )
     if "BYMONTH" in parts:
-        months = (
-            "janvier",
-            "février",
-            "mars",
-            "avril",
-            "mai",
-            "juin",
-            "juillet",
-            "août",
-            "septembre",
-            "octobre",
-            "novembre",
-            "décembre",
-        )
-        label += " · " + ", ".join(months[int(m) - 1] for m in parts["BYMONTH"].split(","))
+        label += " · " + ", ".join(tr(f"month_{int(m)}") for m in parts["BYMONTH"].split(","))
     if "BYSETPOS" in parts and not grouped_position:
-        label += " · position " + parts["BYSETPOS"]
+        label += " · " + tr("position", value=parts["BYSETPOS"])
     if "BYYEARDAY" in parts:
-        label += " · jour(s) de l’année : " + parts["BYYEARDAY"]
+        label += " · " + tr("year_days", value=parts["BYYEARDAY"])
     if "BYWEEKNO" in parts:
         weeks = [int(w) for w in parts["BYWEEKNO"].split(",")]
-        label += (
-            " · semaines impaires"
+        label += " · " + (
+            tr("odd_weeks")
             if weeks == list(range(1, 54, 2))
-            else " · semaines paires"
+            else tr("even_weeks")
             if weeks == list(range(2, 54, 2))
-            else " · semaines : " + parts["BYWEEKNO"]
+            else tr("weeks", value=parts["BYWEEKNO"])
         )
     if rule.mode == "completion":
-        label += " après résolution"
+        label += tr("after_completion")
     if rule.end_date:
-        label += " · jusqu’au " + rule.end_date.strftime("%d/%m/%Y")
+        label += " · " + tr("until_date", value=date_label(rule.end_date))
     if rule.max_occurrences:
-        label += f" · {rule.max_occurrences} occurrence(s)"
+        label += " · " + tr(
+            "occurrences_one" if rule.max_occurrences == 1 else "occurrences_other",
+            count=rule.max_occurrences,
+        )
     if rule.excluded_dates:
-        label += f" · {len(rule.excluded_dates)} date(s) exclue(s)"
+        label += " · " + tr(
+            "excluded_one" if len(rule.excluded_dates) == 1 else "excluded_other",
+            count=len(rule.excluded_dates),
+        )
     return label
