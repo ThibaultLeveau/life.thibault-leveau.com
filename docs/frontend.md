@@ -18,6 +18,8 @@ Les règles et dates restent des données API. Les brouillons du planificateur n
 
 La détection affiche le libellé et les trois premières dates retournées par le serveur. `status=incomplete/invalid` affiche `diagnostic` et demande une correction ou le choix explicite **Garder le texte** avant sauvegarde, y compris sur validation immédiate et dans l’ajout rapide. Le planificateur montre le même diagnostic. `ScheduleHelp` expose des exemples français ou anglais selon la langue ; ses boutons dans le planificateur remplissent seulement le brouillon à interpréter. L’aide est hors de la région `aria-live` pour éviter de la relire à chaque frappe.
 
+L’ajout rapide conserve son champ monté et focalisé après Entrée sur ordinateur. Pendant la validation de date, le champ est en lecture seule pour garder le focus sans permettre de modifier le titre soumis. Le succès vide le titre ; une erreur de validation conserve le texte. Les confirmations réseau suivantes ne touchent pas la nouvelle saisie.
+
 | Fichier / composant | Rôle |
 | --- | --- |
 | `Page.tsx` | Espaces, état de chargement, filtres et assemblage métier ; session du socle |
@@ -26,7 +28,8 @@ La détection affiche le libellé et les trois premières dates retournées par 
 | `types.ts`, `dates.ts` | Contrats, libellés calendaires et changement de jour local |
 | `AgendaView` | Vue globale des échéances, périodes et réglages enregistrés par API |
 | `TaskContents` | Contenu et échéance partagés par liste, kanban et agenda |
-| `TaskViews` | Listes, lignes/colonnes du tableau, ajouts rapides et glisser-déposer |
+| `TaskViews` | Listes, lignes/colonnes du tableau, ajouts rapides et cibles de dépôt |
+| `TaskDragProvider` | Contexte dnd-kit commun aux tâches et liens des espaces, capteurs pointeur/clavier et aperçu |
 | `TaskActions`, `TaskMenu`, `BulkTaskDialog` | Menu partagé, sélection transitoire, confirmation et opérations API groupées |
 | `useTaskSelection` | Rectangle souris, défilement aux bords et appui long tactile annulé par le défilement |
 | `TaskEditor`, `MoveDialog` | Édition atomique, conflits, historique et déplacement accessible |
@@ -34,7 +37,7 @@ La détection affiche le libellé et les trois premières dates retournées par 
 | `shared/ui/Dialog`, `platform/auth/LoginPanel` | Dialogue partagé et connexion commune |
 | `styles.css` | Présentation métier utilisant les tokens communs |
 
-`@dnd-kit/core` fournit les capteurs pointeur/clavier et les cibles de dépôt. Le serveur calcule l'ordre final. Un tri automatique désactive les poignées ; la commande de déplacement reste disponible. Les sections sont filtrées selon leur visibilité ; les statuts définissent les colonnes, sans les confondre avec les sections.
+`@dnd-kit/core` fournit les capteurs pointeur/clavier et les cibles de dépôt. Le serveur calcule l’ordre final. Les cellules utilisent `POST /tasks/{id}/move` ; un dépôt sur un autre espace utilise `POST /tasks/bulk` avec une seule tâche et `section_id: null`, pour conserver le statut ouvert/terminé via le contrat existant. Le pointeur doit rencontrer une vraie cible ; la proximité est réservée au clavier. Un tri automatique désactive les poignées ; la commande de déplacement reste disponible. Les sections sont filtrées selon leur visibilité ; les statuts définissent les colonnes, sans les confondre avec les sections.
 
 `useTaskSync` conserve, uniquement pendant le montage de Tâches, un instantané confirmé par l’API et les intentions d’écriture en attente. `optimistic` applique ces intentions pour afficher immédiatement créations, modifications, résolutions, déplacements, suppressions/restaurations, ordre et réglages. Les listes et l’agenda restent montés et disponibles pendant l’enregistrement. La validation joue une animation de 420 ms, supprimée avec `prefers-reduced-motion`.
 
@@ -70,7 +73,7 @@ Les différences entre dates calendaires sont calculées sur des minuits UTC, sa
 
 Pas de mode hors connexion, service worker, synchronisation temps réel ou virtualisation. Le client lit les pages API de 200 tâches jusqu'au total pour une vue personnelle complète. Les tests de navigateur utilisent la compilation de production, afin de vérifier aussi les effets de l'optimisation CSS/JavaScript. Voir [Tests](tests.md).
 
-Les trois vues partagent le menu contextuel et les actions de sélection. Le menu est rendu dans un portail, borné au viewport et refermé au défilement, clic extérieur ou Échap. Il gère focus et navigation au clavier. La sélection souris démarre après 6 px, le maintien tactile après 450 ms et s’annule avant activation au-delà de 10 px de mouvement. Les poignées conservent le glisser-déposer individuel ; un clic simple conserve l’édition. Le rectangle et le défilement aux bords utilisent `requestAnimationFrame` ; le pointeur est suivi jusqu’au relâchement ou à l’annulation, même hors de la zone des tâches.
+Les trois vues partagent le menu contextuel et les actions de sélection. Le menu est rendu dans un portail, borné au viewport et refermé au défilement, clic extérieur ou Échap. Il gère focus et navigation au clavier. La sélection souris démarre uniquement depuis le fond, hors tâche et commande, après 6 px, le maintien tactile après 450 ms et s’annule avant activation au-delà de 10 px de mouvement. Sur ordinateur, le titre et le corps de la carte démarrent aussi le déplacement, sans intercepter cases, menus ou Ctrl/⌘-clic ; sur écran tactile, seule la poignée le démarre ; un clic simple conserve l’édition. Le rectangle et le défilement aux bords utilisent `requestAnimationFrame` ; le pointeur est suivi jusqu’au relâchement ou à l’annulation, même hors de la zone des tâches.
 
 La barre fixe présente replanification, déplacement, suppression réversible et désélection. `BulkTaskDialog` transmet les versions affichées à `/tasks/bulk` et se ferme dès la confirmation. La synchronisation conserve les erreurs, réconcilie le lot entier après conflit et laisse continuer les autres actions. Le menu appelle `/duplicate` ou la même suppression groupée pour une seule tâche. Les gestes restent purement locaux ; seules les actions confirmées mutent l’API. La sélection est limitée aux tâches encore visibles et est remise à zéro après soumission ou changement d’espace. Le panneau mobile bloque le contenu arrière et contient le focus ; les cibles tactiles, champs sans zoom automatique, marges de sécurité et animations réduites sont pris en compte.
 

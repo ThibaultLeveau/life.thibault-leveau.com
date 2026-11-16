@@ -78,7 +78,7 @@ Un espace garde au moins une colonne ouverte et une terminée. Le type d'une col
 
 ## Créer et modifier une tâche
 
-**Nouvelle tâche** ou **Ajouter une tâche** ouvre l'éditeur. L'ajout rapide dans une liste ou une cellule utilise directement sa section et son statut. Une tâche comporte titre, description, priorité de P1 urgente à P4 sans priorité, échéance facultative et étiquettes.
+**Nouvelle tâche** ou **Ajouter une tâche** ouvre l'éditeur. L'ajout rapide dans une liste ou une cellule utilise directement sa section et son statut. Sur ordinateur, valider le titre de l’ajout rapide avec **Entrée** vide le champ et y conserve le curseur pour saisir la tâche suivante, dans la même section et le même statut. **Échap** referme cet ajout. Une tâche comporte titre, description, priorité de P1 urgente à P4 sans priorité, échéance facultative et étiquettes.
 
 Cliquer sur le titre ouvre les détails. Le bouton `…` et le clic droit sur une tâche ouvrent un menu : **Modifier**, **Dupliquer**, **Sélectionner** et **Supprimer**. Ce menu existe en liste, tableau et agenda. Il se ferme au clic extérieur ou avec Échap ; les flèches permettent de parcourir ses actions au clavier. Les noms d’étiquettes sont propres à chaque espace ; elles se créent dans ses réglages puis se sélectionnent dans la tâche.
 
@@ -88,7 +88,7 @@ Cliquer sur le titre ouvre les détails. Le bouton `…` et le clic droit sur un
 
 ### Sélectionner plusieurs tâches
 
-- **Ordinateur :** maintenir le clic gauche et dessiner un rectangle dans la zone des tâches, y compris en partant du titre ou du fond d’une carte. Le cadre sélectionne les tâches qu’il rencontre. Approcher du bord fait défiler la vue ; Ctrl, ⌘ ou Maj pendant le départ conserve la sélection précédente. Les poignées restent réservées au déplacement.
+- **Ordinateur :** maintenir le clic gauche et dessiner un rectangle en partant du fond de la vue, en dehors des cartes et des commandes. Un départ sur une tâche est réservé au déplacement, pas au rectangle. Le cadre sélectionne les tâches qu’il rencontre. Approcher du bord fait défiler la vue ; Ctrl, ⌘ ou Maj pendant le départ conserve la sélection précédente.
 - **Mobile :** maintenir le doigt environ une demi-seconde sur une tâche, puis toucher les autres pour les ajouter ou les retirer de la sélection. Un mouvement avant ce délai reste un défilement normal.
 - **Clavier ou commande explicite :** choisir **Sélectionner** au-dessus des tâches ou dans leur menu, puis utiliser les cases de sélection. En mode sélection, toucher un titre sélectionne la tâche sans ouvrir son éditeur.
 
@@ -177,7 +177,9 @@ La reconnaissance est déterministe et française, sans appel à un service d’
 
 ## Déplacer et ordonner
 
-En **ordre manuel**, saisir la poignée à gauche d'une tâche puis la déposer sur une carte pour la placer avant, ou dans une cellule pour l'ajouter à la fin. Le tableau accepte les déplacements entre colonnes et lignes. La liste permet de changer l'ordre et la section sans changer le statut.
+En **ordre manuel**, sur ordinateur, saisir le titre, le corps ou la poignée d’une tâche puis la déposer sur une carte pour la placer avant, ou dans une cellule pour l'ajouter à la fin. Le tableau accepte les déplacements entre colonnes et lignes. La liste permet de changer l'ordre et la section sans changer le statut.
+
+Déposer une tâche sur un **autre espace dans la navigation** la place à la fin de **Sans section** dans cet espace. Son état ouvert/terminé est conservé dans le premier statut compatible ; les étiquettes et l’historique suivent la tâche. Relâcher hors d’une cible ou appuyer sur **Échap** annule le geste. Sur mobile, la poignée reste la zone de glisser-déposer.
 
 L'action **Déplacer et réordonner** dans les détails propose les mêmes réglages sans glisser-déposer, y compris vers un autre espace. Choisir espace, section, statut et position. Les étiquettes sont reprises dans l'espace cible ; l'historique suit la tâche.
 

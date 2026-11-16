@@ -64,7 +64,7 @@ async function rectangle(page: Page, first: Task, last: Task) {
   ).toBeEnabled();
   const a = (await row(page, first).boundingBox())!;
   const b = (await row(page, last).boundingBox())!;
-  await page.mouse.move(a.x + 60, a.y + 5);
+  await page.mouse.move(a.x + 60, a.y - 5);
   await page.mouse.down();
   await page.mouse.move(b.x + b.width - 48, b.y + b.height - 4, {
     steps: 12,
@@ -459,7 +459,7 @@ test("rectangle : défilement aux bords, annulation, Ctrl-clic et menu borné", 
   await expect(row(page, tasks[0])).toBeVisible();
   await expect(row(page, hiddenTask)).toHaveCount(0);
   const first = (await row(page, tasks[0]).boundingBox())!;
-  await page.mouse.move(first.x + 70, first.y + 5);
+  await page.mouse.move(first.x + 70, first.y - 5);
   await page.mouse.down();
   await page.mouse.move(first.x + 250, 795, { steps: 12 });
   await expect
