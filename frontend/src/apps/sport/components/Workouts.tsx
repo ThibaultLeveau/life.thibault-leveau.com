@@ -88,12 +88,15 @@ export function Workouts({
               <HyroxBrand date={w.competition_date} compact />
             )}
             <div className="sport-workout-top">
-              <span className="sport-tag">
-                {tr("exercise_count", { count: w.entries.length })} ·{" "}
-                {tr("set_count", {
-                  count: w.entries.reduce((sum, e) => sum + e.sets, 0),
-                })}
-              </span>
+              <div>
+                <span className="sport-tag">
+                  {tr("exercise_count", { count: w.entries.length })} ·{" "}
+                  {tr("set_count", {
+                    count: w.entries.reduce((sum, e) => sum + e.sets, 0),
+                  })}
+                </span>
+                <h2>{w.name}</h2>
+              </div>
               <button
                 className="icon-button"
                 aria-label={tr("edit_named", { name: w.name })}
@@ -102,8 +105,7 @@ export function Workouts({
                 <Icon name="edit" />
               </button>
             </div>
-            <h2>{w.name}</h2>
-            {w.notes && <p className="muted">{w.notes}</p>}
+            {w.notes && <p className="muted sport-workout-notes">{w.notes}</p>}
             <ol>
               {w.entries.map((entry, i) => (
                 <li key={i}>
@@ -122,6 +124,11 @@ export function Workouts({
                 </li>
               ))}
             </ol>
+            {w.entries.length > 2 && (
+              <p className="sport-workout-more muted">
+                {tr("more_exercises", { count: w.entries.length - 2 })}
+              </p>
+            )}
             <div className="sport-workout-actions">
               {!archived && (
                 <button
@@ -142,22 +149,24 @@ export function Workouts({
                   {tr("start_training_session")} <Icon name="arrow" />
                 </button>
               )}
-              <button
-                className="text-button"
-                disabled={action.busy}
-                onClick={() =>
-                  void action.run(
-                    () =>
-                      sportApi.write(`/workouts/${w.id}/archive`, {
-                        expected_version: w.version,
-                        archived: !archived,
-                      }),
-                    resource.reload,
-                  )
-                }
-              >
-                {archived ? tr("restore") : tr("archive")}
-              </button>
+              {archived && (
+                <button
+                  className="text-button"
+                  disabled={action.busy}
+                  onClick={() =>
+                    void action.run(
+                      () =>
+                        sportApi.write(`/workouts/${w.id}/archive`, {
+                          expected_version: w.version,
+                          archived: false,
+                        }),
+                      resource.reload,
+                    )
+                  }
+                >
+                  {tr("restore")}
+                </button>
+              )}
             </div>
           </article>
         ))}

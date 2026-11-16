@@ -215,5 +215,8 @@
   "hyrox_next_challenge": "On to your next challenge.",
   "hyrox_countdown": "D−{{count}}",
   "hyrox_days_until_one": "{{count}} day until race day",
-  "hyrox_days_until_other": "{{count}} days until race day"
+  "hyrox_days_until_other": "{{count}} days until race day",
+  "more_exercises_one": "+ {{count}} more exercise",
+  "more_exercises_other": "+ {{count}} more exercises",
+  "archive_program_discard_changes": "Archive this program without saving your changes?"
 }

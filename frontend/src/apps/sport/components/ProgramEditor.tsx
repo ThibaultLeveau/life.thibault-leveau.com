@@ -359,6 +359,29 @@ function ProgramForm({
             </button>
           </div>
         </div>
+        {workout && !workout.archived_at && (
+          <button
+            type="button"
+            className="text-button danger sport-program-archive"
+            onClick={() => {
+              if (
+                dirty &&
+                !window.confirm(tr("archive_program_discard_changes"))
+              )
+                return;
+              void action.run(
+                () =>
+                  sportApi.write(`/workouts/${workout.id}/archive`, {
+                    expected_version: workout.version,
+                    archived: true,
+                  }),
+                onSaved,
+              );
+            }}
+          >
+            {tr("archive")}
+          </button>
+        )}
       </fieldset>
     </form>
   );

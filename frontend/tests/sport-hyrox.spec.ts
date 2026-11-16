@@ -185,7 +185,8 @@ test("HYROX : date conservée après archivage et réactivation", async ({ page 
   }, "POST");
   await page.goto("/sport?tab=workouts");
   const card = page.locator(".sport-workout").filter({ has: page.getByRole("heading", { name: workout.name, exact: true }) });
-  await card.getByRole("button", { name: "Archiver", exact: true }).click();
+  await card.getByRole("button", { name: `Modifier ${workout.name}`, exact: true }).click();
+  await page.getByRole("button", { name: "Archiver", exact: true }).click();
   await page.getByLabel("Programmes archivés").check();
   await expect(card.locator("time")).toHaveAttribute("datetime", "2028-02-29");
   await card.getByRole("button", { name: "Restaurer", exact: true }).click();

@@ -215,5 +215,8 @@
   "hyrox_next_challenge": "Cap sur votre prochain défi.",
   "hyrox_countdown": "J−{{count}}",
   "hyrox_days_until_one": "{{count}} jour avant le départ",
-  "hyrox_days_until_other": "{{count}} jours avant le départ"
+  "hyrox_days_until_other": "{{count}} jours avant le départ",
+  "more_exercises_one": "+ {{count}} autre exercice",
+  "more_exercises_other": "+ {{count}} autres exercices",
+  "archive_program_discard_changes": "Archiver ce programme sans enregistrer vos modifications ?"
 }
