@@ -1,9 +1,10 @@
 import { tr } from "../i18n";
-import { type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useTaskSync } from "../useTaskSync";
 import type { Workspace } from "../types";
 import { WorkspaceParentSelect } from "./WorkspaceParentSelect";
 import { Dialog } from "../../../shared/ui/Dialog";
+import { ColorPicker } from "./ColorPicker";
 
 export function WorkspaceDialog({
   workspaces,
@@ -15,6 +16,7 @@ export function WorkspaceDialog({
   onCreated: (workspace: Workspace) => void;
 }) {
   const sync = useTaskSync();
+  const [color, setColor] = useState("#c05a45");
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const values = new FormData(event.currentTarget);
@@ -59,10 +61,7 @@ export function WorkspaceDialog({
             placeholder={tr("what_is_this_workspace_for")}
           />
         </label>
-        <label className="color-field">
-          {tr("color")}
-          <input name="color" type="color" defaultValue="#c05a45" />
-        </label>
+        <ColorPicker value={color} onChange={setColor} />
         <div className="dialog-actions">
           <button className="secondary-button" type="button" onClick={onClose}>
             {tr("cancel")}

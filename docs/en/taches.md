@@ -22,6 +22,14 @@ Workspace settings let you edit its name, parent, sections, statuses and labels.
 
 Sections organize tasks inside a workspace and can appear in lists, boards or both. Statuses determine whether a task is open or complete. At least one open and one completed status must remain; a status used by tasks, including archived tasks, cannot change its completion meaning. Labels belong to their workspace.
 
+### Choosing colours
+
+Workspaces, sections, columns and labels offer the same **16-colour grid** on desktop and mobile, when creating or editing. Click or tap a swatch to select it; a checkmark identifies the current choice. With a keyboard, use Tab to reach a swatch, then Enter or Space to select it.
+
+**Custom color** opens your browser’s free colour picker. Its appearance depends on the device, while the LifeOS grid and its colours stay identical. The selected hexadecimal code is displayed next to the picker. Existing custom colours are preserved even when absent from the grid. Selecting a colour does not submit the form: use **Create workspace**, **Add** or **Save** afterwards. After adding a section, column or label, the creation form returns to its default colour.
+
+Colours are saved through the [existing APIs](../api.md#espaces-et-configuration) in the `color` field as `#RRGGBB` and appear on other devices after reloading. The palette does not restrict accepted values; no data changes or migration are required.
+
 ## Upcoming tasks
 
 **Upcoming** combines due tasks from active workspaces and is the default `/tasks` view. A link with `?space=…` still opens that workspace. Tasks are grouped chronologically by date with their full workspace path and section.
