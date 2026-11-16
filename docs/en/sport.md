@@ -51,7 +51,7 @@ The last recorded results are suggested next time, **set by set**, for the same 
 
 Matching uses exercise identity and type even after reordering. Repeated occurrences of one exercise track their own results by occurrence order. New programs or changed types start without past results. Without a historical value, the last completed preceding set in the current session is used, then the program target. Targets remain unchanged. Suggestions are fixed when training starts and survive reloads and disable/enable cycles.
 
-Unsaved field edits remain pending until completion or correction. Errors and refresh do not erase them. Leaving asks for confirmation; confirmed reload or sign-out loses pending entries. Finish requires saving or discarding them first. After a conflict, **Refresh training session** retrieves server results while preserving edited fields for reconciliation.
+Unsaved field edits remain pending until completion or correction. Errors and refresh do not erase them. Leaving asks for confirmation; confirmed reload or sign-out loses pending entries. Finish requires saving or discarding them first. After a training error, **Refresh training session** appears in the content. It retrieves server results while preserving edited fields for reconciliation after a conflict.
 
 Finished or cancelled sessions are immutable. Editing or archiving the source program does not change them. A personal exercise must be active to start another session; if its type changed, remove and re-add it in the program to configure new targets. Obsolete versions fail explicitly instead of overwriting saved results.
 

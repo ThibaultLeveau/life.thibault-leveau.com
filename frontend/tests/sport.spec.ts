@@ -478,6 +478,9 @@ test("Sport : saisie directe, brouillons, conflit, correction et séance suivant
   const reps = (row: typeof first) => row.getByLabel("Répétitions (rép.)");
   await expect(weight(first)).toHaveValue("20");
   await expect(weight(second)).toHaveValue("20");
+  await expect(
+    page.getByRole("button", { name: "Actualiser l’entraînement" }),
+  ).toHaveCount(0);
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await weight(second).fill("42.5");
   await reps(second).fill("8");
@@ -537,6 +540,9 @@ test("Sport : saisie directe, brouillons, conflit, correction et séance suivant
     .getByRole("button", { name: "Valider la série", exact: true })
     .click();
   await expect(second).toHaveClass(/is-complete/);
+  await expect(
+    page.getByRole("button", { name: "Actualiser l’entraînement" }),
+  ).toHaveCount(0);
   release();
   await expect(page.getByText("Chargement…", { exact: true })).toHaveCount(0);
   await expect(page.locator(".sport-set.is-complete")).toHaveCount(2);

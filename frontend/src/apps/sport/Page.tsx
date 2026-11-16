@@ -202,6 +202,15 @@ export function Page() {
           </div>
           <LoadState {...kinds} />
           <LoadState {...activeResource} />
+          {active && trainingAction.error && (
+            <button
+              className="secondary-button"
+              disabled={activeResource.loading || trainingAction.busy}
+              onClick={activeResource.reload}
+            >
+              {tr("refresh_training_session")}
+            </button>
+          )}
           {kinds.data && active !== undefined && (
             <div key={`${tab}-${program ?? "list"}`}>
               {tab === "workouts" && program && (
