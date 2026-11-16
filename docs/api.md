@@ -385,7 +385,7 @@ Le module commun `/api/v1/progression` fournit les points acquis, niveaux, titre
 | `GET /{application_id}` | Même résumé ; 403 si désactivée, 404 si inconnue ou sans fournisseur |
 | `GET /{application_id}/quests` | `state=all\|available\|earned`, `category`, `q` (120 caractères), `offset` 0–100000, `limit` 1–100 (défaut 60) ; `{items,total,offset,limit}` |
 | `GET /{application_id}/history` | Journal décroissant par date puis identifiant, `offset` 0–100000, `limit` 1–100 (défaut 20) ; `{items,total,offset,limit}` |
-| `GET /settings` | `timezone`, `exclude_weekends` par identifiant d’application, `vacations` et `version` (0 sans préférence enregistrée) |
+| `GET /settings` | `timezone`, `usage_days` et `exclude_weekends` par identifiant d’application, `vacations` et `version` (0 sans préférence enregistrée) |
 | `PUT /settings` | Même configuration avec `expected_version` à la place de `version` ; 409 si une autre écriture a gagné |
 
 Les listes de quêtes placent les quêtes inachevées d’abord, puis trient par ratio de progression décroissant, objectif et identifiant. La recherche porte sur le nom et la description localisés. Une quête contient `id`, `name`, `description`, `category`, `target`, `progress`, `ratio`, `xp` et `earned_at` nullable. Les titres indiquent `level`, `name`, `xp` cumulé et `earned`. Au niveau 100, `next_level_xp=null` et `level_progress=1`.
@@ -404,8 +404,12 @@ curl -b cookies.txt https://life.thibault-leveau.com/api/v1/progression/settings
 # Remplacer 0 par la version lue avant modification.
 curl -b cookies.txt -H "X-CSRF-Token: $CSRF" -H 'Content-Type: application/json' \
   -X PUT https://life.thibault-leveau.com/api/v1/progression/settings \
-  -d '{"expected_version":0,"timezone":"Europe/Paris","exclude_weekends":{"tasks":true,"sport":false,"tracking":true},"vacations":[{"start":"2026-12-21","end":"2026-12-27"}]}'
+  -d '{"expected_version":0,"timezone":"Europe/Paris","usage_days":{"tasks":[0,1,2,3,4],"sport":[0,2,4],"tracking":[6],"okr":[4]},"vacations":[{"start":"2026-12-21","end":"2026-12-27"}]}'
 ```
+
+`usage_days` associe chaque identifiant d’application à **1 à 7 entiers distincts**, de `0` (lundi) à `6` (dimanche), retournés dans l’ordre. Un identifiant absent utilise le réglage historique `exclude_weekends` (`true` : lundi–vendredi ; `false` ou absent : tous les jours). Un calendrier explicite est prioritaire, même si l’ancien indicateur exclut les week-ends. Le résumé de chaque application expose `usage_days` résolu pour comprendre la série ; `exclude_weekends` y indique si aucun samedi/dimanche n’est prévu.
+
+Un `PUT` qui fournit `usage_days` remplace cette carte entière : lire puis renvoyer les réglages des autres applications pour les conserver. Une carte vide `{}` rétablit les calendriers historiques/par défaut. **Omettre `usage_days` conserve les calendriers explicites déjà enregistrés**, pour protéger les mises à jour d’anciens clients API. Les autres champs suivent le contrat de remplacement existant. Les listes vides, doublons, booléens, nombres non entiers, chaînes numériques et jours hors 0–6 sont refusés (422). Jusqu’à 50 identifiants connus disposant d’un fournisseur de progression sont acceptés, y compris ceux des applications désactivées ; leurs réglages survivent à la réactivation.
 
 Les corps inconnus, fuseaux invalides, identifiants non enregistrés, booléens non stricts, dates hors 2000–2100, périodes inversées/chevauchantes ou plus de 100 vacances sont refusés (422). Une session absente/expirée produit 401, un CSRF invalide 403. Les changements de règles modifient le calcul des séries mais ne réécrivent pas les gains historiques. Voir [données](donnees.md#donnees-de-progression) et [sauvegarde](sauvegardes.md#migration-0010-progression).
 

@@ -43,15 +43,15 @@ Les dix paliers de chaque famille rapportent respectivement **25, 40, 60, 90, 13
 Dans **Suivi → Réglages → Votre rythme, vos règles** :
 
 - Choisissez le fuseau IANA des nouvelles activités, par défaut `Europe/Paris`.
-- Excluez les samedis et dimanches séparément pour chaque application.
+- Choisissez les **jours d’utilisation de chaque application**, du lundi au dimanche, avec au moins un jour. Par exemple : dimanche uniquement pour un suivi hebdomadaire ; lundi, mercredi et vendredi pour trois jours de pratique. Les raccourcis « Tous les jours » et « Du lundi au vendredi » facilitent le choix. Le badge rappelle les jours prévus.
 - Ajoutez des périodes de vacances inclusives, communes à toutes les applications. Le bouton « Partir en vacances aujourd’hui » propose une semaine modifiable ; enregistrez pour activer le mode vacances. Vous pouvez prévoir jusqu’à 100 périodes non chevauchantes.
 - « Terminer les vacances aujourd’hui » termine la pause hier, afin qu’aujourd’hui redevienne éligible. Enregistrez pour confirmer.
 
 Une journée avec au moins une première confirmation éligible valide la journée de son application. Plusieurs confirmations le même jour ne donnent qu’un jour de série. Une saisie rétrospective dans Suivi compte le jour où elle est confirmée, et ne reconstitue pas artificiellement une présence passée.
 
-Un jour neutralisé **n’incrémente ni ne casse la série**, même si vous utilisez l’application ce jour-là. Ses actions rapportent toujours des XP et comptent dans les jours de pratique. La journée courante inachevée bénéficie d’un délai jusqu’à la fin de la journée. Une journée éligible passée sans activité casse la série ; le record reste calculé sur tout l’historique, sans limite d’un an.
+Un jour non choisi ou en vacances **n’incrémente ni ne casse la série**, même si vous utilisez l’application ce jour-là. Ses actions rapportent toujours des XP et comptent dans les jours de pratique. La journée courante inachevée bénéficie d’un délai jusqu’à la fin de la journée. Une journée éligible passée sans activité casse la série ; le record reste calculé sur tout l’historique, sans limite d’un an.
 
-Le changement de fuseau ne déplace pas les dates d’activité déjà enregistrées. Les réglages week-end/vacances s’appliquent au calcul de l’historique, sans modifier les événements ni les gains déjà acquis. La désactivation d’une application conserve ses données mais ne crée pas une pause de calendrier : planifiez des vacances si nécessaire. Sport suit le même calendrier de jours éligibles ; les objectifs de volume restent disponibles sans exiger une pratique quotidienne.
+Le changement de fuseau ne déplace pas les dates d’activité déjà enregistrées. Les jours choisis et les vacances s’appliquent au calcul de l’historique, sans modifier les événements ni les gains déjà acquis. La désactivation d’une application conserve ses données mais ne crée pas une pause de calendrier : planifiez des vacances si nécessaire. Chaque application suit son propre calendrier. Les anciennes préférences sont conservées : tous les jours, ou lundi–vendredi si les week-ends étaient exclus. Une série de trois dimanches validés vaut trois jours de série, même si trois semaines se sont écoulées. Une activité le samedi ne remplace pas le dimanche attendu : ce réglage porte sur des jours précis, pas sur un quota libre dans la semaine. Les échéances des suivis ne sont pas modifiées ; seule la série d’utilisation de l’application est concernée.
 
 Les brouillons de réglages sont protégés lors d’une navigation, d’un changement de langue ou d’une déconnexion. Une modification concurrente produit un conflit explicite.
 

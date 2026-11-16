@@ -45,7 +45,7 @@ Archiving sets a goal aside without completing it. Restore it from **Archives**.
 
 OKR includes **60 quests**, ten titles and levels up to 100 through [shared progression](progression.md). A first objective completion earns **100 XP** and the first time each key result reaches its target earns **15 XP**, including values entered in the editor. Quest families cover completed objectives, key results, personal goals, professional goals, active days and streaks. Only first successes produce active days; edits and repeated completions do not multiply rewards. Corrections do not subtract earned XP.
 
-The topbar badge works without Tracking. When Tracking is enabled, **My quests in Tracking** opens the OKR quest wall. Shared progression settings control streak timezones, weekends and vacations independently of the OKR business timezone. Guidance and quests are built into the application; no external AI service processes your goals.
+The topbar badge works without Tracking. When Tracking is enabled, **My quests in Tracking** opens the OKR quest wall. Shared progression settings control streak timezones, usage days and vacations independently of the OKR business timezone. Guidance and quests are built into the application; no external AI service processes your goals.
 
 ## Settings and limits
 

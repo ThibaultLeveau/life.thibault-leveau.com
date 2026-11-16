@@ -42,6 +42,7 @@ test.beforeAll(async ({ browser }) => {
           expected_version: settings.version,
           timezone: "Europe/Paris",
           exclude_weekends: {},
+          usage_days: {},
           vacations: [],
         },
       })
@@ -132,14 +133,24 @@ test("Les actions mettent à jour le badge ; les points et quêtes concordent av
   });
 });
 
-test("Week-ends et vacances : enregistrement, garde du brouillon et persistance", async ({
+test("Jours par application et vacances : clavier, garde du brouillon et persistance", async ({
   page,
 }) => {
   await page.goto("/tracking?tab=settings");
-  const weekend = page.getByRole("switch", {
-    name: "Exclure les week-ends pour Tâches",
-  });
-  await weekend.check();
+  const tasks = page.getByRole("group", { name: "Tâches", exact: true });
+  const saturday = tasks.getByRole("checkbox", { name: "samedi", exact: true });
+  await saturday.focus();
+  await page.keyboard.press("Space");
+  await expect(saturday).not.toBeChecked();
+  await tasks.getByRole("checkbox", { name: "dimanche", exact: true }).uncheck();
+  const tracking = page.getByRole("group", { name: "Suivi", exact: true });
+  for (const name of ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"])
+    await tracking.getByRole("checkbox", { name, exact: true }).uncheck();
+  await expect(tracking.getByRole("checkbox", { name: "dimanche", exact: true })).toBeDisabled();
+  await expect(tracking).toContainText("1 jour prévu par semaine");
+  const sport = page.getByRole("group", { name: "Sport", exact: true });
+  for (const name of ["mardi", "jeudi", "samedi", "dimanche"])
+    await sport.getByRole("checkbox", { name, exact: true }).uncheck();
   page.once("dialog", (dialog) => dialog.dismiss());
   await page
     .locator(".application-sidebar")
@@ -152,12 +163,15 @@ test("Week-ends et vacances : enregistrement, garde du brouillon et persistance"
   await page.getByRole("button", { name: "Enregistrer mon rythme" }).click();
   await expect(page.getByText("Votre rythme est enregistré.")).toBeVisible();
   await page.reload();
-  await expect(weekend).toBeChecked();
+  await expect(saturday).not.toBeChecked();
+  await expect(tracking.getByRole("checkbox", { checked: true })).toHaveCount(1);
   await expect(page.getByText("Mode vacances actif")).toBeVisible();
   const settings = await (
     await page.request.get("/api/v1/progression/settings")
   ).json();
-  expect(settings.exclude_weekends.tasks).toBe(true);
+  expect(settings.usage_days.tasks).toEqual([0, 1, 2, 3, 4]);
+  expect(settings.usage_days.sport).toEqual([0, 2, 4]);
+  expect(settings.usage_days.tracking).toEqual([6]);
   expect(settings.vacations).toHaveLength(1);
   for (const id of ["tasks", "sport", "okr", "tracking"])
     expect(
@@ -169,6 +183,11 @@ test("Week-ends et vacances : enregistrement, garde du brouillon et persistance"
     .click();
   await page.getByRole("button", { name: "Enregistrer mon rythme" }).click();
   await expect(page.getByText("Votre rythme est enregistré.")).toBeVisible();
+  await page.locator(".progression-badge").click();
+  await expect(page.locator(".progression-popover")).toContainText("Jours prévus : dim.");
+  await page.keyboard.press("Escape");
+  await noOverflow(page);
+  await page.screenshot({ path: "test-results/progression-schedules-desktop.png", fullPage: true });
 });
 
 test("Parité mobile 320 px et bureau, FR/EN et thèmes ; séries conservées après désactivation", async ({
@@ -200,6 +219,17 @@ test("Parité mobile 320 px et bureau, FR/EN et thèmes ; séries conservées ap
           path: `test-results/progression-mobile-${locale}.png`,
           fullPage: false,
         });
+      await page.goto("/tracking?tab=settings");
+      const tracking = page.getByRole("group", { name: locale === "fr" ? "Suivi" : "Tracking", exact: true });
+      await expect(tracking.getByRole("checkbox", { checked: true })).toHaveCount(1);
+      const sunday = tracking.getByRole("checkbox", { name: locale === "fr" ? "dimanche" : "Sunday", exact: true });
+      await expect(sunday).toBeChecked();
+      await noOverflow(page);
+      const targets = await tracking.locator("label").evaluateAll((labels) =>
+        labels.every((label) => label.getBoundingClientRect().height >= 44 && label.getBoundingClientRect().width >= 44));
+      expect(targets).toBeTruthy();
+      if (theme === "dark")
+        await page.screenshot({ path: `test-results/progression-schedules-mobile-${locale}.png`, fullPage: true });
     }
   const before = await (
     await auth.request.get("/api/v1/progression/tasks")
@@ -225,6 +255,9 @@ test("Parité mobile 320 px et bureau, FR/EN et thèmes ; séries conservées ap
   expect(
     (await (await auth.request.get("/api/v1/progression/tasks")).json()).xp,
   ).toBe(before.xp);
+  expect(
+    (await (await auth.request.get("/api/v1/progression/tasks")).json()).usage_days,
+  ).toEqual(before.usage_days);
   await auth.request.put("/api/v1/preferences", {
     headers,
     data: { locale: "fr", theme: "light" },

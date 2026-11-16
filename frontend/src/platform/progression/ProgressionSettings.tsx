@@ -5,6 +5,7 @@ import { Icon } from "../../shared/ui/Icon";
 import { useApplications } from "../applications/ApplicationProvider";
 import { useApiAction, useApiResource } from "../useApiResource";
 import { progressionApi } from "./api";
+import { WEEKDAYS, usageDays, weekdayLabel } from "./calendar";
 import type { ProgressionSettings as Settings } from "./types";
 
 function dayInZone(timezone: string) {
@@ -110,27 +111,56 @@ function SettingsForm({
         <small className="progression-muted">
           {tr("progression_timezone_hint")}
         </small>
-        <h3>{tr("progression_weekends")}</h3>
-        <div className="progression-weekends">
-          {items?.map((app) => (
-            <label key={app.id}>
-              <span>{app.name}</span>
-              <input
-                type="checkbox"
-                role="switch"
-                aria-label={tr("progression_weekend_for", { name: app.name })}
-                checked={value.exclude_weekends[app.id] ?? false}
-                onChange={(e) =>
-                  change({
-                    exclude_weekends: {
-                      ...value.exclude_weekends,
-                      [app.id]: e.target.checked,
-                    },
-                  })
-                }
-              />
-            </label>
-          ))}
+        <h3>{tr("progression_usage_days")}</h3>
+        <p className="progression-muted">{tr("progression_usage_days_hint")}</p>
+        <div className="progression-schedules">
+          {items?.map((app) => {
+            const days = usageDays(value, app.id);
+            const setDays = (next: number[]) =>
+              change({ usage_days: { ...value.usage_days, [app.id]: next } });
+            return (
+              <fieldset className="progression-schedule" key={app.id}>
+                <legend>{app.name}</legend>
+                <p className="progression-muted">
+                  {tr("progression_days_per_week", { count: days.length })}
+                </p>
+                <div className="progression-day-presets">
+                  <button
+                    type="button"
+                    className="text-button"
+                    onClick={() => setDays(WEEKDAYS)}
+                  >
+                    {tr("progression_every_day")}
+                  </button>
+                  <button
+                    type="button"
+                    className="text-button"
+                    onClick={() => setDays(WEEKDAYS.slice(0, 5))}
+                  >
+                    {tr("progression_workweek")}
+                  </button>
+                </div>
+                <div className="progression-usage-days">
+                  {WEEKDAYS.map((day) => (
+                    <label key={day}>
+                      <input
+                        type="checkbox"
+                        aria-label={weekdayLabel(day)}
+                        checked={days.includes(day)}
+                        disabled={days.length === 1 && days.includes(day)}
+                        onChange={(event) =>
+                          setDays(event.target.checked
+                            ? [...days, day].sort((a, b) => a - b)
+                            : days.filter((d) => d !== day))
+                        }
+                      />
+                      <span>{weekdayLabel(day, "short")}</span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            );
+          })}
         </div>
         <div className="progression-vacation-heading">
           <div>

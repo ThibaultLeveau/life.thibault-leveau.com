@@ -79,4 +79,4 @@ LifeOS, Tâches, Sport, Suivi et Objectifs OKR sont disponibles en **français e
 
 [Suivi](docs/tracking.md) est disponible dans la bibliothèque : habitudes quotidiennes, hebdomadaires, mensuelles et annuelles, données manuelles ou issues de Tâches/Sport, calendrier mois/année, saisie guidée, statistiques et récompenses. Le cadre sidebar/topbar est partagé avec Sport. Les [intégrations](docs/integrations.md) utilisent un contrat de fournisseurs approuvé dans l’[ADR 005](docs/decisions/005-integrations-tracking.md).
 
-Les [réussites](docs/progression.md) proposent **60 quêtes par application**, une progression jusqu’au niveau 100, dix titres, des séries avec week-ends/vacances et un journal des gains. Le badge commun affiche niveau, titre, série et quêtes proches dans Tâches, Sport et Suivi.
+Les [réussites](docs/progression.md) proposent **60 quêtes par application**, une progression jusqu’au niveau 100, dix titres, des séries avec jours d’utilisation choisis par application et vacances et un journal des gains. Le badge commun affiche niveau, titre, série et quêtes proches dans Tâches, Sport et Suivi.

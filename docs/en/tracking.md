@@ -36,7 +36,7 @@ Longer periods have a separate section and do not colour every day as complete. 
 
 Statistics show numeric/boolean trends and a data table, with an average across scored entries and a completion rate across all four frequencies. The selected period includes unfinished current periods. You can explore a Tasks or Sport activity metric for the same date range.
 
-Achievements provide 60 quests per application, increasing level costs up to 100, ten titles and an immutable points journal. The shared badge shows your level, title and streak. Configure weekends off and global vacation periods in Settings. See the [complete achievements guide](progression.md) for scoring, corrections and historical imports.
+Achievements provide 60 quests per application, increasing level costs up to 100, ten titles and an immutable points journal. The shared badge shows your level, title and streak. Choose usage days for each application and global vacation periods in Settings. See the [complete achievements guide](progression.md) for scoring, corrections and historical imports.
 
 ## Lifecycle and limits
 

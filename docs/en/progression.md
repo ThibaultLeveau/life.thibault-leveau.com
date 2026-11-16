@@ -24,11 +24,13 @@ Each application has six families of ten quests: Tasks rewards completions, on-t
 
 ## Rest days and vacation
 
-In **Tracking → Settings → Your pace, your rules**, choose the IANA timezone for new activities, exclude weekends separately for each application, and add inclusive vacation periods for all applications. Starting vacation today proposes one editable week. Save to apply it. Up to 100 non-overlapping periods are supported. Ending vacation today closes the interval yesterday so today becomes eligible again.
+In **Tracking → Settings → Your pace, your rules**, choose the IANA timezone for new activities, choose the expected weekdays separately for each application (at least one day), and add inclusive vacation periods for all applications. Starting vacation today proposes one editable week. Save to apply it. Up to 100 non-overlapping periods are supported. Ending vacation today closes the interval yesterday so today becomes eligible again.
+
+For weekly tracking, select Sunday only; for three days of practice, select Monday, Wednesday and Friday. “Every day” and “Monday to Friday” provide shortcuts. The badge displays the scheduled days. Existing preferences remain unchanged: all days, or Monday–Friday if weekends were excluded. Three successful Sundays count as three streak days. A Saturday confirmation does not replace a missed Sunday: these are fixed weekdays, not a flexible weekly quota. Tracker deadlines remain unchanged; this setting only affects the application’s usage streak.
 
 One first confirmation validates an application’s day; more actions do not add extra streak days. Backdated tracking entries count on the day you confirm them. Rest and vacation days neither increment nor break a streak, even if you use an application; activities still earn XP and count as days of practice. Today remains open until its end. A past eligible day without activity breaks the current streak. The best streak uses all recorded history.
 
-Changing timezone does not move previously recorded activity dates. Weekend and vacation rules recalculate streaks without rewriting rewards. Disabling an application preserves its data but does not pause its calendar. Unsaved settings are protected during navigation, language changes and sign-out, and concurrent changes return a conflict.
+Changing timezone does not move previously recorded activity dates. Selected weekdays and vacation rules recalculate historical streaks without rewriting rewards. Disabling an application preserves its data but does not pause its calendar. Unsaved settings are protected during navigation, language changes and sign-out, and concurrent changes return a conflict.
 
 ## Existing data
 
