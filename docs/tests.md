@@ -118,6 +118,8 @@ Les parcours `navigation.spec.ts` comparent le style calculé de la top bar, sid
 
 Le changement ne modifie ni tables, migrations, contrats HTTP, récurrences ni journal historique. Les validations PostgreSQL, propriétaire/CSRF, sauvegarde/restauration et désactivation/réactivation restent celles des parcours existants.
 
+`task-drag-input.spec.ts` vérifie les créations successives par Entrée en liste/tableau et FR/EN, le focus avec une écriture retardée, les erreurs de date, le déplacement depuis titres et corps des cartes, les sections/cellules vides, les dépôts inter-espaces sans section et la conservation des dates/historiques par API. Il couvre aussi les dépôts hors cible, Échap et les erreurs de déplacement. Les rectangles de `task-actions.spec.ts` partent désormais du fond ; les scénarios tactiles existants vérifient toujours défilement et appui long.
+
 ## Suivi et métriques inter-applications
 
 `test_integrations.py` vérifie fenêtres locales/DST, résolutions nettes et annulations, reports manuels, filtres propriétaires, sources désactivées, agrégations Sport et absence de mesure. `test_tracking.py` vérifie périodes, types stricts, scores/XP, versions, définitions datées, instantanés, archive/réactivation, erreurs et protections SQL. `test_architecture.py` contrôle les fournisseurs optionnels et le cadre partagé ; la suite d’activation couvre automatiquement toutes les routes du nouveau routeur.

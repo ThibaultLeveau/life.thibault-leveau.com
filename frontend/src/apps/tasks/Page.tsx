@@ -20,7 +20,12 @@ import { Dialog } from "../../shared/ui/Dialog";
 import { Icon } from "../../shared/ui/Icon";
 import { MoveDialog } from "./components/MoveDialog";
 import { TaskEditor } from "./components/TaskEditor";
-import { TaskViews, type Destination } from "./components/TaskViews";
+import { TaskViews } from "./components/TaskViews";
+import {
+  TaskDragProvider,
+  WorkspaceDropLink,
+  type Destination,
+} from "./components/TaskDragProvider";
 import { WorkspaceDialog } from "./components/WorkspaceDialog";
 import {
   WorkspaceSettings,
@@ -208,7 +213,21 @@ function TasksPage() {
       },
     );
   }
-  async function move(task: Task, destination: Destination) {
+  function move(task: Task, destination: Destination) {
+    if ("workspace_id" in destination) {
+      sync.mutate(
+        "/tasks/bulk",
+        "POST",
+        {
+          action: "move",
+          tasks: [{ id: task.id, expected_version: task.version }],
+          workspace_id: destination.workspace_id,
+          section_id: null,
+        },
+        { message: tr("task_moved") },
+      );
+      return;
+    }
     sync.mutate(
       `/tasks/${task.id}/move`,
       "POST",
@@ -305,7 +324,11 @@ function TasksPage() {
     view.due !== "all" ||
     !view.show_completed;
   return (
-    <div className="ui-scope tasks-shell">
+    <TaskDragProvider
+      key={agenda ? "agenda" : workspaceId}
+      disabled={agenda || loading || view.sort !== "manual"}
+      onMove={move}
+    >
       <ApplicationSidebar
         name={tr("tasks")}
         icon="check"
@@ -368,8 +391,9 @@ function TasksPage() {
         </div>
         <nav className="workspace-nav" aria-label={tr("workspaces")}>
           {spaceTree.map(({ space, depth, path }) => (
-            <button
+            <WorkspaceDropLink
               key={space.id}
+              workspaceId={space.id}
               style={{ paddingInlineStart: 12 + Math.min(depth, 6) * 16 }}
               title={path}
               aria-label={depth ? `# ${path}` : undefined}
@@ -390,7 +414,7 @@ function TasksPage() {
               {!agenda && workspaceId === space.id && (
                 <Icon name="chevron" size={14} />
               )}
-            </button>
+            </WorkspaceDropLink>
           ))}
         </nav>
         <button
@@ -807,7 +831,6 @@ function TasksPage() {
                     busy={false}
                     onOpen={setEditor}
                     onComplete={complete}
-                    onMove={move}
                     onAdd={quickAdd}
                     onConfigure={() => setSettingsTab("sections")}
                   />
@@ -957,6 +980,6 @@ function TasksPage() {
           </div>
         </Dialog>
       )}
-    </div>
+    </TaskDragProvider>
   );
 }

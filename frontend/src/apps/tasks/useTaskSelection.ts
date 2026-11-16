@@ -118,7 +118,7 @@ export function useTaskSelection(
         return;
       const card = target.closest<HTMLElement>("[data-task-id]");
       const touch = event.pointerType !== "mouse";
-      if (touch && !card) return;
+      if (touch ? !card : card) return;
       const board = target.closest<HTMLElement>(".board-scroll");
       gesture = {
         id: event.pointerId,
