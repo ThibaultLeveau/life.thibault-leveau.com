@@ -90,6 +90,39 @@ async function navigationStyles(page: Page) {
   );
 }
 
+async function singleLineTopbar(page: Page) {
+  const topbar = page.locator(".application-topbar");
+  await expect(page.locator(".progression-level-number")).toHaveText(/\d+/);
+  const header = (await topbar.boundingBox())!;
+  const breadcrumb = (
+    await page.locator(".application-breadcrumb").boundingBox()
+  )!;
+  const badge = (await page.locator(".progression-badge").boundingBox())!;
+  expect(header.height).toBeLessThanOrEqual(66);
+  expect(
+    Math.abs(breadcrumb.y + breadcrumb.height / 2 - badge.y - badge.height / 2),
+  ).toBeLessThan(1);
+  expect(breadcrumb.x + breadcrumb.width).toBeLessThanOrEqual(badge.x);
+  expect(
+    (await topbar.locator("[aria-current=page]").boundingBox())!.width,
+  ).toBeGreaterThan(0);
+  expect(badge.x + badge.width).toBeLessThanOrEqual(header.x + header.width);
+  expect(badge.height).toBeGreaterThanOrEqual(44);
+  expect(
+    (await page.locator(".progression-level-number").boundingBox())!.width,
+  ).toBeLessThanOrEqual(24);
+  expect(
+    (await page.locator(".progression-badge-streak svg").boundingBox())!.width,
+  ).toBeLessThanOrEqual(12);
+  if (page.viewportSize()!.width <= 800) {
+    const menu = (await topbar.locator(".application-nav-mobile").boundingBox())!;
+    expect(menu.width).toBeGreaterThanOrEqual(44);
+    expect(menu.height).toBeGreaterThanOrEqual(44);
+    expect(menu.x + menu.width).toBeLessThanOrEqual(breadcrumb.x);
+    expect(Math.abs(menu.y - badge.y)).toBeLessThan(1);
+  }
+}
+
 test("navigation identique entre applications, thèmes et formats", async ({
   page,
 }, testInfo) => {
@@ -114,6 +147,12 @@ test("navigation identique entre applications, thèmes et formats", async ({
             name: /Actualiser|Refresh|Recharger|Reload/,
           }),
         ).toHaveCount(0);
+        await singleLineTopbar(page);
+        if (width === 320 || width === 375)
+          await page.screenshot({
+            path: testInfo.outputPath(`topbar-${app.document}-${theme}-${width}.png`),
+            animations: "disabled",
+          });
         await openNavigation(page);
         const footer = page.locator(".application-sidebar-footer");
         await expect(footer.getByRole("link")).toHaveText([
@@ -262,5 +301,63 @@ test("menu mobile : focus, Échap, fond et passage au bureau", async ({
     await expect(
       page.getByRole("heading", { name: app.current, exact: true }),
     ).toBeVisible();
+  }
+});
+
+test("topbar compacte : niveau 100, série longue et titres FR/EN accessibles", async ({
+  page,
+}, testInfo) => {
+  test.setTimeout(120_000);
+  await page.route(
+    /\/api\/v1\/progression\/(tasks|sport|tracking)$/,
+    async (route) => {
+      const response = await route.fetch();
+      const summary = await response.json();
+      const title = summary.titles.reduce(
+        (longest: string, item: { name: string }) =>
+          item.name.length > longest.length ? item.name : longest,
+        summary.title,
+      );
+      await route.fulfill({
+        response,
+        json: { ...summary, level: 100, title, streak: 9999 },
+      });
+    },
+  );
+  for (const locale of ["fr", "en"]) {
+    await page.request.put("/api/v1/preferences", {
+      headers,
+      data: { locale, theme: "system" },
+    });
+    for (const width of [320, 390]) {
+      await page.setViewportSize({ width, height: 844 });
+      for (const app of applications) {
+        await page.goto(app.path);
+        await expect(page.locator(".progression-level-number")).toHaveText("100");
+        await singleLineTopbar(page);
+        const badge = page.locator(".progression-badge");
+        const title = await badge.locator(".progression-badge-title").innerText();
+        await expect(badge).toHaveAccessibleName(new RegExp(title));
+        await expect(badge).toHaveAccessibleName(/9999/);
+        await page.screenshot({
+          path: testInfo.outputPath(`compact-${app.document}-${locale}-${width}.png`),
+        });
+        await badge.focus();
+        await page.keyboard.press("Enter");
+        const popover = page.locator(".progression-popover");
+        await expect(popover).toBeVisible();
+        await expect(popover.locator(".progression-popover-status")).toContainText(
+          title,
+        );
+        const panel = (await popover.boundingBox())!;
+        expect(panel.x).toBeGreaterThanOrEqual(0);
+        expect(panel.x + panel.width).toBeLessThanOrEqual(width);
+        expect(
+          await page.evaluate(() => document.documentElement.scrollWidth),
+        ).toBeLessThanOrEqual(width);
+        await page.keyboard.press("Escape");
+        await expect(badge).toBeFocused();
+      }
+    }
   }
 });
