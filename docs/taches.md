@@ -20,6 +20,14 @@ Se connecter avec le compte créé par l'opérateur, puis choisir **Ouvrir** sur
 
 Un espace peut représenter Personnel, Travail ou un projet. **Nouvel espace** définit son nom, sa description, sa couleur et, si souhaité, son **Espace parent**. Les trois colonnes initiales sont À faire, En cours et Terminé. Les réglages `…` à côté du titre permettent de les adapter. L'icône près de **Mes espaces** permet de réordonner les espaces ayant le même parent avec les flèches.
 
+### Choisir les couleurs
+
+Les espaces, sections, colonnes et étiquettes proposent la même **grille de 16 couleurs** sur ordinateur et mobile, à la création comme à la modification. Cliquer ou toucher une case pour la sélectionner ; une coche indique le choix actuel. Au clavier, parcourir les cases avec Tab puis choisir avec Entrée ou Espace.
+
+**Couleur personnalisée** ouvre le sélecteur libre du navigateur. Son apparence dépend de l’appareil, mais la grille proposée par LifeOS et ses couleurs restent identiques. Le code hexadécimal du choix est affiché à côté du sélecteur. Une couleur personnalisée existante est conservée, même si elle ne figure pas dans la grille. Choisir une couleur ne valide pas le formulaire : utiliser ensuite **Créer l’espace**, **Ajouter** ou **Enregistrer**. Après l’ajout d’une section, colonne ou étiquette, le formulaire de création retrouve sa couleur initiale.
+
+Les couleurs sont enregistrées par les [API existantes](api.md#espaces-et-configuration) dans le champ `color` au format `#RRGGBB`, puis retrouvées sur les autres appareils après rechargement. La palette ne limite pas les valeurs acceptées ; aucun changement de données ni migration n’est nécessaire.
+
 ## Espaces parents et sous-espaces
 
 Créer par exemple **Personnel → Voyages → Japon** en choisissant le parent dans **Nouvel espace**. La navigation affiche les enfants sous leur parent ; le chemin complet apparaît en haut de la page et dans les choix d'espace, y compris pour déplacer une tâche.
