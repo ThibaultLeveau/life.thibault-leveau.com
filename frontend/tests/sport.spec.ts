@@ -52,18 +52,19 @@ test.beforeEach(async ({ page }) => {
     ).toBeTruthy();
 });
 async function tab(page: Page, name: string) {
-  const desktop = page.locator(".application-sidebar");
-  if (await desktop.isVisible())
-    await desktop.getByRole("button", { name, exact: true }).click();
-  else {
-    await page
-      .getByRole("button", { name: "Ouvrir la navigation", exact: true })
-      .click();
-    await page
-      .getByRole("dialog")
-      .getByRole("button", { name, exact: true })
-      .click();
-  }
+  const opener = page.getByRole("button", {
+    name: "Ouvrir la navigation",
+    exact: true,
+  });
+  if (
+    (await opener.isVisible()) &&
+    (await opener.getAttribute("aria-expanded")) === "false"
+  )
+    await opener.click();
+  await page
+    .locator(".application-sidebar")
+    .getByRole("button", { name, exact: true })
+    .click();
 }
 async function createApiWorkout(page: Page, name: string) {
   const ex: ExercisePage = await (
@@ -172,19 +173,24 @@ test("Sport : bibliothèque, séance mixte, repos, mensurations et statistiques 
   const dialog = page.getByRole("form", { name: "Nouveau programme" });
   const name = `Séance mixte ${Date.now()}`;
   await dialog.getByLabel("Nom du programme").fill(name);
-  for (const [i, query] of [
-    "Développé couché à la barre",
-    "Course sur tapis",
-    "Marche du fermier",
-    "Burpees",
+  for (const [i, [query, kind]] of [
+    ["Développé couché à la barre", "weight_reps"],
+    ["Course sur tapis", "distance_duration"],
+    ["Marche du fermier", "weight_distance"],
+    ["Burpees", "reps"],
   ].entries()) {
     await dialog
       .getByRole("button", { name: "Ajouter un exercice", exact: true })
       .click();
-    await dialog.getByLabel("Rechercher un exercice").fill(query);
-    await dialog
+    const picker = dialog.locator(".sport-picker");
+    await picker.getByLabel("Rechercher un exercice").fill(query);
+    await picker
+      .getByRole("combobox", { name: "Type", exact: true })
+      .selectOption(kind);
+    await expect(picker.getByRole("status")).toHaveCount(0);
+    await picker
       .locator(".sport-picker-item")
-      .filter({ hasText: query })
+      .filter({ has: page.getByText(query, { exact: true }) })
       .first()
       .click();
     await dialog.getByLabel("Nombre de séries").nth(i).fill("1");
