@@ -31,7 +31,7 @@ Les types décrivent des **mesures**, pas une liste fermée de sports. Un même 
 
 Dans **Programmes**, choisir **Nouveau programme**, donner un nom, ajouter des exercices et indiquer leur nombre de séries. Les cibles par série sont facultatives. Les flèches changent l’ordre ; la croix retire un exercice du brouillon. Un programme accepte jusqu’à 50 exercices et 300 séries au total, avec 1 à 30 séries par exercice.
 
-Les cartes sont compactes sur ordinateur. Sur téléphone, elles affichent le nom, le total d’exercices et de séries, les deux premiers exercices et le nombre d’exercices restants. Le bandeau HYROX conserve son logo, son compteur et la date dans un format réduit. Le bouton crayon ouvre la fiche complète avec les notes, toutes les séries et leurs cibles.
+Sur ordinateur, les cartes HYROX et classiques ont toutes la même hauteur, avec les boutons alignés en bas de chaque rangée. Sur téléphone, elles affichent le nom, le total d’exercices et de séries, les deux premiers exercices et le nombre d’exercices restants. Le bandeau HYROX conserve son logo, son compteur et la date dans un format réduit. Le bouton crayon ouvre la fiche complète avec les notes, toutes les séries et leurs cibles.
 
 Pour archiver un programme, ouvrir sa **fiche de modification**, puis choisir **Archiver** en bas de page. Ce bouton n’apparaît ni sur les cartes ni à la création. Si des modifications ne sont pas enregistrées, une confirmation permet de les abandonner avant l’archivage ; une erreur conserve le brouillon. L’archivage utilise la version enregistrée et conserve exercices, notes, date de compétition et historique. Activer **Programmes archivés**, puis **Restaurer** sur la carte pour retrouver le programme.
 

@@ -548,6 +548,11 @@ test("Cartes de programme compactes : ordinateur, mobile, thèmes et langues", a
     name: "Programme B — Épaules + Dos",
     entries,
   });
+  const legs = await write<Workout>(page, "/sport/workouts", {
+    name: "Programme jambes",
+    entries,
+  });
+  const programsUnderTest = [regular, hyrox, shoulders, legs];
   // Isolate real API fixtures so captures do not depend on previous scenarios.
   await page.route("**/api/v1/sport/workouts?archived=false", async (route) => {
     const response = await route.fetch();
@@ -555,7 +560,7 @@ test("Cartes de programme compactes : ordinateur, mobile, thèmes et langues", a
     await route.fulfill({
       response,
       json: programs.filter((program) =>
-        [regular.id, hyrox.id, shoulders.id].includes(program.id),
+        programsUnderTest.some((fixture) => fixture.id === program.id),
       ),
     });
   });
@@ -566,11 +571,11 @@ test("Cartes de programme compactes : ordinateur, mobile, thèmes et langues", a
         await page.setViewportSize({ width, height: 900 });
         await page.goto("/sport");
         const cards = page.locator(".sport-workout");
-        await expect(cards).toHaveCount(3);
+        await expect(cards).toHaveCount(programsUnderTest.length);
         await expect(
           page.getByRole("button", { name: /^(Archiver|Archive)$/ }),
         ).toHaveCount(0);
-        for (const program of [regular, hyrox, shoulders]) {
+        for (const program of programsUnderTest) {
           const card = cards.filter({
             has: page.getByRole("heading", { name: program.name, exact: true }),
           });
@@ -587,9 +592,7 @@ test("Cartes de programme compactes : ordinateur, mobile, thèmes et langues", a
               locale === "fr" ? "+ 2 autres exercices" : "+ 2 more exercises",
             );
           const height = (await card.boundingBox())!.height;
-          expect(height).toBeLessThan(
-            mobile ? 350 : program.id === hyrox.id ? 600 : 460,
-          );
+          expect(height).toBeLessThan(mobile ? 350 : 600);
           for (const button of await card.getByRole("button").all()) {
             const box = (await button.boundingBox())!;
             expect(box.height).toBeGreaterThanOrEqual(44);
@@ -597,6 +600,36 @@ test("Cartes de programme compactes : ordinateur, mobile, thèmes et langues", a
             expect(box.x).toBeGreaterThanOrEqual(0);
             expect(box.x + box.width).toBeLessThanOrEqual(width);
           }
+        }
+        const layout = await cards.evaluateAll((elements) =>
+          elements.map((element) => {
+            const card = element.getBoundingClientRect();
+            const actions = element
+              .querySelector(".sport-workout-actions")!
+              .getBoundingClientRect();
+            return {
+              width: card.width,
+              height: card.height,
+              top: card.top,
+              actionsTop: actions.top - card.top,
+            };
+          }),
+        );
+        const heights = layout.map((card) => card.height);
+        if (width === 1440) {
+          // Equal sizing also applies to a shorter card on the next row.
+          expect(new Set(layout.map((card) => Math.round(card.top))).size).toBe(
+            2,
+          );
+          for (const dimension of ["width", "height", "actionsTop"] as const) {
+            const values = layout.map((card) => card[dimension]);
+            expect(Math.max(...values) - Math.min(...values)).toBeLessThan(1);
+          }
+        } else {
+          // Single-column phone cards keep their compact, natural heights.
+          expect(Math.max(...heights) - Math.min(...heights)).toBeGreaterThan(
+            40,
+          );
         }
         await expect(cards.getByAltText("HYROX")).toBeVisible();
         await expect(cards.locator("time")).toHaveAttribute(
