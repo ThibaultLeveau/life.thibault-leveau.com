@@ -195,7 +195,9 @@ Le clavier permet de parcourir les actions, de fermer un dialogue avec Échap et
 
 **Liste / Tableau** change la disposition. **Filtres** sélectionne statut, priorité, étiquette et échéance. La recherche porte sur le titre et la description (`Ctrl+K` ou `⌘K` donne le focus). **Afficher** choisit densité, tâches terminées et tri manuel, priorité ou échéance.
 
-Un tri automatique désactive les poignées ; le message au-dessus des tâches permet de revenir à l'ordre manuel. Les réglages sont conservés par espace, après rechargement et reconnexion. Une recherche active peut masquer une nouvelle tâche qui ne lui correspond pas : effacer les filtres pour tout retrouver.
+À chaque ouverture ou rechargement de la page, les tâches terminées sont masquées dans tous les espaces, en liste comme en tableau, même si elles étaient affichées auparavant. **Afficher → Afficher les tâches terminées** permet de les consulter dans l’espace courant jusqu’au prochain rechargement. Ce choix reste actif quand on change d’espace puis revient, pendant cette consultation. **Effacer les filtres** permet également de tout afficher. Les dates et l’historique des tâches sont conservés.
+
+Un tri automatique désactive les poignées ; le message au-dessus des tâches permet de revenir à l'ordre manuel. Les autres réglages sont conservés par espace, après rechargement et reconnexion. Une recherche active peut masquer une nouvelle tâche qui ne lui correspond pas : effacer les filtres pour tout retrouver. Les options de la vue **À venir** restent enregistrées séparément.
 
 Le thème, sous la navigation, suit le système ou impose clair/sombre. Il est enregistré dans le compte. Sur mobile, le bouton de menu ouvre un panneau latéral ; le focus reste dans ce panneau jusqu’à sa fermeture. Le tableau défile horizontalement dans sa zone. Les commandes et champs sont adaptés aux petits écrans ; la barre d’actions groupées reste accessible en bas de l’écran. Les animations respectent le réglage système de réduction des mouvements.
 

@@ -579,6 +579,9 @@ def test_filters_pagination_and_persisted_view(client):
         "due": "overdue",
     }
     path = f"/api/v1/workspaces/{space['id']}/view"
+    assert client.get(path).json()["show_completed"] is False
+    assert client.put(path, json={**settings, "show_completed": True}).status_code == 200
+    assert client.get(path).json() == {**settings, "show_completed": True}
     assert client.put(path, json=settings).status_code == 200
     assert client.get(path).json() == settings
     assert client.put("/api/v1/preferences", json={"theme": "dark"}).status_code == 200

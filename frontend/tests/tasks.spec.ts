@@ -75,6 +75,16 @@ async function seed(page: Page) {
   ).toBeVisible();
   return { mutate, space, sections, statuses, tasks };
 }
+async function showCompleted(page: Page) {
+  await page.getByRole("button", { name: "Afficher", exact: true }).click();
+  await page.getByLabel("Afficher les tâches terminées").check();
+  await page.getByRole("button", { name: "Afficher", exact: true }).click();
+  await expect(page.locator(".task-sync-status")).toHaveAttribute(
+    "data-pending",
+    "0",
+  );
+}
+
 async function closeDialog(page: Page) {
   await page
     .getByRole("dialog")
@@ -164,6 +174,7 @@ test("connexion et cycle complet depuis les formulaires", async ({ page }) => {
   await dialog
     .getByRole("button", { name: "Ajouter la tâche", exact: true })
     .click();
+  await showCompleted(page);
   await page
     .getByRole("checkbox", {
       name: "Terminer : Organiser le week-end",
@@ -241,6 +252,7 @@ test("kanban par lignes, glisser-déposer, ordre et thèmes persistants", async 
 }, testInfo) => {
   await page.setViewportSize({ width: 1440, height: 1200 });
   const { space, sections, statuses, tasks } = await seed(page);
+  await showCompleted(page);
   await expect(
     page.getByRole("heading", { name: "Tableau seulement", exact: true }),
   ).toHaveCount(0);
@@ -266,6 +278,7 @@ test("kanban par lignes, glisser-déposer, ordre et thèmes persistants", async 
     "0",
   );
   await page.reload();
+  await showCompleted(page);
   await expect(
     cell.getByRole("button", { name: tasks[0].title, exact: true }),
   ).toBeVisible();
@@ -293,6 +306,7 @@ test("kanban par lignes, glisser-déposer, ordre et thèmes persistants", async 
     "0",
   );
   await page.reload();
+  await showCompleted(page);
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await expect(page.locator(".tasks-shell")).toHaveCSS(
     "background-color",
@@ -323,6 +337,7 @@ test("kanban par lignes, glisser-déposer, ordre et thèmes persistants", async 
     page.getByRole("button", { name: "Ajouter une tâche", exact: true }),
   ).toBeDisabled();
   releaseView();
+  await showCompleted(page);
   await page.getByRole("button", { name: "Liste", exact: true }).click();
   await expect(page.locator(".task-lists")).toBeVisible();
   const firstRow = page.locator(`[data-task-id="${tasks[1].id}"]`);
@@ -652,3 +667,100 @@ test("espaces parents : création, déplacement, ordre et archives persistantes"
     nav.getByRole("button", { name: "# Voyages / Japon", exact: true }),
   ).toBeVisible();
 });
+
+for (const layout of ["list", "board"] as const) {
+  test(`les tâches terminées restent masquées après chaque rechargement (${layout})`, async ({
+    page,
+  }) => {
+    const { mutate, space, tasks } = await seed(page);
+    const completed = await mutate<Task>(`/tasks/${tasks[1].id}/complete`, {
+      expected_version: tasks[1].version,
+    });
+    const preferences = {
+      layout,
+      density: "compact",
+      sort: "priority",
+      show_completed: true,
+    };
+    await mutate(`/workspaces/${space.id}/view`, preferences, "PUT");
+    const other = await mutate<Workspace>("/workspaces", {
+      name: `Autre espace ${Date.now()}`,
+    });
+    const otherTask = await mutate<Task>("/tasks", {
+      workspace_id: other.id,
+      title: "Tâche terminée dans un autre espace",
+    });
+    await mutate(`/tasks/${otherTask.id}/complete`, {
+      expected_version: otherTask.version,
+    });
+    await mutate(`/workspaces/${other.id}/view`, preferences, "PUT");
+    const row = (task: Task) => page.locator(`[data-task-id="${task.id}"]`);
+    const history = await (
+      await page.request.get(`/api/v1/tasks/${completed.id}/events`)
+    ).json();
+
+    // Existing saved true values must not reveal completed tasks on page load.
+    await page.reload();
+    await expect(row(tasks[0])).toBeVisible();
+    await expect(row(completed)).toHaveCount(0);
+    await page.getByRole("button", { name: "Afficher", exact: true }).click();
+    await expect(
+      page.getByLabel("Afficher les tâches terminées"),
+    ).not.toBeChecked();
+    await expect(
+      page.getByRole("combobox", { name: "Densité", exact: true }),
+    ).toHaveValue("compact");
+    await expect(
+      page.getByRole("combobox", { name: "Trier par", exact: true }),
+    ).toHaveValue("priority");
+    await page.getByLabel("Afficher les tâches terminées").check();
+    await expect(row(completed)).toBeVisible();
+    await expect(page.locator(".task-sync-status")).toHaveAttribute(
+      "data-pending",
+      "0",
+    );
+
+    // Lazy-loaded spaces also start hidden; returning keeps this visit's choice.
+    await page
+      .getByRole("button", { name: `# ${other.name}`, exact: true })
+      .click();
+    await expect(
+      page.getByRole("button", { name: "Nouvelle tâche", exact: true }),
+    ).toBeEnabled();
+    await expect(row(otherTask)).toHaveCount(0);
+    await page
+      .getByRole("button", { name: `# ${space.name}`, exact: true })
+      .click();
+    await expect(row(completed)).toBeVisible();
+
+    await page.reload();
+    await expect(row(tasks[0])).toBeVisible();
+    await expect(row(completed)).toHaveCount(0);
+    await showCompleted(page);
+    await expect(row(completed)).toBeVisible();
+    await page.reload();
+    await expect(row(tasks[0])).toBeVisible();
+    await expect(row(completed)).toHaveCount(0);
+    await expect(
+      page.locator(layout === "list" ? ".task-lists" : ".board-scroll"),
+    ).toBeVisible();
+    expect(
+      await (await page.request.get(`/api/v1/tasks/${completed.id}`)).json(),
+    ).toEqual(completed);
+    expect(
+      await (
+        await page.request.get(`/api/v1/tasks/${completed.id}/events`)
+      ).json(),
+    ).toEqual(history);
+    const saved = await (
+      await page.request.get(`/api/v1/workspaces/${space.id}/view`)
+    ).json();
+    expect(saved).toMatchObject(preferences);
+    const openOnly = await page.request.get(
+      `/api/v1/tasks?workspace_id=${space.id}&completed=false`,
+    );
+    expect(
+      (await openOnly.json()).items.map((task: Task) => task.id),
+    ).not.toContain(completed.id);
+  });
+}

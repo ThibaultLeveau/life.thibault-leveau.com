@@ -38,8 +38,20 @@ async function seed(page: Page) {
     );
   await page.goto(`/tasks?space=${space.id}`);
   await expect(row(page, tasks[0])).toBeVisible();
+  // These scenarios inspect and reopen completed rows during synchronization.
+  await showCompleted(page);
   return { space, tasks, write };
 }
+async function showCompleted(page: Page) {
+  await page.getByRole("button", { name: "Afficher", exact: true }).click();
+  await page.getByLabel("Afficher les tâches terminées").check();
+  await page.getByRole("button", { name: "Afficher", exact: true }).click();
+  await expect(page.locator(".task-sync-status")).toHaveAttribute(
+    "data-pending",
+    "0",
+  );
+}
+
 const row = (page: Page, task: Task) =>
   page.locator(`[data-task-id="${task.id}"]`);
 const state = async (page: Page, task: Task): Promise<Task> =>
@@ -393,6 +405,7 @@ test("récurrence calculée par le serveur, autre validation et annulation", asy
     "PATCH",
   );
   await page.reload();
+  await showCompleted(page);
   const release = gate();
   await hold(page, `**/api/v1/tasks/${tasks[1].id}/complete`, release);
   await row(page, recurring).getByRole("checkbox").click();
@@ -546,6 +559,7 @@ test("éditer le titre pendant une résolution récurrente préserve la prochain
     "PATCH",
   );
   await page.reload();
+  await showCompleted(page);
   const release = gate();
   await hold(page, `**/api/v1/tasks/${recurring.id}/complete`, release);
   try {

@@ -70,7 +70,8 @@ async function readDataOnce(
   const [active, archived, tasks, archives, agenda] = await Promise.all([
     api<Workspace[]>("/workspaces", "GET", undefined, signal),
     api<Workspace[]>("/workspaces?archived=true", "GET", undefined, signal),
-    allTasks("", defaultView, false, signal),
+    // Keep completed records available for explicit display and the agenda.
+    allTasks("", { ...defaultView, show_completed: true }, false, signal),
     allTasks("", defaultView, true, signal),
     api<AgendaSettings>("/agenda/view", "GET", undefined, signal),
   ]);

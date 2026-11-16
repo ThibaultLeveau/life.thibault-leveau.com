@@ -64,7 +64,17 @@ function TasksPage() {
       .sort((a, b) => a.position - b.position) ?? [];
   const labels =
     data?.labels.filter((label) => label.workspace_id === workspaceId) ?? [];
-  const view = data?.views[workspaceId] ?? defaultView;
+  // A saved preference never reveals completed tasks before an explicit choice
+  // in this page visit. Keep API synchronization (including rollback) in charge.
+  const [completedVisibilityChosen, setCompletedVisibilityChosen] = useState(
+    new Set<string>(),
+  );
+  const savedView = data?.views[workspaceId] ?? defaultView;
+  const view = {
+    ...savedView,
+    show_completed:
+      completedVisibilityChosen.has(workspaceId) && savedView.show_completed,
+  };
   const tasks = data
     ? workspaceTasks(data, workspaceId, view, today, sync.flashes)
     : [];
@@ -122,6 +132,10 @@ function TasksPage() {
   const changeView = useCallback(
     (patch: Partial<ViewSettings>) => {
       if (!workspaceId || !data) return;
+      if (patch.show_completed !== undefined)
+        setCompletedVisibilityChosen((previous) =>
+          new Set(previous).add(workspaceId),
+        );
       sync.mutate(`/workspaces/${workspaceId}/view`, "PUT", {
         ...view,
         ...patch,
