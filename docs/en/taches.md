@@ -84,3 +84,8 @@ The interface supports keyboard navigation, named controls, focus-contained dial
 All records belong to the signed-in account. Writes require the session, CSRF token and allowed origin. There is no offline business-data store or instant synchronization between devices. A session expiry removes private views; records already saved remain intact. Task-resolution statistics and OKRs are future work.
 
 See [language preferences](index.md), the [French detailed task guide](../taches.md) and the [API reference](../api.md).
+
+
+## Progress and quests
+
+The top-right badge shows your level, title and streak. Open it for nearby quests; the full wall and journal are in Tracking → Achievements. [Points, 60 quests and streak rules](progression.md).

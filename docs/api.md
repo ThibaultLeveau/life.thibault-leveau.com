@@ -374,3 +374,37 @@ Une erreur HTTP expose `{detail, code}` ; la validation de structure 422 expose 
 ## Suivi et intégrations
 
 Les [contrats Suivi](tracking-api.md) couvrent définitions, ordre, archivage/restauration, réglages, périodes, saisies, corrections, calendrier, statistiques et réussites sous `/api/v1/tracking`. Le [catalogue de métriques](integrations.md) expose découverte, recherche des filtres et évaluations sous `/api/v1/integrations`. Toutes les écritures et évaluations POST utilisent le CSRF commun.
+
+## Progression par application
+
+Le module commun `/api/v1/progression` fournit les points acquis, niveaux, titres, séries, quêtes et préférences décrits dans le [guide des réussites](progression.md). Session obligatoire partout ; propriétaire issu de la session, jamais du corps. Les écritures exigent origine autorisée et CSRF. Les réponses sont localisées dans la langue du compte.
+
+| Méthode et chemin après `/api/v1/progression` | Contrat |
+| --- | --- |
+| `GET /` (sans slash final accepté) | Résumés des applications activées : XP, niveau 1–100, titre, seuil courant/suivant, progression 0–1, dix titres, séries, jours actifs, pause actuelle et trois quêtes proches, barème `base_xp` et `rules` localisé |
+| `GET /{application_id}` | Même résumé ; 403 si désactivée, 404 si inconnue ou sans fournisseur |
+| `GET /{application_id}/quests` | `state=all\|available\|earned`, `category`, `q` (120 caractères), `offset` 0–100000, `limit` 1–100 (défaut 60) ; `{items,total,offset,limit}` |
+| `GET /{application_id}/history` | Journal décroissant par date puis identifiant, `offset` 0–100000, `limit` 1–100 (défaut 20) ; `{items,total,offset,limit}` |
+| `GET /settings` | `timezone`, `exclude_weekends` par identifiant d’application, `vacations` et `version` (0 sans préférence enregistrée) |
+| `PUT /settings` | Même configuration avec `expected_version` à la place de `version` ; 409 si une autre écriture a gagné |
+
+Les listes de quêtes placent les quêtes inachevées d’abord, puis trient par ratio de progression décroissant, objectif et identifiant. La recherche porte sur le nom et la description localisés. Une quête contient `id`, `name`, `description`, `category`, `target`, `progress`, `ratio`, `xp` et `earned_at` nullable. Les titres indiquent `level`, `name`, `xp` cumulé et `earned`. Au niveau 100, `next_level_xp=null` et `level_progress=1`.
+
+Le journal contient `id`, `kind` (`activity` ou `quest`), libellé localisé, XP, date d’activité `occurred_at`, date d’enregistrement `recorded_at` et `imported`. Les dates de déblocage des quêtes importées correspondent à l’import, et non à une date historique inventée.
+
+Toutes les actions éligibles des API Tâches, Sport et Suivi déclenchent automatiquement leur progression, dans la même transaction ; aucune route n’accepte un montant de points envoyé par un client. Les lectures sont sans effet d’attribution. Les préférences sont communes et restent accessibles si Suivi est désactivé ; l’interface de réglages se trouve dans Suivi. Les détails privés d’une application désactivée restent interdits, sans démonter Suivi qui les consomme.
+
+Exemples indépendants de l’interface, après création d’une session avec `POST /api/v1/auth/session` :
+
+```bash
+curl -b cookies.txt https://life.thibault-leveau.com/api/v1/progression/tasks
+curl -b cookies.txt 'https://life.thibault-leveau.com/api/v1/progression/tasks/quests?state=available&limit=20'
+curl -b cookies.txt 'https://life.thibault-leveau.com/api/v1/progression/tasks/history?limit=20&offset=0'
+curl -b cookies.txt https://life.thibault-leveau.com/api/v1/progression/settings
+# Remplacer 0 par la version lue avant modification.
+curl -b cookies.txt -H "X-CSRF-Token: $CSRF" -H 'Content-Type: application/json' \
+  -X PUT https://life.thibault-leveau.com/api/v1/progression/settings \
+  -d '{"expected_version":0,"timezone":"Europe/Paris","exclude_weekends":{"tasks":true,"sport":false,"tracking":true},"vacations":[{"start":"2026-12-21","end":"2026-12-27"}]}'
+```
+
+Les corps inconnus, fuseaux invalides, identifiants non enregistrés, booléens non stricts, dates hors 2000–2100, périodes inversées/chevauchantes ou plus de 100 vacances sont refusés (422). Une session absente/expirée produit 401, un CSRF invalide 403. Les changements de règles modifient le calcul des séries mais ne réécrivent pas les gains historiques. Voir [données](donnees.md#donnees-de-progression) et [sauvegarde](sauvegardes.md#migration-0010-progression).

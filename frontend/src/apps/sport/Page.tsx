@@ -1,3 +1,4 @@
+import { ProgressionBadge } from "../../platform/progression/ProgressionBadge";
 import { tr } from "./i18n";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ApplicationFooter } from "../../platform/auth/ApplicationFooter";
@@ -161,6 +162,7 @@ export function Page() {
       </ApplicationSidebar>
       <main className="sport-main" id="sport-main" tabIndex={-1}>
         <ApplicationTopbar
+          status={<ProgressionBadge applicationId="sport" />}
           name={tr("sport")}
           current={title}
           mainId="sport-main"

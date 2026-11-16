@@ -393,6 +393,9 @@ def write_entry(db, user, definitions, item, day, payload):
             entry_id=entry.id, version=entry.version, snapshot=result.model_dump(mode="json")
         )
     )
+    from life_app.apps.tracking.progression import record_completion
+
+    record_completion(db, user, entry)
     return result
 
 

@@ -25,6 +25,11 @@ def main():
     parser = argparse.ArgumentParser(description="Administration de Life")
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("migrate", help="Appliquer les migrations jusqu'à head")
+    backfill_parser = sub.add_parser(
+        "backfill-progression", help="Reprendre les activités d’un compte explicite"
+    )
+    backfill_parser.add_argument("username")
+    backfill_parser.add_argument("--dry-run", action="store_true")
     for name in ("create-user", "reset-password"):
         account = sub.add_parser(name)
         account.add_argument("username")
@@ -40,6 +45,26 @@ def main():
     username = args.username.strip().casefold()
     if not username or len(username) > 80:
         parser.error("Identifiant requis, 80 caractères maximum")
+    if args.command == "backfill-progression":
+        from life_app.apps.registry import APPLICATIONS
+        from life_app.platform.progression.service import backfill, preview_backfill
+
+        engine = create_engine(settings.database_url.get_secret_value())
+        try:
+            with Session(engine) as db, db.begin():
+                user = db.scalar(select(User).where(User.username == username).with_for_update())
+                if user is None:
+                    parser.error("Compte introuvable")
+                if args.dry_run:
+                    import json
+
+                    print(json.dumps(preview_backfill(db, user, APPLICATIONS)))
+                    return
+                backfill(db, user, APPLICATIONS)
+            print("Historique du compte repris ; aucun doublon ajouté.")
+        finally:
+            engine.dispose()
+        return
     password = (
         sys.stdin.readline().rstrip("\r\n")
         if args.password_stdin

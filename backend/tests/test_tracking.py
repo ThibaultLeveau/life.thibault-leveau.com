@@ -272,6 +272,7 @@ def test_types_goals_validation_and_unavailable_dates(client):
     call(c, "PUT", f"/trackers/{t['id']}/entries/{day() + timedelta(days=1)}", {"values": {}}, 422)
 
 
+@pytest.mark.usefixtures("legacy_progression")
 def test_owner_csrf_constraints_immutable_history_and_migration(client, app, engine):
     c = client
     t = tracker(c)

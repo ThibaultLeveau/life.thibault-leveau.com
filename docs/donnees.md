@@ -163,3 +163,20 @@ Une entrée est `draft` ou `complete` ; seule une entrée complète possède `co
 Les définitions sont datées : une période non saisie utilise la révision applicable à son début (ou au premier jour du suivi si la période commence avant). Les anciennes saisies utilisent toujours leur propre définition. L’archivage/restauration ajoute une révision, sans réécrire les périodes enregistrées. Désactiver l’application ne touche aucune table métier.
 
 Les sources conservent requête, fuseau, bornes, résultat, unité, état et date d’observation. Les valeurs proviennent du serveur. Une actualisation crée une correction explicite ; une source désactivée laisse ses instantanés accessibles. Les points et badges sont dérivés des entrées actuelles, pas d’un journal de récompenses susceptible de doubler. Il n’existe pas de suppression définitive. [API](tracking-api.md), [calculs](tracking.md), [restauration](sauvegardes.md#migration-0009-suivi).
+
+## Données de progression
+
+L’[ADR 006](decisions/006-progression-applications.md) et la migration additive `0010_progression` introduisent quatre tables du socle :
+
+- `progression_activity` : première confirmation par propriétaire/application/clé métier, instant UTC, date locale figée, XP, compteurs et dimensions capturés. La clé unique empêche toute double attribution ; les XP sont strictement positifs et les documents JSON sont des objets.
+- `progression_rewards` : journal append-only des gains d’activité et des bonus de quêtes. Une clé unique par propriétaire/application/source garantit l’attribution unique. Le montant est positif ; type `activity` ou `quest`. Les instants d’activité et d’enregistrement ainsi que le marqueur d’import sont conservés.
+- `progression_settings` : fuseau, week-ends par application et intervalles globaux de vacances ; version positive pour le contrôle optimiste. La validation serveur impose fuseau IANA, applications connues, booléens stricts, dates inclusives 2000–2100, jusqu’à 100 intervalles ordonnés sans chevauchement.
+- `progression_imports` : marqueur immuable d’une reprise réussie par compte/application. L’activité, les récompenses et ce marqueur sont validés dans une transaction, sous le verrou utilisateur.
+
+Toutes les tables référencent `users`. Les triggers interdisent UPDATE/DELETE sur activités, récompenses et marqueurs. Les dates d’activité ne bougent pas si le fuseau change. Les compteurs proviennent des premières confirmations ; les corrections, réouvertures et archives ne les modifient pas. Les titres/niveaux sont calculés depuis la somme du journal ; aucun total mutable parallèle. Les quêtes acquises sont représentées par leur ligne de récompense.
+
+Les mutations HTTP partagent le verrou de propriétaire existant. Les identifiants de source sont `task:<uuid>:once`, `task:<uuid>:<échéance>`, `session:<uuid>` et `entry:<uuid>`. Le traitement métier et l’attribution partagent la transaction : une erreur ou un conflit n’ajoute aucun gain. Les lectures et historiques filtrent systématiquement le propriétaire. La désactivation préserve ces quatre tables.
+
+Les quêtes et règles sont du code métier fourni par les manifestes, sans code externe. Les agrégations parcourent les activités par lots de 1 000 et ne coupent pas arbitrairement un historique ancien ; le journal et le mur sont paginés. Le coût des résumés et des nouvelles attributions dépend du volume historique : mesurer avant d’introduire une matérialisation ou un ordonnanceur. Le calcul des séries couvre tous les jours depuis la première activité, avec grâce pour aujourd’hui et neutralisation sans incrément des week-ends/vacances.
+
+La reprise lit chaque métier par son fournisseur propre. Elle importe uniquement les événements vérifiables : résolutions non annulées lors de l’import, séances terminées avec séries effectuées, saisies actuellement confirmées. L’ancien montant Suivi 10–30 XP est conservé. Une priorité absente d’un ancien événement n’est pas reconstruite. Les quêtes atteintes sont datées de l’import. Voir [exploitation](deploiement.md#livraison-de-la-progression).

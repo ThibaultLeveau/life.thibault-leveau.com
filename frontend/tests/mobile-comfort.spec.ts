@@ -598,6 +598,10 @@ for (const mobile of [false, true]) {
             "aria-checked",
             "true",
           );
+          await expect(page.locator(".task-sync-status")).toHaveAttribute(
+            "data-pending",
+            "0",
+          );
           expect(await scrollTop(page)).toBeGreaterThan(before - 170);
           expect(
             await retained!.evaluate((node) => node.isConnected),
@@ -608,8 +612,15 @@ for (const mobile of [false, true]) {
               "aria-checked",
               "false",
             );
+            await expect(page.locator(".task-sync-status")).toHaveAttribute(
+              "data-pending",
+              "0",
+            );
             expect(await scrollTop(page)).toBeGreaterThan(before - 170);
           }
+          await expect(target.getByRole("checkbox")).not.toHaveClass(
+            /is-validating/,
+          );
           await center(neighbor);
           const failedBefore = await scrollTop(page);
           const unaffected = await row(page, data.tasks[21]).elementHandle();

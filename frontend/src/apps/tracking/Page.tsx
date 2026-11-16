@@ -1,3 +1,6 @@
+import { ProgressionSettings } from "../../platform/progression/ProgressionSettings";
+import { AchievementsView } from "./components/Achievements";
+import { ProgressionBadge } from "../../platform/progression/ProgressionBadge";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ApplicationFooter } from "../../platform/auth/ApplicationFooter";
 import {
@@ -9,7 +12,7 @@ import { Icon, type IconName } from "../../shared/ui/Icon";
 import { trackingApi } from "./api";
 import { CalendarView } from "./components/Calendar";
 import { EntryWizard } from "./components/EntryWizard";
-import { AchievementsView, StatisticsView } from "./components/Statistics";
+import { StatisticsView } from "./components/Statistics";
 import { TrackerEditor } from "./components/TrackerEditor";
 import {
   Empty,
@@ -163,6 +166,7 @@ export function Page() {
       </ApplicationSidebar>
       <main className="tracking-main" id="tracking-main" tabIndex={-1}>
         <ApplicationTopbar
+          status={<ProgressionBadge applicationId="tracking" />}
           name={tr("app")}
           current={title}
           mainId="tracking-main"
@@ -271,10 +275,13 @@ export function Page() {
                     <AchievementsView revision={revision} />
                   )}
                   {view.tab === "settings" && (
-                    <Settings
-                      timezone={settings.data.timezone}
-                      onSaved={refresh}
-                    />
+                    <>
+                      <Settings
+                        timezone={settings.data.timezone}
+                        onSaved={refresh}
+                      />
+                      <ProgressionSettings onDirty={setDirty} />
+                    </>
                   )}
                 </>
               )}

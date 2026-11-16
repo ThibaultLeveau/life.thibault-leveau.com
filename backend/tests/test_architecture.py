@@ -38,7 +38,7 @@ def test_applications_have_matching_manifests_and_standard_structure():
                 operation = (method, route.path)
                 assert operation not in operations, "Collision entre routes métier"
                 assert not route.path.startswith(
-                    ("/auth/", "/preferences", "/applications", "/health")
+                    ("/auth/", "/preferences", "/applications", "/health", "/progression")
                 )
                 operations.add(operation)
     for base in (BACKEND, FRONTEND):
@@ -107,3 +107,15 @@ def test_metric_providers_are_owned_by_their_application_and_frames_are_shared()
             "shared/ui/ApplicationNavigation"
             in (FRONTEND / "apps" / app_id / "Page.tsx").read_text()
         )
+
+
+def test_progression_providers_keep_catalogues_in_their_application():
+    for app in APPLICATIONS:
+        assert app.progression is not None
+        assert type(app.progression).__module__ == f"life_app.apps.{app.id}.progression"
+        assert len(app.progression.quests) >= 50
+        assert len({q.id for q in app.progression.quests}) == len(app.progression.quests)
+        assert len(app.progression.titles) == 10
+        assert all(len(t) == 2 and all(t) for t in app.progression.titles)
+        assert all(len(q.names) == 2 and len(q.descriptions) == 2 for q in app.progression.quests)
+        assert "ProgressionBadge" in (FRONTEND / "apps" / app.id / "Page.tsx").read_text()

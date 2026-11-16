@@ -14,7 +14,7 @@ L’API `/api/v1/tracking` utilise la session, le CSRF et l’activation `tracki
 | `GET /current?day=YYYY-MM-DD&include_archived=false` | Périodes contenant ce jour ; sans jour, aujourd’hui dans chaque fuseau |
 | `GET /calendar?since=…&until=…&tracker_id=…` | Jours quotidiens et occurrences longues séparées |
 | `GET /statistics?since=…&until=…&tracker_id=…` | Calendrier, régularité, score moyen, réussites et tendances du suivi choisi |
-| `GET /achievements` | XP, niveau, séries et badges calculés |
+| `GET /achievements` | Ancien contrat compatible : XP recalculés des saisies et cinq badges ; le nouveau mur utilise `/progression` |
 | `GET /trackers/{id}/entries/{day}` | Occurrence, définition applicable et saisie éventuelle |
 | `POST /trackers/{id}/entries/{day}/preview` | Aperçu des sources, sans écriture ; CSRF requis |
 | `PUT /trackers/{id}/entries/{day}` | Sauvegarde partielle, brouillon ou confirmation |
@@ -61,3 +61,6 @@ Cette saisie est complète et vaut 0/10. Corriger avec `expected_version:1`, `wa
 Les évaluations pour une saisie transforment les erreurs de source 404/409/422 en état `unavailable`. Elles ne déconnectent pas le consommateur. Les compteurs vides valent zéro, une moyenne/dernière mesure sans observation vaut `missing`, un état historique non reconstructible vaut `unavailable`. Les réponses n’ont pas de valeur fictive de remplacement.
 
 Toutes les dates de requête sont comprises entre 2000 et 2100 ; calendrier/statistiques acceptent 367 jours inclus. Les sources sont bornées à dix ans et 20 000 observations par requête. Les entrées utilisées dans les calculs ont également une limite de 20 000 : un dépassement produit 422, sans troncature silencieuse. Voir [intégrations](integrations.md), [données](donnees.md#donnees-de-suivi) et [sauvegardes](sauvegardes.md#migration-0009-suivi).
+
+
+La progression par application, les 60 quêtes, les niveaux jusqu’à 100, les titres, l’historique XP et les réglages week-end/vacances passent par l’[API commune de progression](api.md#progression-par-application). Les champs historiques `EntryOutput.xp` et `Statistics.achievements` restent des indicateurs recalculés des saisies, distincts du nouveau journal acquis.

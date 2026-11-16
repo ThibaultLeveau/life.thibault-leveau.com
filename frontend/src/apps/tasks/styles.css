@@ -43,6 +43,8 @@
   flex: 1;
   min-width: 0;
   overflow-y: auto;
+  /* Async notices must not make the browser move the row being clicked. */
+  overflow-anchor: none;
 }
 .tasks-main:focus {
   outline: none;

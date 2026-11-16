@@ -62,6 +62,10 @@ for suite in frontend/tests/*.spec.ts; do
     npm --prefix frontend run test:e2e -- "$(basename "$suite")" --output "test-results/$suite_name"
 done
 
+# Exercise the explicit import only on this disposable named account; reruns are idempotent.
+run_app life backfill-progression browser-test
+run_app life backfill-progression browser-test
+
 # Persist a disabled application through the public contract before testing the dump.
 # Start a separate acceptance phase after the browser suites.
 # This database is disposable; production rate limits stay unchanged.
@@ -138,6 +142,13 @@ for tracking_table in tracking_trackers tracking_definitions tracking_entries tr
   restored_tracking=$(docker exec "$db" psql -U life -d life_restored -Atc "$tracking_query")
   [[ "$source_tracking" != '[]' && "$source_tracking" == "$restored_tracking" ]]
 done
+# Progression preferences, first confirmations, rewards and import markers survive intact.
+for progression_table in progression_settings progression_activity progression_rewards progression_imports; do
+  progression_query="SELECT coalesce(jsonb_agg(to_jsonb(t) ORDER BY to_jsonb(t)::text), '[]'::jsonb) FROM $progression_table t"
+  source_progression=$(docker exec "$db" psql -U life -d life -Atc "$progression_query")
+  restored_progression=$(docker exec "$db" psql -U life -d life_restored -Atc "$progression_query")
+  [[ "$source_progression" != '[]' && "$source_progression" == "$restored_progression" ]]
+done
 [[ $(docker exec "$db" psql -U life -d life_restored -Atc 'SELECT count(*) FROM login_sessions') == 0 ]]
 [[ -z $(docker exec "$db" psql -U life -d life_restored -Atc "SELECT to_regclass('public.obsolete_data')") ]]
 docker exec "$db" psql -U life -d life_restored -c 'CREATE TABLE rollback_marker (id integer)' >/dev/null
@@ -155,6 +166,10 @@ echo 'Vérification des migrations et de l’immuabilité après restauration…
 run_app life migrate
 if docker exec "$db" psql -U life -d life_restored --set ON_ERROR_STOP=1 -c "UPDATE task_events SET kind = 'updated'" >"$temporary/immutable-check" 2>&1; then
   echo 'Le journal restauré doit rester immuable.' >&2
+  exit 1
+fi
+if docker exec "$db" psql -U life -d life_restored --set ON_ERROR_STOP=1 -c "UPDATE progression_rewards SET xp = xp + 1" >"$temporary/progression-immutable-check" 2>&1; then
+  echo 'Le journal de progression restauré doit rester immuable.' >&2
   exit 1
 fi
 printf 'Image, navigateur, rôle PostgreSQL et restauration vérifiés (%s événements conservés).\n' "$source_count"

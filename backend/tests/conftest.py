@@ -99,3 +99,17 @@ def authenticated_client(app):
         assert response.status_code == 200, response.text
         client.headers["X-CSRF-Token"] = response.json()["csrf_token"]
         yield client
+
+
+@pytest.fixture
+def legacy_progression(monkeypatch):
+    """Older migration fixtures predate progression; exercise their own loss guards.
+
+    Migration 0010's loss guard and real activity imports are tested separately.
+    """
+    from life_app.apps.sport import progression as sport
+    from life_app.apps.tasks import progression as tasks
+    from life_app.apps.tracking import progression as tracking
+
+    for provider in (tasks, sport, tracking):
+        monkeypatch.setattr(provider, "record", lambda *args, **kwargs: False)

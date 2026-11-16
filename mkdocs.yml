@@ -58,6 +58,7 @@ nav:
   - API Sport: sport-api.md
   - Utiliser Suivi: tracking.md
   - API Suivi: tracking-api.md
+  - Réussites et progression: progression.md
   - Intégrations de données: integrations.md
   - Français et anglais: internationalisation.md
   - English user guides:
@@ -66,6 +67,7 @@ nav:
       - Tasks: en/taches.md
       - Sport: en/sport.md
       - Tracking: en/tracking.md
+      - Achievements: en/progression.md
   - Développer:
       - Démarrage: demarrage.md
       - Architecture: architecture.md
@@ -88,3 +90,4 @@ nav:
       - Applications LifeOS: decisions/003-applications-lifeos.md
       - Français et anglais: decisions/004-internationalisation.md
       - Intégrations et Suivi: decisions/005-integrations-tracking.md
+      - Progression commune: decisions/006-progression-applications.md

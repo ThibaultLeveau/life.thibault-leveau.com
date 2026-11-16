@@ -1,0 +1,8 @@
+{
+  "invalid": "Invalid progression settings.",
+  "conflict": "These settings have changed. Reload them before trying again.",
+  "not_found": "Progression is unavailable for this application.",
+  "activity": "Confirmed activity",
+  "quest": "Quest: {name}",
+  "novice": "Newcomer"
+}

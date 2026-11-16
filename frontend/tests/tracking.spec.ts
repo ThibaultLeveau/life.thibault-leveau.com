@@ -477,7 +477,7 @@ test("Suivi : statistiques, récompenses, archives, désactivation et anglais", 
   await expect(page.locator(".tracking-activity-value")).toHaveText("0");
   await tab(page, "Réussites");
   await expect(
-    page.locator(".tracking-badges .is-earned").first(),
+    page.locator(".progression-quest-card.is-earned").first(),
   ).toBeVisible();
   await tab(page, "Mes suivis");
   const card = page
