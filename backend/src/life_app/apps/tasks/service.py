@@ -225,6 +225,7 @@ def context(db, item):
         "due_date": item.due_date.isoformat() if item.due_date else None,
         "recurrence": item.recurrence,
         "recurrence_completed": item.recurrence_completed,
+        "priority": item.priority,
         "completed_at": item.completed_at.isoformat() if item.completed_at else None,
         "version": item.version,
     }
@@ -245,6 +246,10 @@ def event(db, item, kind, previous=None, **details):
         context={"before": previous, "after": current, **details},
     )
     db.add(record)
+    if kind == "completed":
+        from life_app.apps.tasks.progression import record_completion
+
+        record_completion(db, item, record)
     return record
 
 

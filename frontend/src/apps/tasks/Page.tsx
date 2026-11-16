@@ -1,3 +1,4 @@
+import { ProgressionBadge } from "../../platform/progression/ProgressionBadge";
 import { tr } from "./i18n";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSession } from "../../platform/auth/SessionProvider";
@@ -441,6 +442,7 @@ function TasksPage() {
       </ApplicationSidebar>
       <main className="tasks-main" id="tasks-content" tabIndex={-1}>
         <ApplicationTopbar
+          status={<ProgressionBadge applicationId="tasks" />}
           name={tr("tasks")}
           current={
             agenda

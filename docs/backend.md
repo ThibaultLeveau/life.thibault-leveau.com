@@ -61,3 +61,7 @@ Les tests combinent artefacts temporaires pour le routage et PostgreSQL réel po
 `core/i18n.py` lie un contexte à chaque requête ; la résolution de la session y applique la préférence du propriétaire. Ce contexte est isolé entre requêtes concurrentes et fonctionne aussi dans les dépendances synchrones FastAPI. Chaque domaine possède un `messages.py` et ses JSON FR/EN. `Message` garde un code stable avec le texte traduit. Le gestionnaire de validation expose les erreurs localisées sans les valeurs soumises.
 
 `scheduling_english.py` adapte le vocabulaire anglais vers les jetons de la grammaire commune, en conservant les indices Unicode du texte original. Aucun modèle externe ni nouveau format de règle. Les aides des deux langues sont testées. Voir [Langue et API](internationalisation.md#api-independante-de-linterface).
+
+## Progression
+
+`platform/progression` applique les règles de niveau et de calendrier, conserve les premières confirmations et attribue les quêtes uniques. Les fournisseurs résident dans les trois applications et sont injectés par le manifeste. Le service n’importe aucun métier ; toutes les mutations utilisent le verrou utilisateur et la transaction existants. Les GET ne créent aucun gain. La commande `life backfill-progression <compte> [--dry-run]` reprend explicitement l’historique d’un compte. Voir [API](api.md#progression-par-application), [modèle](donnees.md#donnees-de-progression) et [ADR 006](decisions/006-progression-applications.md).

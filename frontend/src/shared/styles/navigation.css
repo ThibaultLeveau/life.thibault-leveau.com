@@ -199,3 +199,33 @@
     transition: none;
   }
 }
+
+.application-topbar-status {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+@media (max-width: 1100px) {
+  .application-topbar {
+    padding-inline: 16px;
+    gap: 8px;
+  }
+  .application-breadcrumb {
+    gap: 6px;
+  }
+}
+@media (max-width: 600px) {
+  .application-topbar {
+    height: auto;
+    min-height: 104px;
+    flex-wrap: wrap;
+    padding: 6px 12px;
+  }
+  .application-breadcrumb {
+    flex: 1;
+  }
+  .application-topbar-status {
+    flex-basis: 100%;
+    display: flex;
+    justify-content: flex-end;
+  }
+}

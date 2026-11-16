@@ -139,9 +139,11 @@ export function ApplicationTopbar({
   mainId,
   open,
   onOpenChange,
+  status,
 }: NavigationState & {
   name: string;
   current: string;
+  status?: ReactNode;
 }) {
   return (
     <header className="application-topbar">
@@ -164,6 +166,7 @@ export function ApplicationTopbar({
           {current}
         </strong>
       </nav>
+      {status && <div className="application-topbar-status">{status}</div>}
     </header>
   );
 }

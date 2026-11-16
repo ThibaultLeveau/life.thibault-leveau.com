@@ -213,5 +213,6 @@
   "selected_option": "Current selection",
   "timezone_invalid": "Choose a valid time zone, for example Europe/Paris.",
   "source_name": "Connected application",
-  "refresh_activity": "Refresh metric"
+  "refresh_activity": "Refresh metric",
+  "scheduled_streak": "Scheduled tracker streak"
 }

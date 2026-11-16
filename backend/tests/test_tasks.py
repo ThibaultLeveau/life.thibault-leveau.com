@@ -292,6 +292,7 @@ def test_schema_matches_models_and_migration_roundtrip(engine, app):
         assert compare_metadata(MigrationContext.configure(conn), Base.metadata) == []
 
 
+@pytest.mark.usefixtures("legacy_progression")
 def test_recurrence_migration_preserves_data_and_refuses_loss(client, engine):
     space, _ = create_space(client)
     item = mutate(client, create_task(client, space, due_date="2026-12-31"), "complete")
@@ -970,6 +971,7 @@ def test_workspace_parent_database_constraints(client, app, engine):
         )
 
 
+@pytest.mark.usefixtures("legacy_progression")
 def test_workspace_parent_migration_preserves_existing_data(client, engine):
     root, _ = create_space(client)
     child = child_space(client, root)
@@ -1163,6 +1165,7 @@ def test_agenda_preferences_validation_and_access(client, app):
     assert "get" in schema["paths"]["/api/v1/agenda/tasks"]
 
 
+@pytest.mark.usefixtures("legacy_progression")
 def test_agenda_migration_preserves_existing_data(client, engine):
     root, _ = create_space(client)
     space = child_space(client, root)

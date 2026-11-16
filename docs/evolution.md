@@ -81,3 +81,9 @@ Chaque métrique décrit un identifiant stable, son nom et sa description FR/EN,
 Étendre les tests de catalogue, propriétaire, source désactivée, bornes temporelles et erreurs, puis le [catalogue livré](integrations.md). Le cadre `shared/ui/ApplicationNavigation` réutilise sidebar/topbar de Sport via des slots ; conserver la connexion et les gardes de navigation dans la Page et injecter les éléments du compte. Aucun import vers `platform` depuis `shared`.
 
 Le client HTTP et les types de métriques réutilisables sont dans `frontend/src/platform/integrations/`. Les composants de configuration et saisie restent propres à Suivi.
+
+## Ajouter la progression d’une application
+
+L’[ADR 006](decisions/006-progression-applications.md) approuve `ApplicationDefinition.progression`. Définir un fournisseur dans `apps/<id>/progression.py` : catalogue de quêtes stables et localisées, dix titres, barème et historique limité au propriétaire. Transformer une première confirmation métier en `Activity` (clé stable, instant UTC, XP, compteurs, dimensions), puis appeler le moteur commun dans la transaction existante. La clé doit survivre aux corrections/réouvertures et identifier une occurrence distincte lorsque le métier le permet. Aucun accès aux tables d’une autre application.
+
+Déclarer le fournisseur dans le manifeste ; le registre demeure l’unique assemblage. Injecter `ProgressionBadge` dans le slot `status` de la topbar partagée. Utiliser `/progression` pour les lectures et réglages ; aucune attribution depuis le navigateur. Documenter unicité, corrections, jours d’activité, rétroactivité, reprise historique et barème. Tester quotas de quêtes/traductions, propriétaire, concurrence, activation, déduplication et restauration. Une modification des frontières ou du contrat exige à nouveau un accord explicite.

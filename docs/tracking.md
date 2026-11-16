@@ -62,7 +62,9 @@ Le score est la moyenne pondérée des objectifs. Sans aucune réponse évaluée
 
 ## Progresser et conserver l’historique
 
-Les statistiques montrent vos mesures dans le temps et une table des valeurs. Vous pouvez explorer une mesure de Tâches ou Sport sur la période choisie. Les réussites donnent 10 XP par période terminée, plus jusqu’à 20 XP pour les objectifs, et un niveau tous les 250 XP. Cinq badges récompensent la première saisie, 7, 30, 100 périodes terminées et 10 périodes parfaites. Une correction recalcule les points : enregistrer plusieurs fois ne crée pas de récompenses supplémentaires. La série quotidienne et sa meilleure longueur sont calculées sur les 366 derniers jours ; les jours de repos ne la cassent pas et la journée en cours inachevée attend sa fin.
+Les statistiques montrent vos mesures dans le temps et une table des valeurs. Vous pouvez explorer une mesure de Tâches ou Sport sur la période choisie.
+
+**Réussites** devient un espace de progression par application : **60 quêtes chacune**, points d’expérience, niveaux de plus en plus exigeants jusqu’à 100, dix titres et journal des gains. Le badge commun en haut à droite affiche niveau, titre et série, avec les quêtes proches. Les réglages proposent les week-ends de repos par application et des vacances globales. Consultez le [guide des réussites](progression.md) pour les barèmes, les conditions de séries, les corrections et l’historique repris.
 
 Les saisies existantes gardent leur définition et leurs objectifs. Les changements s’appliquent aux nouvelles périodes : au plus tôt le jour local de modification, ou à la prochaine période pour un suivi déjà commencé. Pour éviter de mélanger des historiques différents, fréquence, premier jour et fuseau ne se modifient pas ; créez un autre suivi pour les changer. Changer le type ou l’unité d’une donnée crée une nouvelle série de mesures.
 

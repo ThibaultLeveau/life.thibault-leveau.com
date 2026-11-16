@@ -209,3 +209,22 @@ Vérifier le SHA réellement exécuté, les sondes, `/tracking`, les guides FR/E
 Publier avec la sauvegarde habituelle, sans nouvelle migration SQL ni variable (révision `0008_locale`). Les résultats JSONB à zéro et le marqueur `skipped` imposent de respecter la [compatibilité de retour arrière](sauvegardes.md#fin-de-seance-sport-incomplete).
 
 Sur un compte synthétique isolé, démarrer plusieurs séries, en valider une puis terminer. Vérifier la confirmation FR/EN, le maintien des saisies en cours, les séries restantes à zéro dans l’historique, les dates préservées, le repos arrêté et le compteur de séries réellement effectuées. Recharger puis relancer le programme : les zéros automatiques ne doivent pas remplacer les derniers résultats proposés. Terminer également une séance sans série validée et contrôler l’absence d’erreur de score, en mobile à 320 px et au clavier. Contrôler le SHA exécuté, les sondes, `/sport`, OpenAPI et les guides français/anglais en HTTPS, puis consigner sauvegarde et résultats dans l’issue.
+
+## Livraison de la progression
+
+Après tests, auto-revue et CI sur le dernier commit, fusionner puis publier le `main` validé avec `./scripts/deploy.sh`. La sauvegarde précède la migration additive `0010_progression`. Aucun service, secret ou changement DNS/Caddy. Le nouveau code commence immédiatement à attribuer les premières confirmations ; les points historiques nécessitent une reprise explicite ciblée.
+
+Quand la nouvelle image est saine et que l’ancien processus web est arrêté, préparer la reprise du **compte nommé** concerné. Utiliser l’image réellement publiée et la configuration existante ; les commandes ci-dessous ne sont pas ajoutées automatiquement au script de déploiement :
+
+```bash
+export LIFE_IMAGE=$(cat .deployment/current-image)
+docker compose --env-file .env.production run --rm --no-deps web \
+  life backfill-progression thibault --dry-run
+# Après examen du périmètre et de l’aperçu, reprendre ce compte uniquement.
+docker compose --env-file .env.production run --rm --no-deps web \
+  life backfill-progression thibault
+```
+
+Adapter le nom à un compte explicitement concerné ; ne pas effectuer de reprise automatique de tous les utilisateurs. L’aperçu affiche seulement les nombres d’activités et leurs XP de base par application. Les bonus de quêtes sont évalués à l’écriture. Chaque compte est verrouillé pendant sa transaction ; les actions simultanées attendent, puis retrouvent des clés déjà dédupliquées. Un échec annule toute sa reprise, et une relance après succès ne duplique rien. Consigner le compte, l’aperçu agrégé et le résultat, sans données métier privées.
+
+Vérifier le SHA réellement exécuté, les sondes, `/tasks`, `/sport`, `/tracking`, OpenAPI, guides FR/EN et API de progression en HTTPS. Sur un compte synthétique isolé : confirmation et réouverture sans double gain, séance avec série puis annulation sans gain, correction de suivi, 60 quêtes par application, niveau/titre/série en topbar, quêtes proches, filtres et journal, week-ends/vacances, clavier/Échap, mobile 320 px et thèmes/langues. Vérifier la conservation après désactivation/réactivation et l’indépendance de Tâches/Sport vis-à-vis de Suivi. Consigner sauvegarde, migration, SHA et résultats dans l’issue. Voir les [limites de retour arrière](sauvegardes.md#migration-0010-progression).

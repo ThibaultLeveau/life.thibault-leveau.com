@@ -127,6 +127,7 @@ def test_deactivation_preserves_data_history_preferences_and_session(client):
     assert client.get("/api/v1/preferences").json() == theme
 
 
+@pytest.mark.usefixtures("legacy_progression")
 def test_activation_migration_preserves_existing_data_and_refuses_loss(client, engine):
     space, _ = create_space(client)
     item = mutate(client, create_task(client, space), "complete")

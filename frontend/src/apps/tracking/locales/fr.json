@@ -213,5 +213,6 @@
   "selected_option": "Sélection en cours",
   "timezone_invalid": "Choisissez un fuseau horaire valide, par exemple Europe/Paris.",
   "source_name": "Application connectée",
-  "refresh_activity": "Actualiser la mesure"
+  "refresh_activity": "Actualiser la mesure",
+  "scheduled_streak": "Série des suivis planifiés"
 }

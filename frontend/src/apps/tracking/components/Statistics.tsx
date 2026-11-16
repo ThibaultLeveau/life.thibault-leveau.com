@@ -3,65 +3,9 @@ import { Icon } from "../../../shared/ui/Icon";
 import { evaluation, integrationApi, trackingApi } from "../api";
 import { addDays, dateLabel, number } from "../dates";
 import { tr } from "../i18n";
-import type { Achievements, DynamicSource, Metric, Tracker } from "../types";
+import type { DynamicSource, Metric, Tracker } from "../types";
 import { LoadState, Score, useResource } from "./common";
 import { SourcePicker } from "./SourcePicker";
-export function AchievementsView({ revision }: { revision: number }) {
-  const result = useResource(trackingApi.achievements, [revision]);
-  return (
-    <>
-      <LoadState {...result} />
-      {result.data && <AchievementsContent value={result.data} />}
-    </>
-  );
-}
-function AchievementsContent({ value }: { value: Achievements }) {
-  return (
-    <>
-      <div className="tracking-level">
-        <span className="tracking-level-icon">
-          <Icon name="flag" size={34} />
-        </span>
-        <div>
-          <p className="tracking-frequency">{tr("experience")}</p>
-          <h2>{tr("level", { level: value.level })}</h2>
-          <div className="tracking-progress">
-            <span style={{ width: `${((value.xp % 250) / 250) * 100}%` }} />
-          </div>
-          <p>
-            {tr("xp_progress", { xp: value.xp, next: value.next_level_xp })}
-          </p>
-        </div>
-        <div className="tracking-streak">
-          <strong>{value.streak}</strong>
-          <span>{tr("streak")}</span>
-          <small>{tr("best_streak", { count: value.best_streak })}</small>
-        </div>
-      </div>
-      <p className="muted tracking-xp-rules">{tr("xp_rules")}</p>
-      <div className="tracking-badges">
-        {value.badges.map((b) => (
-          <article key={b.id} className={b.earned ? "is-earned" : ""}>
-            <span className="tracking-badge-mark">
-              <Icon name={b.earned ? "flag" : "repeat"} size={26} />
-            </span>
-            <span className="tracking-frequency">
-              {tr(b.earned ? "earned" : "locked")}
-            </span>
-            <h3>{b.name}</h3>
-            <p>{b.description}</p>
-            <div className="tracking-progress">
-              <span style={{ width: `${(b.progress / b.target) * 100}%` }} />
-            </div>
-            <small>
-              {b.progress} / {b.target}
-            </small>
-          </article>
-        ))}
-      </div>
-    </>
-  );
-}
 export function StatisticsView({
   today,
   timezone,
@@ -152,7 +96,7 @@ export function StatisticsView({
               <Score value={result.data.average_score} large />
             </div>
             <div>
-              <span>{tr("streak")}</span>
+              <span>{tr("scheduled_streak")}</span>
               <strong>
                 {tr("days_count", { count: result.data.achievements.streak })}
               </strong>

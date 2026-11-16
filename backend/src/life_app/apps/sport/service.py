@@ -346,6 +346,9 @@ def finish(db, user, id, payload):
     item.rest_until = None
     item.notes = payload.notes
     touch(item)
+    from life_app.apps.sport.progression import record_completion
+
+    record_completion(db, user, item)
     return item
 
 

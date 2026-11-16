@@ -1,0 +1,8 @@
+{
+  "invalid": "Réglages de progression invalides.",
+  "conflict": "Ces réglages ont changé. Rechargez-les avant de réessayer.",
+  "not_found": "Progression indisponible pour cette application.",
+  "activity": "Activité confirmée",
+  "quest": "Quête : {name}",
+  "novice": "Novice"
+}
