@@ -90,6 +90,8 @@ class SportMetrics:
             )
             if metric in {"score", "speed", "weight_kg", "assistance_kg"}:
                 aggregations = ["average", "min", "max", "latest"]
+            if metric == "completion_rate":
+                aggregations = ["average"]
             result.append(
                 MetricDefinition(
                     id=metric,

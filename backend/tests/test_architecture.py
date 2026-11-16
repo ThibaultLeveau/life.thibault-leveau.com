@@ -102,5 +102,8 @@ def test_metric_providers_are_owned_by_their_application_and_frames_are_shared()
         )
         for metric in metrics:
             assert len({f.id for f in metric.filters}) == len(metric.filters)
-    for app_id in ("sport", "tracking"):
-        assert "shared/ui/ApplicationFrame" in (FRONTEND / "apps" / app_id / "Page.tsx").read_text()
+    for app_id in ("sport", "tasks", "tracking"):
+        assert (
+            "shared/ui/ApplicationNavigation"
+            in (FRONTEND / "apps" / app_id / "Page.tsx").read_text()
+        )

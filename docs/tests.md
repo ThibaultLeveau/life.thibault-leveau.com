@@ -110,7 +110,7 @@ Les cartes de programme Sport sont mesurées à 320/375/1440 px, en français/an
 
 `i18n.spec.ts` utilise l’API réelle et les bundles compilés pour vérifier langue anonyme et de compte, reconnexion, thème, Tâches en anglais, catalogue Sport et données personnelles, programmes/entraînements/historique, réponses obsolètes, brouillons, mobile/clavier et erreurs/expiration. La restauration conteneur compare aussi la langue du compte après un choix anglais persistant.
 
-Les parcours `navigation.spec.ts` comparent le style calculé de la top bar, sidebar, liens actifs et footer entre Tâches et Sport à 1440, 1000, 800, 375 et 320 px, en clair/sombre. Ils vérifient aussi les trois thèmes et les deux langues via les préférences API, les liens de documentation ciblés, la bibliothèque, la déconnexion, le confinement du focus, Échap, le fond de fermeture et le passage mobile/bureau.
+Les parcours `navigation.spec.ts` comparent le style calculé de la top bar, sidebar, liens actifs et footer entre Tâches, Sport et Suivi à 1440, 1000, 800, 375 et 320 px, en clair/sombre. Ils vérifient aussi les trois thèmes et les deux langues via les préférences API, les liens de documentation ciblés, la bibliothèque, la déconnexion, le confinement du focus, Échap, le fond de fermeture et le passage mobile/bureau.
 
 ## Interactions Tâches en arrière-plan
 

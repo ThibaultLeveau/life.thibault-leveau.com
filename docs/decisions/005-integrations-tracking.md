@@ -14,7 +14,7 @@ Les fournisseurs décrivent des métriques localisées, unités et filtres autor
 
 La saisie confirmée conserve valeur et provenance. Les aperçus sont recalculés à la demande ; actualiser une saisie est une correction explicite et historisée. Désactiver une source bloque ses nouvelles lectures, sans effacer les instantanés déjà enregistrés. Les corrections ne multiplient pas les points. Les périodes utilisent un fuseau IANA explicite ; les bornes locales sont converties en UTC.
 
-Extraire le cadre visuel Sport dans un composant `shared/ui` sans dépendance à `platform` ni à une application. Titres, navigation, menu du compte et actions arrivent par propriétés. Les comportements métier et les gardes de navigation restent dans les Pages. Sport et Suivi utilisent le même cadre.
+Réutiliser le cadre visuel commun Sport dans `shared/ui`, sans dépendance à `platform` ni à une application. Titres, navigation et menu du compte arrivent par propriétés. Les comportements métier et les gardes de navigation restent dans les Pages. La PR #44 a livré `ApplicationSidebar`, `ApplicationTopbar` et le footer commun pendant l’implémentation de Suivi : ces composants existants sont réutilisés directement, conformément au même objectif approuvé, sans second cadre concurrent.
 
 ## Alternatives
 

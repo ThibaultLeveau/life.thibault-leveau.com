@@ -1,4 +1,33 @@
 .tracking-shell {
+  display: flex;
+  min-height: 100svh;
+  background: var(--ui-paper);
+}
+.tracking-main {
+  flex: 1;
+  min-width: 0;
+  outline: 0;
+}
+.tracking-content {
+  margin: 0 auto;
+  padding: 44px 48px 80px;
+}
+@media (max-width: 1050px) {
+  .tracking-content {
+    padding: 32px 28px 60px;
+  }
+}
+@media (max-width: 800px) {
+  .tracking-content {
+    padding: 28px 22px 60px;
+  }
+}
+@media (max-width: 560px) {
+  .tracking-content {
+    padding: 25px 16px 50px;
+  }
+}
+.tracking-shell {
   --tracking-red: #b23e38;
   --tracking-amber: #9d6a13;
   --tracking-green: #24734a;
@@ -291,7 +320,7 @@
   gap: 6px;
   flex-wrap: wrap;
 }
-.tracking-shell
+.tracking-content
   :is(input:not([type="checkbox"]):not([type="range"]), select, textarea),
 .app-dialog
   :is(.tracking-source, .tracking-entry)
@@ -306,10 +335,10 @@
   min-width: 0;
   font: inherit;
 }
-.tracking-shell input:disabled {
+.tracking-content input:disabled {
   opacity: 0.65;
 }
-.tracking-shell label,
+.tracking-content label,
 .tracking-source label {
   display: flex;
   flex-direction: column;
@@ -318,7 +347,7 @@
   color: var(--ui-muted);
   min-width: 0;
 }
-.tracking-shell input[type="checkbox"],
+.tracking-content input[type="checkbox"],
 .tracking-source input[type="checkbox"],
 .tracking-entry input[type="checkbox"] {
   accent-color: var(--ui-accent);
@@ -1507,7 +1536,7 @@
   }
 }
 @media (max-width: 560px) {
-  .tracking-shell :is(input:not([type="checkbox"]), select, textarea),
+  .tracking-content :is(input:not([type="checkbox"]), select, textarea),
   .tracking-source :is(input:not([type="checkbox"]), select, textarea) {
     font-size: 16px !important;
   }
@@ -1769,4 +1798,17 @@
   .tracking-day-value.is-precise strong {
     font-size: 12px;
   }
+}
+.tracking-trend-track.is-signed {
+  position: relative;
+}
+.tracking-trend-track.is-signed::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  inset-inline: 0;
+  border-top: 1px solid var(--ui-border);
+}
+.tracking-trend-track.is-signed > i {
+  position: absolute;
 }

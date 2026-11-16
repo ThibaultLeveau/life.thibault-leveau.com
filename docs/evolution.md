@@ -78,6 +78,6 @@ L’[ADR 005](decisions/005-integrations-tracking.md) approuve le contrat option
 
 Chaque métrique décrit un identifiant stable, son nom et sa description FR/EN, une unité, les agrégations/filtres autorisés et son caractère historique ou actuel. Le fournisseur contrôle tous les propriétaires et borne ses lectures. Documenter les événements, fuseaux, archives, annulations, échantillons manquants et conditions de comparabilité. Les filtres ne doivent pas reconstruire le passé depuis un attribut actuel. Retourner `missing` ou `unavailable` lorsque le résultat n’est pas connu ; seuls les vrais compteurs vides valent zéro.
 
-Étendre les tests de catalogue, propriétaire, source désactivée, bornes temporelles et erreurs, puis le [catalogue livré](integrations.md). Le cadre `shared/ui/ApplicationFrame` réutilise sidebar/topbar de Sport via des slots ; conserver la connexion et les gardes de navigation dans la Page et injecter les éléments du compte. Aucun import vers `platform` depuis `shared`.
+Étendre les tests de catalogue, propriétaire, source désactivée, bornes temporelles et erreurs, puis le [catalogue livré](integrations.md). Le cadre `shared/ui/ApplicationNavigation` réutilise sidebar/topbar de Sport via des slots ; conserver la connexion et les gardes de navigation dans la Page et injecter les éléments du compte. Aucun import vers `platform` depuis `shared`.
 
 Le client HTTP et les types de métriques réutilisables sont dans `frontend/src/platform/integrations/`. Les composants de configuration et saisie restent propres à Suivi.

@@ -87,6 +87,6 @@ L’[ADR 005](decisions/005-integrations-tracking.md), approuvé le 16 novembre 
 
 `apps/tracking` possède définitions, révisions, périodes, valeurs, instantanés et historique. Son service calcule scores, XP et calendrier à partir de ces données. Les sources enregistrées sont des instantanés explicitement actualisables ; aucun calcul en arrière-plan ni service supplémentaire. La migration globale `0009_tracking` ajoute cinq tables et protège les historiques contre les modifications/suppressions.
 
-Sport et Suivi composent `shared/ui/ApplicationFrame` avec leurs navigation, menu du compte et actions. Ce composant ne dépend d’aucune application ou service de session. Les requêtes Suivi utilisent le transport commun et `platform/useApiResource` pour annuler/ignorer les lectures obsolètes. Voir [intégrations](integrations.md), [modèle](donnees.md#donnees-de-suivi) et [API](tracking-api.md).
+Tâches, Sport et Suivi composent `shared/ui/ApplicationNavigation` avec leurs navigation, menu du compte et actions. Ce composant ne dépend d’aucune application ou service de session. Les requêtes Suivi utilisent le transport commun et `platform/useApiResource` pour annuler/ignorer les lectures obsolètes. Voir [intégrations](integrations.md), [modèle](donnees.md#donnees-de-suivi) et [API](tracking-api.md).
 
 Le client HTTP et les types de métriques réutilisables sont dans `frontend/src/platform/integrations/`. Les composants de configuration et saisie restent propres à Suivi.

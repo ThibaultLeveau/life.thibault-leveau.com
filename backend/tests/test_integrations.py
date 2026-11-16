@@ -95,6 +95,7 @@ def test_completion_cycles_undo_lateness_and_manual_rescheduling(authenticated_c
         == 1
     )
     assert evaluate(c, "late_days", aggregation="average")["value"] == 2
+    assert evaluate(c, "on_time_rate", aggregation="average")["value"] == 0
     item = mutate(c, item, "undo-complete")
     assert evaluate(c, "completed")["value"] == 0
     recurring = create_task(
@@ -138,7 +139,7 @@ def test_sport_metrics_filters_zero_missing_and_archived_program(authenticated_c
     assert evaluate(c, "weight_kg", "sport", filters, "max")["value"] == 25
     assert evaluate(c, "training_days", "sport", filters)["value"] == 1
     assert evaluate(c, "programs", "sport", filters)["value"] == 1
-    assert evaluate(c, "completion_rate", "sport", filters)["value"] == 100
+    assert evaluate(c, "completion_rate", "sport", filters, "average")["value"] == 100
     c.put(
         f"/api/v1/sport/workouts/{program['id']}/archive",
         json={"expected_version": program["version"], "archived": True},
@@ -171,7 +172,7 @@ def test_sport_scores_require_comparable_programs_and_private_options(authentica
     c = authenticated_client
     c.put("/api/v1/applications/sport", json={"enabled": True})
     programs = []
-    for i in range(2):
+    for _ in range(2):
         p = workout(c, sets=1)
         programs.append(p)
         run = record(c, start(c, p), {"weight_kg": 20, "reps": 8})

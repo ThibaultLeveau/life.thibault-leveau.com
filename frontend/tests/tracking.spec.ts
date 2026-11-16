@@ -60,9 +60,9 @@ test.afterAll(async () => {
   await auth?.close();
 });
 async function tab(page: Page, name: string) {
-  if (await page.locator(".tracking-sidebar").isVisible())
+  if (await page.locator(".application-sidebar").isVisible())
     await page
-      .locator(".tracking-sidebar")
+      .locator(".application-sidebar")
       .getByRole("button", { name, exact: true })
       .click();
   else {
@@ -222,7 +222,9 @@ test("Suivi : calendrier contrasté, mois/année, mobile, clavier et période lo
   await expect(
     page.getByRole("heading", { name: "Calendrier", exact: true }),
   ).toBeVisible();
-  await page.getByRole("combobox", { name: "Mes suivis", exact: true }).selectOption(tracker.id);
+  await page
+    .getByRole("combobox", { name: "Mes suivis", exact: true })
+    .selectOption(tracker.id);
   const zero = page.getByRole("button", {
     name: new RegExp("Tout renseigné · score 0/10$"),
   });
@@ -254,8 +256,12 @@ test("Suivi : calendrier contrasté, mois/année, mobile, clavier et période lo
       fullPage: true,
     });
   }
-  await page.getByRole("combobox", { name: "Mes suivis", exact: true }).selectOption("");
-  await expect(page.getByText("Les objectifs au long cours", { exact: true })).toBeVisible();
+  await page
+    .getByRole("combobox", { name: "Mes suivis", exact: true })
+    .selectOption("");
+  await expect(
+    page.getByText("Les objectifs au long cours", { exact: true }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Année", exact: true }).click();
   await expect(page.locator(".tracking-mini-month")).toHaveCount(12);
   await noOverflow(page);
@@ -355,12 +361,10 @@ test("Suivi : choisir une mesure filtrée, aperçu, sauvegarde et source désact
     .getByRole("searchbox", { name: "Rechercher une mesure" })
     .fill("terminées");
   await picker
-    .locator(".tracking-metric-list button")
-    .filter({ hasText: "Tâches terminées" })
-    .first()
+    .getByRole("button", { name: /^Tâches terminées Occurrences/ })
     .click();
   await picker
-    .getByLabel("Période de calcul", { exact: true })
+    .getByRole("combobox", { name: "Période de calcul", exact: true })
     .selectOption("weekly");
   await picker.getByRole("checkbox", { name: "Espace", exact: true }).check();
   await picker

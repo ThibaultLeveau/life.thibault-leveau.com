@@ -344,3 +344,20 @@ def test_empty_migration_roundtrip_preserves_existing_business_data(client, engi
         command.upgrade(config, "head")
     assert client.get(f"/api/v1/tasks/{task['id']}").json()["title"] == task["title"]
     assert call(client, "GET", "/trackers") == []
+
+
+def test_long_period_cannot_be_started_before_tracker_start_date(client):
+    start = day() + timedelta(days=1)
+    t = tracker(client, frequency="yearly", start_date=start.isoformat())
+    canonical = start.replace(month=1, day=1)
+    call(
+        client,
+        "PUT",
+        f"/trackers/{t['id']}/entries/{canonical}",
+        {
+            "complete": True,
+            "values": {"water": 2, "walk": True},
+        },
+        status=422,
+    )
+    call(client, "POST", f"/trackers/{t['id']}/entries/{canonical}/preview", status=422)

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Dialog, ErrorMessage } from "../../../shared/ui/Dialog";
 import { Icon } from "../../../shared/ui/Icon";
 import { trackingApi } from "../api";
-import { dateLabel, number } from "../dates";
+import { dateLabel, number, timestampLabel } from "../dates";
 import { tr } from "../i18n";
 import type { Entry, TrackingField, Value } from "../types";
 import { LoadState, Score, useAction, useResource } from "./common";
@@ -314,9 +314,10 @@ export function EntryWizard({
                   {sample?.result.observed_at && (
                     <small>
                       {tr("source_as_of", {
-                        date: new Date(
+                        date: timestampLabel(
                           sample.result.observed_at,
-                        ).toLocaleString(),
+                          sample.query.timezone,
+                        ),
                       })}
                     </small>
                   )}
@@ -457,7 +458,9 @@ function History({
         <div key={r.version}>
           <span>
             {tr("version", { version: r.version })}
-            <small>{new Date(r.recorded_at).toLocaleString()}</small>
+            <small>
+              {timestampLabel(r.recorded_at, r.snapshot.definition.timezone)}
+            </small>
           </span>
           <Score value={r.snapshot.score} />
           <span>

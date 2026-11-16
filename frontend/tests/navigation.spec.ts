@@ -1,6 +1,12 @@
 import { expect, test, type Page } from "@playwright/test";
 
 const applications = [
+  {
+    path: "/tracking",
+    name: "Suivi",
+    document: "tracking",
+    current: "Aujourd’hui",
+  },
   { path: "/tasks", name: "Tâches", document: "taches", current: "À venir" },
   { path: "/sport", name: "Sport", document: "sport", current: "Programmes" },
 ];
@@ -14,7 +20,7 @@ test.beforeEach(async ({ page }) => {
   });
   expect(login.ok()).toBeTruthy();
   headers = { "X-CSRF-Token": (await login.json()).csrf_token };
-  for (const id of ["tasks", "sport"])
+  for (const id of ["tasks", "sport", "tracking"])
     expect(
       (
         await page.request.put(`/api/v1/applications/${id}`, {

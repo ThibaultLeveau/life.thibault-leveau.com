@@ -171,6 +171,7 @@ export function StatisticsView({
                       typeof p.value === "number" ||
                       typeof p.value === "boolean",
                   ),
+                  signed = points.some((p) => Number(p.value) < 0),
                   max = Math.max(
                     1,
                     ...points.map((p) => Math.abs(Number(p.value))),
@@ -197,10 +198,23 @@ export function StatisticsView({
                               ? tr(p.value ? "yes" : "no")
                               : number(Number(p.value))}
                           </span>
-                          <div className="tracking-trend-track">
+                          <div
+                            className={`tracking-trend-track ${signed ? "is-signed" : ""}`}
+                          >
                             <i
                               style={{
-                                height: `${Math.max(2, (Math.abs(Number(p.value)) / max) * 100)}%`,
+                                height: `${Math.max(1, (Math.abs(Number(p.value)) / max) * (signed ? 50 : 100))}%`,
+                                ...(signed
+                                  ? {
+                                      top: Number(p.value) < 0 ? "50%" : "auto",
+                                      bottom:
+                                        Number(p.value) >= 0 ? "50%" : "auto",
+                                      background:
+                                        Number(p.value) < 0
+                                          ? "var(--tracking-red)"
+                                          : undefined,
+                                    }
+                                  : {}),
                               }}
                             />
                           </div>

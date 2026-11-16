@@ -46,3 +46,11 @@ export function dateLabel(
 }
 export const number = (v: number) =>
   new Intl.NumberFormat(formatLocale(), { maximumFractionDigits: 2 }).format(v);
+
+export function timestampLabel(value: string, timezone?: string) {
+  return new Intl.DateTimeFormat(formatLocale(), {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: timezone,
+  }).format(new Date(value));
+}

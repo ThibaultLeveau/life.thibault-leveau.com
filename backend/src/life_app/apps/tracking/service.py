@@ -320,7 +320,9 @@ def source_values(db, user, definitions, occurrence, day):
 
 def preview(db, user, definitions, item, day):
     occurrence, _ = get_occurrence(db, user, item, day)
-    if occurrence.period_start > today(occurrence.definition.timezone):
+    if max(occurrence.period_start, occurrence.definition.start_date) > today(
+        occurrence.definition.timezone
+    ):
         raise HTTPException(422, tr("future"))
     occurrence.sources = source_values(db, user, definitions, occurrence, day)
     return occurrence
@@ -343,9 +345,9 @@ def validate_value(field, value):
 
 def write_entry(db, user, definitions, item, day, payload):
     occurrence, entry = get_occurrence(db, user, item, day)
-    if occurrence.period_start > today(occurrence.definition.timezone) or day > today(
+    if max(occurrence.period_start, occurrence.definition.start_date) > today(
         occurrence.definition.timezone
-    ):
+    ) or day > today(occurrence.definition.timezone):
         raise HTTPException(422, tr("future"))
     if payload.expected_version != (entry.version if entry else 0):
         raise HTTPException(409, tr("conflict"))
@@ -457,6 +459,8 @@ def calendar(db, user, since, until, tracker_id=None):
         occurrences = []
         for item in items:
             start, _ = period(cursor, item.definition["frequency"])
+            if (item.id, start) in long_periods:
+                continue
             occurrence = resolve(item, revs[item.id], cursor, saved.get((item.id, start)))
             if occurrence is None:
                 continue

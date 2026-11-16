@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AccountMenu } from "../../platform/auth/AccountMenu";
-import { useSession } from "../../platform/auth/SessionProvider";
-import { documentationPath } from "../../shared/i18n";
-import { ApplicationFrame } from "../../shared/ui/ApplicationFrame";
+import { ApplicationFooter } from "../../platform/auth/ApplicationFooter";
+import {
+  ApplicationSidebar,
+  ApplicationTopbar,
+} from "../../shared/ui/ApplicationNavigation";
 import { ErrorMessage } from "../../shared/ui/Dialog";
 import { Icon, type IconName } from "../../shared/ui/Icon";
 import { trackingApi } from "./api";
@@ -38,7 +39,6 @@ function readView() {
   };
 }
 export function Page() {
-  const { session } = useSession();
   const [view, setView] = useState(readView),
     [mobile, setMobile] = useState(false),
     [revision, setRevision] = useState(0),
@@ -144,158 +144,153 @@ export function Page() {
     </nav>
   );
   return (
-    <ApplicationFrame
-      id="tracking"
-      name={tr("app")}
-      eyebrow={tr("eyebrow")}
-      icon="calendar"
-      username={session.username}
-      navigation={navigation}
-      mobileOpen={mobile}
-      onOpenMobile={() => setMobile(true)}
-      onCloseMobile={() => setMobile(false)}
-      labels={{
-        home: tr("home"),
-        skip: tr("skip"),
-        open: tr("open_navigation"),
-        navigation: tr("navigation"),
-      }}
-      actions={
-        <button
-          className="icon-button"
-          aria-label={tr("refresh")}
-          onClick={refresh}
-        >
-          <Icon name="restore" />
-        </button>
-      }
-      footer={
-        <>
-          <a href="/applications">
-            <Icon name="grid" />
-            {tr("library")}
-          </a>
-          <a href={documentationPath("tracking")}>
-            <Icon name="info" />
-            {tr("guide")}
-          </a>
-          <AccountMenu beforeSessionChange={permit} />
-        </>
-      }
-    >
-      <div className="tracking-page-heading">
-        <div>
-          <p className="eyebrow">
-            {view.tab === "today" && !view.edit
-              ? dateLabel(today, {
-                  weekday: "long",
-                  day: "numeric",
-                  month: "long",
-                })
-              : tr("eyebrow")}
-          </p>
-          <h1 ref={heading} tabIndex={-1}>
-            {title}
-          </h1>
-          {!view.edit && <p className="muted">{tr(`${view.tab}_subtitle`)}</p>}
-        </div>
-        {!view.edit && (view.tab === "today" || view.tab === "trackers") && (
-          <button
-            className="primary-button"
-            onClick={() => choose("trackers", "new")}
-          >
-            <Icon name="plus" />
-            {tr("new_tracker")}
-          </button>
-        )}
-      </div>
-      <LoadState {...settings} />
-      <LoadState {...trackers} />
-      {settings.data && trackers.data && (
-        <>
-          {view.edit ? (
-            view.edit === "new" || all.some((t) => t.id === view.edit) ? (
-              <TrackerEditor
-                key={view.edit}
-                existing={all.find((t) => t.id === view.edit)}
-                timezone={settings.data.timezone}
-                onDirty={setDirty}
-                onClose={() => choose("trackers")}
-                onSaved={() => {
-                  refresh();
-                  choose("trackers", null, true);
-                }}
-              />
-            ) : (
-              <Empty
-                title={tr("no_results")}
-                action={
-                  <button
-                    className="secondary-button"
-                    onClick={() => choose("trackers")}
-                  >
-                    {tr("back")}
-                  </button>
-                }
-              >
-                {tr("retry")}
-              </Empty>
-            )
-          ) : (
+    <div className="ui-scope tracking-shell">
+      <ApplicationSidebar
+        name={tr("app")}
+        icon="calendar"
+        label={tr("navigation")}
+        mainId="tracking-main"
+        open={mobile}
+        onOpenChange={setMobile}
+        footer={
+          <ApplicationFooter
+            documentation="tracking"
+            beforeSessionChange={permit}
+          />
+        }
+      >
+        {navigation}
+      </ApplicationSidebar>
+      <main className="tracking-main" id="tracking-main" tabIndex={-1}>
+        <ApplicationTopbar
+          name={tr("app")}
+          current={title}
+          mainId="tracking-main"
+          open={mobile}
+          onOpenChange={setMobile}
+        />
+        <div className="tracking-content">
+          <div className="tracking-page-heading">
+            <div>
+              <p className="eyebrow">
+                {view.tab === "today" && !view.edit
+                  ? dateLabel(today, {
+                      weekday: "long",
+                      day: "numeric",
+                      month: "long",
+                    })
+                  : tr("eyebrow")}
+              </p>
+              <h1 ref={heading} tabIndex={-1}>
+                {title}
+              </h1>
+              {!view.edit && (
+                <p className="muted">{tr(`${view.tab}_subtitle`)}</p>
+              )}
+            </div>
+            {!view.edit &&
+              (view.tab === "today" || view.tab === "trackers") && (
+                <button
+                  className="primary-button"
+                  onClick={() => choose("trackers", "new")}
+                >
+                  <Icon name="plus" />
+                  {tr("new_tracker")}
+                </button>
+              )}
+          </div>
+          <LoadState {...settings} />
+          <LoadState {...trackers} />
+          {settings.data && trackers.data && (
             <>
-              {view.tab === "today" && (
-                <Today
-                  revision={revision}
-                  empty={!trackers.data.active.length}
-                  onCreate={() => choose("trackers", "new")}
-                  onOpen={(id, day) => setWizard({ id, day })}
-                  today={today}
-                />
-              )}
-              {view.tab === "calendar" && (
-                <CalendarView
-                  today={today}
-                  trackers={all}
-                  revision={revision}
-                  onOpen={(id, day) => setWizard({ id, day })}
-                />
-              )}
-              {view.tab === "trackers" && (
-                <Trackers
-                  active={trackers.data.active}
-                  archived={trackers.data.archived}
-                  onChange={refresh}
-                  onEdit={(id) => choose("trackers", id)}
-                  onCreate={() => choose("trackers", "new")}
-                />
-              )}
-              {view.tab === "statistics" && (
-                <StatisticsView
-                  today={today}
-                  timezone={settings.data.timezone}
-                  trackers={all}
-                  revision={revision}
-                />
-              )}
-              {view.tab === "achievements" && (
-                <AchievementsView revision={revision} />
-              )}
-              {view.tab === "settings" && (
-                <Settings timezone={settings.data.timezone} onSaved={refresh} />
+              {view.edit ? (
+                view.edit === "new" || all.some((t) => t.id === view.edit) ? (
+                  <TrackerEditor
+                    key={view.edit}
+                    existing={all.find((t) => t.id === view.edit)}
+                    timezone={settings.data.timezone}
+                    onDirty={setDirty}
+                    onClose={() => choose("trackers")}
+                    onSaved={() => {
+                      refresh();
+                      choose("trackers", null, true);
+                    }}
+                  />
+                ) : (
+                  <Empty
+                    title={tr("no_results")}
+                    action={
+                      <button
+                        className="secondary-button"
+                        onClick={() => choose("trackers")}
+                      >
+                        {tr("back")}
+                      </button>
+                    }
+                  >
+                    {tr("retry")}
+                  </Empty>
+                )
+              ) : (
+                <>
+                  {view.tab === "today" && (
+                    <Today
+                      revision={revision}
+                      empty={!trackers.data.active.length}
+                      onCreate={() => choose("trackers", "new")}
+                      onOpen={(id, day) => setWizard({ id, day })}
+                      today={today}
+                    />
+                  )}
+                  {view.tab === "calendar" && (
+                    <CalendarView
+                      today={today}
+                      trackers={all}
+                      revision={revision}
+                      onOpen={(id, day) => setWizard({ id, day })}
+                    />
+                  )}
+                  {view.tab === "trackers" && (
+                    <Trackers
+                      active={trackers.data.active}
+                      archived={trackers.data.archived}
+                      onChange={refresh}
+                      onEdit={(id) => choose("trackers", id)}
+                      onCreate={() => choose("trackers", "new")}
+                    />
+                  )}
+                  {view.tab === "statistics" && (
+                    <StatisticsView
+                      today={today}
+                      timezone={settings.data.timezone}
+                      trackers={all}
+                      revision={revision}
+                    />
+                  )}
+                  {view.tab === "achievements" && (
+                    <AchievementsView revision={revision} />
+                  )}
+                  {view.tab === "settings" && (
+                    <Settings
+                      timezone={settings.data.timezone}
+                      onSaved={refresh}
+                    />
+                  )}
+                </>
               )}
             </>
           )}
-        </>
-      )}
-      {wizard && (
-        <EntryWizard
-          key={`${wizard.id}:${wizard.day}`}
-          {...wizard}
-          onClose={() => setWizard(null)}
-          onSaved={refresh}
-        />
-      )}
-    </ApplicationFrame>
+          {wizard && (
+            <EntryWizard
+              key={`${wizard.id}:${wizard.day}`}
+              {...wizard}
+              onClose={() => setWizard(null)}
+              onSaved={refresh}
+            />
+          )}
+        </div>
+      </main>
+    </div>
   );
 }
 function Today({

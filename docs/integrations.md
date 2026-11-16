@@ -72,7 +72,7 @@ Les identifiants et unités sont stables ; les noms, descriptions et filtres son
 | `due` | Tâches ouvertes à échéance (état actuel) | — | `count` | `workspace_id`, `section_id`, `status_id`, `recurring`, `label_id`, `priority` |
 | `late_days` | Retard à la résolution | d | `average`, `sum`, `min`, `max` | `workspace_id`, `section_id`, `status_id`, `recurring`, `due_state` |
 | `moved` | Déplacements de tâches | — | `count` | `workspace_id`, `section_id`, `status_id`, `recurring`, `due_state` |
-| `on_time_rate` | Résolutions à l’heure | % | `count` | `workspace_id`, `section_id`, `status_id`, `recurring`, `due_state` |
+| `on_time_rate` | Résolutions à l’heure | % | `average` | `workspace_id`, `section_id`, `status_id`, `recurring`, `due_state` |
 | `open` | Tâches ouvertes maintenant (état actuel) | — | `count` | `workspace_id`, `section_id`, `status_id`, `recurring`, `label_id`, `priority` |
 | `overdue` | Tâches en retard maintenant (état actuel) | — | `count` | `workspace_id`, `section_id`, `status_id`, `recurring`, `label_id`, `priority` |
 | `recurring` | Tâches récurrentes actives (état actuel) | — | `count` | `workspace_id`, `section_id`, `status_id`, `recurring`, `label_id`, `priority` |
@@ -90,7 +90,7 @@ Les identifiants et unités sont stables ; les noms, descriptions et filtres son
 | `calories` | Calories saisies | kcal | `sum`, `average`, `min`, `max`, `latest` | `workout_id`, `exercise_id`, `kind` |
 | `cancelled` | Entraînements abandonnés | — | `count` | `workout_id`, `exercise_id`, `kind` |
 | `completed` | Entraînements terminés | — | `count` | `workout_id`, `exercise_id`, `kind` |
-| `completion_rate` | Taux de séances terminées | % | `count` | `workout_id`, `exercise_id`, `kind` |
+| `completion_rate` | Taux de séances terminées | % | `average` | `workout_id`, `exercise_id`, `kind` |
 | `distance_m` | Distance parcourue | m | `sum`, `average`, `min`, `max`, `latest` | `workout_id`, `exercise_id`, `kind` |
 | `duration_seconds` | Durée d’effort saisie | s | `sum`, `average`, `min`, `max`, `latest` | `workout_id`, `exercise_id`, `kind` |
 | `elapsed_seconds` | Durée des entraînements | s | `sum`, `average`, `min`, `max`, `latest` | `workout_id`, `exercise_id`, `kind` |

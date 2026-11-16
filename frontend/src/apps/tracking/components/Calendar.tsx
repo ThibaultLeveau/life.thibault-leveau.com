@@ -90,6 +90,7 @@ export function CalendarView({
     else if (event.key === "End") next = addDays(date, 6 - weekday);
     else return;
     event.preventDefault();
+    if (next < "2000-01-01" || next > "2100-12-31") return;
     focusDay.current = true;
     setSelected(next);
     if (next.slice(0, 7) !== month.slice(0, 7))
@@ -334,7 +335,9 @@ export function CalendarView({
                 {resource.data.periods.map((p) => (
                   <button
                     key={`${p.tracker_id}:${p.period_start}`}
-                    disabled={p.period_start > today}
+                    disabled={
+                      p.period_start > today || p.definition.start_date > today
+                    }
                     onClick={() =>
                       onOpen(
                         p.tracker_id,
@@ -356,7 +359,8 @@ export function CalendarView({
                     <Score value={p.entry?.score ?? null} />
                     <span className="tracking-period-state">
                       {tr(
-                        p.period_start > today
+                        p.period_start > today ||
+                          p.definition.start_date > today
                           ? "future"
                           : p.entry?.status === "complete"
                             ? "complete"

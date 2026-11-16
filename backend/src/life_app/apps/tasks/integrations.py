@@ -102,7 +102,11 @@ class TasksMetrics:
                     description=tr("metric_" + key + "_description"),
                     unit="%" if key == "on_time_rate" else "d" if measurement else "",
                     temporal="current" if key in CURRENT else "events",
-                    aggregations=["average", "sum", "min", "max"] if measurement else ["count"],
+                    aggregations=["average", "sum", "min", "max"]
+                    if measurement
+                    else ["average"]
+                    if key == "on_time_rate"
+                    else ["count"],
                     filters=fs,
                 )
             )
