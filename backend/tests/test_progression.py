@@ -170,6 +170,44 @@ def test_global_vacations_freeze_without_fake_days():
     assert svc.streaks({friday, friday + timedelta(days=1)}, monday, Settings(), "tasks") == (0, 2)
 
 
+def test_usage_days_weekly_and_three_days_per_week():
+    monday = date(2026, 11, 2)
+    preferences = Settings(usage_days={"tracking": [6], "sport": [0, 2, 4]})
+    sunday = monday + timedelta(days=6)
+    # Weekly tracking: the six other days are neutral, including after the last Sunday.
+    days = {sunday, sunday + timedelta(days=7)}
+    assert svc.streaks(days, sunday + timedelta(days=13), preferences, "tracking") == (2, 2)
+    assert svc.streaks(days, sunday + timedelta(days=14), preferences, "tracking") == (2, 2)
+    assert svc.streaks(days, sunday + timedelta(days=15), preferences, "tracking") == (0, 2)
+    # An off-schedule confirmation earns XP elsewhere, but cannot validate a missed Sunday.
+    assert svc.streaks(
+        days | {sunday + timedelta(days=15)},
+        sunday + timedelta(days=15),
+        preferences,
+        "tracking",
+    ) == (0, 2)
+    practice = {monday + timedelta(days=n) for n in (0, 2, 4, 7)}
+    assert svc.streaks(practice, monday + timedelta(days=9), preferences, "sport") == (4, 4)
+    assert svc.streaks(practice, monday + timedelta(days=10), preferences, "sport") == (0, 4)
+    # Application calendars are independent; Tasks retains the daily default.
+    assert svc.streaks(practice, monday + timedelta(days=7), preferences, "tasks") == (1, 1)
+
+
+def test_usage_days_vacations_override_and_long_history():
+    sunday = date(2025, 1, 5)
+    last = sunday + timedelta(weeks=100)
+    preferences = Settings(
+        exclude_weekends={"tracking": True},
+        usage_days={"tracking": [6]},
+        vacations=[Vacation(start=last - timedelta(days=7), end=last - timedelta(days=7))],
+    )
+    # Explicit Sunday overrides the old weekend flag; a vacation Sunday does not count.
+    days = {sunday + timedelta(weeks=n) for n in range(101)}
+    assert svc.streaks(days, last, preferences, "tracking") == (100, 100)
+    assert svc.streaks(set(), last, preferences, "tracking") == (0, 0)
+    assert svc.streaks({last - timedelta(days=1)}, last, preferences, "tracking") == (0, 0)
+
+
 def test_settings_validation_csrf_conflicts_and_owners(authenticated_client, app, monkeypatch):
     monkeypatch.setattr(svc, "utcnow", lambda: datetime(2026, 11, 16, 12, tzinfo=UTC))
     c = authenticated_client
@@ -179,16 +217,25 @@ def test_settings_validation_csrf_conflicts_and_owners(authenticated_client, app
         "expected_version": 0,
         "timezone": "Europe/Paris",
         "exclude_weekends": {"tasks": True},
+        "usage_days": {"tasks": [4, 0, 2], "tracking": [6]},
         "vacations": [{"start": "2026-11-16", "end": "2026-11-20"}],
     }
     response = c.put("/api/v1/progression/settings", json=payload)
     assert response.status_code == 200, response.text
     assert get(c, "/settings")["version"] == 1
+    assert get(c, "/settings")["usage_days"] == {"tasks": [0, 2, 4], "tracking": [6]}
+    assert get(c, "/tasks")["usage_days"] == [0, 2, 4]
     assert get(c, "/tasks")["paused_today"]
     assert c.put("/api/v1/progression/settings", json=payload).status_code == 409
     for extra in (
         {"timezone": "invalid"},
         {"exclude_weekends": {"unknown": True}},
+        {"usage_days": {"unknown": [0]}},
+        *(
+            {"usage_days": {"tasks": days}}
+            for days in ([], [0, 0], [-1], [7], [True], [1.5], ["1"], None, list(range(8)))
+        ),
+        {"usage_days": None},
         {"vacations": [{"start": "2026-12-02", "end": "2026-12-01"}]},
         {
             "vacations": [
@@ -220,8 +267,114 @@ def test_settings_validation_csrf_conflicts_and_owners(authenticated_client, app
         )
         other.headers["X-CSRF-Token"] = login.json()["csrf_token"]
         assert get(other, "/settings")["version"] == 0
+        assert get(other, "/settings")["usage_days"] == {}
+        assert get(other, "/tasks")["usage_days"] == list(range(7))
         assert get(other, "/tasks")["xp"] == 0
         assert get(other, "/tasks/history")["total"] == 0
+
+
+def test_usage_days_legacy_preferences_and_writes(authenticated_client, app):
+    c = authenticated_client
+    owner = UUID(c.get("/api/v1/auth/session").json()["user_id"])
+    # A JSON document saved by the released image remains readable, without a data migration.
+    with app.state.sessions() as db, db.begin():
+        db.add(
+            m.Preferences(
+                owner_id=owner,
+                version=1,
+                settings={
+                    "timezone": "Europe/Paris",
+                    "exclude_weekends": {"tasks": True},
+                    "vacations": [],
+                },
+            )
+        )
+    assert get(c, "/settings")["usage_days"] == {}
+    assert get(c, "/tasks")["usage_days"] == [0, 1, 2, 3, 4]
+    legacy = {"expected_version": 1, "exclude_weekends": {"tasks": False}}
+    assert c.put("/api/v1/progression/settings", json=legacy).status_code == 200
+    assert get(c, "/tasks")["usage_days"] == list(range(7))
+    custom = {"expected_version": 2, "usage_days": {"tasks": [0, 2, 4]}}
+    assert c.put("/api/v1/progression/settings", json=custom).status_code == 200
+    legacy.update(expected_version=3, timezone="UTC")
+    assert c.put("/api/v1/progression/settings", json=legacy).status_code == 200
+    assert get(c, "/settings")["usage_days"] == {"tasks": [0, 2, 4]}
+    assert get(c, "/settings")["timezone"] == "UTC"
+    enable(c, "tasks", False)
+    assert get(c, "/settings")["usage_days"] == {"tasks": [0, 2, 4]}
+    enable(c, "tasks")
+    assert get(c, "/tasks")["usage_days"] == [0, 2, 4]
+    # An explicit empty map resets custom schedules to the legacy/default calendars.
+    assert (
+        c.put(
+            "/api/v1/progression/settings",
+            json={
+                "expected_version": 4,
+                "usage_days": {},
+                "exclude_weekends": {"tasks": True},
+            },
+        ).status_code
+        == 200
+    )
+    assert get(c, "/tasks")["usage_days"] == [0, 1, 2, 3, 4]
+
+
+def test_usage_days_recalculate_without_rewriting_rewards(authenticated_client, app, monkeypatch):
+    c = authenticated_client
+    owner = UUID(c.get("/api/v1/auth/session").json()["user_id"])
+    now = datetime(2026, 11, 6, 12, tzinfo=UTC)
+    monkeypatch.setattr(svc, "utcnow", lambda: now)
+    with app.state.sessions() as db, db.begin():
+        for day in (2, 4, 6):
+            svc.record(
+                db,
+                db.get(User, owner),
+                "tasks",
+                APPLICATIONS[0].progression,
+                Activity(f"schedule-{day}", now.replace(day=day), 10, {"completed": 1}, {}),
+            )
+    before = get(c, "/tasks/history")
+    assert get(c, "/tasks")["streak"] == 1
+    assert (
+        c.put(
+            "/api/v1/progression/settings",
+            json={
+                "expected_version": 0,
+                "usage_days": {"tasks": [0, 2, 4]},
+            },
+        ).status_code
+        == 200
+    )
+    summary = get(c, "/tasks")
+    assert summary["streak"] == summary["best_streak"] == 3
+    assert summary["today_active"] and not summary["paused_today"]
+    get(c, "/tasks/quests")
+    assert get(c, "/tasks/history") == before
+    now = now.replace(day=7)  # Saturday: an extra activity must not extend the streak.
+    with app.state.sessions() as db, db.begin():
+        svc.record(
+            db,
+            db.get(User, owner),
+            "tasks",
+            APPLICATIONS[0].progression,
+            Activity("schedule-rest", now, 10, {"completed": 1}, {}),
+        )
+    summary = get(c, "/tasks")
+    assert summary["streak"] == 3 and summary["paused_today"] and summary["today_active"]
+    assert summary["active_days"] == 4
+    assert summary["xp"] > sum(item["xp"] for item in before["items"])
+    earned = get(c, "/tasks/history")
+    assert (
+        c.put(
+            "/api/v1/progression/settings",
+            json={
+                "expected_version": 1,
+                "usage_days": {"tasks": list(range(7))},
+            },
+        ).status_code
+        == 200
+    )
+    assert get(c, "/tasks/history") == earned
 
 
 def test_recorded_days_timezone_dst_and_level_cap(authenticated_client, app, monkeypatch):

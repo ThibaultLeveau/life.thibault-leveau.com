@@ -5,6 +5,7 @@ import { ErrorMessage } from "../../shared/ui/Dialog";
 import { useApiResource } from "../useApiResource";
 import { useApplications } from "../applications/ApplicationProvider";
 import { progressionApi } from "./api";
+import { usageDaysLabel } from "./calendar";
 import { useProgressionRevision } from "./useProgression";
 import type { Quest } from "./types";
 import "./styles.css";
@@ -173,6 +174,11 @@ export function ProgressionBadge({ applicationId }: { applicationId: string }) {
               <p className="progression-series-note">
                 {tr("progression_series", { count: data.streak })}
                 {data.paused_today ? ` · ${tr("progression_rest")}` : ""}
+              </p>
+              <p className="progression-muted">
+                {tr("progression_schedule", {
+                  days: usageDaysLabel(data.usage_days),
+                })}
               </p>
               <h3>{tr("progression_almost")}</h3>
               {data.closest.map((quest) => (

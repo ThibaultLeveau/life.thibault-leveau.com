@@ -49,7 +49,7 @@ OKR fournit à [Suivi](tracking.md) trois métriques : objectifs accomplis, rés
 
 La [progression commune](progression.md) ajoute **60 quêtes** OKR, dix titres et les niveaux jusqu’à 100. Une première clôture rapporte **100 XP** ; la première atteinte d’un résultat clé rapporte **15 XP**, même si elle intervient dans le formulaire. Les familles de quêtes portent sur les objectifs accomplis, résultats clés, objectifs personnels, objectifs professionnels, jours actifs et séries. Les jours actifs sont les jours de premières réussites, pas ceux de simples modifications. Les corrections et réouvertures ne multiplient pas les XP et n’annulent pas les gains acquis.
 
-Le badge de progression fonctionne même sans Suivi. Si Suivi est actif, le lien **Mes quêtes dans Suivi** ouvre directement les quêtes OKR. Les week-ends, vacances et fuseau des séries relèvent des réglages de progression communs ; le fuseau OKR ne règle que les jours et trimestres métier. Aucun service automatique ni IA externe ne traite vos objectifs : les aides sont guidées et les quêtes sont calculées à partir de vos actions confirmées.
+Le badge de progression fonctionne même sans Suivi. Si Suivi est actif, le lien **Mes quêtes dans Suivi** ouvre directement les quêtes OKR. Les jours d’utilisation, vacances et fuseau des séries relèvent des réglages de progression communs ; le fuseau OKR ne règle que les jours et trimestres métier. Aucun service automatique ni IA externe ne traite vos objectifs : les aides sont guidées et les quêtes sont calculées à partir de vos actions confirmées.
 
 ## Réglages, limites et erreurs
 

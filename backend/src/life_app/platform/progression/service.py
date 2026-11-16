@@ -25,7 +25,7 @@ def settings(db, user):
 
 def save_settings(db, user, definitions, payload):
     ids = {d.id for d in definitions if d.progression is not None}
-    if set(payload.exclude_weekends) - ids:
+    if (set(payload.exclude_weekends) | set(payload.usage_days)) - ids:
         raise HTTPException(422, tr("invalid"))
     item = db.get(m.Preferences, user.id)
     if payload.expected_version != (item.version if item else 0):
@@ -33,7 +33,11 @@ def save_settings(db, user, definitions, payload):
     if item is None:
         item = m.Preferences(owner_id=user.id, version=0)
         db.add(item)
-    item.settings = payload.model_dump(mode="json", exclude={"expected_version"})
+    updated = payload.model_dump(mode="json", exclude={"expected_version"})
+    # Older clients cannot round-trip this field. Omitting it must not erase a schedule.
+    if "usage_days" not in payload.model_fields_set:
+        updated["usage_days"] = (item.settings or {}).get("usage_days", {})
+    item.settings = updated
     item.version += 1
     db.flush()
     return settings(db, user)
@@ -59,8 +63,14 @@ def level_for(xp):
     return max(level for level in range(1, 101) if threshold(level) <= xp)
 
 
+def usage_days(preferences, app_id):
+    return preferences.usage_days.get(
+        app_id, list(range(5 if preferences.exclude_weekends.get(app_id, False) else 7))
+    )
+
+
 def neutral(day, preferences, app_id):
-    return (preferences.exclude_weekends.get(app_id, False) and day.weekday() >= 5) or any(
+    return day.weekday() not in usage_days(preferences, app_id) or any(
         v.start <= day <= v.end for v in preferences.vacations
     )
 
@@ -186,7 +196,8 @@ def summary(db, user, app):
         active_days=counts["active_days"],
         today_active=today_active,
         paused_today=paused,
-        exclude_weekends=preferences.exclude_weekends.get(app.id, False),
+        exclude_weekends=all(day < 5 for day in usage_days(preferences, app.id)),
+        usage_days=usage_days(preferences, app.id),
         timezone=preferences.timezone,
         quests_earned=len(rewards),
         quests_total=len(items),

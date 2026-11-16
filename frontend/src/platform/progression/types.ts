@@ -33,6 +33,7 @@ export interface Progression {
   today_active: boolean;
   paused_today: boolean;
   exclude_weekends: boolean;
+  usage_days: number[];
   timezone: string;
   quests_earned: number;
   quests_total: number;
@@ -47,6 +48,7 @@ export interface Vacation {
 export interface ProgressionSettings {
   timezone: string;
   exclude_weekends: Record<string, boolean>;
+  usage_days: Record<string, number[]>;
   vacations: Vacation[];
   version: number;
 }

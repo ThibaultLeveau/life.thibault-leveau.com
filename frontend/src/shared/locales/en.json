@@ -104,8 +104,6 @@
   "progression_calendar_hint": "Streaks follow your days of practice. Rest days and vacations preserve them without adding artificial active days.",
   "progression_timezone": "Streak and new activity timezone",
   "progression_timezone_hint": "Previously recorded dates stay unchanged.",
-  "progression_weekends": "Weekends off",
-  "progression_weekend_for": "Exclude weekends for {{name}}",
   "progression_vacation": "Vacation · all applications",
   "progression_vacation_hint": "Plan a break or start one today. You can still earn points if you use an application during your vacation.",
   "progression_vacation_active": "Vacation mode is on",
@@ -128,5 +126,12 @@
   "progression_days_other": "days",
   "progression_days_one": "day",
   "progression_badge_label_other": "Level {{level}}, {{title}}, {{streak}} day streak. View quests.",
-  "progression_badge_label_one": "Level {{level}}, {{title}}, {{streak}} day streak. View quests."
+  "progression_badge_label_one": "Level {{level}}, {{title}}, {{streak}} day streak. View quests.",
+  "progression_usage_days": "Usage days per application",
+  "progression_usage_days_hint": "Choose at least one day per application. For example, Sunday for weekly tracking, or Monday, Wednesday and Friday for three days of practice. Other days neither extend nor break the streak. Settings also apply to its history, without changing earned XP or quests.",
+  "progression_every_day": "Every day",
+  "progression_workweek": "Monday to Friday",
+  "progression_days_per_week_one": "{{count}} scheduled day per week",
+  "progression_days_per_week_other": "{{count}} scheduled days per week",
+  "progression_schedule": "Scheduled days: {{days}}"
 }

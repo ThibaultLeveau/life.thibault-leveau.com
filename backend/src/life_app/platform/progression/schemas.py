@@ -23,10 +23,27 @@ class Vacation(Contract):
         return self
 
 
+UsageDays = Annotated[
+    list[Annotated[int, Field(ge=0, le=6, strict=True)]], Field(min_length=1, max_length=7)
+]
+
+
 class Settings(Contract):
     timezone: str = Field("Europe/Paris", max_length=100)
     exclude_weekends: dict[str, StrictBool] = Field(default_factory=dict, max_length=50)
+    usage_days: dict[str, UsageDays] = Field(
+        default_factory=dict,
+        max_length=50,
+        description="Expected weekdays: Monday=0, Sunday=6. Overrides exclude_weekends per app.",
+    )
     vacations: list[Vacation] = Field(default_factory=list, max_length=100)
+
+    @field_validator("usage_days")
+    @classmethod
+    def weekdays(cls, value):
+        if any(len(days) != len(set(days)) for days in value.values()):
+            raise ValueError(tr("invalid"))
+        return {app_id: sorted(days) for app_id, days in value.items()}
 
     @field_validator("timezone")
     @classmethod
@@ -91,6 +108,7 @@ class Summary(Contract):
     today_active: bool
     paused_today: bool
     exclude_weekends: bool
+    usage_days: list[int]
     timezone: str
     quests_earned: int
     quests_total: int

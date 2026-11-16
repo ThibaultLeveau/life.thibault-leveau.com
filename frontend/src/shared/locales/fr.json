@@ -104,8 +104,6 @@
   "progression_calendar_hint": "Les séries suivent vos journées de pratique. Les jours de repos et les vacances ne les cassent pas et n’ajoutent aucun jour fictif.",
   "progression_timezone": "Fuseau des séries et des nouvelles activités",
   "progression_timezone_hint": "Les dates déjà enregistrées restent inchangées.",
-  "progression_weekends": "Week-ends de repos",
-  "progression_weekend_for": "Exclure les week-ends pour {{name}}",
   "progression_vacation": "Vacances · toutes les applications",
   "progression_vacation_hint": "Planifiez une pause ou commencez-la aujourd’hui. Les points restent disponibles si vous utilisez une application pendant vos vacances.",
   "progression_vacation_active": "Mode vacances actif",
@@ -128,5 +126,12 @@
   "progression_days_other": "jours",
   "progression_days_one": "jour",
   "progression_badge_label_other": "Niveau {{level}}, {{title}}, série de {{streak}} jours. Voir les quêtes.",
-  "progression_badge_label_one": "Niveau {{level}}, {{title}}, série de {{streak}} jour. Voir les quêtes."
+  "progression_badge_label_one": "Niveau {{level}}, {{title}}, série de {{streak}} jour. Voir les quêtes.",
+  "progression_usage_days": "Jours d’utilisation par application",
+  "progression_usage_days_hint": "Choisissez au moins un jour par application. Par exemple, le dimanche pour un suivi hebdomadaire, ou lundi, mercredi et vendredi pour trois jours de pratique. Les autres jours ne prolongent ni ne cassent la série. Les réglages s’appliquent aussi à son historique, sans modifier les XP et quêtes acquis.",
+  "progression_every_day": "Tous les jours",
+  "progression_workweek": "Du lundi au vendredi",
+  "progression_days_per_week_one": "{{count}} jour prévu par semaine",
+  "progression_days_per_week_other": "{{count}} jours prévus par semaine",
+  "progression_schedule": "Jours prévus : {{days}}"
 }

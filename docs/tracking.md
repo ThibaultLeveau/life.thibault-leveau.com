@@ -64,7 +64,7 @@ Le score est la moyenne pondérée des objectifs. Sans aucune réponse évaluée
 
 Les statistiques montrent vos mesures dans le temps et une table des valeurs. Vous pouvez explorer une mesure de Tâches ou Sport sur la période choisie.
 
-**Réussites** devient un espace de progression par application : **60 quêtes chacune**, points d’expérience, niveaux de plus en plus exigeants jusqu’à 100, dix titres et journal des gains. Le badge commun en haut à droite affiche niveau, titre et série, avec les quêtes proches. Les réglages proposent les week-ends de repos par application et des vacances globales. Consultez le [guide des réussites](progression.md) pour les barèmes, les conditions de séries, les corrections et l’historique repris.
+**Réussites** devient un espace de progression par application : **60 quêtes chacune**, points d’expérience, niveaux de plus en plus exigeants jusqu’à 100, dix titres et journal des gains. Le badge commun en haut à droite affiche niveau, titre et série, avec les quêtes proches. Les réglages proposent les jours d’utilisation par application et des vacances globales. Consultez le [guide des réussites](progression.md) pour les barèmes, les conditions de séries, les corrections et l’historique repris.
 
 Les saisies existantes gardent leur définition et leurs objectifs. Les changements s’appliquent aux nouvelles périodes : au plus tôt le jour local de modification, ou à la prochaine période pour un suivi déjà commencé. Pour éviter de mélanger des historiques différents, fréquence, premier jour et fuseau ne se modifient pas ; créez un autre suivi pour les changer. Changer le type ou l’unité d’une donnée crée une nouvelle série de mesures.
 
