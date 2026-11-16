@@ -33,6 +33,7 @@ export function ObjectiveEditor({
   onCancel: () => void;
   onSaved: (o: Objective) => void;
 }) {
+  const [baseline] = useState(existing);
   const [draft, setDraft] = useState<ObjectiveInput>(() =>
     existing
       ? inputOf(existing)
@@ -86,7 +87,7 @@ export function ObjectiveEditor({
         e.preventDefault();
         void action.run(
           () =>
-            existing ? okrApi.update(existing, draft) : okrApi.create(draft),
+            baseline ? okrApi.update(baseline, draft) : okrApi.create(draft),
           onSaved,
         );
       }}

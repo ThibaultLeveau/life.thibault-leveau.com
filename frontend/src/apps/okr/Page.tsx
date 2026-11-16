@@ -154,12 +154,13 @@ export function Page() {
   function accepted(o: Objective, close = false) {
     dirty.current = false;
     setNotice(
-      o.status === "done"
-        ? tr("completion_message", {
-            quarter: quarterLabel(o.completed_quarter!),
-          })
-        : o.archived_at
-          ? tr("archive_message")
+      o.archived_at
+        ? tr("archive_message")
+        : o.status === "done" &&
+            all.find((item) => item.id === o.id)?.status !== "done"
+          ? tr("completion_message", {
+              quarter: quarterLabel(o.completed_quarter!),
+            })
           : tr("saved_message"),
     );
     if (close) setSelected(null);

@@ -458,6 +458,9 @@ test("OKR : brouillons, erreurs réseau, archives et réglages persistants", asy
     .getByRole("button", { name: "Archiver", exact: true })
     .click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page.locator(".okr-notice")).toHaveText(
+    "Objectif archivé, historique conservé.",
+  );
   await tab(page, "Archives");
   await page
     .getByRole("button", { name: `Ouvrir ${title}`, exact: true })
@@ -474,6 +477,41 @@ test("OKR : brouillons, erreurs réseau, archives et réglages persistants", asy
   const saved = await (await page.request.get("/api/v1/okr/settings")).json();
   expect(saved.timezone).toBe("Europe/Paris");
   expect(saved.version).toBeGreaterThan(0);
+});
+
+test("OKR : une modification concurrente protège le brouillon et les données serveur", async ({
+  page,
+}) => {
+  const created = await page.request.post("/api/v1/okr/objectives", {
+    headers,
+    data: {
+      title: `Cap partagé ${stamp}`,
+      domain: "personal",
+      horizon: "ten_year",
+    },
+  });
+  expect(created.ok()).toBeTruthy();
+  const o: Objective = await created.json();
+  await page.goto(`/okr?tab=horizons&edit=${o.id}`);
+  await page.getByLabel(/Votre objectif/).fill("Mon brouillon local");
+  const changed = await page.request.put(`/api/v1/okr/objectives/${o.id}`, {
+    headers,
+    data: {
+      expected_version: o.version,
+      title: "Modification depuis un autre appareil",
+      domain: "personal",
+      horizon: "ten_year",
+    },
+  });
+  expect(changed.ok()).toBeTruthy();
+  await page.getByRole("button", { name: "Enregistrer", exact: true }).click();
+  await expect(page.getByRole("alert")).toBeVisible();
+  await expect(page.getByLabel(/Votre objectif/)).toHaveValue(
+    "Mon brouillon local",
+  );
+  expect((await list(page)).find((item) => item.id === o.id)?.title).toBe(
+    "Modification depuis un autre appareil",
+  );
 });
 
 test("OKR : contenu FR/EN, clair/sombre/système et 320 px", async ({

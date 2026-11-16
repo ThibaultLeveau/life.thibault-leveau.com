@@ -29,6 +29,7 @@ export function ObjectiveDetail({
   const action = useApiAction();
   const [check, setCheck] = useState<{
     id: string;
+    version: number;
     value: string;
     note: string;
   } | null>(null);
@@ -44,7 +45,7 @@ export function ObjectiveDetail({
   );
   function start(k: KeyResult) {
     if (check && !window.confirm(tr("unsaved"))) return;
-    setCheck({ id: k.id, value: String(k.current), note: "" });
+    setCheck({ id: k.id, version: o.version, value: String(k.current), note: "" });
     onDirty(false);
   }
   function saved(result: Objective, close = false) {
@@ -142,7 +143,7 @@ export function ObjectiveDetail({
                         void action.run(
                           () =>
                             okrApi.checkIn(
-                              o,
+                              { ...o, version: check.version },
                               k.id,
                               Number(check.value),
                               check.note,
