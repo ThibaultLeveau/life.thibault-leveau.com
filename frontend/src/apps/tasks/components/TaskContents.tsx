@@ -6,6 +6,8 @@ import { Icon } from "../../../shared/ui/Icon";
 import { shortRecurrence } from "../scheduling";
 import { useTaskActions } from "./TaskActions";
 
+import { useTaskSync } from "../useTaskSync";
+
 export function TaskContents({
   task,
   today,
@@ -24,6 +26,7 @@ export function TaskContents({
   context?: ReactNode;
 }) {
   const actions = useTaskActions();
+  const flashing = useTaskSync().flashes.has(task.id);
   const selecting = actions?.selecting ?? false;
   const selected = actions?.selected.has(task.id) ?? false;
   const completed = !!task.completed_at;
@@ -36,7 +39,7 @@ export function TaskContents({
         className={
           selecting
             ? "task-checkbox task-select"
-            : `task-checkbox priority-${task.priority}`
+            : `task-checkbox priority-${task.priority} ${flashing ? "is-validating" : ""}`
         }
         onClick={() => (selecting ? actions?.toggle(task.id) : onComplete())}
         aria-label={tr("action_named", {
@@ -51,7 +54,9 @@ export function TaskContents({
         })}
         disabled={busy || actions?.busy}
       >
-        {(selecting ? selected : completed) && <Icon name="check" size={13} />}
+        {(selecting ? selected : completed || flashing) && (
+          <Icon name="check" size={13} />
+        )}
       </button>
       <div className="task-content">
         <button

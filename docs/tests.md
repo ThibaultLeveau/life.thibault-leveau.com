@@ -109,3 +109,9 @@ Les cartes de programme Sport sont mesurées à 320/375/1440 px, en français/an
 `test_i18n.py` couvre préférence et contraintes `fr/en`, session/CSRF/propriétaires, négociation, requêtes concurrentes, catalogues FR/EN et paramètres, les 680 identifiants, les homonymes personnels, instantanés et scores inchangés, désactivation/réactivation et migration `0008_locale`. `test_scheduling_english.py` couvre nombres, dates, cadences, bornes/exceptions, indices Unicode, diagnostics, textes littéraux et exemples de l’aide.
 
 `i18n.spec.ts` utilise l’API réelle et les bundles compilés pour vérifier langue anonyme et de compte, reconnexion, thème, Tâches en anglais, catalogue Sport et données personnelles, programmes/entraînements/historique, réponses obsolètes, brouillons, mobile/clavier et erreurs/expiration. La restauration conteneur compare aussi la langue du compte après un choix anglais persistant.
+
+## Interactions Tâches en arrière-plan
+
+`task-sync.spec.ts` retient explicitement les réponses d’écriture : plusieurs validations, la réouverture et d’autres actions doivent être visibles avant de libérer le réseau. Il compare ensuite les versions et valeurs avec l’API réelle. Les scénarios couvrent erreurs, conflits et conservation du brouillon, création suivie d’une action avant attribution de l’identifiant serveur, agenda, réglages, mobile/clavier et réduction des mouvements. Les parcours existants attendent la confirmation du statut d’enregistrement avant de vérifier la persistance après rechargement ; le rendu optimiste seul ne prouve pas la persistance.
+
+Le changement ne modifie ni tables, migrations, contrats HTTP, récurrences ni journal historique. Les validations PostgreSQL, propriétaire/CSRF, sauvegarde/restauration et désactivation/réactivation restent celles des parcours existants.

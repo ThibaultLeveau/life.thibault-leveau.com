@@ -10,12 +10,12 @@ export async function allTasks(
   today = localDate(),
 ) {
   const params = new URLSearchParams({
-    workspace_id: workspaceId,
     limit: "200",
     sort: view.sort,
     today,
     archived: String(archived),
   });
+  if (workspaceId) params.set("workspace_id", workspaceId);
   if (!archived) {
     params.set("search", view.search);
     params.set("due", view.due);

@@ -1,38 +1,30 @@
 import { tr } from "../i18n";
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
-import { api } from "../../../platform/api";
-import { allTasks } from "../api";
+import { useState, type FormEvent, type ReactNode } from "react";
+import { SyncFeedback, useTaskSync } from "../useTaskSync";
+import { activeTasks } from "../optimistic";
 import {
-  defaultView,
   type Label,
   type Section,
   type Status,
-  type Task,
   type Workspace,
 } from "../types";
-import { Dialog, ErrorMessage } from "../../../shared/ui/Dialog";
+import { Dialog } from "../../../shared/ui/Dialog";
 import { WorkspaceParentSelect } from "./WorkspaceParentSelect";
 import { Icon } from "../../../shared/ui/Icon";
 
 export type SettingsTab =
-  | "space"
-  | "sections"
-  | "statuses"
-  | "labels"
-  | "archives";
+  "space" | "sections" | "statuses" | "labels" | "archives";
 type Entity = Section | Status | Label;
 type Kind = "sections" | "statuses" | "labels";
 
 function EntityForm({
   kind,
   item,
-  disabled,
   onSubmit,
   children,
 }: {
   kind: Kind;
   item?: Entity;
-  disabled: boolean;
   onSubmit: (data: Record<string, unknown>) => Promise<boolean>;
   children?: ReactNode;
 }) {
@@ -84,7 +76,6 @@ function EntityForm({
               ? "secondary-button small-button"
               : "primary-button small-button"
           }
-          disabled={disabled}
         >
           {item ? tr("save") : tr("add")}
         </button>
@@ -136,7 +127,6 @@ export function WorkspaceSettings({
   labels,
   initialTab,
   onClose,
-  onChanged,
   onArchived,
 }: {
   workspace: Workspace;
@@ -146,41 +136,22 @@ export function WorkspaceSettings({
   labels: Label[];
   initialTab: SettingsTab;
   onClose: () => void;
-  onChanged: () => Promise<void>;
   onArchived: () => void;
 }) {
   const [tab, setTab] = useState(initialTab);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
-  const [archivedTasks, setArchivedTasks] = useState<Task[]>([]);
+  const sync = useTaskSync();
+  const archivedTasks = sync.data
+    ? activeTasks(sync.data, true).filter(
+        (task) => task.workspace_id === workspace.id,
+      )
+    : [];
   const [replacements, setReplacements] = useState<Record<string, string>>({});
   const base = `/workspaces/${workspace.id}`;
-  useEffect(() => {
-    if (tab !== "archives") return;
-    const controller = new AbortController();
-    allTasks(workspace.id, defaultView, true, controller.signal)
-      .then((page) => setArchivedTasks(page.items))
-      .catch((error) => {
-        if (!controller.signal.aborted) setError(error.message);
-      });
-    return () => controller.abort();
-  }, [tab, workspace.id, sections]);
   async function run(path: string, method: string, payload?: unknown) {
-    setBusy(true);
-    setError("");
-    setNotice("");
-    try {
-      await api(path, method, payload);
-      await onChanged();
-      setNotice(tr("changes_saved"));
-      return true;
-    } catch (error) {
-      setError((error as Error).message);
-      return false;
-    } finally {
-      setBusy(false);
-    }
+    sync.mutate(path, method, payload as Record<string, unknown>, {
+      message: tr("changes_saved"),
+    });
+    return true;
   }
   async function reorder(
     kind: "sections" | "statuses",
@@ -210,16 +181,13 @@ export function WorkspaceSettings({
     });
   }
   async function archiveSpace() {
-    setBusy(true);
-    setError("");
-    try {
-      await api(base, "PATCH", { archived: true });
-      onArchived();
-    } catch (error) {
-      setError((error as Error).message);
-    } finally {
-      setBusy(false);
-    }
+    sync.mutate(
+      base,
+      "PATCH",
+      { archived: true },
+      { message: tr("changes_saved") },
+    );
+    onArchived();
   }
   const tabs: [SettingsTab, string][] = [
     ["space", tr("workspace")],
@@ -264,14 +232,10 @@ export function WorkspaceSettings({
                 event.preventDefault();
                 setTab(tabs[next][0]);
                 document.getElementById(`tab-${tabs[next][0]}`)?.focus();
-                setError("");
-                setNotice("");
               }
             }}
             onClick={() => {
               setTab(value);
-              setError("");
-              setNotice("");
             }}
           >
             {label}
@@ -284,6 +248,7 @@ export function WorkspaceSettings({
         id={`settings-${tab}`}
         aria-labelledby={`tab-${tab}`}
       >
+        <SyncFeedback inDialog />
         {tab === "space" && (
           <>
             <form className="stack-form" onSubmit={saveSpace}>
@@ -318,9 +283,7 @@ export function WorkspaceSettings({
                 />
               </label>
               <div className="dialog-actions">
-                <button className="primary-button" disabled={busy}>
-                  {tr("save")}
-                </button>
+                <button className="primary-button">{tr("save")}</button>
               </div>
             </form>
             <div className="archive-space">
@@ -332,7 +295,7 @@ export function WorkspaceSettings({
               </div>
               <button
                 className="secondary-button"
-                disabled={busy}
+
                 onClick={archiveSpace}
               >
                 <Icon name="archive" />
@@ -359,10 +322,10 @@ export function WorkspaceSettings({
             <div className="entity-list">
               {entities.map((item, index) => (
                 <EntityForm
-                  key={item.id}
+                  key={sync.keyFor(item.id)}
                   kind={tab}
                   item={item}
-                  disabled={busy}
+
                   onSubmit={(payload) =>
                     run(
                       `${base}/${tab}/${item.id}`,
@@ -376,7 +339,7 @@ export function WorkspaceSettings({
                       <button
                         type="button"
                         className="icon-button"
-                        disabled={busy || index === 0}
+                        disabled={index === 0}
                         aria-label={tr("move_up", { name: item.name })}
                         onClick={() => reorder(tab, index, -1)}
                       >
@@ -385,7 +348,7 @@ export function WorkspaceSettings({
                       <button
                         type="button"
                         className="icon-button"
-                        disabled={busy || index === entities.length - 1}
+                        disabled={index === entities.length - 1}
                         aria-label={tr("move_down", { name: item.name })}
                         onClick={() => reorder(tab, index, 1)}
                       >
@@ -398,7 +361,7 @@ export function WorkspaceSettings({
                     <button
                       type="button"
                       className="text-button"
-                      disabled={busy}
+
                       onClick={() =>
                         run(`${base}/sections/${item.id}`, "PATCH", {
                           archived: true,
@@ -413,7 +376,7 @@ export function WorkspaceSettings({
                     <button
                       type="button"
                       className="text-button danger"
-                      disabled={busy}
+
                       onClick={() => {
                         if (
                           window.confirm(
@@ -461,7 +424,7 @@ export function WorkspaceSettings({
                       <button
                         type="button"
                         className="text-button danger"
-                        disabled={busy}
+
                         onClick={() => {
                           if (
                             window.confirm(
@@ -493,7 +456,7 @@ export function WorkspaceSettings({
             <EntityForm
               key={tab}
               kind={tab}
-              disabled={busy}
+
               onSubmit={(payload) => run(`${base}/${tab}`, "POST", payload)}
             />
           </>
@@ -511,7 +474,7 @@ export function WorkspaceSettings({
                   <span>{section.name}</span>
                   <button
                     className="secondary-button small-button"
-                    disabled={busy}
+
                     onClick={() =>
                       run(`${base}/sections/${section.id}`, "PATCH", {
                         archived: false,
@@ -545,17 +508,12 @@ export function WorkspaceSettings({
                   {task.archived_at && (
                     <button
                       className="secondary-button small-button"
-                      disabled={busy || parentArchived}
-                      onClick={async () => {
-                        if (
-                          await run(`/tasks/${task.id}`, "PATCH", {
-                            expected_version: task.version,
-                            archived: false,
-                          })
-                        )
-                          setArchivedTasks((previous) =>
-                            previous.filter((item) => item.id !== task.id),
-                          );
+                      disabled={parentArchived}
+                      onClick={() => {
+                        void run(`/tasks/${task.id}`, "PATCH", {
+                          expected_version: task.version,
+                          archived: false,
+                        });
                       }}
                     >
                       <Icon name="restore" size={14} />
@@ -566,12 +524,6 @@ export function WorkspaceSettings({
               );
             })}
           </>
-        )}
-        <ErrorMessage message={error} />
-        {notice && (
-          <p className="success-message" role="status">
-            {notice}
-          </p>
         )}
       </div>
     </Dialog>

@@ -2117,6 +2117,77 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.task-sidebar .account-menu { margin: 16px 8px; gap: 12px; }
-.task-sidebar .account-menu .theme-select { width: 100%; }
-.task-sidebar .account-menu .account-name { margin-right: auto; }
+.task-sidebar .account-menu {
+  margin: 16px 8px;
+  gap: 12px;
+}
+.task-sidebar .account-menu .theme-select {
+  width: 100%;
+}
+.task-sidebar .account-menu .account-name {
+  margin-right: auto;
+}
+
+.task-sync-feedback {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+.task-sync-status {
+  min-height: 1.5em;
+  margin: 0 0 8px;
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+.task-sync-error {
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  border: 1px solid var(--ui-border);
+  border-radius: 8px;
+  background: var(--ui-paper);
+}
+.task-sync-error p {
+  margin: 0 0 6px;
+}
+.task-sync-error button + button {
+  margin-inline-start: 12px;
+}
+.task-checkbox.is-validating {
+  background: var(--ui-accent);
+  border-color: var(--ui-accent);
+  color: var(--ui-button-text);
+  animation: task-validation 420ms ease-out;
+}
+.task-checkbox.is-validating svg {
+  animation: task-check 260ms ease-out;
+}
+@keyframes task-validation {
+  0% {
+    transform: scale(0.86);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--ui-accent) 30%, transparent);
+  }
+  45% {
+    transform: scale(1.16);
+    box-shadow: 0 0 0 7px color-mix(in srgb, var(--ui-accent) 0%, transparent);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 9px transparent;
+  }
+}
+@keyframes task-check {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .task-checkbox.is-validating,
+  .task-checkbox.is-validating svg {
+    animation: none;
+  }
+}

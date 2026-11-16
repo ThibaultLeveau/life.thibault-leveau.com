@@ -1,4 +1,5 @@
 import { tr } from "../i18n";
+import { useTaskSync } from "../useTaskSync";
 import { useState, type CSSProperties, type FormEvent } from "react";
 import {
   closestCenter,
@@ -215,6 +216,7 @@ function Cell({
   tasks: Task[];
   props: Props;
 }) {
+  const sync = useTaskSync();
   const disabled = props.busy || props.view.sort !== "manual";
   const drop = useDroppable({
     id: `cell:${sectionId ?? "none"}:${statusId ?? "list"}`,
@@ -230,7 +232,7 @@ function Cell({
     >
       {tasks.map((task) => (
         <TaskCard
-          key={task.id}
+          key={sync.keyFor(task.id)}
           task={task}
           today={props.today}
           labels={props.labels}

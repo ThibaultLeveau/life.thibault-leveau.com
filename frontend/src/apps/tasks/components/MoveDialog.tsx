@@ -1,6 +1,7 @@
 import { tr } from "../i18n";
 import { useEffect, useState, type FormEvent } from "react";
 import { api } from "../../../platform/api";
+import { useTaskSync } from "../useTaskSync";
 import { allTasks } from "../api";
 import {
   defaultView,
@@ -31,7 +32,7 @@ export function MoveDialog({
   const [statusId, setStatusId] = useState(task.status_id);
   const [beforeId, setBeforeId] = useState("");
   const [loading, setLoading] = useState(true);
-  const [busy, setBusy] = useState(false);
+  const sync = useTaskSync();
   const [error, setError] = useState("");
   useEffect(() => {
     const controller = new AbortController();
@@ -79,23 +80,21 @@ export function MoveDialog({
   }, [spaceId, task]);
   async function submit(event: FormEvent) {
     event.preventDefault();
-    setBusy(true);
-    setError("");
-    try {
-      await api(`/tasks/${task.id}/move`, "POST", {
+    sync.mutate(
+      `/tasks/${task.id}/move`,
+      "POST",
+      {
         expected_version: task.version,
         workspace_id: spaceId,
         section_id: sectionId || null,
         status_id: statusId,
         before_id: beforeId || null,
-      });
-      onSaved();
-    } catch (error) {
-      setError((error as Error).message);
-    } finally {
-      setBusy(false);
-    }
+      },
+      { message: tr("task_moved") },
+    );
+    onSaved();
   }
+
   return (
     <Dialog title={tr("move_task")} onClose={onClose}>
       <form className="stack-form dialog-body" onSubmit={submit}>
@@ -177,11 +176,8 @@ export function MoveDialog({
           <button type="button" className="secondary-button" onClick={onClose}>
             {tr("cancel")}
           </button>
-          <button
-            className="primary-button"
-            disabled={loading || busy || !statusId}
-          >
-            {busy ? tr("moving") : tr("move")}
+          <button className="primary-button" disabled={loading || !statusId}>
+            {tr("move")}
           </button>
         </div>
       </form>

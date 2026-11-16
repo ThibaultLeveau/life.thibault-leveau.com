@@ -1,10 +1,4 @@
-import {
-  test,
-  expect,
-  type Page,
-  type BrowserContext,
-  type APIRequestContext,
-} from "@playwright/test";
+import { test, expect, type Page, type BrowserContext } from "@playwright/test";
 import type { Task, Workspace, Section } from "../src/apps/tasks/types";
 import { localDate } from "../src/apps/tasks/types";
 
@@ -54,11 +48,12 @@ async function seed(page: Page, count = 3) {
 }
 const row = (page: Page, task: Task) =>
   page.locator(`[data-task-id="${task.id}"]`);
-async function taskFromAPI(
-  request: APIRequestContext,
-  task: Task,
-): Promise<Task> {
-  return (await request.get(`/api/v1/tasks/${task.id}`)).json();
+async function taskFromAPI(page: Page, task: Task): Promise<Task> {
+  await expect(page.locator(".task-sync-status")).toHaveAttribute(
+    "data-pending",
+    "0",
+  );
+  return (await page.request.get(`/api/v1/tasks/${task.id}`)).json();
 }
 async function rectangle(page: Page, first: Task, last: Task) {
   await expect(
@@ -120,9 +115,7 @@ test("menu trois points et clic droit : clavier, copie, suppression réversible"
     page.getByRole("menuitem", { name: "Modifier", exact: true }),
   ).toBeFocused();
   await page.keyboard.press("ArrowDown");
-  await expect(
-    page.getByRole("menuitem", { name: "Dupliquer" }),
-  ).toBeFocused();
+  await expect(page.getByRole("menuitem", { name: "Dupliquer" })).toBeFocused();
   await page.keyboard.press("Escape");
   await expect(trigger).toBeFocused();
   await row(page, tasks[0])
@@ -149,25 +142,21 @@ test("menu trois points et clic droit : clavier, copie, suppression réversible"
   await row(page, copy)
     .getByRole("button", { name: `Actions : ${copy.title}`, exact: true })
     .click();
-  await page
-    .getByRole("menuitem", { name: "Supprimer", exact: true })
-    .click();
+  await page.getByRole("menuitem", { name: "Supprimer", exact: true }).click();
   await page
     .getByRole("dialog")
     .getByRole("button", { name: "Annuler" })
     .click();
-  expect((await taskFromAPI(page.request, copy)).archived_at).toBeNull();
+  expect((await taskFromAPI(page, copy)).archived_at).toBeNull();
   await row(page, copy).click({ button: "right" });
-  await page
-    .getByRole("menuitem", { name: "Supprimer", exact: true })
-    .click();
+  await page.getByRole("menuitem", { name: "Supprimer", exact: true }).click();
   await page
     .getByRole("dialog")
     .getByRole("button", { name: "Supprimer", exact: true })
     .click();
   await expect(row(page, copy)).toHaveCount(0);
-  expect((await taskFromAPI(page.request, copy)).archived_at).not.toBeNull();
-  expect((await taskFromAPI(page.request, tasks[0])).archived_at).toBeNull();
+  expect((await taskFromAPI(page, copy)).archived_at).not.toBeNull();
+  expect((await taskFromAPI(page, tasks[0])).archived_at).toBeNull();
 });
 
 test("rectangle et actions groupées : dates, déplacement, suppression et désélection", async ({
@@ -183,17 +172,13 @@ test("rectangle et actions groupées : dates, déplacement, suppression et dés�
   ).toBeVisible();
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await page.screenshot({ path: "test-results/selection-desktop.png" });
-  await page
-    .getByRole("button", { name: "Replanifier", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Replanifier", exact: true }).click();
   const calendar = page.getByRole("dialog").getByRole("grid");
   await calendar.locator('button[tabindex="0"]').focus();
   await page.keyboard.press("PageDown");
   const focusedDate = await page.locator(":focus").getAttribute("data-date");
   await page.keyboard.press("Space");
-  await expect(
-    calendar.locator(`[data-date="${focusedDate}"]`),
-  ).toBeFocused();
+  await expect(calendar.locator(`[data-date="${focusedDate}"]`)).toBeFocused();
   await page
     .getByRole("dialog")
     .getByRole("button", { name: "Demain", exact: true })
@@ -205,14 +190,10 @@ test("rectangle et actions groupées : dates, déplacement, suppression et dés�
   await expect(
     page.getByText("2 tâches replanifiées.", { exact: true }),
   ).toBeVisible();
-  const first = await taskFromAPI(page.request, tasks[0]);
+  const first = await taskFromAPI(page, tasks[0]);
   expect(first.due_date).not.toBe(tasks[0].due_date);
-  expect((await taskFromAPI(page.request, tasks[1])).due_date).toBe(
-    first.due_date,
-  );
-  expect((await taskFromAPI(page.request, tasks[2])).due_date).toBe(
-    tasks[2].due_date,
-  );
+  expect((await taskFromAPI(page, tasks[1])).due_date).toBe(first.due_date);
+  expect((await taskFromAPI(page, tasks[2])).due_date).toBe(tasks[2].due_date);
   await rectangle(page, tasks[0], tasks[1]);
   await page.getByRole("button", { name: "Déplacer", exact: true }).click();
   await page
@@ -226,10 +207,12 @@ test("rectangle et actions groupées : dates, déplacement, suppression et dés�
   await expect(
     page.getByText("2 tâches déplacées.", { exact: true }),
   ).toBeVisible();
-  expect((await taskFromAPI(page.request, tasks[0])).section_id).toBe(
-    section.id,
-  );
+  expect((await taskFromAPI(page, tasks[0])).section_id).toBe(section.id);
   // Reload also loads the section created externally before the move.
+  await expect(page.locator(".task-sync-status")).toHaveAttribute(
+    "data-pending",
+    "0",
+  );
   await page.reload();
   await expect(row(page, tasks[0])).toBeVisible();
   await rectangle(page, tasks[0], tasks[1]);
@@ -237,9 +220,7 @@ test("rectangle et actions groupées : dates, déplacement, suppression et dés�
   await expect(
     page.getByRole("region", { name: "Actions de la sélection" }),
   ).toHaveCount(0);
-  await page
-    .getByRole("button", { name: "Sélectionner", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Sélectionner", exact: true }).click();
   await page
     .getByRole("checkbox", {
       name: `Sélectionner : ${tasks[0].title}`,
@@ -258,20 +239,16 @@ test("rectangle et actions groupées : dates, déplacement, suppression et dés�
     .getByRole("button", { name: "Supprimer", exact: true })
     .click();
   await expect(row(page, tasks[0])).toHaveCount(0);
-  expect(
-    (await taskFromAPI(page.request, tasks[1])).archived_at,
-  ).not.toBeNull();
-  expect((await taskFromAPI(page.request, tasks[2])).archived_at).toBeNull();
+  expect((await taskFromAPI(page, tasks[1])).archived_at).not.toBeNull();
+  expect((await taskFromAPI(page, tasks[2])).archived_at).toBeNull();
 });
 
-test("un conflit de lot conserve la sélection et ne change aucune autre tâche", async ({
+test("un conflit de lot ferme le dialogue, signale l’échec et ne change aucune autre tâche", async ({
   page,
 }) => {
   const { tasks, mutate } = await seed(page);
   await rectangle(page, tasks[0], tasks[1]);
-  await page
-    .getByRole("button", { name: "Replanifier", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Replanifier", exact: true }).click();
   await mutate(
     `/tasks/${tasks[1].id}`,
     { expected_version: tasks[1].version, title: "Modifiée ailleurs" },
@@ -286,12 +263,8 @@ test("un conflit de lot conserve la sélection et ne change aucune autre tâche"
     .getByRole("button", { name: "Replanifier", exact: true })
     .click();
   await expect(page.getByRole("alert")).toContainText("Cette tâche a changé");
-  expect((await taskFromAPI(page.request, tasks[0])).version).toBe(
-    tasks[0].version,
-  );
-  await expect(
-    page.getByText("2 sélectionnées", { exact: true }),
-  ).toBeVisible();
+  expect((await taskFromAPI(page, tasks[0])).version).toBe(tasks[0].version);
+  await expect(page.getByRole("dialog")).toHaveCount(0);
   await page
     .getByRole("button", { name: "Recharger les tâches", exact: true })
     .click();
@@ -312,9 +285,7 @@ test("tableau et agenda partagent menus et sélection entre espaces", async ({
   ).toBeVisible();
   await page.keyboard.press("Escape");
   await row(page, tasks[0]).click({ button: "right" });
-  await expect(
-    page.getByRole("menuitem", { name: "Dupliquer" }),
-  ).toBeVisible();
+  await expect(page.getByRole("menuitem", { name: "Dupliquer" })).toBeVisible();
   await page.keyboard.press("Escape");
   await mutate(
     "/agenda/view",
@@ -348,9 +319,7 @@ test("tableau et agenda partagent menus et sélection entre espaces", async ({
   await expect(
     page.getByText("2 sélectionnées", { exact: true }),
   ).toBeVisible();
-  await page
-    .getByRole("button", { name: "Replanifier", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Replanifier", exact: true }).click();
   await page
     .getByRole("dialog")
     .getByRole("button", { name: "Demain", exact: true })
@@ -362,12 +331,10 @@ test("tableau et agenda partagent menus et sélection entre espaces", async ({
   await expect(row(page, tasks[0])).toHaveCount(0);
   await expect(row(page, otherTask)).toHaveCount(0);
   await expect(row(page, tasks[1])).toBeVisible();
-  expect((await taskFromAPI(page.request, otherTask)).due_date).toBe(
-    (await taskFromAPI(page.request, tasks[0])).due_date,
+  expect((await taskFromAPI(page, otherTask)).due_date).toBe(
+    (await taskFromAPI(page, tasks[0])).due_date,
   );
-  expect((await taskFromAPI(page.request, tasks[0])).workspace_id).toBe(
-    space.id,
-  );
+  expect((await taskFromAPI(page, tasks[0])).workspace_id).toBe(space.id);
 });
 
 test("mobile tactile : défilement, appui long, actions et navigation à 320/375 px", async ({
@@ -389,9 +356,7 @@ test("mobile tactile : défilement, appui long, actions et navigation à 320/375
   await row(page, tasks[0]).scrollIntoViewIfNeeded();
   const b = (await row(page, tasks[0]).boundingBox())!;
   await touch(context, page, b.x + 90, b.y + 25);
-  await expect(
-    page.getByText("1 sélectionnée", { exact: true }),
-  ).toBeVisible();
+  await expect(page.getByText("1 sélectionnée", { exact: true })).toBeVisible();
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await row(page, tasks[1])
     .getByRole("button", { name: tasks[1].title, exact: true })
@@ -416,9 +381,7 @@ test("mobile tactile : défilement, appui long, actions et navigation à 320/375
     await page.setViewportSize({ width, height: 812 });
     await expect
       .poll(() =>
-        page.evaluate(
-          () => document.documentElement.scrollWidth <= innerWidth,
-        ),
+        page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
       )
       .toBe(true);
     await page.getByRole("button", { name: "Ouvrir la navigation" }).tap();
@@ -442,9 +405,7 @@ test("mobile tactile : défilement, appui long, actions et navigation à 320/375
     await page.keyboard.press("Escape");
   }
   await page.getByRole("button", { name: "Ouvrir la navigation" }).tap();
-  await page
-    .getByRole("button", { name: "Nouvel espace", exact: true })
-    .tap();
+  await page.getByRole("button", { name: "Nouvel espace", exact: true }).tap();
   await expect(page.getByRole("dialog")).toHaveCount(1);
   await page
     .getByRole("dialog")
@@ -460,6 +421,10 @@ test("mobile tactile : défilement, appui long, actions et navigation à 320/375
     )
     .toBe(true);
   await mutate("/preferences", { theme: "dark" }, "PUT");
+  await expect(page.locator(".task-sync-status")).toHaveAttribute(
+    "data-pending",
+    "0",
+  );
   await page.reload();
   await page
     .getByRole("button", { name: `Actions : ${tasks[0].title}`, exact: true })
@@ -486,6 +451,10 @@ test("rectangle : défilement aux bords, annulation, Ctrl-clic et menu borné", 
     section_id: hidden.id,
     title: "Tâche masquée",
   });
+  await expect(page.locator(".task-sync-status")).toHaveAttribute(
+    "data-pending",
+    "0",
+  );
   await page.reload();
   await expect(row(page, tasks[0])).toBeVisible();
   await expect(row(page, hiddenTask)).toHaveCount(0);
@@ -542,5 +511,5 @@ test("rectangle : défilement aux bords, annulation, Ctrl-clic et menu borné", 
   await expect(
     menu.getByRole("menuitem", { name: "Supprimer", exact: true }),
   ).toBeInViewport();
-  expect((await taskFromAPI(page.request, hiddenTask)).version).toBe(1);
+  expect((await taskFromAPI(page, hiddenTask)).version).toBe(1);
 });

@@ -2,6 +2,16 @@
 
 Tâches est une application de LifeOS, activée par défaut. Retrouvez-la sur l’accueil ou réactivez-la dans la [bibliothèque](applications.md). Une désactivation bloque son accès sans changer les données ni l’historique.
 
+## Interactions immédiates
+
+Cocher une tâche affiche aussitôt sa validation avec une courte animation. Vous pouvez cocher une autre tâche immédiatement. Création, édition, déplacement, duplication, suppression/restauration, actions groupées et réglages s’affichent également sans attendre leur enregistrement. Les listes, le tableau et **À venir** restent utilisables ; le statut en haut de la page indique les actions en cours d’enregistrement.
+
+La prochaine échéance d’une tâche récurrente apparaît à réception du calcul serveur. Les dates saisies en langage naturel restent validées avant l’envoi. Les confirmations de suppression et validations de formulaire restent présentes.
+
+Si l’enregistrement échoue, un message précise le problème et l’affichage est rapproché des données enregistrées. Les autres actions indépendantes continuent. **Reprendre la saisie** permet de récupérer un brouillon de tâche, y compris après navigation entre les vues. Après un conflit, vérifiez les valeurs enregistrées avant de soumettre à nouveau. Après une interruption réseau, rechargez pour vérifier si l’action a été enregistrée avant de la renouveler.
+
+Attendez la fin du statut d’enregistrement avant de fermer ou recharger la page : les actions en attente ne sont pas conservées hors connexion. Le navigateur avertit si vous tentez de quitter pendant l’enregistrement. L’animation respecte le réglage système de réduction des mouvements.
+
 ## Se connecter et créer un espace
 
 Se connecter avec le compte créé par l'opérateur, puis choisir **Ouvrir** sur la carte **Tâches** de l’accueil ou de la bibliothèque. La page de connexion présente les champs **Identifiant** et **Mot de passe**, puis le bouton **Se connecter**. Les erreurs s’affichent dans le formulaire. La déconnexion se trouve à côté du profil. Une session expirée demande une nouvelle connexion ; les données déjà enregistrées restent conservées.

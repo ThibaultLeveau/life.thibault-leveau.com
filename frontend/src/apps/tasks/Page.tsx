@@ -1,8 +1,6 @@
 import { formatLocale, documentationPath } from "../../shared/i18n";
 import { tr } from "./i18n";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { allTasks } from "./api";
-import { api } from "../../platform/api";
 import { useSession } from "../../platform/auth/SessionProvider";
 import { AccountMenu } from "../../platform/auth/AccountMenu";
 import { relativeDate, useLocalToday } from "./dates";
@@ -10,15 +8,12 @@ import { AgendaView } from "./components/AgendaView";
 import { TaskActions } from "./components/TaskActions";
 import {
   defaultView,
-  type Label,
-  type Section,
   type Schedule,
-  type Status,
   type Task,
   type ViewSettings,
   type Workspace,
 } from "./types";
-import { Dialog, ErrorMessage } from "../../shared/ui/Dialog";
+import { Dialog } from "../../shared/ui/Dialog";
 import { Icon } from "../../shared/ui/Icon";
 import { MoveDialog } from "./components/MoveDialog";
 import { TaskEditor } from "./components/TaskEditor";
@@ -29,31 +24,51 @@ import {
   type SettingsTab,
 } from "./components/WorkspaceSettings";
 import { workspaceTree } from "./workspaceTree";
+import { TaskSyncProvider, SyncFeedback, useTaskSync } from "./useTaskSync";
+import { workspaceTasks } from "./optimistic";
 import "./styles.css";
 
 export function Page() {
+  return (
+    <TaskSyncProvider>
+      <TasksPage />
+    </TaskSyncProvider>
+  );
+}
+
+function TasksPage() {
+  const sync = useTaskSync();
   const today = useLocalToday();
   const [agenda, setAgenda] = useState(
     !new URLSearchParams(window.location.search).has("space"),
   );
   const { session } = useSession();
-  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
-  const [archivedSpaces, setArchivedSpaces] = useState<Workspace[]>([]);
   const [workspaceId, setWorkspaceId] = useState(
     new URLSearchParams(window.location.search).get("space") ?? "",
   );
-  const [sections, setSections] = useState<Section[]>([]);
-  const [statuses, setStatuses] = useState<Status[]>([]);
-  const [labels, setLabels] = useState<Label[]>([]);
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [view, setView] = useState<ViewSettings>(defaultView);
+  const data = sync.data;
+  const workspaces =
+    data?.workspaces.filter((space) => !space.archived_at) ?? [];
+  const archivedSpaces =
+    data?.workspaces.filter((space) => space.archived_at) ?? [];
+  const sections =
+    data?.sections
+      .filter((section) => section.workspace_id === workspaceId)
+      .sort((a, b) => a.position - b.position) ?? [];
+  const statuses =
+    data?.statuses
+      .filter((status) => status.workspace_id === workspaceId)
+      .sort((a, b) => a.position - b.position) ?? [];
+  const labels =
+    data?.labels.filter((label) => label.workspace_id === workspaceId) ?? [];
+  const view = data?.views[workspaceId] ?? defaultView;
+  const tasks = data
+    ? workspaceTasks(data, workspaceId, view, today, sync.flashes)
+    : [];
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [spacesLoading, setSpacesLoading] = useState(true);
-  const sessionEpoch = useRef(0);
-  const [taskLoading, setTaskLoading] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
+  const loading =
+    !data || (!agenda && !!workspaceId && !data.views[workspaceId]);
+  const spacesLoading = !data;
   const [notice, setNotice] = useState("");
   const [undoTask, setUndoTask] = useState<Task | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -66,12 +81,15 @@ export function Page() {
   const [settingsTab, setSettingsTab] = useState<SettingsTab | null>(null);
   const [editor, setEditor] = useState<Task | "new" | null>(null);
   const [moving, setMoving] = useState<Task | null>(null);
-  const [reloadTasks, setReloadTasks] = useState(0);
   const focusSearch = useRef(false);
-  const selectedRef = useRef(workspaceId);
-  const viewRef = useRef(view);
-  const viewWrites = useRef<Promise<unknown>>(Promise.resolve());
-  selectedRef.current = workspaceId;
+  useEffect(() => {
+    if (!sync.recovery) return;
+    setAgenda(false);
+    setWorkspaceId(sync.recovery.workspace_id);
+    setEditor(sync.recovery);
+    sync.recoverTask(null);
+  }, [sync.recovery]);
+
   const spaceTree = workspaceTree(workspaces);
   const archivedTree = workspaceTree([...workspaces, ...archivedSpaces]).filter(
     ({ space }) => space.archived_at,
@@ -124,144 +142,42 @@ export function Page() {
   }, [sidebarOpen]);
 
   useEffect(() => {
+    if (!agenda && data && workspaceId) void sync.ensureSpace(workspaceId);
+  }, [workspaceId, agenda, !!data]);
+  useEffect(() => {
     document.title = tr("tasks_lifeos");
-    return () => {
-      sessionEpoch.current += 1;
-    };
-  }, []);
-
-  const loadWorkspaces = useCallback(async (preferId?: string) => {
-    const epoch = sessionEpoch.current;
-    const [active, archived] = await Promise.all([
-      api<Workspace[]>("/workspaces"),
-      api<Workspace[]>("/workspaces?archived=true"),
-    ]);
-    if (epoch !== sessionEpoch.current) return;
-    setWorkspaces(active);
-    setArchivedSpaces(archived);
-    const selected = preferId ?? selectedRef.current;
-    setWorkspaceId(
-      active.some((space) => space.id === selected)
-        ? selected
-        : (active[0]?.id ?? ""),
-    );
   }, []);
   useEffect(() => {
-    if (!session) return;
-    setSpacesLoading(true);
-    loadWorkspaces()
-      .catch((error) => setError(error.message))
-      .finally(() => setSpacesLoading(false));
-  }, [session?.user_id, loadWorkspaces]);
-
-  const loadSpace = useCallback(async (id: string, signal?: AbortSignal) => {
-    await viewWrites.current;
-    const base = `/workspaces/${id}`;
-    const [activeSections, archivedSections, statuses, labels, savedView] =
-      await Promise.all([
-        api<Section[]>(`${base}/sections`, "GET", undefined, signal),
-        api<Section[]>(
-          `${base}/sections?archived=true`,
-          "GET",
-          undefined,
-          signal,
-        ),
-        api<Status[]>(`${base}/statuses`, "GET", undefined, signal),
-        api<Label[]>(`${base}/labels`, "GET", undefined, signal),
-        api<ViewSettings>(`${base}/view`, "GET", undefined, signal),
-      ]);
-    if (selectedRef.current !== id || signal?.aborted) return;
-    setSections(
-      [...activeSections, ...archivedSections].sort(
-        (a, b) => a.position - b.position,
-      ),
-    );
-    setStatuses(statuses);
-    setLabels(labels);
-    setView(savedView);
-    viewRef.current = savedView;
-    setSearch(savedView.search);
-  }, []);
+    if (data && !workspaces.some((space) => space.id === workspaceId))
+      setWorkspaceId(workspaces[0]?.id ?? "");
+  }, [data, workspaceId]);
   useEffect(() => {
-    if (!session) return;
-    if (agenda) {
-      setLoading(false);
-      setTaskLoading(false);
-      window.history.replaceState(null, "", "/tasks?view=agenda");
-      return;
-    }
-    if (!workspaceId) return;
-    const controller = new AbortController();
-    setLoading(true);
-    setError("");
-    setTasks([]);
-    setSections([]);
-    setStatuses([]);
-    setLabels([]);
     window.history.replaceState(
       null,
       "",
-      `/tasks?space=${encodeURIComponent(workspaceId)}`,
+      agenda
+        ? "/tasks?view=agenda"
+        : `/tasks?space=${encodeURIComponent(workspaceId)}`,
     );
-    loadSpace(workspaceId, controller.signal)
-      .catch((error) => {
-        if (!controller.signal.aborted) setError(error.message);
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
-      });
-    return () => controller.abort();
-  }, [workspaceId, session?.user_id, loadSpace, agenda]);
+  }, [agenda, workspaceId]);
   useEffect(() => {
-    if (!session || agenda || !workspaceId || loading || !statuses.length)
-      return;
-    const controller = new AbortController();
-    setTaskLoading(true);
-    allTasks(workspaceId, view, false, controller.signal, today)
-      .then((page) => {
-        if (!controller.signal.aborted) setTasks(page.items);
-      })
-      .catch((error) => {
-        if (!controller.signal.aborted) {
-          setError(error.message);
-        }
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setTaskLoading(false);
-      });
-    return () => controller.abort();
-  }, [
-    workspaceId,
-    agenda,
-    today,
-    view,
-    reloadTasks,
-    loading,
-    statuses.length,
-    session?.user_id,
-  ]);
-
+    setSearch(view.search);
+  }, [workspaceId, view.search]);
   const changeView = useCallback(
     (patch: Partial<ViewSettings>) => {
-      const id = selectedRef.current;
-      if (!id || loading || spacesLoading) return;
-      const next = { ...viewRef.current, ...patch };
-      viewRef.current = next;
-      setView(next);
-      viewWrites.current = viewWrites.current
-        .then(() => api(`/workspaces/${id}/view`, "PUT", next))
-        .catch((error) =>
-          setError(tr("settings_unsaved", { message: error.message })),
-        );
+      if (!workspaceId || !data) return;
+      sync.mutate(`/workspaces/${workspaceId}/view`, "PUT", {
+        ...view,
+        ...patch,
+      });
     },
-    [loading, spacesLoading],
+    [workspaceId, data, view, sync.mutate],
   );
   useEffect(() => {
-    if (agenda || !workspaceId || loading || search === viewRef.current.search)
-      return;
+    if (agenda || !workspaceId || loading || search === view.search) return;
     const timer = setTimeout(() => changeView({ search }), 300);
     return () => clearTimeout(timer);
-  }, [search, workspaceId, loading, changeView, agenda]);
+  }, [search, workspaceId, loading, changeView, agenda, view.search]);
   useEffect(() => {
     if (!agenda && !loading && focusSearch.current) {
       const field = document.getElementById("task-search");
@@ -297,69 +213,42 @@ export function Page() {
     return () => window.removeEventListener("keydown", shortcut);
   }, []);
 
-  async function refreshEntities() {
-    setTaskLoading(true);
-    try {
-      await Promise.all([loadWorkspaces(), loadSpace(selectedRef.current)]);
-    } finally {
-      setReloadTasks((value) => value + 1);
-    }
-  }
-  async function action(
-    run: () => Promise<unknown>,
-    message: string | (() => string),
-  ) {
-    setBusy(true);
-    setTaskLoading(true);
-    setError("");
-    setNotice("");
+  function complete(task: Task) {
     setUndoTask(null);
-    try {
-      await run();
-      setTaskLoading(true);
-      setReloadTasks((value) => value + 1);
-      setNotice(typeof message === "function" ? message() : message);
-    } catch (error) {
-      setError((error as Error).message);
-      setTaskLoading(true);
-      setReloadTasks((value) => value + 1);
-    } finally {
-      setBusy(false);
-    }
-  }
-  async function complete(task: Task) {
-    let saved: Task;
-    await action(
-      async () => {
-        saved = await api<Task>(
-          `/tasks/${task.id}/${task.completed_at ? "reopen" : "complete"}`,
-          "POST",
-          { expected_version: task.version },
-        );
-        setUndoTask(task.completed_at ? null : saved);
+    sync.mutate(
+      `/tasks/${task.id}/${task.completed_at ? "reopen" : "complete"}`,
+      "POST",
+      { expected_version: task.version },
+      {
+        success: (result) => {
+          const saved = result as Task;
+          setUndoTask(task.completed_at ? null : saved);
+          setNotice(
+            task.completed_at
+              ? tr("task_reopened")
+              : saved.recurrence && !saved.completed_at
+                ? tr("occurrence_next", {
+                    date: relativeDate(saved.due_date!, today).full,
+                  })
+                : saved.recurrence
+                  ? tr("last_occurrence_completed")
+                  : tr("one_step_forward_task_completed"),
+          );
+        },
       },
-      () =>
-        task.completed_at
-          ? tr("task_reopened")
-          : saved.recurrence && !saved.completed_at
-            ? tr("occurrence_next", {
-                date: relativeDate(saved.due_date!, today).full,
-              })
-            : saved.recurrence
-              ? tr("last_occurrence_completed")
-              : tr("one_step_forward_task_completed"),
     );
   }
   async function move(task: Task, destination: Destination) {
-    await action(
-      () =>
-        api(`/tasks/${task.id}/move`, "POST", {
-          ...destination,
-          status_id: destination.status_id ?? task.status_id,
-          workspace_id: task.workspace_id,
-          expected_version: task.version,
-        }),
-      tr("task_moved"),
+    sync.mutate(
+      `/tasks/${task.id}/move`,
+      "POST",
+      {
+        ...destination,
+        status_id: destination.status_id ?? task.status_id,
+        workspace_id: task.workspace_id,
+        expected_version: task.version,
+      },
+      { message: tr("task_moved") },
     );
   }
   async function quickAdd(
@@ -368,18 +257,42 @@ export function Page() {
     statusId: string,
     schedule?: Schedule,
   ) {
-    await api("/tasks", "POST", {
-      workspace_id: workspaceId,
-      title,
-      section_id: sectionId,
-      status_id: statusId,
-      ...(schedule
-        ? { due_date: schedule.due_date, recurrence: schedule.recurrence }
-        : {}),
-    });
-    setTaskLoading(true);
-    setReloadTasks((value) => value + 1);
-    setNotice(tr("task_added"));
+    sync.mutate(
+      "/tasks",
+      "POST",
+      {
+        workspace_id: workspaceId,
+        title,
+        section_id: sectionId,
+        status_id: statusId,
+        ...(schedule
+          ? { due_date: schedule.due_date, recurrence: schedule.recurrence }
+          : {}),
+      },
+      {
+        message: tr("task_added"),
+        recover: () =>
+          sync.recoverTask({
+            id: "draft",
+            workspace_id: workspaceId,
+            title,
+            section_id: sectionId,
+            status_id: statusId,
+            description: "",
+            priority: 4,
+            label_ids: [],
+            due_date: schedule?.due_date ?? null,
+            recurrence: schedule?.recurrence ?? null,
+            recurrence_completed: 0,
+            position: 0,
+            version: 0,
+            created_at: "",
+            updated_at: "",
+            completed_at: null,
+            archived_at: null,
+          }),
+      },
+    );
   }
   async function orderSpaces(space: Workspace, delta: number) {
     const siblings = workspaces.filter(
@@ -392,19 +305,16 @@ export function Page() {
     const index = ids.indexOf(space.id);
     const otherIndex = ids.indexOf(other.id);
     [ids[index], ids[otherIndex]] = [ids[otherIndex], ids[index]];
-    await action(async () => {
-      await api("/workspaces/order", "PUT", {
-        ids: [...ids, ...archivedSpaces.map((space) => space.id)],
-      });
-      await loadWorkspaces();
-    }, tr("workspace_order_saved"));
+    sync.mutate(
+      "/workspaces/order",
+      "PUT",
+      { ids: [...ids, ...archivedSpaces.map((space) => space.id)] },
+      { message: tr("workspace_order_saved") },
+    );
   }
   function savedTask() {
     setEditor(null);
     setMoving(null);
-    setTaskLoading(true);
-    setReloadTasks((value) => value + 1);
-    setNotice(tr("task_saved"));
   }
 
   const visibleTasks = tasks.filter(
@@ -484,7 +394,6 @@ export function Page() {
             setAgenda(true);
             setSidebarOpen(false);
             setNotice("");
-            setError("");
           }}
         >
           <Icon name="calendar" size={18} />
@@ -533,6 +442,7 @@ export function Page() {
         </nav>
         <button
           className="sidebar-new-space"
+          disabled={spacesLoading}
           onClick={() => {
             setSidebarOpen(false);
             setCreateSpace(true);
@@ -561,10 +471,7 @@ export function Page() {
             <Icon name="archive" size={17} />
             {tr("workspace_archives")}
           </button>
-          <AccountMenu
-            disabled={busy}
-            beforeSessionChange={() => viewWrites.current.then(() => {})}
-          />
+          <AccountMenu beforeSessionChange={sync.idle} />
         </div>
       </aside>
       <main
@@ -600,19 +507,7 @@ export function Page() {
           </span>
         </header>
         <div className="task-page-content">
-          <ErrorMessage message={error} />
-          {error && !agenda && statuses.length > 0 && (
-            <button
-              className="text-button"
-              disabled={busy || loading || taskLoading}
-              onClick={() => {
-                setError("");
-                setReloadTasks((value) => value + 1);
-              }}
-            >
-              {tr("try_again")}
-            </button>
-          )}
+          <SyncFeedback />
           {notice && (
             <p className="notice" role="status">
               <Icon name="check" size={14} />
@@ -620,14 +515,20 @@ export function Page() {
               {undoTask && (
                 <button
                   className="text-button"
-                  disabled={busy}
                   onClick={() =>
-                    action(
-                      () =>
-                        api(`/tasks/${undoTask.id}/undo-complete`, "POST", {
-                          expected_version: undoTask.version,
-                        }),
-                      tr("completion_undone_the_previous_due_date_is_restored"),
+                    sync.mutate(
+                      `/tasks/${undoTask.id}/undo-complete`,
+                      "POST",
+                      { expected_version: undoTask.version },
+                      {
+                        message: tr(
+                          "completion_undone_the_previous_due_date_is_restored",
+                        ),
+                        success: () => {
+                          setUndoTask(null);
+                          setNotice("");
+                        },
+                      },
                     )
                   }
                 >
@@ -651,7 +552,6 @@ export function Page() {
                 key={session.user_id}
                 workspaces={workspaces}
                 today={today}
-                writes={viewWrites}
                 onWorkspace={(id) => {
                   setWorkspaceId(id);
                   setAgenda(false);
@@ -668,6 +568,7 @@ export function Page() {
               <p className="muted">{tr("create_workspace_introduction")}</p>
               <button
                 className="primary-button"
+                disabled={spacesLoading}
                 onClick={() => {
                   setSidebarOpen(false);
                   setCreateSpace(true);
@@ -905,7 +806,7 @@ export function Page() {
               )}
               <div className="task-summary">
                 <span>
-                  {loading || taskLoading
+                  {loading
                     ? tr("loading_tasks")
                     : tr(hasFilters ? "result_count" : "task_count", {
                         count: visibleTasks.length,
@@ -948,7 +849,7 @@ export function Page() {
                   {tr("to_use_drag_and_drop")}
                 </p>
               )}
-              {hasFilters && !taskLoading && tasks.length === 0 && (
+              {hasFilters && tasks.length === 0 && (
                 <p className="empty-filter">
                   {tr("no_tasks_match_these_filters")}
                 </p>
@@ -965,21 +866,12 @@ export function Page() {
                 </div>
               ) : (
                 <TaskActions
-                  key={`${workspaceId}:${JSON.stringify(view)}`}
+                  key={workspaceId}
                   tasks={visibleTasks}
                   workspaces={workspaces}
                   today={today}
-                  busy={busy || taskLoading}
+                  busy={false}
                   onEdit={setEditor}
-                  onRefresh={(message) => {
-                    if (message) {
-                      setNotice(message);
-                      setUndoTask(null);
-                    }
-                    void refreshEntities().catch((error) =>
-                      setError(error.message),
-                    );
-                  }}
                 >
                   <TaskViews
                     tasks={tasks}
@@ -990,7 +882,7 @@ export function Page() {
                     statuses={statuses}
                     labels={labels}
                     view={view}
-                    busy={busy || taskLoading}
+                    busy={false}
                     onOpen={setEditor}
                     onComplete={complete}
                     onMove={move}
@@ -1010,9 +902,7 @@ export function Page() {
           onCreated={(space) => {
             setCreateSpace(false);
             setAgenda(false);
-            void loadWorkspaces(space.id).catch((error) =>
-              setError(error.message),
-            );
+            setWorkspaceId(space.id);
           }}
         />
       )}
@@ -1025,10 +915,8 @@ export function Page() {
           labels={labels}
           initialTab={settingsTab}
           onClose={() => setSettingsTab(null)}
-          onChanged={refreshEntities}
           onArchived={() => {
             setSettingsTab(null);
-            void loadWorkspaces().catch((error) => setError(error.message));
           }}
         />
       )}
@@ -1046,7 +934,6 @@ export function Page() {
             setEditor(null);
             setMoving(task);
           }}
-          onReload={setEditor}
         />
       )}
       {moving && (
@@ -1085,7 +972,6 @@ export function Page() {
                   <button
                     className="icon-button"
                     disabled={
-                      busy ||
                       workspaces.filter(
                         (item) => item.parent_id === space.parent_id,
                       )[0]?.id === space.id
@@ -1098,7 +984,6 @@ export function Page() {
                   <button
                     className="icon-button"
                     disabled={
-                      busy ||
                       workspaces
                         .filter((item) => item.parent_id === space.parent_id)
                         .at(-1)?.id === space.id
@@ -1129,17 +1014,16 @@ export function Page() {
                 </span>
                 <button
                   className="secondary-button small-button"
-                  disabled={
-                    busy ||
-                    archivedSpaces.some((item) => item.id === space.parent_id)
-                  }
+                  disabled={archivedSpaces.some(
+                    (item) => item.id === space.parent_id,
+                  )}
                   onClick={() =>
-                    action(async () => {
-                      await api(`/workspaces/${space.id}`, "PATCH", {
-                        archived: false,
-                      });
-                      await loadWorkspaces();
-                    }, tr("workspace_restored"))
+                    sync.mutate(
+                      `/workspaces/${space.id}`,
+                      "PATCH",
+                      { archived: false },
+                      { message: tr("workspace_restored") },
+                    )
                   }
                 >
                   <Icon name="restore" size={14} />
@@ -1147,7 +1031,7 @@ export function Page() {
                 </button>
               </div>
             ))}
-            <ErrorMessage message={error} />
+            <SyncFeedback inDialog />
           </div>
         </Dialog>
       )}

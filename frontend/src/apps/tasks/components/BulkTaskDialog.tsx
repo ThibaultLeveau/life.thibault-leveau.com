@@ -1,12 +1,14 @@
 import { tr } from "../i18n";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { api, ApiError } from "../../../platform/api";
+import { api } from "../../../platform/api";
 import { relativeDate } from "../dates";
 import { plusDays } from "../scheduling";
 import type { Section, Task, Workspace } from "../types";
 import { workspaceTree } from "../workspaceTree";
 import { Dialog, ErrorMessage } from "../../../shared/ui/Dialog";
 import { Calendar } from "./ScheduleCalendar";
+
+import { useTaskSync } from "../useTaskSync";
 
 export type BulkAction = "reschedule" | "move" | "archive";
 
@@ -17,24 +19,21 @@ export function BulkTaskDialog({
   today,
   onClose,
   onSaved,
-  onRefresh,
 }: {
   action: BulkAction;
   tasks: Task[];
   workspaces: Workspace[];
   today: string;
   onClose: () => void;
-  onSaved: (message: string) => void;
-  onRefresh: () => void;
+  onSaved: () => void;
 }) {
   const [date, setDate] = useState<string | null>(today);
   const [spaceId, setSpaceId] = useState(tasks[0].workspace_id);
   const [sectionId, setSectionId] = useState("");
   const [sections, setSections] = useState<Section[]>([]);
   const [loading, setLoading] = useState(action === "move");
-  const [busy, setBusy] = useState(false);
+  const sync = useTaskSync();
   const [error, setError] = useState("");
-  const [conflict, setConflict] = useState(false);
   const calendar = useRef<HTMLFieldSetElement>(null);
   const verb =
     action === "archive"
@@ -66,11 +65,11 @@ export function BulkTaskDialog({
   }, [spaceId, action]);
   async function submit(event: FormEvent) {
     event.preventDefault();
-    if (busy || conflict || loading) return;
-    setBusy(true);
-    setError("");
-    try {
-      await api("/tasks/bulk", "POST", {
+    if (loading) return;
+    sync.mutate(
+      "/tasks/bulk",
+      "POST",
+      {
         action,
         tasks: tasks.map((task) => ({
           id: task.id,
@@ -80,23 +79,16 @@ export function BulkTaskDialog({
         ...(action === "move"
           ? { workspace_id: spaceId, section_id: sectionId || null }
           : {}),
-      });
-      onSaved(tr(`bulk_${action}`, { count: tasks.length }));
-    } catch (error) {
-      setError((error as Error).message);
-      setConflict(
-        error instanceof ApiError && [404, 409].includes(error.status),
-      );
-    } finally {
-      setBusy(false);
-    }
+      },
+      { message: tr(`bulk_${action}`, { count: tasks.length }) },
+    );
+    onSaved();
   }
+
   return (
     <Dialog
       title={tr(`bulk_title_${action}`, { count: tasks.length })}
-      onClose={() => {
-        if (!busy) onClose();
-      }}
+      onClose={onClose}
     >
       <form className="dialog-body stack-form bulk-task-form" onSubmit={submit}>
         {action === "archive" && (
@@ -108,7 +100,6 @@ export function BulkTaskDialog({
               <button
                 type="button"
                 className="secondary-button"
-                disabled={busy}
                 onClick={() => setDate(today)}
               >
                 {tr("today")}
@@ -116,7 +107,6 @@ export function BulkTaskDialog({
               <button
                 type="button"
                 className="secondary-button"
-                disabled={busy}
                 onClick={() => setDate(plusDays(today, 1))}
               >
                 {tr("tomorrow")}
@@ -124,13 +114,13 @@ export function BulkTaskDialog({
               <button
                 type="button"
                 className="secondary-button"
-                disabled={busy || tasks.some((task) => !!task.recurrence)}
+                disabled={tasks.some((task) => !!task.recurrence)}
                 onClick={() => setDate(null)}
               >
                 {tr("no_date")}
               </button>
             </div>
-            <fieldset ref={calendar} disabled={busy} className="bulk-calendar">
+            <fieldset ref={calendar} className="bulk-calendar">
               <legend className="sr-only">{tr("new_due_date")}</legend>
               <Calendar
                 key={date?.slice(0, 7) ?? today.slice(0, 7)}
@@ -168,7 +158,6 @@ export function BulkTaskDialog({
               {tr("workspace")}
               <select
                 value={spaceId}
-                disabled={busy}
                 onChange={(event) => setSpaceId(event.target.value)}
               >
                 {workspaceTree(workspaces).map(({ space, path }) => (
@@ -182,7 +171,7 @@ export function BulkTaskDialog({
               {tr("section")}
               <select
                 value={sectionId}
-                disabled={busy || loading}
+                disabled={loading}
                 onChange={(event) => setSectionId(event.target.value)}
               >
                 <option value="">{tr("no_section")}</option>
@@ -199,37 +188,16 @@ export function BulkTaskDialog({
           </>
         )}
         <ErrorMessage message={error} />
-        {conflict && (
-          <p>{tr("no_tasks_were_changed_reload_the_view_and_check_your")}</p>
-        )}
         <div className="dialog-actions">
-          <button
-            type="button"
-            className="secondary-button"
-            disabled={busy}
-            onClick={onClose}
-          >
+          <button type="button" className="secondary-button" onClick={onClose}>
             {tr("cancel")}
           </button>
-          {conflict ? (
-            <button
-              type="button"
-              className="primary-button"
-              onClick={() => {
-                onClose();
-                onRefresh();
-              }}
-            >
-              {tr("reload_tasks")}
-            </button>
-          ) : (
-            <button
-              className={`primary-button ${action === "archive" ? "danger-button" : ""}`}
-              disabled={busy || loading}
-            >
-              {busy ? tr("saving") : verb}
-            </button>
-          )}
+          <button
+            className={`primary-button ${action === "archive" ? "danger-button" : ""}`}
+            disabled={loading}
+          >
+            {verb}
+          </button>
         </div>
       </form>
     </Dialog>
