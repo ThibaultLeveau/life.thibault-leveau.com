@@ -293,11 +293,7 @@ export function WorkspaceSettings({
                   {tr("you_can_restore_it_from_the_archives_tasks_and_their")}
                 </p>
               </div>
-              <button
-                className="secondary-button"
-
-                onClick={archiveSpace}
-              >
+              <button className="secondary-button" onClick={archiveSpace}>
                 <Icon name="archive" />
                 {tr("archive")}
               </button>
@@ -325,7 +321,6 @@ export function WorkspaceSettings({
                   key={sync.keyFor(item.id)}
                   kind={tab}
                   item={item}
-
                   onSubmit={(payload) =>
                     run(
                       `${base}/${tab}/${item.id}`,
@@ -361,7 +356,6 @@ export function WorkspaceSettings({
                     <button
                       type="button"
                       className="text-button"
-
                       onClick={() =>
                         run(`${base}/sections/${item.id}`, "PATCH", {
                           archived: true,
@@ -376,7 +370,6 @@ export function WorkspaceSettings({
                     <button
                       type="button"
                       className="text-button danger"
-
                       onClick={() => {
                         if (
                           window.confirm(
@@ -424,7 +417,6 @@ export function WorkspaceSettings({
                       <button
                         type="button"
                         className="text-button danger"
-
                         onClick={() => {
                           if (
                             window.confirm(
@@ -456,7 +448,6 @@ export function WorkspaceSettings({
             <EntityForm
               key={tab}
               kind={tab}
-
               onSubmit={(payload) => run(`${base}/${tab}`, "POST", payload)}
             />
           </>
