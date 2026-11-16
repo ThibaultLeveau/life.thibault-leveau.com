@@ -162,6 +162,27 @@ def test_sport_metrics_filters_zero_missing_and_archived_program(authenticated_c
     )
 
 
+def test_sport_unperformed_sets_do_not_count_or_lower_recorded_averages(authenticated_client):
+    c = authenticated_client
+    c.put("/api/v1/applications/sport", json={"enabled": True})
+    program = workout(c, sets=3)
+    training = record(c, start(c, program), {"weight_kg": 20, "reps": 8})
+    finished = finish(c, training)
+    assert sum(s["skipped"] for s in finished["sets"]) == 2
+    filters = {"workout_id": program["id"]}
+    assert evaluate(c, "completed", "sport", filters)["value"] == 1
+    assert evaluate(c, "sets", "sport", filters)["value"] == 1
+    assert evaluate(c, "weight_kg", "sport", filters, "average")["value"] == 20
+    assert evaluate(c, "reps", "sport", filters, "average")["value"] == 8
+    assert evaluate(c, "volume_kg", "sport", filters, "sum")["value"] == 160
+    empty_program = workout(c, sets=2)
+    finish(c, start(c, empty_program))
+    empty_filter = {"workout_id": empty_program["id"]}
+    assert evaluate(c, "completed", "sport", empty_filter)["value"] == 1
+    assert evaluate(c, "sets", "sport", empty_filter)["value"] == 0
+    assert evaluate(c, "weight_kg", "sport", empty_filter, "average")["state"] == "missing"
+
+
 @pytest.mark.parametrize("day,hours", [(date(2026, 3, 29), 23), (date(2026, 10, 25), 25)])
 def test_local_windows_cross_daylight_saving(day, hours):
     start, end = utc_window(day, day, "Europe/Paris")

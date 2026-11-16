@@ -211,7 +211,11 @@ class SportMetrics:
                 if not indexes:
                     continue
                 matched.append(row)
-                sets = [s for s in row.sets if s["entry_index"] in indexes]
+                sets = [
+                    s
+                    for s in row.sets
+                    if s["entry_index"] in indexes and not s.get("skipped", False)
+                ]
                 if metric in {"started", "completed", "cancelled", "completion_rate"}:
                     values.append(1)
                 elif metric == "sets":
