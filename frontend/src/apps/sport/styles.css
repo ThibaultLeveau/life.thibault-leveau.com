@@ -100,8 +100,9 @@
 .sport-workout-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  grid-auto-rows: 1fr;
   gap: 16px;
-  align-items: start;
+  align-items: stretch;
 }
 .sport-workout {
   border: 1px solid var(--ui-border);
@@ -804,7 +805,9 @@
     width: 100%;
   }
   .sport-workout-grid {
+    grid-auto-rows: auto;
     gap: 12px;
+    align-items: start;
   }
   .sport-workout {
     padding: 14px;
