@@ -121,9 +121,19 @@ for (const width of [320, 375, 768, 1440]) {
     await page
       .getByLabel("Notes de préparation")
       .fill("Échauffement et charge totale.");
-    await page
-      .getByRole("button", { name: "Actualiser l’entraînement" })
-      .click();
+    await expect(
+      page.getByRole("button", { name: "Actualiser l’entraînement" }),
+    ).toHaveCount(0);
+    if (width <= 800)
+      await page.getByRole("button", { name: "Ouvrir la navigation" }).click();
+    for (const theme of ["dark", "light"]) {
+      await page
+        .getByRole("combobox", { name: "Apparence" })
+        .selectOption(theme);
+      await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+    }
+    if (width <= 800)
+      await page.getByRole("button", { name: "Fermer la navigation" }).click();
     await expect(page.getByLabel("Nom du programme")).toHaveValue(name);
     await add(page, "Développé couché à la barre");
     await page.getByLabel("Nombre de séries").fill("2");

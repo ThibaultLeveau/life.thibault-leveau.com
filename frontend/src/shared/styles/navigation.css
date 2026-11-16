@@ -1,0 +1,201 @@
+.application-sidebar {
+  width: 252px;
+  flex-shrink: 0;
+  height: var(--ui-viewport-height, 100svh);
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 18px max(16px, env(safe-area-inset-bottom));
+  background: var(--ui-sidebar);
+  border-right: 1px solid var(--ui-border);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.application-sidebar-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  margin: 0 10px 24px;
+}
+.application-sidebar .app-brand {
+  text-decoration: none;
+  color: var(--ui-text);
+}
+.application-sidebar-label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--ui-muted);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  margin: 0 12px 16px;
+}
+.application-sidebar-links {
+  padding-bottom: 24px;
+}
+.application-sidebar .application-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  margin: 3px 0;
+  padding: 10px 12px;
+  background: transparent;
+  border: 0;
+  border-radius: 7px;
+  color: var(--ui-muted);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: left;
+  text-decoration: none;
+}
+.application-nav-item > svg {
+  flex-shrink: 0;
+}
+.application-sidebar .application-nav-item:hover {
+  background: var(--ui-hover);
+  color: var(--ui-text);
+}
+.application-sidebar .application-nav-item.is-active {
+  background: var(--ui-accent-bg);
+  color: var(--ui-accent);
+  font-weight: 600;
+}
+.application-sidebar .application-nav-item:disabled {
+  opacity: 0.5;
+}
+.application-sidebar .icon-button,
+.application-topbar .icon-button {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+.application-sidebar-footer {
+  margin-top: auto;
+  padding-top: 16px;
+}
+.application-sidebar-footer .application-nav-item {
+  font-size: 12px;
+}
+.application-sidebar-footer .account-menu {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin: 16px 0 0;
+  border-top: 1px solid var(--ui-border);
+  padding-top: 12px;
+}
+.application-sidebar-footer .theme-select {
+  grid-column: 1 / -1;
+  margin: 0 12px;
+  min-height: 44px;
+}
+.application-sidebar-footer .theme-select select {
+  min-height: 44px;
+  min-width: 0;
+  font-size: var(--ui-input-size, 12px);
+}
+.application-sidebar-footer .account-name {
+  max-width: none;
+  margin-left: 12px;
+}
+.application-sidebar-footer .form-error {
+  grid-column: 1 / -1;
+}
+.application-topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 66px;
+  padding: 10px 40px;
+  border-bottom: 1px solid var(--ui-border);
+  background: var(--ui-paper);
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+.application-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.application-breadcrumb > a {
+  color: inherit;
+  text-decoration: none;
+}
+.application-breadcrumb > strong {
+  color: var(--ui-text);
+  font-weight: 500;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.application-nav-mobile,
+.application-nav-scrim {
+  display: none;
+}
+.application-skip {
+  position: fixed;
+  top: -100px;
+  left: 20px;
+  padding: 12px;
+  z-index: 100;
+  color: var(--ui-text);
+  background: var(--ui-paper);
+}
+.application-skip:focus {
+  top: 10px;
+}
+@media (max-width: 800px) {
+  .application-sidebar {
+    position: fixed;
+    z-index: 40;
+    left: 0;
+    top: 0;
+    width: min(310px, calc(100vw - 36px));
+    height: var(--ui-viewport-height, 100dvh);
+    visibility: hidden;
+    transform: translateX(-100%);
+    transition:
+      transform 180ms ease,
+      visibility 0s 180ms;
+  }
+  .application-sidebar.is-open {
+    visibility: visible;
+    transform: translateX(0);
+    transition-delay: 0s;
+  }
+  .application-nav-mobile {
+    display: inline-flex;
+  }
+  .application-nav-scrim {
+    display: block;
+    position: fixed;
+    z-index: 39;
+    inset: 0;
+    background: #101b1666;
+  }
+  .application-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    height: 64px;
+    padding: 10px 16px 10px 10px;
+  }
+  .application-breadcrumb {
+    gap: 8px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .application-sidebar {
+    transition: none;
+  }
+}

@@ -31,3 +31,9 @@ Le catalogue et l’activation sont aussi accessibles par l’[API versionnée](
 ## Français ou anglais
 
 Le menu du compte propose **Langue / Language**, disponible aussi dans la navigation mobile. Le choix est enregistré pour tout LifeOS, indépendamment du thème, et conservé après reconnexion. Les textes personnels restent intacts. Les comptes existants commencent en français ; avant connexion, le navigateur choisit la langue du formulaire. Voir [les règles détaillées](internationalisation.md) et le [guide anglais](en/applications.md).
+
+## Navigation commune
+
+Tâches et Sport partagent la même barre supérieure et la même barre latérale. Le fil d’Ariane indique l’application et la vue courante. Sur mobile, **Ouvrir la navigation** affiche les mêmes liens et le même footer ; **Échap** ou **Fermer la navigation** referme le menu.
+
+Le footer propose, dans l’ordre, la **Bibliothèque des applications**, la **Documentation** propre à l’application et à la langue courante, le thème **clair / sombre / système**, la **Langue**, puis l’utilisateur et **Se déconnecter**. Thème et langue sont conservés sur le compte par l’API. Les archives et réglages métier restent dans la navigation de chaque application.

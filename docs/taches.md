@@ -1,5 +1,7 @@
 # Utiliser les tâches
 
+La navigation partage son design avec Sport. Le footer propose bibliothèque, documentation Tâches, thème, langue et utilisateur/déconnexion. **Archives des espaces** reste disponible parmi les liens métier. Voir la [navigation commune](applications.md#navigation-commune).
+
 Tâches est une application de LifeOS, activée par défaut. Retrouvez-la sur l’accueil ou réactivez-la dans la [bibliothèque](applications.md). Une désactivation bloque son accès sans changer les données ni l’historique.
 
 ## Se connecter et créer un espace

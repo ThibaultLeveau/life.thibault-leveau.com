@@ -370,5 +370,6 @@
   "ordinal_suffix_one": "st",
   "ordinal_suffix_two": "nd",
   "ordinal_suffix_few": "rd",
-  "ordinal_suffix_other": "th"
+  "ordinal_suffix_other": "th",
+  "tasks": "Tasks"
 }

@@ -52,18 +52,19 @@ test.beforeEach(async ({ page }) => {
     ).toBeTruthy();
 });
 async function tab(page: Page, name: string) {
-  const desktop = page.locator(".sport-sidebar");
-  if (await desktop.isVisible())
-    await desktop.getByRole("button", { name, exact: true }).click();
-  else {
-    await page
-      .getByRole("button", { name: "Ouvrir la navigation", exact: true })
-      .click();
-    await page
-      .getByRole("dialog")
-      .getByRole("button", { name, exact: true })
-      .click();
-  }
+  const opener = page.getByRole("button", {
+    name: "Ouvrir la navigation",
+    exact: true,
+  });
+  if (
+    (await opener.isVisible()) &&
+    (await opener.getAttribute("aria-expanded")) === "false"
+  )
+    await opener.click();
+  await page
+    .locator(".application-sidebar")
+    .getByRole("button", { name, exact: true })
+    .click();
 }
 async function createApiWorkout(page: Page, name: string) {
   const ex: ExercisePage = await (
@@ -93,7 +94,10 @@ test("Sport : ouvrir la navigation mobile sans activer le thème", async ({
     exact: true,
   });
   const dialog = page.getByRole("dialog", { name: "Navigation Sport" });
-  const close = dialog.getByRole("button", { name: "Fermer", exact: true });
+  const close = dialog.getByRole("button", {
+    name: "Fermer la navigation",
+    exact: true,
+  });
   const theme = dialog.getByRole("combobox", { name: "Apparence" });
   for (const method of ["pointer", "keyboard"] as const) {
     await opener.focus();
@@ -169,17 +173,22 @@ test("Sport : bibliothèque, séance mixte, repos, mensurations et statistiques 
   const dialog = page.getByRole("form", { name: "Nouveau programme" });
   const name = `Séance mixte ${Date.now()}`;
   await dialog.getByLabel("Nom du programme").fill(name);
-  for (const [i, query] of [
-    "Développé couché à la barre",
-    "Course sur tapis",
-    "Marche du fermier",
-    "Burpees",
+  for (const [i, [query, kind]] of [
+    ["Développé couché à la barre", "weight_reps"],
+    ["Course sur tapis", "distance_duration"],
+    ["Marche du fermier", "weight_distance"],
+    ["Burpees", "reps"],
   ].entries()) {
     await dialog
       .getByRole("button", { name: "Ajouter un exercice", exact: true })
       .click();
-    await dialog.getByLabel("Rechercher un exercice").fill(query);
-    await dialog
+    const picker = dialog.locator(".sport-picker");
+    await picker.getByLabel("Rechercher un exercice").fill(query);
+    await picker
+      .getByRole("combobox", { name: "Type", exact: true })
+      .selectOption(kind);
+    await expect(picker.getByRole("status")).toHaveCount(0);
+    await picker
       .locator(".sport-picker-item")
       .filter({ hasText: query })
       .first()
@@ -309,7 +318,7 @@ test("Sport : bibliothèque, séance mixte, repos, mensurations et statistiques 
     fullPage: true,
   });
   await page
-    .locator(".sport-sidebar")
+    .locator(".application-sidebar")
     .getByRole("link", { name: "Bibliothèque des applications" })
     .click();
   await page
@@ -475,6 +484,9 @@ test("Sport : saisie directe, brouillons, conflit, correction et séance suivant
   const reps = (row: typeof first) => row.getByLabel("Répétitions (rép.)");
   await expect(weight(first)).toHaveValue("20");
   await expect(weight(second)).toHaveValue("20");
+  await expect(
+    page.getByRole("button", { name: "Actualiser l’entraînement" }),
+  ).toHaveCount(0);
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await weight(second).fill("42.5");
   await reps(second).fill("8");
@@ -534,6 +546,9 @@ test("Sport : saisie directe, brouillons, conflit, correction et séance suivant
     .getByRole("button", { name: "Valider la série", exact: true })
     .click();
   await expect(second).toHaveClass(/is-complete/);
+  await expect(
+    page.getByRole("button", { name: "Actualiser l’entraînement" }),
+  ).toHaveCount(0);
   release();
   await expect(page.getByText("Chargement…", { exact: true })).toHaveCount(0);
   await expect(page.locator(".sport-set.is-complete")).toHaveCount(2);
@@ -795,7 +810,10 @@ test("Sport : blocs d’exercice et lignes de séries compactes pour les dix typ
         theme,
       );
       for (const [i, entry] of workout.entries.entries()) {
-        const card = page.getByRole("region", { name: entry.name, exact: true });
+        const card = page.getByRole("region", {
+          name: entry.name,
+          exact: true,
+        });
         await expect(
           card.getByRole("heading", { name: entry.name, exact: true }),
         ).toBeVisible();
@@ -822,7 +840,8 @@ test("Sport : blocs d’exercice et lignes de séries compactes pour les dix typ
                   (rect) => rect.left >= box.left && rect.right <= box.right,
                 ),
                 separate: rects.every(
-                  (rect, index) => !index || rect.left >= rects[index - 1].right + 4,
+                  (rect, index) =>
+                    !index || rect.left >= rects[index - 1].right + 4,
                 ),
                 touch: rects.every(
                   (rect) => rect.height >= 44 && rect.width >= 44,
@@ -848,7 +867,9 @@ test("Sport : blocs d’exercice et lignes de séries compactes pour les dix typ
           ).toHaveCount(2);
       }
       expect(
-        await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
       ).toBe(true);
       await page.evaluate(() => window.scrollTo(0, 0));
       await page.screenshot({
@@ -904,5 +925,5 @@ test("Sport : réponse obsolète, déconnexion et erreur de chargement", async (
   ).toBeVisible();
   release();
   await expect(page.locator(".sport-exercise")).toHaveCount(0);
-  await expect(page.locator(".sport-sidebar")).toHaveCount(0);
+  await expect(page.locator(".application-sidebar")).toHaveCount(0);
 });

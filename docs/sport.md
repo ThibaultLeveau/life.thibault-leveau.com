@@ -1,8 +1,10 @@
 # Sport
 
+La navigation partage son design avec Tâches. La barre supérieure indique uniquement le fil d’Ariane et le bouton de menu mobile : le rechargement global et le prénom ont été retirés. Bibliothèque, documentation Sport, thème, langue et utilisateur/déconnexion sont réunis dans le footer, également sur mobile. Voir la [navigation commune](applications.md#navigation-commune).
+
 Sport est disponible dans la [bibliothèque LifeOS](applications.md). Activez **Sport**, puis ouvrez l’application. Elle partage la connexion, le thème et les commandes accessibles de LifeOS. Sa navigation latérale reprend l’organisation de Tâches ; sur mobile, le bouton de navigation ouvre les mêmes onglets. Chaque rubrique possède son titre et son URL ; la navigation replace le contenu en haut de page et le focus sur le titre. Les commandes tactiles, les champs et les graphiques s’adaptent aux écrans étroits, en thème clair ou sombre.
 
-Sur mobile, l’ouverture du menu place le focus sur **Fermer**, sans ouvrir le sélecteur de thème. **Apparence** reste accessible pour changer volontairement le thème. Fermer le menu sans changer de rubrique rend le focus au bouton de navigation.
+Sur mobile, l’ouverture du menu place le focus sur **Fermer la navigation**, sans ouvrir le sélecteur de thème. **Apparence** reste accessible pour changer volontairement le thème. Fermer le menu sans changer de rubrique rend le focus au bouton de navigation.
 
 ## Exercices prêts à utiliser
 
@@ -51,9 +53,9 @@ Les **derniers résultats** sont proposés automatiquement au prochain entraîne
 
 La correspondance utilise l’exercice et son type, même après réordonnancement du programme. Si le même exercice apparaît plusieurs fois, chaque occurrence conserve son propre suivi selon son rang. Un nouveau programme ou un type différent repart sans résultat antérieur. Sans résultat pour une série, la dernière série précédente validée de l’entraînement courant sert de proposition, puis la cible du programme. Les cibles restent inchangées. Les propositions sont figées au démarrage et conservées après rechargement ou désactivation/réactivation.
 
-Les modifications de champs sont des **saisies en cours** jusqu’à validation ou correction : une erreur réseau, un conflit ou l’actualisation ne les efface pas. Une sortie demande confirmation ; le rechargement confirmé et la déconnexion les perdent. Terminer demande d’abord d’enregistrer ou d’annuler ces saisies. Après un conflit, **Actualiser l’entraînement** retrouve les résultats serveur en conservant vos champs modifiés, à réconcilier avant de réessayer.
+Les modifications de champs sont des **saisies en cours** jusqu’à validation ou correction : une erreur réseau, un conflit ou l’actualisation ne les efface pas. Une sortie demande confirmation ; le rechargement confirmé et la déconnexion les perdent. Terminer demande d’abord d’enregistrer ou d’annuler ces saisies. Après une erreur de séance, **Actualiser l’entraînement** apparaît dans le contenu pour récupérer les résultats serveur en conservant vos champs modifiés, à réconcilier avant de réessayer.
 
-Une session terminée ou abandonnée est conservée et ne se modifie plus. Modifier ou archiver le programme d’origine ne change pas les sessions existantes. Avant un nouveau lancement, les exercices personnels doivent être actifs ; si leur type a changé, retirer puis ajouter à nouveau l’exercice dans le programme pour saisir ses nouveaux objectifs. Le bouton **Actualiser l’entraînement** permet de retrouver la version serveur après une modification depuis un autre appareil. Une version obsolète produit un conflit explicite, sans écraser les données.
+Une session terminée ou abandonnée est conservée et ne se modifie plus. Modifier ou archiver le programme d’origine ne change pas les sessions existantes. Avant un nouveau lancement, les exercices personnels doivent être actifs ; si leur type a changé, retirer puis ajouter à nouveau l’exercice dans le programme pour saisir ses nouveaux objectifs. Une version obsolète produit un conflit explicite, sans écraser les données.
 
 ## Mensurations
 
