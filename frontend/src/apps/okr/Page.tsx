@@ -458,11 +458,33 @@ export function Page() {
                     <div className="okr-board">
                       {statuses.map((status) => {
                         const column = board.filter((o) => o.status === status);
-                        function drop(position = 10000) {
+                        const fullColumn = active.filter(
+                          (o) =>
+                            o.horizon === "quarterly" && o.status === status,
+                        );
+                        const indexOf = (neighbor?: Objective) =>
+                          neighbor
+                            ? fullColumn.findIndex((o) => o.id === neighbor.id)
+                            : undefined;
+                        function drop(before?: Objective) {
                           const o = active.find((o) => o.id === drag.current);
                           drag.current = null;
-                          if (o && !action.busy && !resource.loading)
+                          if (
+                            o &&
+                            o.id !== before?.id &&
+                            !action.busy &&
+                            !resource.loading
+                          ) {
+                            const remaining = fullColumn.filter(
+                              (item) => item.id !== o.id,
+                            );
+                            const position = before
+                              ? remaining.findIndex(
+                                  (item) => item.id === before.id,
+                                )
+                              : remaining.length;
                             move(o, status, position);
+                          }
                         }
                         return (
                           <section
@@ -495,9 +517,9 @@ export function Page() {
                                 onDrag={(id) => {
                                   drag.current = id;
                                 }}
-                                onDrop={() => drop(o.position)}
-                                up={column[i - 1]?.position}
-                                down={column[i + 1]?.position}
+                                onDrop={() => drop(o)}
+                                up={indexOf(column[i - 1])}
+                                down={indexOf(column[i + 1])}
                               />
                             ))}
                             {!column.length && (

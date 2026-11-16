@@ -223,7 +223,12 @@ test("OKR : suivi, clôture, rétrospective et quêtes sans double gain", async 
     (await (await page.request.get("/api/v1/progression/okr")).json()).xp,
   ).toBe(reward.xp);
   await tab(page, "Réalisations");
-  await expect(page.getByText("Rouvert depuis", { exact: true })).toBeVisible();
+  await expect(
+    page
+      .locator(".okr-achievement")
+      .filter({ hasText: title })
+      .getByText("Rouvert depuis", { exact: true }),
+  ).toBeVisible();
   await tab(page, "Ce trimestre");
   await page
     .getByRole("link", { name: "Mes quêtes dans Suivi", exact: true })
@@ -263,6 +268,18 @@ test("OKR : kanban glissé, ordre clavier et mobile 320 px", async ({
   await page.goto("/okr?tab=quarter");
   const a = created[0],
     b = created[1];
+  const prepareUp = page.getByRole("button", {
+    name: `Monter ${b.title}`,
+    exact: true,
+  });
+  await expect(prepareUp).toBeEnabled();
+  await prepareUp.click();
+  await expect(
+    page
+      .getByRole("region", { name: "À préparer", exact: true })
+      .locator(".okr-card")
+      .first(),
+  ).toContainText(b.title);
   await page
     .getByRole("button", {
       name: `Glisser ${a.title}. Les commandes de déplacement sont aussi disponibles.`,
@@ -387,7 +404,7 @@ test("OKR : source Suivi par interface, instantané conservé et 60 quêtes", as
     .getByRole("switch", { name: "Activer Objectifs OKR", exact: true })
     .click();
   await expect(
-    page.getByRole("switch", { name: "Désactiver Objectifs OKR", exact: true }),
+    page.getByRole("switch", { name: "Activer Objectifs OKR", exact: true }),
   ).toBeChecked();
   await page.goto("/okr?tab=quarter");
   await expect(
@@ -453,7 +470,7 @@ test("OKR : brouillons, erreurs réseau, archives et réglages persistants", asy
   await tab(page, "Réglages");
   await page.getByLabel("Fuseau horaire", { exact: true }).fill("Europe/Paris");
   await page.getByRole("button", { name: "Enregistrer", exact: true }).click();
-  await expect(page.getByRole("status")).toHaveText("Réglages enregistrés.");
+  await expect(page.locator(".okr-notice")).toHaveText("Réglages enregistrés.");
   const saved = await (await page.request.get("/api/v1/okr/settings")).json();
   expect(saved.timezone).toBe("Europe/Paris");
   expect(saved.version).toBeGreaterThan(0);

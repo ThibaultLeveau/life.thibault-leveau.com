@@ -104,13 +104,15 @@ def validate_parent(db, user, payload, item=None):
 
 
 def event(db, user, item, kind, detail=None):
-    occurred = utcnow()
+    occurred = item.completed_at if kind == "completed" else utcnow()
     row = m.Event(
         owner_id=user.id,
         objective_id=item.id,
         kind=kind,
         occurred_at=occurred,
-        quarter=s.quarter(occurred.astimezone(ZoneInfo(settings(db, user).timezone)).date()),
+        quarter=item.completed_quarter
+        if kind == "completed"
+        else s.quarter(occurred.astimezone(ZoneInfo(settings(db, user).timezone)).date()),
         snapshot=output(item).model_dump(mode="json"),
         detail=detail or {},
     )
@@ -141,6 +143,18 @@ def assign(item, payload):
     item.key_results = [kr.model_dump(mode="json") for kr in payload.key_results]
 
 
+def next_position(db, user, horizon, status="backlog"):
+    maximum = db.scalar(
+        select(func.max(m.Objective.position)).where(
+            m.Objective.owner_id == user.id,
+            m.Objective.horizon == horizon,
+            m.Objective.status == status,
+            m.Objective.archived_at.is_(None),
+        )
+    )
+    return (maximum if maximum is not None else -1) + 1
+
+
 def create(db, user, payload):
     if (
         db.scalar(
@@ -150,7 +164,7 @@ def create(db, user, payload):
     ):
         raise HTTPException(422, tr("limit"))
     validate_parent(db, user, payload)
-    item = m.Objective(owner_id=user.id, position=len(objectives(db, user)))
+    item = m.Objective(owner_id=user.id, position=next_position(db, user, payload.horizon))
     assign(item, payload)
     db.add(item)
     db.flush()
@@ -162,6 +176,8 @@ def create(db, user, payload):
 def update(db, user, item, payload):
     check(item, payload.expected_version)
     validate_parent(db, user, payload, item)
+    if item.horizon != payload.horizon:
+        item.position = next_position(db, user, payload.horizon, item.status)
     assign(item, payload)
     item.version += 1
     item.updated_at = utcnow()

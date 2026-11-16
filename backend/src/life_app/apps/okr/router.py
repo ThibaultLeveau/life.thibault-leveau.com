@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Query
-from sqlalchemy import select
+from sqlalchemy import Integer, select
 
 from life_app.apps.okr import models as m
 from life_app.apps.okr import schemas as s
@@ -65,7 +65,11 @@ def history(
     return db.scalars(
         select(m.Event)
         .where(m.Event.objective_id == id, m.Event.owner_id == user.id)
-        .order_by(m.Event.occurred_at.desc(), m.Event.id)
+        .order_by(
+            m.Event.snapshot["version"].astext.cast(Integer).desc(),
+            m.Event.occurred_at.desc(),
+            m.Event.id,
+        )
         .offset(offset)
         .limit(limit)
     ).all()

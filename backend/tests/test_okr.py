@@ -339,3 +339,108 @@ def test_additive_migration_constraints_and_history_immutability(authenticated_c
         config.attributes["connection"] = connection
         command.downgrade(config, "0010_progression")
     assert c.get(f"/api/v1/okr/objectives/{o['id']}").json() == o
+
+
+def test_okr_backfill_preserves_first_success_and_owner(monkeypatch, authenticated_client, app):
+    from sqlalchemy import select
+
+    from life_app.apps.registry import APPLICATIONS
+    from life_app.platform.auth.models import User
+    from life_app.platform.progression import service as progression
+
+    c = authenticated_client
+    enable(c)
+    with monkeypatch.context() as legacy:
+        legacy.setattr(service, "record", lambda *args, **kwargs: False)
+        o = create(c, **quarterly())
+        o = checkin(c, o, 5)
+        o = move(c, o, "done")
+        o = move(c, o, "in_progress")
+        o = edit(c, o, domain="professional").json()
+        move(c, o, "done")
+    owner = UUID(c.get("/api/v1/auth/session").json()["user_id"])
+    with app.state.sessions() as db:
+        preview = progression.preview_backfill(db, db.get(User, owner), APPLICATIONS)
+        assert next(r for r in preview if r["application"] == "okr") == {
+            "application": "okr",
+            "activities": 2,
+            "activity_xp": 115,
+        }
+    for _ in range(2):
+        with app.state.sessions() as db, db.begin():
+            user = db.scalar(select(User).where(User.id == owner).with_for_update())
+            progression.backfill(db, user, APPLICATIONS)
+    rewards = c.get("/api/v1/progression/okr/history").json()["items"]
+    assert sorted(r["xp"] for r in rewards if r["kind"] == "activity") == [15, 100]
+    quests = c.get("/api/v1/progression/okr/quests").json()["items"]
+    assert next(q for q in quests if q["id"] == "personal_1")["earned_at"]
+    assert not next(q for q in quests if q["id"] == "professional_1")["earned_at"]
+
+
+def test_metric_filters_settings_validation_and_pagination(authenticated_client, app):
+    c = authenticated_client
+    enable(c)
+    o = create(c)
+    o = move(c, o, "done")
+    for payload in (
+        {"timezone": "not/a/zone", "expected_version": 0},
+        {"timezone": "UTC", "expected_version": -1},
+        {"timezone": "UTC", "expected_version": 0, "extra": True},
+    ):
+        assert c.put("/api/v1/okr/settings", json=payload).status_code == 422
+    assert (
+        c.put("/api/v1/okr/settings", json={"timezone": "UTC", "expected_version": 0}).status_code
+        == 200
+    )
+    assert (
+        c.put("/api/v1/okr/settings", json={"timezone": "UTC", "expected_version": 0}).status_code
+        == 409
+    )
+    assert len(c.get(f"/api/v1/okr/objectives/{o['id']}/history?limit=1").json()) == 1
+    assert c.get("/api/v1/okr/achievements?limit=1&offset=1").json()["items"] == []
+    assert c.get("/api/v1/okr/achievements?quarter=2026-Q5").status_code == 422
+    query = {
+        "application_id": "okr",
+        "metric_id": "completed",
+        "since": "2026-01-01",
+        "until": "2027-12-31",
+    }
+    for patch in (
+        {"filters": {"objective_id": "bad-uuid"}},
+        {"filters": {"domain": "invalid"}},
+        {"aggregation": "sum"},
+    ):
+        assert c.post("/api/v1/integrations/evaluate", json={**query, **patch}).status_code == 422
+    with TestClient(app) as bob:
+        login = bob.post(
+            "/api/v1/auth/session", json={"username": "bob", "password": "synthetic-test-password"}
+        ).json()
+        bob.headers["X-CSRF-Token"] = login["csrf_token"]
+        enable(bob)
+        assert (
+            bob.post(
+                "/api/v1/integrations/evaluate",
+                json={**query, "filters": {"objective_id": o["id"]}},
+            ).status_code
+            == 404
+        )
+    c.put("/api/v1/preferences", json={"locale": "en"})
+    sources = c.get("/api/v1/integrations").json()
+    assert next(s for s in sources if s["id"] == "okr")["name"] == "OKR Goals"
+    assert c.get(f"/api/v1/okr/objectives/{o['id']}").json()["title"] == o["title"]
+
+
+def test_completion_and_snapshot_use_the_same_instant_across_midnight(
+    authenticated_client, monkeypatch
+):
+    c = authenticated_client
+    enable(c)
+    c.put("/api/v1/okr/settings", json={"timezone": "UTC", "expected_version": 0})
+    o = create(c)
+    instants = iter([datetime(2026, 3, 31, 23, 59, 59, tzinfo=UTC)] * 2)
+    monkeypatch.setattr(service, "utcnow", lambda: next(instants, datetime(2026, 4, 1, tzinfo=UTC)))
+    o = move(c, o, "done")
+    event = next(e for e in history(c, o) if e["kind"] == "completed")
+    assert event["occurred_at"] == o["completed_at"]
+    assert event["quarter"] == o["completed_quarter"] == "2026-Q1"
+    assert c.get("/api/v1/okr/achievements?quarter=2026-Q1").json()["total"] == 1

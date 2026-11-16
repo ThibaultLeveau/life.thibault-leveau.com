@@ -160,7 +160,7 @@ export function ApplicationTopbar({
       <nav className="application-breadcrumb" aria-label={tr("breadcrumb")}>
         <a href="/">LifeOS</a>
         <span aria-hidden="true">/</span>
-        <span>{name}</span>
+        <span title={name}>{name}</span>
         <span aria-hidden="true">/</span>
         <strong aria-current="page" title={current}>
           {current}

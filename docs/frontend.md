@@ -106,3 +106,5 @@ Le slot optionnel `status` d’`ApplicationTopbar` reçoit `platform/progression
 ## Interface Objectifs OKR
 
 `apps/okr` assemble le cadre commun, le badge et le footer avec un formulaire guidé par horizon, les résultats clés, le kanban, une rétrospective paginée et les archives. Les cartes offrent des commandes natives de statut et d’ordre équivalentes au glisser-déposer. Les colonnes s’empilent sur écran étroit. `useApiResource` et le transport commun protègent les réponses obsolètes ; les formulaires protègent navigation, historique navigateur, langue et déconnexion. Aucun style OKR ne modifie la sidebar, la topbar ou le footer. Les liens vers les quêtes utilisent les métadonnées de la bibliothèque commune.
+
+Sur mobile, les noms longs d’application sont tronqués visuellement dans le fil d’Ariane pour préserver la vue courante même avec un badge de niveau/série long ; leur texte complet reste accessible. Les boutons de fermeture des dialogues communs conservent une cible de 44 px.

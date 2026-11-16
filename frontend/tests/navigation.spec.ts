@@ -100,9 +100,9 @@ async function singleLineTopbar(page: Page) {
   const topbar = page.locator(".application-topbar");
   await expect(page.locator(".progression-level-number")).toHaveText(/\d+/);
   const header = (await topbar.boundingBox())!;
-  const breadcrumb = (
-    await page.locator(".application-breadcrumb").boundingBox()
-  )!;
+  const breadcrumb = (await page
+    .locator(".application-breadcrumb")
+    .boundingBox())!;
   const badge = (await page.locator(".progression-badge").boundingBox())!;
   expect(header.height).toBeLessThanOrEqual(66);
   expect(
@@ -121,7 +121,9 @@ async function singleLineTopbar(page: Page) {
     (await page.locator(".progression-badge-streak svg").boundingBox())!.width,
   ).toBeLessThanOrEqual(12);
   if (page.viewportSize()!.width <= 800) {
-    const menu = (await topbar.locator(".application-nav-mobile").boundingBox())!;
+    const menu = (await topbar
+      .locator(".application-nav-mobile")
+      .boundingBox())!;
     expect(menu.width).toBeGreaterThanOrEqual(44);
     expect(menu.height).toBeGreaterThanOrEqual(44);
     expect(menu.x + menu.width).toBeLessThanOrEqual(breadcrumb.x);
@@ -156,7 +158,9 @@ test("navigation identique entre applications, thèmes et formats", async ({
         await singleLineTopbar(page);
         if (width === 320 || width === 375)
           await page.screenshot({
-            path: testInfo.outputPath(`topbar-${app.document}-${theme}-${width}.png`),
+            path: testInfo.outputPath(
+              `topbar-${app.document}-${theme}-${width}.png`,
+            ),
             animations: "disabled",
           });
         await openNavigation(page);
@@ -315,7 +319,7 @@ test("topbar compacte : niveau 100, série longue et titres FR/EN accessibles", 
 }, testInfo) => {
   test.setTimeout(120_000);
   await page.route(
-    /\/api\/v1\/progression\/(tasks|sport|tracking)$/,
+    /\/api\/v1\/progression\/(tasks|sport|tracking|okr)$/,
     async (route) => {
       const response = await route.fetch();
       const summary = await response.json();
@@ -339,22 +343,28 @@ test("topbar compacte : niveau 100, série longue et titres FR/EN accessibles", 
       await page.setViewportSize({ width, height: 844 });
       for (const app of applications) {
         await page.goto(app.path);
-        await expect(page.locator(".progression-level-number")).toHaveText("100");
+        await expect(page.locator(".progression-level-number")).toHaveText(
+          "100",
+        );
         await singleLineTopbar(page);
         const badge = page.locator(".progression-badge");
-        const title = await badge.locator(".progression-badge-title").innerText();
+        const title = await badge
+          .locator(".progression-badge-title")
+          .innerText();
         await expect(badge).toHaveAccessibleName(new RegExp(title));
         await expect(badge).toHaveAccessibleName(/9999/);
         await page.screenshot({
-          path: testInfo.outputPath(`compact-${app.document}-${locale}-${width}.png`),
+          path: testInfo.outputPath(
+            `compact-${app.document}-${locale}-${width}.png`,
+          ),
         });
         await badge.focus();
         await page.keyboard.press("Enter");
         const popover = page.locator(".progression-popover");
         await expect(popover).toBeVisible();
-        await expect(popover.locator(".progression-popover-status")).toContainText(
-          title,
-        );
+        await expect(
+          popover.locator(".progression-popover-status"),
+        ).toContainText(title);
         const panel = (await popover.boundingBox())!;
         expect(panel.x).toBeGreaterThanOrEqual(0);
         expect(panel.x + panel.width).toBeLessThanOrEqual(width);

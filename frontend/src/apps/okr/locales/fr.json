@@ -122,7 +122,7 @@
   "timezone_hint": "Ex. Europe/Paris. Les réalisations déjà enregistrées gardent leur trimestre.",
   "settings_saved": "Réglages enregistrés.",
   "quests_link": "Mes quêtes dans Suivi",
-  "quests_hint": "Vos objectifs et résultats clés font progresser vos quêtes. Le badge en haut reste disponible même sans Suivi.",
+  "quests_hint": "Un objectif accompli, un résultat clé atteint : chaque avancée fait grandir votre niveau.",
   "not_found": "Cet objectif n’est plus disponible.",
   "achievements_count_one": "{{count}} réalisation à célébrer",
   "achievements_count_other": "{{count}} réalisations à célébrer"

@@ -122,7 +122,7 @@
   "timezone_hint": "E.g. Europe/Paris. Recorded accomplishments keep their original quarter.",
   "settings_saved": "Settings saved.",
   "quests_link": "My quests in Tracking",
-  "quests_hint": "Objectives and key results advance your quests. The badge above remains available without Tracking.",
+  "quests_hint": "An objective completed, a key result reached: every step helps you level up.",
   "not_found": "This objective is no longer available.",
   "achievements_count_one": "{{count}} accomplishment to celebrate",
   "achievements_count_other": "{{count}} accomplishments to celebrate"
