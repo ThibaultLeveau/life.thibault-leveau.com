@@ -20,6 +20,14 @@ Se connecter avec le compte créé par l'opérateur, puis choisir **Ouvrir** sur
 
 Un espace peut représenter Personnel, Travail ou un projet. **Nouvel espace** définit son nom, sa description, sa couleur et, si souhaité, son **Espace parent**. Les trois colonnes initiales sont À faire, En cours et Terminé. Les réglages `…` à côté du titre permettent de les adapter. L'icône près de **Mes espaces** permet de réordonner les espaces ayant le même parent avec les flèches.
 
+### Choisir les couleurs
+
+Les espaces, sections, colonnes et étiquettes proposent la même **grille de 16 couleurs** sur ordinateur et mobile, à la création comme à la modification. Cliquer ou toucher une case pour la sélectionner ; une coche indique le choix actuel. Au clavier, parcourir les cases avec Tab puis choisir avec Entrée ou Espace.
+
+**Couleur personnalisée** ouvre le sélecteur libre du navigateur. Son apparence dépend de l’appareil, mais la grille proposée par LifeOS et ses couleurs restent identiques. Le code hexadécimal du choix est affiché à côté du sélecteur. Une couleur personnalisée existante est conservée, même si elle ne figure pas dans la grille. Choisir une couleur ne valide pas le formulaire : utiliser ensuite **Créer l’espace**, **Ajouter** ou **Enregistrer**. Après l’ajout d’une section, colonne ou étiquette, le formulaire de création retrouve sa couleur initiale.
+
+Les couleurs sont enregistrées par les [API existantes](api.md#espaces-et-configuration) dans le champ `color` au format `#RRGGBB`, puis retrouvées sur les autres appareils après rechargement. La palette ne limite pas les valeurs acceptées ; aucun changement de données ni migration n’est nécessaire.
+
 ## Espaces parents et sous-espaces
 
 Créer par exemple **Personnel → Voyages → Japon** en choisissant le parent dans **Nouvel espace**. La navigation affiche les enfants sous leur parent ; le chemin complet apparaît en haut de la page et dans les choix d'espace, y compris pour déplacer une tâche.
@@ -189,7 +197,9 @@ Le clavier permet de parcourir les actions, de fermer un dialogue avec Échap et
 
 **Liste / Tableau** change la disposition. **Filtres** sélectionne statut, priorité, étiquette et échéance. La recherche porte sur le titre et la description (`Ctrl+K` ou `⌘K` donne le focus). **Afficher** choisit densité, tâches terminées et tri manuel, priorité ou échéance.
 
-Un tri automatique désactive les poignées ; le message au-dessus des tâches permet de revenir à l'ordre manuel. Les réglages sont conservés par espace, après rechargement et reconnexion. Une recherche active peut masquer une nouvelle tâche qui ne lui correspond pas : effacer les filtres pour tout retrouver.
+À chaque ouverture ou rechargement de la page, les tâches terminées sont masquées dans tous les espaces, en liste comme en tableau, même si elles étaient affichées auparavant. **Afficher → Afficher les tâches terminées** permet de les consulter dans l’espace courant jusqu’au prochain rechargement. Ce choix reste actif quand on change d’espace puis revient, pendant cette consultation. **Effacer les filtres** permet également de tout afficher. Les dates et l’historique des tâches sont conservés.
+
+Un tri automatique désactive les poignées ; le message au-dessus des tâches permet de revenir à l'ordre manuel. Les autres réglages sont conservés par espace, après rechargement et reconnexion. Une recherche active peut masquer une nouvelle tâche qui ne lui correspond pas : effacer les filtres pour tout retrouver. Les options de la vue **À venir** restent enregistrées séparément.
 
 Le thème, sous la navigation, suit le système ou impose clair/sombre. Il est enregistré dans le compte. Sur mobile, le bouton de menu ouvre un panneau latéral ; le focus reste dans ce panneau jusqu’à sa fermeture. Le tableau défile horizontalement dans sa zone. Les commandes et champs sont adaptés aux petits écrans ; la barre d’actions groupées reste accessible en bas de l’écran. Les animations respectent le réglage système de réduction des mouvements.
 

@@ -13,3 +13,5 @@ Interface text and default Sport exercises are translated. Your titles, notes, w
 Changing language reloads the current view. Save temporary form entries first; Sport asks before leaving a changed program or unsaved training entries. Saved sets, active training and history are preserved. Signing out or session expiry clears private information from the screen.
 
 The technical and operations documentation is maintained in French: [architecture](../architecture.md), [API](../api.md), [language contracts](../internationalisation.md), [deployment](../deploiement.md) and [backups](../sauvegardes.md).
+
+[Tracking](tracking.md) adds personal habits and goals, Tasks/Sport data sources, guided entry, a responsive calendar, statistics and rewards.

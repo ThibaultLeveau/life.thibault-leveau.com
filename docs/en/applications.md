@@ -32,6 +32,8 @@ An expired session returns to sign-in and removes private views. HTML pages cont
 
 ## Shared navigation
 
-Tasks and Sport share the same top bar and sidebar. The breadcrumb identifies the application and current view. On mobile, **Open navigation** shows the same links and footer; **Escape** or **Close navigation** closes the menu.
+Tasks, Sport and Tracking share the same top bar and sidebar. The breadcrumb identifies the application and current view. On mobile, **Open navigation** shows the same links and footer; **Escape** or **Close navigation** closes the menu.
 
 The footer contains, in order, the **Application library**, **Documentation** for the current application and language, the **light / dark / system** theme, **Language**, then the user and **Sign out**. Theme and language are saved to the account through the API. Business archives and settings remain among each application's navigation links.
+
+**Tracking** is available and disabled by default. It provides custom habits, goals, Tasks/Sport data sources, guided entries, a month/year calendar, statistics and rewards. [Tracking guide](tracking.md). Disabling a source blocks new integration reads while preserving saved snapshots.

@@ -2,7 +2,7 @@
 
 ## État disponible
 
-LifeOS possède un socle commun, une bibliothèque avec activation par compte et les applications **Tâches** et **Sport**. Objectifs OKR, ménage et plantes restent des pistes futures. L’[ADR 003](decisions/003-applications-lifeos.md) décrit l’organisation approuvée ; les ADR précédents conservent l’historique du socle et de la persistance.
+LifeOS possède un socle commun, une bibliothèque avec activation par compte et les applications **Tâches**, **Sport** et **Suivi**. Objectifs OKR, ménage et plantes restent des pistes futures. L’[ADR 003](decisions/003-applications-lifeos.md) décrit l’organisation approuvée ; les ADR précédents conservent l’historique du socle et de la persistance.
 
 Toutes les applications suivent les mêmes conventions et isolent leur métier. Les dossiers ne sont pas des copies de Tâches : ils réutilisent connexion, transport API, activation, thème et composants accessibles du socle.
 
@@ -71,3 +71,13 @@ Pour Tâches, préserver les événements `completed`, `reopened`, `rescheduled`
 ## Traductions livrées avec les fonctionnalités
 
 Chaque application fournit ses catalogues FR/EN dans son propre dossier, avec des clés sémantiques et des phrases complètes. Réutiliser le moteur commun, les pluriels i18next et les formats de langue ; ne jamais traduire les textes personnels. Ajouter les erreurs serveur et exemples de planification dans les deux langues et étendre les tests de parité. Voir [Internationalisation](internationalisation.md#organisation-des-traductions).
+
+## Ajouter une source de métriques
+
+L’[ADR 005](decisions/005-integrations-tracking.md) approuve le contrat optionnel `ApplicationDefinition.metrics`. Implémenter `catalogue()`, `options(db,user,filter_id,q,offset,limit)` et `evaluate(db,user,query)` dans `apps/<id>/integrations.py`, puis fournir l’instance dans le manifeste. Le registre existant reste le seul assemblage. `platform/integrations` décrit les contrats et contrôles communs ; il ne connaît pas les modèles métier. Un consommateur utilise le service injecté ou l’API commune, jamais les tables/imports d’une autre application.
+
+Chaque métrique décrit un identifiant stable, son nom et sa description FR/EN, une unité, les agrégations/filtres autorisés et son caractère historique ou actuel. Le fournisseur contrôle tous les propriétaires et borne ses lectures. Documenter les événements, fuseaux, archives, annulations, échantillons manquants et conditions de comparabilité. Les filtres ne doivent pas reconstruire le passé depuis un attribut actuel. Retourner `missing` ou `unavailable` lorsque le résultat n’est pas connu ; seuls les vrais compteurs vides valent zéro.
+
+Étendre les tests de catalogue, propriétaire, source désactivée, bornes temporelles et erreurs, puis le [catalogue livré](integrations.md). Le cadre `shared/ui/ApplicationNavigation` réutilise sidebar/topbar de Sport via des slots ; conserver la connexion et les gardes de navigation dans la Page et injecter les éléments du compte. Aucun import vers `platform` depuis `shared`.
+
+Le client HTTP et les types de métriques réutilisables sont dans `frontend/src/platform/integrations/`. Les composants de configuration et saisie restent propres à Suivi.

@@ -576,6 +576,18 @@ for (const mobile of [false, true]) {
             "PUT",
           );
           await data.open();
+          // Keep completed rows available for this completion/reopening scenario.
+          await page
+            .getByRole("button", { name: "Afficher", exact: true })
+            .click();
+          await page.getByLabel("Afficher les tâches terminées").check();
+          await page
+            .getByRole("button", { name: "Afficher", exact: true })
+            .click();
+          await expect(page.locator(".task-sync-status")).toHaveAttribute(
+            "data-pending",
+            "0",
+          );
           const target = row(page, data.tasks[19]);
           const neighbor = row(page, data.tasks[20]);
           await center(target);

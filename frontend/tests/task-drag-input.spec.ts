@@ -126,6 +126,9 @@ test("task title/body drag: list sections, reorder, board columns and workspace"
   await drop(page, card(page, tasks[0]).locator(".task-description"), card(page, tasks[1]), `/tasks/${tasks[0].id}/move`);
   expect((await saved(page, tasks[0])).section_id).toBe(sections[0].id);
   await expect(page.locator(`[data-drop-section="${sections[0].id}"] article`).first()).toHaveAttribute("data-task-id", tasks[0].id);
+  await page.getByRole("button", { name: "Afficher", exact: true }).click();
+  await page.getByLabel("Afficher les tâches terminées", { exact: true }).check();
+  await page.getByRole("button", { name: "Afficher", exact: true }).click();
   await page.getByRole("button", { name: "Tableau", exact: true }).click();
   const completed = statuses.find(s => s.is_completed)!;
   const cell = page.locator(`[data-drop-section="${sections[1].id}"][data-drop-status="${completed.id}"]`);
@@ -143,8 +146,13 @@ test("task title/body drag: list sections, reorder, board columns and workspace"
   const afterHistory = await (await page.request.get(`/api/v1/tasks/${tasks[0].id}/events`)).json();
   expect(afterHistory.items).toEqual(expect.arrayContaining(history.items));
   await link.click();
+  await page.getByRole("button", { name: "Afficher", exact: true }).click();
+  await page.getByLabel("Afficher les tâches terminées", { exact: true }).check();
   await expect(page.locator('[data-drop-section="none"] .task-title').filter({ hasText: tasks[0].title })).toBeVisible();
+  await idle(page);
   await page.reload();
+  await page.getByRole("button", { name: "Afficher", exact: true }).click();
+  await page.getByLabel("Afficher les tâches terminées", { exact: true }).check();
   await expect(card(page, tasks[0])).toBeVisible();
 });
 

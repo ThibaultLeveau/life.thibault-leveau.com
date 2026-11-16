@@ -131,6 +131,13 @@ for sport_table in sport_exercises sport_workouts sport_sessions sport_measureme
   restored_sport=$(docker exec "$db" psql -U life -d life_restored -Atc "$sport_query")
   [[ "$source_sport" != '[]' && "$source_sport" == "$restored_sport" ]]
 done
+# Compare all Tracking definitions, source snapshots, corrections and settings.
+for tracking_table in tracking_trackers tracking_definitions tracking_entries tracking_entry_revisions tracking_settings; do
+  tracking_query="SELECT coalesce(jsonb_agg(to_jsonb(t) ORDER BY to_jsonb(t)::text), '[]'::jsonb) FROM $tracking_table t"
+  source_tracking=$(docker exec "$db" psql -U life -d life -Atc "$tracking_query")
+  restored_tracking=$(docker exec "$db" psql -U life -d life_restored -Atc "$tracking_query")
+  [[ "$source_tracking" != '[]' && "$source_tracking" == "$restored_tracking" ]]
+done
 [[ $(docker exec "$db" psql -U life -d life_restored -Atc 'SELECT count(*) FROM login_sessions') == 0 ]]
 [[ -z $(docker exec "$db" psql -U life -d life_restored -Atc "SELECT to_regclass('public.obsolete_data')") ]]
 docker exec "$db" psql -U life -d life_restored -c 'CREATE TABLE rollback_marker (id integer)' >/dev/null

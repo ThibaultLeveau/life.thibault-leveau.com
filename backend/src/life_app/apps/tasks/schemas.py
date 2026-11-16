@@ -107,7 +107,7 @@ class Reorder(Schema):
 class ViewSettings(Schema):
     layout: Literal["list", "board"] = "list"
     density: Literal["comfortable", "compact"] = "comfortable"
-    show_completed: bool = True
+    show_completed: bool = False
     search: str = Field(default="", max_length=500)
     sort: Literal["manual", "priority", "due_date"] = "manual"
     status_id: UUID | None = None

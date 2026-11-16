@@ -11,6 +11,7 @@ import {
 import { Dialog } from "../../../shared/ui/Dialog";
 import { WorkspaceParentSelect } from "./WorkspaceParentSelect";
 import { Icon } from "../../../shared/ui/Icon";
+import { ColorPicker } from "./ColorPicker";
 
 export type SettingsTab =
   "space" | "sections" | "statuses" | "labels" | "archives";
@@ -28,6 +29,7 @@ function EntityForm({
   onSubmit: (data: Record<string, unknown>) => Promise<boolean>;
   children?: ReactNode;
 }) {
+  const [color, setColor] = useState(item?.color ?? "#748b79");
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
@@ -35,23 +37,16 @@ function EntityForm({
     const payload: Record<string, unknown> = Object.fromEntries(data);
     if (kind === "statuses")
       payload.is_completed = data.get("is_completed") === "on";
-    if ((await onSubmit(payload)) && !item) form.reset();
+    if ((await onSubmit(payload)) && !item) {
+      form.reset();
+      setColor("#748b79");
+    }
   }
   const section =
     kind === "sections" ? (item as Section | undefined) : undefined;
   return (
     <form className="entity-form" onSubmit={submit}>
       <div className="entity-main">
-        <label className="entity-color">
-          <span className="sr-only">
-            {tr("color")} {item?.name ?? tr("of_the_new_item")}
-          </span>
-          <input
-            type="color"
-            name="color"
-            defaultValue={item?.color ?? "#748b79"}
-          />
-        </label>
         <label className="entity-name">
           <span className="sr-only">
             {tr("name")} {item?.name ?? tr("of_the_new_item")}
@@ -80,6 +75,11 @@ function EntityForm({
           {item ? tr("save") : tr("add")}
         </button>
       </div>
+      <ColorPicker
+        label={`${tr("color")} ${item?.name ?? tr("of_the_new_item")}`}
+        value={color}
+        onChange={setColor}
+      />
       {kind === "sections" && (
         <div className="entity-detail">
           <label>
@@ -139,7 +139,13 @@ export function WorkspaceSettings({
   onArchived: () => void;
 }) {
   const [tab, setTab] = useState(initialTab);
+  const [color, setColor] = useState(workspace.color);
   const sync = useTaskSync();
+  function selectTab(value: SettingsTab) {
+    if (value === tab) return;
+    setTab(value);
+    setColor(workspace.color);
+  }
   const archivedTasks = sync.data
     ? activeTasks(sync.data, true).filter(
         (task) => task.workspace_id === workspace.id,
@@ -230,12 +236,12 @@ export function WorkspaceSettings({
                         : null;
               if (next !== null) {
                 event.preventDefault();
-                setTab(tabs[next][0]);
+                selectTab(tabs[next][0]);
                 document.getElementById(`tab-${tabs[next][0]}`)?.focus();
               }
             }}
             onClick={() => {
-              setTab(value);
+              selectTab(value);
             }}
           >
             {label}
@@ -274,14 +280,7 @@ export function WorkspaceSettings({
                   defaultValue={workspace.description}
                 />
               </label>
-              <label className="color-field">
-                {tr("color")}
-                <input
-                  type="color"
-                  name="color"
-                  defaultValue={workspace.color}
-                />
-              </label>
+              <ColorPicker value={color} onChange={setColor} />
               <div className="dialog-actions">
                 <button className="primary-button">{tr("save")}</button>
               </div>

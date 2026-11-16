@@ -118,7 +118,7 @@ interface Context {
 export const defaultView: ViewSettings = {
   layout: "list",
   density: "comfortable",
-  show_completed: true,
+  show_completed: false,
   search: "",
   sort: "manual",
   status_id: null,

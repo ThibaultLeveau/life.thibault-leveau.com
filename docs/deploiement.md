@@ -198,6 +198,12 @@ Publier le `main` validé avec la procédure habituelle : sauvegarde, migration 
 
 Sur le compte synthétique isolé, vérifier le sélecteur Langue/Language, sa persistance et l’indépendance du thème, Tâches et Sport, les noms fournis traduits et les noms personnels conservés. Contrôler aussi `/documentation/en/`, `/documentation/en/taches/` et `/documentation/en/sport/`, ainsi que les sondes et routes publiques habituelles. Consigner résultats et SHA dans l’issue.
 
+## Livraison Suivi et intégrations
+
+Publier le `main` validé par le script habituel, avec sauvegarde préalable et migration additive `0009_tracking`. Aucun service, secret, variable ou changement Caddy/DNS supplémentaire. Voir [compatibilité et restauration](sauvegardes.md#migration-0009-suivi).
+
+Vérifier le SHA réellement exécuté, les sondes, `/tracking`, les guides FR/EN, l’API et le catalogue d’intégrations en HTTPS. Sur un compte de recette isolé : activation, suivi quotidien avec 0/Non, saisie et correction, score 0/10 puis 10/10, filtre Tâches/Sport, instantané préservé quand la source est désactivée, calendrier mobile/ordinateur, archive/restauration et désactivation/réactivation. Vérifier la navigation commune dans Sport et Suivi. Consigner sauvegarde, migration, SHA et résultats dans l’issue. Ne pas utiliser les données personnelles pour les essais.
+
 ### Fin de séance Sport incomplète
 
 Publier avec la sauvegarde habituelle, sans nouvelle migration SQL ni variable (révision `0008_locale`). Les résultats JSONB à zéro et le marqueur `skipped` imposent de respecter la [compatibilité de retour arrière](sauvegardes.md#fin-de-seance-sport-incomplete).

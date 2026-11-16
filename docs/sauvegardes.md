@@ -121,6 +121,14 @@ Le downgrade vers `0007_hyrox` refuse dès qu’un compte a choisi `en`. Ne pas 
 
 Le dump contient la langue comme le thème. Les traductions des 680 exercices et les messages sont embarqués : conserver l’image et son SHA avec la sauvegarde. La recette conteneur enregistre `en` via l’API avant le dump et compare les préférences restaurées, en plus des cinq tables Sport, des récurrences et de l’historique immuable. Vérifier après restauration la reconnexion, les deux langues, un exercice fourni et un exercice personnel homonyme sur un compte de recette.
 
+## Migration 0009 Suivi
+
+`0009_tracking` ajoute les cinq tables `tracking_trackers`, `tracking_definitions`, `tracking_entries`, `tracking_entry_revisions`, `tracking_settings` et la protection SQL des historiques. Aucun compte, événement Tâches, entraînement ou préférence existante n’est transformé. L’ancienne image peut écrire ses propres tables pendant cette migration additive ; sa sonde ne reconnaît pas la nouvelle révision. Terminer la publication avec la nouvelle image. Aucun secret, service ou volume supplémentaire.
+
+Le dump complet contient définitions datées, valeurs, instantanés de sources, corrections, archives, ordre et fuseaux. Le test de restauration du conteneur compare intégralement les cinq tables avant/après restauration dans une base jetable, ainsi que les autres applications et la révocation des sessions. Après restauration, vérifier une saisie manuelle/automatique, son historique, le calendrier et les XP. Une source inactive doit conserver sa valeur enregistrée sans autoriser de nouveau calcul.
+
+Le downgrade vers `0008_locale` refuse dès qu’une table Suivi contient des données, y compris les réglages. Ne pas supprimer de données ou contourner les triggers pour forcer le retour. Préférer une correction en avant ; sinon restaurer un dump connu et une image compatible selon la procédure complète de cette page. Un simple rollback d’image ne restaure pas les données et refuse une révision inconnue.
+
 ## Fin de séance Sport incomplète
 
 La fin partielle enrichit les séries JSONB de `sport_sessions` avec `skipped: true` et des mesures à zéro pour les séries non effectuées, sans nouvelle migration SQL (révision `0008_locale`). Les séries existantes restent intactes et se lisent avec `skipped: false` par défaut. Le dump et la restauration transactionnelle habituels conservent ces marqueurs, résultats, dates et scores ; la recette conteneur crée des séances partielles et compare toutes les tables Sport après restauration.

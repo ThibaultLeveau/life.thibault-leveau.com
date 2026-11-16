@@ -4,7 +4,7 @@ React, TypeScript et Vite conservent l'outillage du socle. `App.tsx` assemble la
 
 ## Navigation commune des applications
 
-Tâches et Sport composent la même `ApplicationSidebar` et la même `ApplicationTopbar` depuis `shared/ui/ApplicationNavigation.tsx`. Le fichier `shared/styles/navigation.css` possède leurs styles : largeur de sidebar de 252 px sur bureau, barre supérieure de 66 px (64 px sur mobile), mêmes liens et états visuels. Les applications fournissent leur nom, icône, fil d’Ariane et liens métier, sans surcharger cet habillage.
+Tâches, Sport et Suivi composent la même `ApplicationSidebar` et la même `ApplicationTopbar` depuis `shared/ui/ApplicationNavigation.tsx`. Le fichier `shared/styles/navigation.css` possède leurs styles : largeur de sidebar de 252 px sur bureau, barre supérieure de 66 px (64 px sur mobile), mêmes liens et états visuels. Les applications fournissent leur nom, icône, fil d’Ariane et liens métier, sans surcharger cet habillage.
 
 `platform/auth/ApplicationFooter` assemble dans cet ordre la bibliothèque, la documentation courante localisée, le thème, la langue et le compte/déconnexion via `AccountMenu`. Les préférences restent dans l’API commune ; les gardes de brouillon Sport et l’attente des écritures Tâches en arrière-plan sont conservées. Les archives des espaces sont parmi les liens métier. Le prénom et le rechargement global ne figurent plus dans la top bar ; les commandes de récupération après erreur restent dans le contenu métier.
 
@@ -90,3 +90,9 @@ Chaque `manifest.ts` associe seulement l’identifiant à `Page.tsx` via `React.
 `platform/i18n/` initialise i18next avant le rendu. Les helpers typés `tr` utilisent les ressources JSON de `shared/` ou de leur application ; les ressources métier arrivent avec la Page chargée à la demande. Les formats de dates et nombres passent par `formatLocale()`. Les chaînes interpolées sont du texte React, sans HTML dynamique.
 
 `SessionProvider` applique `locale` retournée par le serveur, met à jour `html.lang` et remonte l’arbre privé lors d’une bascule. Le transport associe chaque requête à une génération de session/langue et ignore toute réponse devenue obsolète, même après un aller-retour FR → EN → FR. Les préférences sont écrites en série et ne remettent pas les autres champs au défaut. `AccountMenu.beforeSessionChange` attend les écritures Tâches ou consulte la protection des brouillons Sport avant langue/déconnexion. Les formulaires non enregistrés restent transitoires. Voir [Internationalisation](internationalisation.md).
+
+## Cadre Sport / Suivi
+
+`shared/ui/ApplicationNavigation` fournit `ApplicationSidebar` et `ApplicationTopbar`, avec navigation mobile accessible via des propriétés. Le footer utilise `platform/auth/ApplicationFooter`. Sport et Suivi l’utilisent ; leurs gardes, données et menus du compte restent dans les Pages. Le CSS commun suit les tokens `--ui-*`. Suivi compose calendrier mensuel/annuel navigable au clavier, saisie guidée et recherche de métriques/options. `platform/useApiResource` annule les lectures démontées et ignore les mutations terminées après démontage ; les brouillons restent transitoires et les écritures utilisent la version serveur.
+
+Le client HTTP et les types de métriques réutilisables sont dans `frontend/src/platform/integrations/`. Les composants de configuration et saisie restent propres à Suivi.

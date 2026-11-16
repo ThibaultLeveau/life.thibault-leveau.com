@@ -145,3 +145,21 @@ Le programme garde sa date lors d’un archivage ou d’une désactivation. `ser
 ## Langue et textes fournis
 
 La migration `0008_locale` ajoute la préférence de compte sans modifier les contenus existants. Les écritures partielles de préférences conservent les champs absents. Les 680 exercices Sport restent des ressources embarquées ; leurs identifiants, types et codes de facettes sont indépendants de leurs libellés FR/EN. Une réponse peut présenter un nom traduit sans réécrire `sport_workouts.entries`, `sport_sessions.entries` ou `metrics`, ni changer score, signature, dates ou référence. Les UUID personnels ne sont jamais localisés, même en cas d’homonymie. Les statuts personnalisables déjà en base restent leurs textes historiques. Voir [Internationalisation](internationalisation.md#donnees-et-exploitation).
+
+## Données de Suivi
+
+La migration additive `0009_tracking`, après `0008_locale`, crée :
+
+| Table | Contenu et invariants |
+| --- | --- |
+| `tracking_trackers` | Propriétaire, définition JSONB, ordre, version positive, création et archive |
+| `tracking_definitions` | Définition complète par révision, date d’effet et activation ; historique immuable |
+| `tracking_entries` | Une saisie par suivi/début de période, propriétaire cohérent par clé étrangère composée, définition/valeurs/sources JSONB |
+| `tracking_entry_revisions` | Instantané complet par version, date d’enregistrement ; historique immuable |
+| `tracking_settings` | Fuseau IANA propre au compte |
+
+Une entrée est `draft` ou `complete` ; seule une entrée complète possède `completed_at`. Les transitions, corrections et réouvertures sont atomiques et utilisent `expected_version`. La base protège les versions positives, types JSONB, bornes de périodes, unicité et propriétaires ; des triggers interdisent UPDATE/DELETE des deux historiques. L’API valide les champs, unités, objectifs et jours applicables.
+
+Les définitions sont datées : une période non saisie utilise la révision applicable à son début (ou au premier jour du suivi si la période commence avant). Les anciennes saisies utilisent toujours leur propre définition. L’archivage/restauration ajoute une révision, sans réécrire les périodes enregistrées. Désactiver l’application ne touche aucune table métier.
+
+Les sources conservent requête, fuseau, bornes, résultat, unité, état et date d’observation. Les valeurs proviennent du serveur. Une actualisation crée une correction explicite ; une source désactivée laisse ses instantanés accessibles. Les points et badges sont dérivés des entrées actuelles, pas d’un journal de récompenses susceptible de doubler. Il n’existe pas de suppression définitive. [API](tracking-api.md), [calculs](tracking.md), [restauration](sauvegardes.md#migration-0009-suivi).

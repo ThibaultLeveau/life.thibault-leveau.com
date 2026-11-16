@@ -22,6 +22,14 @@ Workspace settings let you edit its name, parent, sections, statuses and labels.
 
 Sections organize tasks inside a workspace and can appear in lists, boards or both. Statuses determine whether a task is open or complete. At least one open and one completed status must remain; a status used by tasks, including archived tasks, cannot change its completion meaning. Labels belong to their workspace.
 
+### Choosing colours
+
+Workspaces, sections, columns and labels offer the same **16-colour grid** on desktop and mobile, when creating or editing. Click or tap a swatch to select it; a checkmark identifies the current choice. With a keyboard, use Tab to reach a swatch, then Enter or Space to select it.
+
+**Custom color** opens your browser’s free colour picker. Its appearance depends on the device, while the LifeOS grid and its colours stay identical. The selected hexadecimal code is displayed next to the picker. Existing custom colours are preserved even when absent from the grid. Selecting a colour does not submit the form: use **Create workspace**, **Add** or **Save** afterwards. After adding a section, column or label, the creation form returns to its default colour.
+
+Colours are saved through the [existing APIs](../api.md#espaces-et-configuration) in the `color` field as `#RRGGBB` and appear on other devices after reloading. The palette does not restrict accepted values; no data changes or migration are required.
+
 ## Upcoming tasks
 
 **Upcoming** combines due tasks from active workspaces and is the default `/tasks` view. A link with `?space=…` still opens that workspace. Tasks are grouped chronologically by date with their full workspace path and section.
@@ -32,7 +40,9 @@ Choose the period and whether to include overdue or completed tasks. Custom hori
 
 Use **New task** or quick entry. On desktop, pressing **Enter** in quick entry clears the title and keeps the cursor ready for the next task in the same section and status. **Escape** closes quick entry. Enter a title, optional description, status, section, priority, labels and due date. Saved data comes from the server; closing or reloading a form can lose unsaved entries. A version conflict is explicit and does not silently overwrite another device’s change.
 
-List, board and other available task views share the same records and actions. View preferences such as grouping, sorting, visible completed tasks and filters persist through the API. Search waits briefly while you type. An update preserves the visible list and scroll position; errors keep the last results and offer **Try again**.
+List, board and other available task views share the same records and actions. Completed tasks are hidden in every workspace whenever you open or reload the page, even if you previously showed them. Choose **Show → Show completed tasks** to reveal them in the current workspace until the next reload. This choice remains active when you visit another workspace and come back during the same visit. **Clear filters** also reveals all tasks. Completion dates and history are preserved.
+
+Other view preferences, including layout, density, sorting and filters, persist through the API. **Upcoming** keeps its separate saved settings. Search waits briefly while you type. An update preserves the visible list and scroll position; errors keep the last results and offer **Try again**.
 
 In manual order on desktop, drag a task by its title, body or handle to reorder it or change its list section or board row/column, including empty cells. Drop it on another workspace in the sidebar to move it to **No section**, preserving its open/completed state in the first compatible status. Releasing outside a target or pressing Escape cancels the drag. Area selection starts only on the background outside tasks and controls; it never starts from a task. On touchscreens, use the handle to drag. The accessible move command offers a keyboard alternative and also moves tasks between workspaces. Select several tasks for rescheduling, moving or reversible deletion. The context menu supports duplication and individual actions. Use Escape to dismiss menus or clear selection. A touch hold starts selection; moving before activation continues scrolling. A task keeps its identity and history when moved.
 

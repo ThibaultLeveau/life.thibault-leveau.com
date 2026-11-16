@@ -102,7 +102,7 @@ Archiver un espace ayant un enfant actif renvoie 409 : archiver ou déplacer les
 {
   "layout": "board",
   "density": "comfortable",
-  "show_completed": true,
+  "show_completed": false,
   "search": "",
   "sort": "manual",
   "status_id": null,
@@ -112,7 +112,7 @@ Archiver un espace ayant un enfant actif renvoie 409 : archiver ou déplacer les
 }
 ```
 
-Valeurs : `layout` list/board, `density` comfortable/compact, `sort` manual/priority/due_date, `due` all/overdue/today/upcoming/none. La priorité optionnelle vaut 1 à 4, la recherche au plus 500 caractères. Statut et étiquette référencés doivent appartenir à l'espace. Le défaut de disposition est `list`, les autres défauts figurent dans cet exemple. Ces réglages ne changent jamais le cycle de vie.
+Valeurs : `layout` list/board, `density` comfortable/compact, `sort` manual/priority/due_date, `due` all/overdue/today/upcoming/none. La priorité optionnelle vaut 1 à 4, la recherche au plus 500 caractères. Statut et étiquette référencés doivent appartenir à l'espace. Le défaut de disposition est `list`, les autres défauts figurent dans cet exemple. Ces réglages ne changent jamais le cycle de vie. `show_completed` vaut `false` par défaut ; une valeur explicite reste lisible et modifiable par cette API. L’interface masque néanmoins les tâches terminées à chaque ouverture/rechargement, même si la valeur enregistrée vaut `true`. Le choix explicite d’affichage utilise cette préférence pendant la consultation de l’espace ; les autres réglages restent appliqués au rechargement. Pour obtenir uniquement les tâches ouvertes par API, utiliser `GET /api/v1/tasks?workspace_id=<uuid>&completed=false` ; omettre `completed` inclut les tâches terminées.
 
 ## Agenda global
 
@@ -370,3 +370,7 @@ L’application Sport expose exercices, programmes, entraînements/séries/repos
 La session expose également `locale`. La préférence de compte prévaut sur `Accept-Language` ; sans compte authentifié, cet en-tête négocie `fr/en`, avec repli français. Les réponses privées annoncent `Content-Language`, `Vary: Accept-Language, Cookie` et `Cache-Control: no-store`. Les codes et identifiants restent indépendants de la langue.
 
 Une erreur HTTP expose `{detail, code}` ; la validation de structure 422 expose `detail: [{loc, type, code, msg}]`, sans valeur d’entrée. Les détails sont traduits, les codes stables. `/scheduling/parse` reconnaît le vocabulaire de la langue du compte, par exemple `Read every Monday and Thursday for three times`, avec les mêmes RRULE, règles de validation, protections et indices Unicode. Les dates numériques restent jour/mois/année ; ISO est accepté. Voir [exemples et contrats de langue](internationalisation.md#api-independante-de-linterface).
+
+## Suivi et intégrations
+
+Les [contrats Suivi](tracking-api.md) couvrent définitions, ordre, archivage/restauration, réglages, périodes, saisies, corrections, calendrier, statistiques et réussites sous `/api/v1/tracking`. Le [catalogue de métriques](integrations.md) expose découverte, recherche des filtres et évaluations sous `/api/v1/integrations`. Toutes les écritures et évaluations POST utilisent le CSRF commun.
