@@ -120,3 +120,9 @@ La restauration transactionnelle habituelle conserve ces colonnes et l’intégr
 Le downgrade vers `0007_hyrox` refuse dès qu’un compte a choisi `en`. Ne pas modifier les préférences pour forcer un retour en production : privilégier une correction en avant ou restaurer explicitement un dump connu avec l’image compatible. L’aller/retour sans préférence anglaise et le refus de perte sont testés.
 
 Le dump contient la langue comme le thème. Les traductions des 680 exercices et les messages sont embarqués : conserver l’image et son SHA avec la sauvegarde. La recette conteneur enregistre `en` via l’API avant le dump et compare les préférences restaurées, en plus des cinq tables Sport, des récurrences et de l’historique immuable. Vérifier après restauration la reconnexion, les deux langues, un exercice fourni et un exercice personnel homonyme sur un compte de recette.
+
+## Fin de séance Sport incomplète
+
+La fin partielle enrichit les séries JSONB de `sport_sessions` avec `skipped: true` et des mesures à zéro pour les séries non effectuées, sans nouvelle migration SQL (révision `0008_locale`). Les séries existantes restent intactes et se lisent avec `skipped: false` par défaut. Le dump et la restauration transactionnelle habituels conservent ces marqueurs, résultats, dates et scores ; la recette conteneur crée des séances partielles et compare toutes les tables Sport après restauration.
+
+Les images antérieures refusent les zéros et le champ `skipped` dans leurs contrats de résultat. Après une première fin partielle, **ne pas revenir directement à une ancienne image**, même si sa sonde Alembic reconnaît la même révision. Préférer une correction en avant. Si une restauration antérieure est nécessaire, suivre la procédure complète avec arrêt des écritures, dump compatible et son image, en tenant compte des données postérieures au dump ; ne pas supprimer les marqueurs ni réécrire les résultats en production.

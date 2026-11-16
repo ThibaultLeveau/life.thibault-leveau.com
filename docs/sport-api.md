@@ -36,11 +36,21 @@ Les entrées de programme sont `{exercise_id, sets, target}`. Les objectifs sont
 
 Chaque entrée d’entraînement expose aussi `suggested_values`, une liste indexée à partir de 0 : `[{"weight_kg":40,"reps":12,...}, {"weight_kg":42.5,"reps":8,...}]`. Les autres mesures de `Values` valent `null`. Une position `null` signifie qu’aucune série antérieure correspondante n’a été enregistrée ; les instantanés créés avant cette fonctionnalité renvoient une liste vide. Ces propositions sont réservées aux réponses d’entraînement : ne pas les envoyer dans les entrées de programme ni les confondre avec `sets`.
 
-Au démarrage, le serveur cherche les derniers résultats conservés de chaque série du même compte/programme/exercice/type, du plus récent entraînement terminé ou abandonné au plus ancien. Des exercices réordonnés restent reconnus ; les doublons sont associés par rang d’occurrence. Une série annulée ou absente ne remplace pas une valeur plus ancienne. Les propositions sont figées dans l’instantané ; elles ne modifient ni `target`, ni `sets`, ni score, dates ou repos. Une nouvelle série sans historique peut utiliser côté client la dernière série précédente validée dans l’entraînement courant, puis `target`. Toute validation reste un PUT explicite avec `expected_version` et toutes les mesures requises.
+Au démarrage, le serveur cherche les derniers résultats conservés de chaque série du même compte/programme/exercice/type, du plus récent entraînement terminé ou abandonné au plus ancien. Des exercices réordonnés restent reconnus ; les doublons sont associés par rang d’occurrence. Une série annulée, absente ou marquée `skipped: true` ne remplace pas une valeur plus ancienne. Les propositions sont figées dans l’instantané ; elles ne modifient ni `target`, ni `sets`, ni score, dates ou repos. Une nouvelle série sans historique peut utiliser côté client la dernière série précédente validée dans l’entraînement courant, puis `target`. Toute validation reste un PUT explicite avec `expected_version` et toutes les mesures requises.
 
 Une session renvoie `server_now` et `rest_until` UTC : le client affiche `max(0, rest_until - server_now - temps écoulé depuis la réponse)`. Une correction de série conserve son `completed_at` et ne relance pas le repos. Les dates et données de l’instantané persistent après modification ou archivage du modèle. Les sessions terminées sont immuables via API ; les résultats, `metrics`, `score` et `baseline_id` restent lisibles. Les [formules et limites du score](sport.md#statistiques-et-score) s’appliquent aussi aux clients indépendants.
 
 Les lectures ne créent ni objets ni copies du catalogue en base. Les écritures sont transactionnelles et sérialisées par propriétaire. Sur un conflit, relire l’objet ; ne pas remplacer aveuglément la version par la dernière sans réconcilier les modifications.
+
+## Terminer une séance incomplète
+
+`PUT /sessions/{uuid}/finish` avec `{"expected_version": 3, "outcome": "completed", "notes": "Fatigue"}` termine aussi une séance sans aucune série validée. Dans la même transaction, le serveur conserve les résultats existants et ajoute chaque couple d’indices manquant avec toutes les mesures de son type à zéro, `skipped: true` et `completed_at` égal à `finished_at`. Les champs non applicables restent `null` dans la réponse. Le repos est arrêté et la version augmente une seule fois. Les anciennes séries et celles validées explicitement renvoient `skipped: false` par défaut.
+
+Le contrat de sortie `SetResultValues` accepte les zéros. Le contrat d’entrée `Values` conserve ses bornes strictes : répétitions, durée, distance et calories positives lors d’une validation manuelle ou d’une cible. `skipped` est un champ de réponse réservé au serveur ; il ne se transmet pas dans un PUT de série. Une série non validée est mise à zéro même si une cible ou une proposition non nulle était affichée.
+
+`completed_sessions` inclut les séances ainsi terminées ; `total_sets` compte uniquement les séries réellement validées. Les mesures à zéro n’augmentent aucun volume ni distance et n’alimentent pas `suggested_values`. Un exercice entièrement omis a une métrique nulle. La référence de score est la première séance de même programme/signature dont chaque exercice a une métrique positive. Sans une telle référence, `score` et `baseline_id` restent `null` si un exercice a une métrique nulle ; avec référence, une séance entièrement omise vaut 0. Les scores antérieurs ne sont pas recalculés. Les graphiques de score excluent les valeurs `null`.
+
+`outcome: "cancelled"` n’ajoute aucune série et conserve son comportement sans score ni statistiques. Les contrôles de session, activation, propriétaire, CSRF et version restent obligatoires. Une répétition du PUT après fin retourne **409**, sans ajouter de résultat ni changer l’historique.
 
 ## Exemple complet en Python
 
@@ -69,7 +79,7 @@ with httpx.Client(base_url=base + '/api/v1', headers={'Origin': base}) as client
     })['items'][0]
     workout = request('POST', '/sport/workouts', json={
         'name': 'Programme API',
-        'entries': [{'exercise_id': exercise['id'], 'sets': 1,
+        'entries': [{'exercise_id': exercise['id'], 'sets': 2,
                      'target': {'weight_kg': 40, 'reps': 10}}],
     })
     training = request('POST', '/sport/sessions', json={
@@ -83,7 +93,9 @@ with httpx.Client(base_url=base + '/api/v1', headers={'Origin': base}) as client
         'expected_version': training['version'], 'outcome': 'completed',
         'notes': 'Exemple créé par API',
     })
-    print(result['score'])  # 100 pour cette première session de référence
+    print(result['sets'][1]['values']['reps'])  # 0 : seconde série non validée
+    assert result['sets'][1]['skipped'] is True
+    print(result['score'])  # 100 : cet exercice a une performance positive
     print(request('GET', '/sport/statistics')['completed_sessions'])
     next_training = request('POST', '/sport/sessions', json={
         'workout_id': workout['id'], 'expected_version': workout['version'],
@@ -99,7 +111,7 @@ Mensuration : `POST /sport/measurements` avec `{"measured_on":"2026-11-14","weig
 - **401** : session absente ou expirée.
 - **403** : origine/CSRF incorrect ou Sport désactivée ; dans ce dernier cas, en-tête `X-Life-Application-Disabled: sport`.
 - **404** : objet inconnu, indice de série absent ou objet d’un autre compte.
-- **409** : version obsolète, session déjà active/terminée, programme ou exercice archivé, série manquante avant fin, date de mensuration déjà utilisée.
+- **409** : version obsolète, session déjà active/terminée, programme ou exercice archivé, date de mensuration déjà utilisée.
 - **422** : champ inconnu, type invalide, bornes dépassées, champs incompatibles, mensuration vide/future ou période incorrecte.
 
 Les compteurs et graphiques excluent les abandons et les relevés archivés. Les périodes de sessions utilisent `started_at` UTC, les relevés leur date civile enregistrée. L’accès aux données des autres comptes ne révèle pas leur existence.

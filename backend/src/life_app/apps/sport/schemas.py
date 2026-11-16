@@ -179,15 +179,38 @@ class SetInput(Version):
     values: Values
 
 
+class SetResultValues(Values):
+    """Saved results also represent sets left unperformed when finishing."""
+
+    reps: int | None = Field(None, ge=0, le=100000, strict=True)
+    duration_seconds: float | None = Field(None, ge=0, le=604800, allow_inf_nan=False)
+    distance_m: float | None = Field(None, ge=0, le=10000000, allow_inf_nan=False)
+    calories: float | None = Field(None, ge=0, le=100000, allow_inf_nan=False)
+
+
 class SetOutput(Contract):
     entry_index: int
     set_index: int
-    values: Values
+    values: SetResultValues
     completed_at: datetime
+    skipped: bool = Field(
+        False,
+        description=(
+            "Série non effectuée, ajoutée à la fin avec toutes ses mesures à zéro. "
+            "completed_at indique alors la fin de séance. Exclue du nombre de séries "
+            "effectuées et des propositions suivantes. false pour les séries validées "
+            "et les anciens résultats."
+        ),
+    )
 
 
 class SessionFinish(Version):
-    outcome: Literal["completed", "cancelled"]
+    outcome: Literal["completed", "cancelled"] = Field(
+        description=(
+            "completed termine la séance et enregistre les séries non validées à zéro ; "
+            "cancelled conserve uniquement les séries validées, sans score ni statistiques."
+        )
+    )
     notes: str = Field("", max_length=4000)
 
 

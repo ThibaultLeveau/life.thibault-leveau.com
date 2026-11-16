@@ -112,7 +112,7 @@ export function TrainingDetail({
         </div>
         <div>
           <span>{tr("completed_sets")}</span>
-          <strong>{training.sets.length}</strong>
+          <strong>{training.sets.filter((s) => !s.skipped).length}</strong>
         </div>
         <div>
           <span>{tr("training_score")}</span>
@@ -132,6 +132,9 @@ export function TrainingDetail({
               )}
         </p>
       )}
+      {training.status === "completed" && training.score == null && (
+        <p className="muted">{tr("score_needs_positive_baseline")}</p>
+      )}
       {training.entries.map((entry, i) => (
         <section className="sport-plan-entry" key={i}>
           <h3>{entry.name}</h3>
@@ -141,6 +144,7 @@ export function TrainingDetail({
               <p key={s.set_index}>
                 {tr("set")} {s.set_index + 1} ·{" "}
                 {valuesText(kinds.find((k) => k.id === entry.kind)!, s.values)}
+                {s.skipped && <> · {tr("set_not_performed")}</>}
               </p>
             ))}
         </section>
@@ -398,7 +402,7 @@ export function ActiveTraining({
         </button>
         <button
           className="primary-button"
-          disabled={action.busy || dirty || training.sets.length !== total}
+          disabled={action.busy || dirty}
           onClick={() => setEnding("completed")}
         >
           {tr("finish_training_session")}
@@ -449,6 +453,9 @@ export function ActiveTraining({
                     "sets_already_recorded_remain_in_your_history_this_training_session",
                   )}
             </p>
+            {ending === "completed" && training.sets.length < total && (
+              <p>{tr("unfinished_sets_will_be_zero")}</p>
+            )}
             <label>
               {tr("how_it_felt_and_notes")}
               <textarea
@@ -497,7 +504,10 @@ export function History({ kinds }: { kinds: KindDefinition[] }) {
               <strong>{t.name}</strong>
               <small>
                 {moment(t.started_at)} ·{" "}
-                {tr("set_count", { count: t.sets.length })} ·{" "}
+                {tr("set_count", {
+                  count: t.sets.filter((s) => !s.skipped).length,
+                })}{" "}
+                ·{" "}
                 {t.status === "completed"
                   ? tr("session_completed")
                   : t.status === "cancelled"

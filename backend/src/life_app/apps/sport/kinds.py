@@ -78,11 +78,13 @@ def performance(kind: str, values: list[dict]) -> float:
         case "weight_duration":
             return sum((v["weight_kg"] + 1) * v["duration_seconds"] for v in values)
         case "distance_duration":
-            return total("distance_m") / total("duration_seconds")
+            return total("distance_m") / duration if (duration := total("duration_seconds")) else 0
         case "reps_duration":
-            return 60 * total("reps") / total("duration_seconds")
+            return 60 * total("reps") / duration if (duration := total("duration_seconds")) else 0
         case "calories_duration":
-            return 60 * total("calories") / total("duration_seconds")
+            return (
+                60 * total("calories") / duration if (duration := total("duration_seconds")) else 0
+            )
         case "duration":
             return total("duration_seconds")
         case "distance":
