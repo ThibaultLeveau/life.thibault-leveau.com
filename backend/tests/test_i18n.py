@@ -14,6 +14,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from life_app.apps.registry import APPLICATIONS
 from life_app.apps.sport.catalogue import CATALOGUES, DATA, TEXTS
 from life_app.apps.sport.models import Training, Workout
 from life_app.cli import migration_config
@@ -331,7 +332,7 @@ def test_language_isolation_under_concurrent_requests(client, app):
 
 def test_frontend_catalogue_keys_interpolation_and_plurals():
     root = Path(__file__).parents[2] / "frontend/src"
-    for directory in (root / "shared", root / "apps/tasks", root / "apps/sport"):
+    for directory in (root / "shared", *(root / "apps" / app.id for app in APPLICATIONS)):
         french = json.loads((directory / "locales/fr.json").read_text())
         english = json.loads((directory / "locales/en.json").read_text())
         assert french.keys() == english.keys(), directory

@@ -20,7 +20,7 @@ When every application is disabled, Home offers to explore the library. Sign-in,
 
 **Sport** is available and disabled by default. Enable it for [exercises, programs, training, body measurements and statistics](sport.md).
 
-OKRs, household chores and plants are future ideas, not available applications. New applications appear in the library when released and start disabled unless a documented migration requires otherwise.
+Household chores and plants are future ideas, not available applications. New applications appear in the library when released and start disabled unless a documented migration requires otherwise.
 
 ## Account, language and appearance
 
@@ -32,8 +32,12 @@ An expired session returns to sign-in and removes private views. HTML pages cont
 
 ## Shared navigation
 
-Tasks, Sport and Tracking share the same top bar and sidebar. The breadcrumb identifies the application and current view. On mobile, **Open navigation** shows the same links and footer; **Escape** or **Close navigation** closes the menu.
+Tasks, Sport, Tracking and OKR Goals share the same top bar and sidebar. The breadcrumb identifies the application and current view. On mobile, **Open navigation** shows the same links and footer; **Escape** or **Close navigation** closes the menu.
 
 The footer contains, in order, the **Application library**, **Documentation** for the current application and language, the **light / dark / system** theme, **Language**, then the user and **Sign out**. Theme and language are saved to the account through the API. Business archives and settings remain among each application's navigation links.
 
 **Tracking** is available and disabled by default. It provides custom habits, goals, Tasks/Sport data sources, guided entries, a month/year calendar, statistics and rewards. [Tracking guide](tracking.md). Disabling a source blocks new integration reads while preserving saved snapshots.
+
+## OKR Goals available
+
+**OKR Goals** starts disabled. Enable it to define personal/professional horizons, measure key results, work through a quarterly board and revisit past accomplishments. Quarterly plans fit within one month. Tracking discovers its metrics and 60 quests through the shared providers. [OKR guide](okr.md).

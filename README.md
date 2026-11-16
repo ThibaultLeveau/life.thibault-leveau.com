@@ -69,11 +69,11 @@ make test-container # image, navigateur et restauration d'une sauvegarde isolée
 
 La première activation nécessite les secrets PostgreSQL, la migration et la création du compte. Suivre le [déploiement](docs/deploiement.md), puis les [sauvegardes et restaurations](docs/sauvegardes.md). Après chaque changement fusionné, y compris documentaire, l'agent déploie le dernier `main` validé sur le VPS et vérifie la publication. La fusion GitHub ne publie pas elle-même le site.
 
-Toutes les opérations de l'interface sont accessibles par [API](docs/api.md). L’application **Sport** propose 680 exercices, programmes, entraînements avec repos, mensurations et statistiques. Les programmes HYROX bénéficient d’un habillage monochrome et d’un compte à rebours de compétition. [Guide Sport](docs/sport.md). Les statistiques de tâches et les objectifs restent à développer. Les tâches, sections et espaces sont archivables, sans suppression définitive dans cette version.
+Toutes les opérations de l'interface sont accessibles par [API](docs/api.md). L’application **Sport** propose 680 exercices, programmes, entraînements avec repos, mensurations et statistiques. Les programmes HYROX bénéficient d’un habillage monochrome et d’un compte à rebours de compétition. [Guide Sport](docs/sport.md). Les statistiques de tâches restent à développer. [Objectifs OKR](docs/okr.md) propose quatre horizons, résultats clés, kanban trimestriel et réalisations historiques, avec métriques Suivi et 60 quêtes. Les tâches, sections et espaces sont archivables, sans suppression définitive dans cette version.
 
 Les trois points et le clic droit ouvrent les actions de tâche : modifier, dupliquer et supprimer (avec restauration dans les archives). Sélectionner plusieurs tâches par rectangle souris ou appui long mobile permet de les replanifier, déplacer ou supprimer ensemble. La navigation et les commandes s’adaptent aux petits écrans ; voir le [guide des tâches](docs/taches.md#selectionner-plusieurs-taches).
 
-LifeOS, Tâches, Sport et Suivi sont disponibles en **français et en anglais**, avec un choix de langue conservé par compte. Les 680 exercices par défaut sont traduits ; les contenus personnels restent intacts. Voir [Langues et traductions](docs/internationalisation.md) et l’[ADR 004](docs/decisions/004-internationalisation.md).
+LifeOS, Tâches, Sport, Suivi et Objectifs OKR sont disponibles en **français et en anglais**, avec un choix de langue conservé par compte. Les 680 exercices par défaut sont traduits ; les contenus personnels restent intacts. Voir [Langues et traductions](docs/internationalisation.md) et l’[ADR 004](docs/decisions/004-internationalisation.md).
 
 ## Suivi personnel
 

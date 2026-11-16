@@ -4,7 +4,7 @@ React, TypeScript et Vite conservent l'outillage du socle. `App.tsx` assemble la
 
 ## Navigation commune des applications
 
-Tâches, Sport et Suivi composent la même `ApplicationSidebar` et la même `ApplicationTopbar` depuis `shared/ui/ApplicationNavigation.tsx`. Le fichier `shared/styles/navigation.css` possède leurs styles : largeur de sidebar de 252 px sur bureau, barre supérieure de 66 px (64 px sur mobile), mêmes liens et états visuels. Les applications fournissent leur nom, icône, fil d’Ariane et liens métier, sans surcharger cet habillage.
+Tâches, Sport, Suivi et Objectifs OKR composent la même `ApplicationSidebar` et la même `ApplicationTopbar` depuis `shared/ui/ApplicationNavigation.tsx`. Le fichier `shared/styles/navigation.css` possède leurs styles : largeur de sidebar de 252 px sur bureau, barre supérieure de 66 px (64 px sur mobile), mêmes liens et états visuels. Les applications fournissent leur nom, icône, fil d’Ariane et liens métier, sans surcharger cet habillage.
 
 `platform/auth/ApplicationFooter` assemble dans cet ordre la bibliothèque, la documentation courante localisée, le thème, la langue et le compte/déconnexion via `AccountMenu`. Les préférences restent dans l’API commune ; les gardes de brouillon Sport et l’attente des écritures Tâches en arrière-plan sont conservées. Les archives des espaces sont parmi les liens métier. Le prénom et le rechargement global ne figurent plus dans la top bar ; les commandes de récupération après erreur restent dans le contenu métier.
 
@@ -102,3 +102,7 @@ Le client HTTP et les types de métriques réutilisables sont dans `frontend/src
 Le slot optionnel `status` d’`ApplicationTopbar` reçoit `platform/progression/ProgressionBadge` dans chaque Page. Le composant partagé reste neutre. Le badge affiche niveau, titre et série ; son panneau accessible expose les trois quêtes proches. Échap et le bouton de fermeture rendent le focus ; clic extérieur et sortie clavier ferment le panneau. Sur les petits écrans, la progression prend une seconde ligne commune afin de garder le fil d’Ariane lisible et les cibles de 44 px.
 
 `platform/progression` possède types, transport, réglages et styles réutilisables. Les mutations réussies du transport émettent un signal transitoire `life-data-changed` pour relire la progression ; ce signal ne contient ni règle ni données métier. Les changements de langue/premier plan relancent les lectures via `useApiResource`, qui annule les réponses obsolètes. Déconnexion/expiration démontent les Pages et leur progression. `apps/tracking/components/Achievements` compose sélection d’application, niveaux/titres, mur filtrable et journal paginé. Aucun stockage de progression dans le navigateur.
+
+## Interface Objectifs OKR
+
+`apps/okr` assemble le cadre commun, le badge et le footer avec un formulaire guidé par horizon, les résultats clés, le kanban, une rétrospective paginée et les archives. Les cartes offrent des commandes natives de statut et d’ordre équivalentes au glisser-déposer. Les colonnes s’empilent sur écran étroit. `useApiResource` et le transport commun protègent les réponses obsolètes ; les formulaires protègent navigation, historique navigateur, langue et déconnexion. Aucun style OKR ne modifie la sidebar, la topbar ou le footer. Les liens vers les quêtes utilisent les métadonnées de la bibliothèque commune.

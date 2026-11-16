@@ -303,8 +303,8 @@ def test_explicit_history_import_is_owner_scoped_and_idempotent(authenticated_cl
     assert all(s["xp"] == 0 for s in get(c, ""))
     with app.state.sessions() as db:
         preview = svc.preview_backfill(db, db.get(User, owner), APPLICATIONS)
-        assert [row["activities"] for row in preview] == [1, 1, 1]
-        assert [row["activity_xp"] for row in preview] == [10, 65, 30]
+        assert [row["activities"] for row in preview] == [1, 1, 1, 0]
+        assert [row["activity_xp"] for row in preview] == [10, 65, 30, 0]
         assert db.scalar(select(func.count()).select_from(m.Reward)) == 0
     for _ in range(2):
         with app.state.sessions() as db, db.begin():
@@ -316,5 +316,5 @@ def test_explicit_history_import_is_owner_scoped_and_idempotent(authenticated_cl
     assert [r["xp"] for r in get(c, "/tasks/history")["items"] if r["kind"] == "activity"] == [10]
     assert [r["xp"] for r in get(c, "/sport/history")["items"] if r["kind"] == "activity"] == [65]
     with app.state.sessions() as db:
-        assert db.scalar(select(func.count()).select_from(m.ImportState)) == 3
+        assert db.scalar(select(func.count()).select_from(m.ImportState)) == len(APPLICATIONS)
         assert set(db.scalars(select(m.Reward.owner_id))) == {owner}

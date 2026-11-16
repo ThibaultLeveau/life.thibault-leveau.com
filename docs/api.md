@@ -408,3 +408,7 @@ curl -b cookies.txt -H "X-CSRF-Token: $CSRF" -H 'Content-Type: application/json'
 ```
 
 Les corps inconnus, fuseaux invalides, identifiants non enregistrés, booléens non stricts, dates hors 2000–2100, périodes inversées/chevauchantes ou plus de 100 vacances sont refusés (422). Une session absente/expirée produit 401, un CSRF invalide 403. Les changements de règles modifient le calcul des séries mais ne réécrivent pas les gains historiques. Voir [données](donnees.md#donnees-de-progression) et [sauvegarde](sauvegardes.md#migration-0010-progression).
+
+## Objectifs OKR
+
+Les routes `/api/v1/okr` exposent objectifs, résultats clés, ordre/statut, archives, historique trimestriel et fuseau, avec versions et protections communes. Les fournisseurs communs exposent métriques et progression. Voir les [contrats et exemples HTTP OKR](okr-api.md).

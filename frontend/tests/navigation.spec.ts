@@ -2,6 +2,12 @@ import { expect, test, type Page } from "@playwright/test";
 
 const applications = [
   {
+    path: "/okr",
+    name: "Objectifs OKR",
+    document: "okr",
+    current: "Votre cap",
+  },
+  {
     path: "/tracking",
     name: "Suivi",
     document: "tracking",
@@ -20,7 +26,7 @@ test.beforeEach(async ({ page }) => {
   });
   expect(login.ok()).toBeTruthy();
   headers = { "X-CSRF-Token": (await login.json()).csrf_token };
-  for (const id of ["tasks", "sport", "tracking"])
+  for (const id of ["tasks", "sport", "tracking", "okr"])
     expect(
       (
         await page.request.put(`/api/v1/applications/${id}`, {
