@@ -58,6 +58,7 @@ export function Dialog({
       <header className="dialog-header">
         <h2 id={titleId}>{title}</h2>
         <button
+          type="button"
           className="icon-button"
           aria-label={tr("close")}
           onClick={onClose}

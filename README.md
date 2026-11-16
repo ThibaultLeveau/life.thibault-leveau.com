@@ -74,3 +74,7 @@ Toutes les opérations de l'interface sont accessibles par [API](docs/api.md). L
 Les trois points et le clic droit ouvrent les actions de tâche : modifier, dupliquer et supprimer (avec restauration dans les archives). Sélectionner plusieurs tâches par rectangle souris ou appui long mobile permet de les replanifier, déplacer ou supprimer ensemble. La navigation et les commandes s’adaptent aux petits écrans ; voir le [guide des tâches](docs/taches.md#selectionner-plusieurs-taches).
 
 LifeOS, Tâches et Sport sont disponibles en **français et en anglais**, avec un choix de langue conservé par compte. Les 680 exercices par défaut sont traduits ; les contenus personnels restent intacts. Voir [Langues et traductions](docs/internationalisation.md) et l’[ADR 004](docs/decisions/004-internationalisation.md).
+
+## Suivi personnel
+
+[Suivi](docs/tracking.md) est disponible dans la bibliothèque : habitudes quotidiennes, hebdomadaires, mensuelles et annuelles, données manuelles ou issues de Tâches/Sport, calendrier mois/année, saisie guidée, statistiques et récompenses. Le cadre sidebar/topbar est partagé avec Sport. Les [intégrations](docs/integrations.md) utilisent un contrat de fournisseurs approuvé dans l’[ADR 005](docs/decisions/005-integrations-tracking.md).
