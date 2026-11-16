@@ -29,6 +29,10 @@ Types describe measurements, not a closed list of sports. A movement can have va
 
 In **Programs**, choose **New program**, name it and add exercises. Each exercise accepts 1–30 sets; a program accepts at most 50 exercises and 300 sets. Targets per set are optional. Arrow buttons reorder entries and the remove button removes an entry from the draft.
 
+Cards are compact on desktop. On phones, they show the name, total exercise and set counts, the first two exercises and the number of remaining exercises. The smaller HYROX banner keeps its logo, countdown and date. The pencil button opens the full editor with notes, every set and its targets.
+
+To archive a program, open its **edit page** and choose **Archive** at the bottom. The button does not appear on cards or during creation. If there are unsaved changes, confirmation lets you discard them before archiving; errors preserve the draft. Archiving uses the saved version and keeps exercises, notes, the competition date and history. Enable **Archived programs**, then choose **Restore** on the card to bring it back.
+
 Creation and editing open a dedicated page. **All programs** or **Cancel** returns to the list; leaving a modified draft requires confirmation, including changing language. Browser back/forward navigation is supported. `/sport?tab=workouts&program=new` opens creation, `program=<uuid>` opens an existing program and `archived=true` preserves the return to archived programs.
 
 **Add an exercise** opens the inline catalogue and focuses search. Choosing an exercise focuses its set count. Entries and values stay together during reordering. Limits are shown explicitly. **Save program** calls the API; network errors and conflicts leave the fields intact for correction. Drafts are temporary and are lost after confirmed reload or session expiry.

@@ -193,22 +193,28 @@
 }
 .sport-workout-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 16px;
+  align-items: start;
 }
 .sport-workout {
   border: 1px solid var(--ui-border);
   border-radius: 12px;
-  padding: 22px;
+  padding: 18px;
   display: flex;
   flex-direction: column;
 }
 .sport-workout-top {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 10px;
-  margin-bottom: 16px;
+}
+.sport-workout-top > div {
+  min-width: 0;
+}
+.sport-workout-top > button {
+  flex-shrink: 0;
 }
 .sport-tag {
   display: inline-flex;
@@ -219,16 +225,31 @@
   font-size: 11px;
 }
 .sport-workout h2 {
-  font-size: 21px;
+  margin: 8px 0 0;
+  font-size: 18px;
+  line-height: 1.4;
   overflow-wrap: anywhere;
+}
+.sport-workout-notes {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  margin: 8px 0 0;
+}
+.sport-workout-more {
+  display: none;
 }
 .sport-workout ol {
   padding-left: 20px;
-  margin: 24px 0;
+  margin: 16px 0;
 }
 .sport-workout li {
   padding-left: 4px;
-  margin-bottom: 13px;
+  margin-bottom: 8px;
+}
+.sport-workout li:last-child {
+  margin-bottom: 0;
 }
 .sport-workout li::marker {
   color: var(--ui-muted);
@@ -246,7 +267,7 @@
   align-items: center;
   flex-wrap: wrap;
   margin-top: auto;
-  padding-top: 18px;
+  padding-top: 12px;
   border-top: 1px solid var(--ui-border);
 }
 .sport-active-banner {
@@ -836,6 +857,9 @@
   align-items: center;
   justify-content: space-between;
 }
+.sport-program-archive {
+  align-self: flex-start;
+}
 .sport-program-actions > p {
   flex: 1 1 200px;
 }
@@ -911,6 +935,39 @@
   }
   .sport-toolbar > .primary-button {
     width: 100%;
+  }
+  .sport-workout-grid {
+    gap: 12px;
+  }
+  .sport-workout {
+    padding: 14px;
+  }
+  .sport-workout h2 {
+    font-size: 17px;
+  }
+  .sport-workout ol {
+    margin: 10px 0;
+    font-size: 12px;
+  }
+  .sport-workout li {
+    margin-bottom: 4px;
+  }
+  .sport-workout li:nth-child(n + 3),
+  .sport-workout li small,
+  .sport-workout-notes {
+    display: none;
+  }
+  .sport-workout-more {
+    display: block;
+    margin: -4px 0 10px;
+    font-size: 11px;
+  }
+  .sport-workout-actions {
+    padding-top: 10px;
+  }
+  .sport-workout-actions > button {
+    width: 100%;
+    justify-content: center;
   }
   .sport-program-info,
   .sport-program-form .sport-plan-entry {
@@ -1170,33 +1227,33 @@
   border-color: var(--ui-border);
 }
 .sport-workout > .sport-hyrox-brand {
-  margin: -22px -22px 20px;
+  margin: -18px -18px 12px;
   border-radius: 11px 11px 0 0;
   border-width: 0 0 1px;
 }
 .sport-hyrox-brand.is-compact {
-  padding: 22px;
-  gap: 20px;
+  padding: 16px 18px;
+  gap: 12px;
   grid-template-columns: 1fr;
 }
 .is-compact .sport-hyrox-identity {
-  gap: 14px;
+  gap: 10px;
 }
 .is-compact .sport-hyrox-logo {
-  width: 180px;
+  width: 150px;
 }
 .is-compact .sport-hyrox-motto {
   display: none;
 }
 .is-compact .sport-hyrox-countdown {
-  padding: 16px 0 0;
+  padding: 10px 0 0;
   border-left: 0;
   border-top: 1px solid #ffffff40;
   max-width: none;
   width: 100%;
 }
 .is-compact .sport-hyrox-countdown strong {
-  font-size: 38px;
+  font-size: 30px;
 }
 .sport-hyrox-stamp {
   display: inline-flex;
@@ -1281,4 +1338,32 @@
     padding: 8px;
   }
   .sport-rest.sport-hyrox > div { flex-basis: 130px; }
+}
+
+@media (max-width: 560px) {
+  .sport-workout > .sport-hyrox-brand.is-compact {
+    margin: -14px -14px 8px;
+    padding: 12px 14px;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 5fr);
+    gap: 12px;
+  }
+  .is-compact .sport-hyrox-logo {
+    width: min(100%, 100px);
+  }
+  .is-compact .sport-hyrox-kicker,
+  .is-compact .sport-hyrox-countdown > span {
+    display: none;
+  }
+  .is-compact .sport-hyrox-countdown {
+    border-top: 0;
+    border-left: 1px solid #ffffff40;
+    padding: 0 0 0 12px;
+    gap: 2px;
+  }
+  .is-compact .sport-hyrox-countdown strong {
+    font-size: 22px;
+  }
+  .is-compact .sport-hyrox-countdown time {
+    margin-top: 0;
+  }
 }

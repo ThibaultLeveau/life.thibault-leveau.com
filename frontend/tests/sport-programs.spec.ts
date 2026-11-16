@@ -19,12 +19,17 @@ test.beforeAll(async ({ browser }) => {
   cookies = await auth.cookies();
 });
 test.afterAll(async () => {
+  if (auth && headers)
+    await auth.request.put("/api/v1/preferences", {
+      headers,
+      data: { locale: "fr" },
+    });
   await auth?.close();
 });
 test.beforeEach(async ({ page }) => {
   await page.context().addCookies(cookies);
   await write(page, "/applications/sport", { enabled: true }, "PUT");
-  await write(page, "/preferences", { theme: "light" }, "PUT");
+  await write(page, "/preferences", { theme: "light", locale: "fr" }, "PUT");
   const active: Training | null = await (
     await page.request.get("/api/v1/sport/sessions/active")
   ).json();
@@ -103,6 +108,9 @@ for (const width of [320, 375, 768, 1440]) {
       .getByRole("button", { name: "Nouveau programme", exact: true })
       .click();
     await expect(page).toHaveURL(/program=new/);
+    await expect(
+      page.getByRole("button", { name: "Archiver", exact: true }),
+    ).toHaveCount(0);
     await expect(page.getByRole("dialog")).toHaveCount(0);
     await expect(
       page.getByRole("heading", { name: "Nouveau programme", exact: true }),
@@ -494,3 +502,252 @@ test.describe("programme tactile", () => {
       .toBe(0);
   });
 });
+
+test("Cartes de programme compactes : ordinateur, mobile, thèmes et langues", async ({
+  page,
+}, info) => {
+  test.setTimeout(90_000);
+  await page.clock.install({ time: new Date("2028-03-25T11:00:00Z") });
+  const exercises = [];
+  for (const name of ["Course sur tapis", "SkiErg", "Rameur", "Burpees"]) {
+    exercises.push(
+      await write<{ id: string }>(page, "/sport/exercises", {
+        name,
+        kind: "reps",
+        muscle_group: "Général",
+        equipment: "Sans matériel",
+      }),
+    );
+  }
+  const entries = exercises.map((exercise) => ({
+    exercise_id: exercise.id,
+    sets: 3,
+    target: { reps: 10 },
+  }));
+  const regular = await write<Workout>(page, "/sport/workouts", {
+    name: "Programme haut du corps",
+    notes: "Échauffement puis progression régulière. ".repeat(15),
+    entries,
+  });
+  const hyrox = await write<Workout>(page, "/sport/workouts", {
+    name: "HYROX — Cardio",
+    competition_date: "2028-03-28",
+    entries,
+  });
+  const shoulders = await write<Workout>(page, "/sport/workouts", {
+    name: "Programme B — Épaules + Dos",
+    entries,
+  });
+  // Isolate real API fixtures so captures do not depend on previous scenarios.
+  await page.route("**/api/v1/sport/workouts?archived=false", async (route) => {
+    const response = await route.fetch();
+    const programs: Workout[] = await response.json();
+    await route.fulfill({
+      response,
+      json: programs.filter((program) =>
+        [regular.id, hyrox.id, shoulders.id].includes(program.id),
+      ),
+    });
+  });
+  for (const locale of ["fr", "en"])
+    for (const theme of ["light", "dark"]) {
+      await write(page, "/preferences", { theme, locale }, "PUT");
+      for (const width of [320, 375, 1440]) {
+        await page.setViewportSize({ width, height: 900 });
+        await page.goto("/sport");
+        const cards = page.locator(".sport-workout");
+        await expect(cards).toHaveCount(3);
+        await expect(
+          page.getByRole("button", { name: /^(Archiver|Archive)$/ }),
+        ).toHaveCount(0);
+        for (const program of [regular, hyrox, shoulders]) {
+          const card = cards.filter({
+            has: page.getByRole("heading", { name: program.name, exact: true }),
+          });
+          const mobile = width < 560;
+          await expect(card.locator("li:visible")).toHaveCount(mobile ? 2 : 4);
+          await expect(card.locator("li small:visible")).toHaveCount(
+            mobile ? 0 : 4,
+          );
+          await expect(card.locator(".sport-workout-more:visible")).toHaveCount(
+            mobile ? 1 : 0,
+          );
+          if (mobile)
+            await expect(card).toContainText(
+              locale === "fr" ? "+ 2 autres exercices" : "+ 2 more exercises",
+            );
+          const height = (await card.boundingBox())!.height;
+          expect(height).toBeLessThan(
+            mobile ? 350 : program.id === hyrox.id ? 600 : 460,
+          );
+          for (const button of await card.getByRole("button").all()) {
+            const box = (await button.boundingBox())!;
+            expect(box.height).toBeGreaterThanOrEqual(44);
+            expect(box.width).toBeGreaterThanOrEqual(44);
+            expect(box.x).toBeGreaterThanOrEqual(0);
+            expect(box.x + box.width).toBeLessThanOrEqual(width);
+          }
+        }
+        await expect(cards.getByAltText("HYROX")).toBeVisible();
+        await expect(cards.locator("time")).toHaveAttribute(
+          "datetime",
+          "2028-03-28",
+        );
+        await fits(page);
+        await page.screenshot({
+          path: info.outputPath(`cards-${locale}-${theme}-${width}.png`),
+          fullPage: true,
+        });
+      }
+    }
+  await write(page, "/preferences", { locale: "fr" }, "PUT");
+  await page.setViewportSize({ width: 320, height: 900 });
+  await page.goto("/sport");
+  const edit = page.getByRole("button", {
+    name: `Modifier ${regular.name}`,
+    exact: true,
+  });
+  await edit.focus();
+  await edit.press("Enter");
+  await expect(page.locator(".sport-plan-entry")).toHaveCount(4);
+  await expect(page.getByLabel("Notes de préparation")).toHaveValue(
+    regular.notes,
+  );
+  await page.getByRole("button", { name: "Annuler", exact: true }).click();
+  await page
+    .locator(".sport-workout")
+    .filter({
+      has: page.getByRole("heading", { name: hyrox.name, exact: true }),
+    })
+    .getByRole("button", { name: "Démarrer l’entraînement", exact: true })
+    .click();
+  await expect(page.locator(".sport-training")).toBeVisible();
+  await expect(page.locator(".sport-session-exercise")).toHaveCount(4);
+});
+
+for (const locale of ["fr", "en"]) {
+  test(`Archivage dans l’éditeur : brouillon, erreur, conflit et restauration (${locale})`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({
+      width: locale === "fr" ? 320 : 1440,
+      height: 900,
+    });
+    const program = await write<Workout>(page, "/sport/workouts", {
+      name: `HYROX archive ${locale}`,
+      notes: "Notes conservées",
+      competition_date: "2028-02-29",
+      entries: [
+        {
+          exercise_id: "builtin-da98dd6929927833d279",
+          sets: 2,
+          target: { distance_m: 1000, duration_seconds: 420 },
+        },
+      ],
+    });
+    await write(page, "/preferences", { locale }, "PUT");
+    await page.goto(`/sport?tab=workouts&program=${program.id}`);
+    const archive = page.getByRole("button", {
+      name: locale === "fr" ? "Archiver" : "Archive",
+      exact: true,
+    });
+    const name = page.getByLabel(
+      locale === "fr" ? "Nom du programme" : "Program name",
+    );
+    await name.fill("Brouillon non enregistré");
+    page.once("dialog", (dialog) => dialog.dismiss());
+    await archive.click();
+    await expect(name).toHaveValue("Brouillon non enregistré");
+    expect(
+      (
+        await (
+          await page.request.get(`/api/v1/sport/workouts/${program.id}`)
+        ).json()
+      ).archived_at,
+    ).toBeNull();
+    await page.route(
+      `**/api/v1/sport/workouts/${program.id}/archive`,
+      (route) => route.abort("failed"),
+    );
+    page.once("dialog", (dialog) => dialog.accept());
+    await archive.click();
+    await expect(page.getByRole("alert")).toBeVisible();
+    await expect(name).toHaveValue("Brouillon non enregistré");
+    await expect(archive).toBeEnabled();
+    await page.unroute(`**/api/v1/sport/workouts/${program.id}/archive`);
+    const current = await write<Workout>(
+      page,
+      `/sport/workouts/${program.id}`,
+      {
+        name: program.name,
+        notes: "Modifié ailleurs",
+        competition_date: program.competition_date,
+        entries: program.entries.map(({ exercise_id, sets, target }) => ({
+          exercise_id,
+          sets,
+          target,
+        })),
+        expected_version: program.version,
+      },
+      "PUT",
+    );
+    const conflict = page.waitForResponse((response) =>
+      response.url().endsWith(`/workouts/${program.id}/archive`),
+    );
+    page.once("dialog", (dialog) => dialog.accept());
+    await archive.click();
+    expect((await conflict).status()).toBe(409);
+    await expect(name).toHaveValue("Brouillon non enregistré");
+    page.once("dialog", (dialog) => dialog.accept());
+    await page.reload();
+    await expect(name).toHaveValue(program.name);
+    await archive.focus();
+    await archive.press("Enter");
+    await expect(page).not.toHaveURL(/program=/);
+    await expect(
+      page.getByRole("heading", { name: program.name, exact: true }),
+    ).toHaveCount(0);
+    const archived: Workout = await (
+      await page.request.get(`/api/v1/sport/workouts/${program.id}`)
+    ).json();
+    expect(archived.archived_at).not.toBeNull();
+    expect(archived.version).toBe(current.version + 1);
+    expect(archived.entries).toEqual(current.entries);
+    expect(archived.notes).toBe("Modifié ailleurs");
+    expect(archived.competition_date).toBe(program.competition_date);
+    expect(archived.created_at).toBe(program.created_at);
+    await page
+      .getByLabel(locale === "fr" ? "Programmes archivés" : "Archived programs")
+      .check();
+    const card = page.locator(".sport-workout").filter({
+      has: page.getByRole("heading", { name: program.name, exact: true }),
+    });
+    await card
+      .getByRole("button", {
+        name: `${locale === "fr" ? "Modifier" : "Edit"} ${program.name}`,
+        exact: true,
+      })
+      .click();
+    await expect(archive).toHaveCount(0);
+    await page
+      .getByRole("button", {
+        name: locale === "fr" ? "Tous les programmes" : "All programs",
+        exact: true,
+      })
+      .click();
+    await card
+      .getByRole("button", {
+        name: locale === "fr" ? "Restaurer" : "Restore",
+        exact: true,
+      })
+      .click();
+    await expect(card).toHaveCount(0);
+    const restored: Workout = await (
+      await page.request.get(`/api/v1/sport/workouts/${program.id}`)
+    ).json();
+    expect(restored.archived_at).toBeNull();
+    expect(restored.entries).toEqual(current.entries);
+    expect(restored.competition_date).toBe(program.competition_date);
+    await write(page, "/preferences", { locale: "fr" }, "PUT");
+  });
+}
