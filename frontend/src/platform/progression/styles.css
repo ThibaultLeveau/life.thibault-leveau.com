@@ -5,11 +5,11 @@
 .progression-badge {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   min-height: 44px;
   border: 1px solid var(--ui-border);
   border-radius: 24px;
-  padding: 4px 12px 4px 5px;
+  padding: 4px 8px;
   background: var(--ui-sidebar);
   color: var(--ui-text);
   font-size: 12px;
@@ -20,15 +20,16 @@
   background: var(--ui-accent-bg);
 }
 .progression-level-number {
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
   display: grid;
   place-items: center;
   background: var(--ui-accent);
   color: var(--ui-button-text);
   border-radius: 50%;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 11px;
 }
 .progression-badge-title {
   max-width: 155px;
@@ -39,10 +40,12 @@
 }
 .progression-badge-streak {
   display: flex;
-  gap: 5px;
+  gap: 3px;
   align-items: center;
   border-left: 1px solid var(--ui-border);
-  padding-left: 10px;
+  padding-left: 6px;
+  font-size: 11px;
+  white-space: nowrap;
   color: var(--ui-accent);
 }
 .progression-popover {
@@ -854,5 +857,12 @@
     .progression-search
     input[type="search"] {
     font-size: 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .progression-badge-title {
+    max-width: clamp(48px, calc(100vw - 300px), 110px);
+    font-size: 11px;
   }
 }

@@ -115,10 +115,10 @@ export function ProgressionBadge({ applicationId }: { applicationId: string }) {
           {data?.title ?? tr("progression_name")}
         </span>
         <span className="progression-badge-streak">
-          <Icon name="repeat" size={14} />
+          <Icon name="repeat" size={12} />
           {data?.streak ?? "—"}
         </span>
-        <Icon name="down" size={13} />
+        <Icon name="down" size={12} />
       </button>
       {open && (
         <section
