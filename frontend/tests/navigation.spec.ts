@@ -38,7 +38,11 @@ async function openNavigation(page: Page) {
     await page
       .getByRole("button", { name: /^(Ouvrir la navigation|Open navigation)$/ })
       .click();
-  await expect(page.locator(".application-sidebar")).toBeVisible();
+  const sidebar = page.locator(".application-sidebar");
+  await expect(sidebar).toBeVisible();
+  await expect
+    .poll(async () => Math.round((await sidebar.boundingBox())!.x))
+    .toBe(0);
 }
 
 async function navigationStyles(page: Page) {
@@ -72,6 +76,8 @@ async function navigationStyles(page: Page) {
           "min-height",
           "display",
           "position",
+          ...(selector === ".application-sidebar" ? ["width"] : []),
+          ...(selector === ".application-topbar" ? ["height"] : []),
         ].map((property) => [property, style.getPropertyValue(property)]),
       );
     }),
@@ -120,6 +126,7 @@ test("navigation identique entre applications, thèmes et formats", async ({
         if (width === 1440 || width === 320)
           await page.screenshot({
             path: testInfo.outputPath(`${app.document}-${theme}-${width}.png`),
+            animations: "disabled",
           });
       }
     }
