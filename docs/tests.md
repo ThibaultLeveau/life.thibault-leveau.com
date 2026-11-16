@@ -110,10 +110,16 @@ Les cartes de programme Sport sont mesurées à 320/375/1440 px, en français/an
 
 `i18n.spec.ts` utilise l’API réelle et les bundles compilés pour vérifier langue anonyme et de compte, reconnexion, thème, Tâches en anglais, catalogue Sport et données personnelles, programmes/entraînements/historique, réponses obsolètes, brouillons, mobile/clavier et erreurs/expiration. La restauration conteneur compare aussi la langue du compte après un choix anglais persistant.
 
-Les parcours `navigation.spec.ts` comparent le style calculé de la top bar, sidebar, liens actifs et footer entre Tâches et Sport à 1440, 1000, 800, 375 et 320 px, en clair/sombre. Ils vérifient aussi les trois thèmes et les deux langues via les préférences API, les liens de documentation ciblés, la bibliothèque, la déconnexion, le confinement du focus, Échap, le fond de fermeture et le passage mobile/bureau.
+Les parcours `navigation.spec.ts` comparent le style calculé de la top bar, sidebar, liens actifs et footer entre Tâches, Sport et Suivi à 1440, 1000, 800, 375 et 320 px, en clair/sombre. Ils vérifient aussi les trois thèmes et les deux langues via les préférences API, les liens de documentation ciblés, la bibliothèque, la déconnexion, le confinement du focus, Échap, le fond de fermeture et le passage mobile/bureau.
 
 ## Interactions Tâches en arrière-plan
 
 `task-sync.spec.ts` retient explicitement les réponses d’écriture : plusieurs validations, la réouverture et d’autres actions doivent être visibles avant de libérer le réseau. Il compare ensuite les versions et valeurs avec l’API réelle. Les scénarios couvrent erreurs, conflits et conservation du brouillon, création suivie d’une action avant attribution de l’identifiant serveur, agenda, réglages, mobile/clavier et réduction des mouvements. Les parcours existants attendent la confirmation du statut d’enregistrement avant de vérifier la persistance après rechargement ; le rendu optimiste seul ne prouve pas la persistance.
 
 Le changement ne modifie ni tables, migrations, contrats HTTP, récurrences ni journal historique. Les validations PostgreSQL, propriétaire/CSRF, sauvegarde/restauration et désactivation/réactivation restent celles des parcours existants.
+
+## Suivi et métriques inter-applications
+
+`test_integrations.py` vérifie fenêtres locales/DST, résolutions nettes et annulations, reports manuels, filtres propriétaires, sources désactivées, agrégations Sport et absence de mesure. `test_tracking.py` vérifie périodes, types stricts, scores/XP, versions, définitions datées, instantanés, archive/réactivation, erreurs et protections SQL. `test_architecture.py` contrôle les fournisseurs optionnels et le cadre partagé ; la suite d’activation couvre automatiquement toutes les routes du nouveau routeur.
+
+`frontend/tests/tracking.spec.ts` exerce les parcours réels API/interface, états vides/erreurs, saisies zéro/Non, corrections, calendrier au clavier et à 320/390/1440 px, mois/année, sources, réglages, archive/restauration et anglais/sombre. La recette conteneur compare les cinq tables Suivi après dump/restauration. Les captures sont des résultats locaux Playwright et ne contiennent que des données synthétiques.

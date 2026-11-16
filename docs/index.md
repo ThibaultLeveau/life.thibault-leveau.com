@@ -29,3 +29,7 @@ Sport propose entraînements, repos, mensurations et statistiques. Tâches propo
 | Diagnostiquer et protéger | [Exploitation](exploitation.md), [Sécurité](securite.md) |
 
 Les décisions initiales restent dans l'[ADR 001](decisions/001-architecture-initiale.md). L'[ADR 002](decisions/002-gestion-taches.md) consigne l'accord de Thibault pour la persistance et l'authentification.
+
+## Suivi personnel
+
+[Suivi](tracking.md) rejoint Tâches et Sport : habitudes et objectifs sur quatre fréquences, calendrier mobile/ordinateur, intégrations de données, saisies guidées et récompenses. [API Suivi](tracking-api.md) · [Métriques disponibles](integrations.md).

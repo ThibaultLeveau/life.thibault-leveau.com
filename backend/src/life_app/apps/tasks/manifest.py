@@ -1,3 +1,4 @@
+from life_app.apps.tasks.integrations import TasksMetrics
 from life_app.apps.tasks.router import router
 from life_app.platform.applications.definition import ApplicationDefinition
 
@@ -8,6 +9,7 @@ application = ApplicationDefinition(
     path="/tasks",
     icon="check",
     router=router,
+    metrics=TasksMetrics(),
     default_enabled=True,
     translations={
         "en": ("Tasks", "Organize your projects, plan your day and move at your own pace."),

@@ -49,7 +49,7 @@ React ne conserve pas de base métier parallèle dans localStorage. Les champs e
 
 ## HTTP et compilation
 
-`/` (accueil), `/applications` (bibliothèque) et les chemins des manifestes (`/tasks` et `/sport`) sont les seules routes HTML React. Les assets sont sous `/assets/`, l'API sous `/api/v1`, Swagger sous `/api/docs` et MkDocs sous `/documentation/`. Tout chemin inconnu reste 404. Le frontend utilise des URL API relatives, sans service réseau distinct pour le rendu.
+`/` (accueil), `/applications` (bibliothèque) et les chemins des manifestes (`/tasks`, `/sport` et `/tracking`) sont les seules routes HTML React. Les assets sont sous `/assets/`, l'API sous `/api/v1`, Swagger sous `/api/docs` et MkDocs sous `/documentation/`. Tout chemin inconnu reste 404. Le frontend utilise des URL API relatives, sans service réseau distinct pour le rendu.
 
 ![Construction multi-étapes : frontend et documentation compilés rejoignent le runtime Python.](assets/diagrams/build.svg)
 
@@ -61,7 +61,7 @@ Les verrous uv/npm sont versionnés. Les images portent le SHA complet des sourc
 
 ## Limites choisies
 
-L'application reste personnelle : pas de partage d'espaces, inscription publique, SSO, synchronisation temps réel, pièces jointes ou synchronisation hors ligne. Sport fournit ses statistiques internes ; les statistiques de tâches restent futures. Le modèle conserve les événements nécessaires aux statistiques futures. La recherche est une recherche SQL de sous-chaîne, et le frontend charge toutes les tâches de la vue : des volumes importants nécessiteront pagination visuelle/indexation après mesure.
+L'application reste personnelle : pas de partage d'espaces, inscription publique, SSO, synchronisation temps réel, pièces jointes ou synchronisation hors ligne. Sport fournit ses statistiques internes ; Suivi exploite les événements de Tâches et les résultats Sport via des fournisseurs de métriques injectés. Aucun temps d’écran n’est collecté. La recherche est une recherche SQL de sous-chaîne, et le frontend charge toutes les tâches de la vue : des volumes importants nécessiteront pagination visuelle/indexation après mesure.
 
 Les récurrences restent dans `apps/tasks` : `recurrence.py` valide et calcule les dates calendaires avec python-dateutil ; `scheduling.py` analyse les expressions françaises ou anglaises selon le compte. La résolution avance la tâche dans la transaction existante, sans ordonnanceur ni service supplémentaire. Le frontend demande l’analyse et l’aperçu à l’API et ne conserve que le brouillon transitoire.
 
@@ -80,3 +80,13 @@ Voir les [contrats et invariants](donnees.md#activations-des-applications), l’
 ## Internationalisation approuvée
 
 L’[ADR 004](decisions/004-internationalisation.md) ajoute la langue au compte et i18next/react-i18next au frontend. `platform/i18n/` initialise le moteur ; `shared/locales` possède les textes communs et chaque application ses ressources. `core/i18n.py` fournit le contexte serveur sans importer de métier ; les domaines chargent leurs propres messages. Les métadonnées localisées restent dans les manifestes backend. Le catalogue Sport sépare identifiants et textes, et localise les réponses sans réécrire les instantanés. L’adaptateur `scheduling_english.py` rejoint la grammaire existante. Voir les [contrats et frontières détaillés](internationalisation.md).
+
+## Intégrations et Suivi
+
+L’[ADR 005](decisions/005-integrations-tracking.md), approuvé le 16 novembre 2026, étend le manifeste avec `metrics` optionnel. `platform/integrations/` porte les contrats neutres, périodes, découverte, validation et contrôle d’activation ; les implémentations restent dans `apps/tasks/integrations.py` et `apps/sport/integrations.py`. Le registre injecté dans `app.state.applications` est le seul assemblage. Aucun domaine ne lit les tables d’un autre. Les options privées et évaluations exigent source active et propriétaire ; le catalogue ne contient que des métadonnées publiques au compte connecté.
+
+`apps/tracking` possède définitions, révisions, périodes, valeurs, instantanés et historique. Son service calcule scores, XP et calendrier à partir de ces données. Les sources enregistrées sont des instantanés explicitement actualisables ; aucun calcul en arrière-plan ni service supplémentaire. La migration globale `0009_tracking` ajoute cinq tables et protège les historiques contre les modifications/suppressions.
+
+Tâches, Sport et Suivi composent `shared/ui/ApplicationNavigation` avec leurs navigation, menu du compte et actions. Ce composant ne dépend d’aucune application ou service de session. Les requêtes Suivi utilisent le transport commun et `platform/useApiResource` pour annuler/ignorer les lectures obsolètes. Voir [intégrations](integrations.md), [modèle](donnees.md#donnees-de-suivi) et [API](tracking-api.md).
+
+Le client HTTP et les types de métriques réutilisables sont dans `frontend/src/platform/integrations/`. Les composants de configuration et saisie restent propres à Suivi.

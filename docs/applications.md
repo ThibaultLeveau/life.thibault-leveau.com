@@ -34,6 +34,10 @@ Le menu du compte propose **Langue / Language**, disponible aussi dans la naviga
 
 ## Navigation commune
 
-Tâches et Sport partagent la même barre supérieure et la même barre latérale. Le fil d’Ariane indique l’application et la vue courante. Sur mobile, **Ouvrir la navigation** affiche les mêmes liens et le même footer ; **Échap** ou **Fermer la navigation** referme le menu.
+Tâches, Sport et Suivi partagent la même barre supérieure et la même barre latérale. Le fil d’Ariane indique l’application et la vue courante. Sur mobile, **Ouvrir la navigation** affiche les mêmes liens et le même footer ; **Échap** ou **Fermer la navigation** referme le menu.
 
 Le footer propose, dans l’ordre, la **Bibliothèque des applications**, la **Documentation** propre à l’application et à la langue courante, le thème **clair / sombre / système**, la **Langue**, puis l’utilisateur et **Se déconnecter**. Thème et langue sont conservés sur le compte par l’API. Les archives et réglages métier restent dans la navigation de chaque application.
+
+## Suivi disponible
+
+**Suivi** est désactivée par défaut. Activez-la pour configurer vos habitudes et objectifs, relier les données Tâches/Sport, remplir les périodes en cours et consulter calendrier, statistiques et réussites. [Guide Suivi](tracking.md). Désactiver une source empêche ses nouvelles lectures dans les intégrations ; les instantanés déjà enregistrés dans Suivi sont conservés.

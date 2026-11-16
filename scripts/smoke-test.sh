@@ -43,6 +43,13 @@ body, _ = get('/api/v1/health')
 assert json.loads(body) == {'status': 'ok'}, 'Réponse de santé inattendue'
 get('/tasks')
 get('/sport')
+get('/tracking')
+get('/api/v1/tracking/current', 401)
+get('/api/v1/integrations', 401)
+get('/documentation/tracking/')
+get('/documentation/tracking-api/')
+get('/documentation/integrations/')
+get('/documentation/en/tracking/')
 get('/api/v1/sport/kinds', 401)
 get('/documentation/sport/')
 get('/documentation/sport-api/')
@@ -58,7 +65,7 @@ get('/api/v1/agenda/view', 401)
 get('/api/v1/agenda/tasks', 401)
 get('/api/docs')
 body, _ = get('/api/openapi.json')
-for path in ('/api/v1/health', '/api/v1/agenda/view', '/api/v1/agenda/tasks', '/api/v1/applications', '/api/v1/applications/{application_id}', '/api/v1/sport/statistics', '/api/v1/sport/sessions'):
+for path in ('/api/v1/health', '/api/v1/agenda/view', '/api/v1/agenda/tasks', '/api/v1/applications', '/api/v1/applications/{application_id}', '/api/v1/sport/statistics', '/api/v1/sport/sessions', '/api/v1/tracking/calendar', '/api/v1/tracking/trackers', '/api/v1/integrations/evaluate'):
     assert path in json.loads(body)['paths'], f'Schéma OpenAPI incomplet : {path}'
 get('/favicon.svg')
 get('/documentation/')

@@ -88,3 +88,22 @@ def test_frontend_platform_shared_and_apps_respect_dependency_boundaries():
                     assert owner[0] == "apps" and target[1] == owner[1], (path, specifier)
                 if owner[0] == "shared":
                     assert target[0] == "shared", (path, specifier)
+
+
+def test_metric_providers_are_owned_by_their_application_and_frames_are_shared():
+    providers = [app for app in APPLICATIONS if app.metrics is not None]
+    assert {app.id for app in providers} == {"tasks", "sport"}
+    for app in providers:
+        assert type(app.metrics).__module__ == f"life_app.apps.{app.id}.integrations"
+        metrics = app.metrics.catalogue()
+        assert metrics and len({metric.id for metric in metrics}) == len(metrics)
+        assert all(
+            metric.aggregations and metric.label and metric.description for metric in metrics
+        )
+        for metric in metrics:
+            assert len({f.id for f in metric.filters}) == len(metric.filters)
+    for app_id in ("sport", "tasks", "tracking"):
+        assert (
+            "shared/ui/ApplicationNavigation"
+            in (FRONTEND / "apps" / app_id / "Page.tsx").read_text()
+        )
