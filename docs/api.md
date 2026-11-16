@@ -102,7 +102,7 @@ Archiver un espace ayant un enfant actif renvoie 409 : archiver ou déplacer les
 {
   "layout": "board",
   "density": "comfortable",
-  "show_completed": true,
+  "show_completed": false,
   "search": "",
   "sort": "manual",
   "status_id": null,
@@ -112,7 +112,7 @@ Archiver un espace ayant un enfant actif renvoie 409 : archiver ou déplacer les
 }
 ```
 
-Valeurs : `layout` list/board, `density` comfortable/compact, `sort` manual/priority/due_date, `due` all/overdue/today/upcoming/none. La priorité optionnelle vaut 1 à 4, la recherche au plus 500 caractères. Statut et étiquette référencés doivent appartenir à l'espace. Le défaut de disposition est `list`, les autres défauts figurent dans cet exemple. Ces réglages ne changent jamais le cycle de vie.
+Valeurs : `layout` list/board, `density` comfortable/compact, `sort` manual/priority/due_date, `due` all/overdue/today/upcoming/none. La priorité optionnelle vaut 1 à 4, la recherche au plus 500 caractères. Statut et étiquette référencés doivent appartenir à l'espace. Le défaut de disposition est `list`, les autres défauts figurent dans cet exemple. Ces réglages ne changent jamais le cycle de vie. `show_completed` vaut `false` par défaut ; une valeur explicite reste lisible et modifiable par cette API. L’interface masque néanmoins les tâches terminées à chaque ouverture/rechargement, même si la valeur enregistrée vaut `true`. Le choix explicite d’affichage utilise cette préférence pendant la consultation de l’espace ; les autres réglages restent appliqués au rechargement. Pour obtenir uniquement les tâches ouvertes par API, utiliser `GET /api/v1/tasks?workspace_id=<uuid>&completed=false` ; omettre `completed` inclut les tâches terminées.
 
 ## Agenda global
 

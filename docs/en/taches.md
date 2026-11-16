@@ -32,7 +32,9 @@ Choose the period and whether to include overdue or completed tasks. Custom hori
 
 Use **New task** or quick entry. Enter a title, optional description, status, section, priority, labels and due date. Saved data comes from the server; closing or reloading a form can lose unsaved entries. A version conflict is explicit and does not silently overwrite another device’s change.
 
-List, board and other available task views share the same records and actions. View preferences such as grouping, sorting, visible completed tasks and filters persist through the API. Search waits briefly while you type. An update preserves the visible list and scroll position; errors keep the last results and offer **Try again**.
+List, board and other available task views share the same records and actions. Completed tasks are hidden in every workspace whenever you open or reload the page, even if you previously showed them. Choose **Show → Show completed tasks** to reveal them in the current workspace until the next reload. This choice remains active when you visit another workspace and come back during the same visit. **Clear filters** also reveals all tasks. Completion dates and history are preserved.
+
+Other view preferences, including layout, density, sorting and filters, persist through the API. **Upcoming** keeps its separate saved settings. Search waits briefly while you type. An update preserves the visible list and scroll position; errors keep the last results and offer **Try again**.
 
 Drag handles move individual tasks where supported. The accessible move command offers a keyboard alternative and also moves tasks between workspaces. Select several tasks for rescheduling, moving or reversible deletion. The context menu supports duplication and individual actions. Use Escape to dismiss menus or clear selection. A touch hold starts selection; moving before activation continues scrolling. A task keeps its identity and history when moved.
 
