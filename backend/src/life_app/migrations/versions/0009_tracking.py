@@ -12,26 +12,26 @@ depends_on = None
 def upgrade():
     op.execute("""
 CREATE TABLE tracking_settings (
-	owner_id UUID NOT NULL, 
-	timezone VARCHAR(100) NOT NULL, 
-	PRIMARY KEY (owner_id), 
+	owner_id UUID NOT NULL,
+	timezone VARCHAR(100) NOT NULL,
+	PRIMARY KEY (owner_id),
 	FOREIGN KEY(owner_id) REFERENCES users (id)
 )
 """)
     op.execute("""
 CREATE TABLE tracking_trackers (
-	id UUID NOT NULL, 
-	owner_id UUID NOT NULL, 
-	version INTEGER NOT NULL, 
-	position INTEGER NOT NULL, 
-	definition JSONB NOT NULL, 
-	effective_from DATE NOT NULL, 
-	created_at TIMESTAMP WITH TIME ZONE NOT NULL, 
-	archived_at TIMESTAMP WITH TIME ZONE, 
-	PRIMARY KEY (id), 
-	UNIQUE (id, owner_id), 
-	CHECK (version > 0 AND position >= 0), 
-	CHECK (jsonb_typeof(definition) = 'object'), 
+	id UUID NOT NULL,
+	owner_id UUID NOT NULL,
+	version INTEGER NOT NULL,
+	position INTEGER NOT NULL,
+	definition JSONB NOT NULL,
+	effective_from DATE NOT NULL,
+	created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	archived_at TIMESTAMP WITH TIME ZONE,
+	PRIMARY KEY (id),
+	UNIQUE (id, owner_id),
+	CHECK (version > 0 AND position >= 0),
+	CHECK (jsonb_typeof(definition) = 'object'),
 	FOREIGN KEY(owner_id) REFERENCES users (id)
 )
 """)
@@ -40,15 +40,15 @@ CREATE INDEX ix_tracking_trackers_owner_id ON tracking_trackers (owner_id)
 """)
     op.execute("""
 CREATE TABLE tracking_definitions (
-	tracker_id UUID NOT NULL, 
-	revision INTEGER NOT NULL, 
-	effective_from DATE NOT NULL, 
-	enabled BOOLEAN NOT NULL, 
-	definition JSONB NOT NULL, 
-	recorded_at TIMESTAMP WITH TIME ZONE NOT NULL, 
-	PRIMARY KEY (tracker_id, revision), 
-	CHECK (revision > 0), 
-	CHECK (jsonb_typeof(definition) = 'object'), 
+	tracker_id UUID NOT NULL,
+	revision INTEGER NOT NULL,
+	effective_from DATE NOT NULL,
+	enabled BOOLEAN NOT NULL,
+	definition JSONB NOT NULL,
+	recorded_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	PRIMARY KEY (tracker_id, revision),
+	CHECK (revision > 0),
+	CHECK (jsonb_typeof(definition) = 'object'),
 	FOREIGN KEY(tracker_id) REFERENCES tracking_trackers (id)
 )
 """)
@@ -57,26 +57,26 @@ CREATE INDEX ix_tracking_definition_date ON tracking_definitions (tracker_id, ef
 """)
     op.execute("""
 CREATE TABLE tracking_entries (
-	id UUID NOT NULL, 
-	owner_id UUID NOT NULL, 
-	tracker_id UUID NOT NULL, 
-	period_start DATE NOT NULL, 
-	period_end DATE NOT NULL, 
-	definition JSONB NOT NULL, 
-	values JSONB NOT NULL, 
-	sources JSONB NOT NULL, 
-	version INTEGER NOT NULL, 
-	status VARCHAR(10) NOT NULL, 
-	created_at TIMESTAMP WITH TIME ZONE NOT NULL, 
-	updated_at TIMESTAMP WITH TIME ZONE NOT NULL, 
-	completed_at TIMESTAMP WITH TIME ZONE, 
-	PRIMARY KEY (id), 
-	UNIQUE (id, owner_id), 
-	UNIQUE (tracker_id, period_start), 
-	FOREIGN KEY(tracker_id, owner_id) REFERENCES tracking_trackers (id, owner_id), 
-	CHECK (version > 0 AND period_end >= period_start), 
-	CHECK (status IN ('draft','complete')), 
-	CHECK ((status = 'complete') = (completed_at IS NOT NULL)), 
+	id UUID NOT NULL,
+	owner_id UUID NOT NULL,
+	tracker_id UUID NOT NULL,
+	period_start DATE NOT NULL,
+	period_end DATE NOT NULL,
+	definition JSONB NOT NULL,
+	values JSONB NOT NULL,
+	sources JSONB NOT NULL,
+	version INTEGER NOT NULL,
+	status VARCHAR(10) NOT NULL,
+	created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	completed_at TIMESTAMP WITH TIME ZONE,
+	PRIMARY KEY (id),
+	UNIQUE (id, owner_id),
+	UNIQUE (tracker_id, period_start),
+	FOREIGN KEY(tracker_id, owner_id) REFERENCES tracking_trackers (id, owner_id),
+	CHECK (version > 0 AND period_end >= period_start),
+	CHECK (status IN ('draft','complete')),
+	CHECK ((status = 'complete') = (completed_at IS NOT NULL)),
 	CHECK (jsonb_typeof(definition) = 'object' AND jsonb_typeof(values) = 'object'
            AND jsonb_typeof(sources) = 'object'),
 	FOREIGN KEY(owner_id) REFERENCES users (id)
@@ -87,13 +87,13 @@ CREATE INDEX ix_tracking_entries_owner_period ON tracking_entries (owner_id, per
 """)
     op.execute("""
 CREATE TABLE tracking_entry_revisions (
-	entry_id UUID NOT NULL, 
-	version INTEGER NOT NULL, 
-	snapshot JSONB NOT NULL, 
-	recorded_at TIMESTAMP WITH TIME ZONE NOT NULL, 
-	PRIMARY KEY (entry_id, version), 
-	CHECK (version > 0), 
-	CHECK (jsonb_typeof(snapshot) = 'object'), 
+	entry_id UUID NOT NULL,
+	version INTEGER NOT NULL,
+	snapshot JSONB NOT NULL,
+	recorded_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	PRIMARY KEY (entry_id, version),
+	CHECK (version > 0),
+	CHECK (jsonb_typeof(snapshot) = 'object'),
 	FOREIGN KEY(entry_id) REFERENCES tracking_entries (id)
 )
 """)
