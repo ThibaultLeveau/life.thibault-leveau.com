@@ -86,7 +86,7 @@ The supplied catalogue is a versioned editorial selection based on common moveme
 
 ## Preparing for HYROX
 
-A program title containing **Hyrox**, regardless of case, activates the monochrome logo, track pattern and competition countdown in the program list, editor, exercise picker and active training, including the recovery bar. Other LifeOS controls remain the same.
+A program title containing **Hyrox**, regardless of case, activates the monochrome logo, track pattern and competition countdown in the program list, editor, exercise picker and active training, including the recovery bar. Black and white styling stays within cards and bounded surfaces; the page background and spaces between cards retain the usual theme. Other LifeOS controls remain the same.
 
 **Date of your next HYROX** is optional. Before the date the banner shows **D−…**, on the date **RACE DAY**, and afterwards **AFTER THE RACE**. Without a date it shows **ON THE WAY**. Use **Clear competition date** and save to remove it. Past dates are accepted. The countdown compares civil dates in your browser’s timezone, refreshes every 30 seconds and when the tab returns to the foreground, and has no alarm.
 

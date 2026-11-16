@@ -31,6 +31,27 @@ test.beforeEach(async ({ page }) => {
 });
 async function readable(page: Page) {
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(page.viewportSize()!.width);
+  // Unframed space must blend into the page, including between exercise cards.
+  const pagePaper = await page.locator(".sport-shell").evaluate((shell) => getComputedStyle(shell).backgroundColor);
+  for (const layout of await page.locator(".sport-training, .sport-program-form, .sport-program-actions").all()) {
+    await expect(layout).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+    const inheritedPaper = await layout.evaluate((el) => {
+      const sample = document.createElement("span");
+      sample.style.backgroundColor = "var(--ui-paper)";
+      el.append(sample);
+      const color = getComputedStyle(sample).backgroundColor;
+      sample.remove();
+      return color;
+    });
+    expect(inheritedPaper).toBe(pagePaper);
+  }
+  for (const card of await page.locator(".sport-hyrox .sport-plan-entry, .sport-hyrox .sport-session-exercise").all()) {
+    const color = await card.evaluate((el) => getComputedStyle(el).backgroundColor);
+    const channels = color.match(/\d+/g)!.map(Number);
+    expect(channels[0]).toBe(channels[1]);
+    expect(channels[1]).toBe(channels[2]);
+    expect(color).not.toBe(pagePaper);
+  }
   const problems = await page.locator(".sport-hyrox input, .sport-hyrox textarea").evaluateAll((fields) => {
     function luminance(color: string) {
       const rgb = color.match(/[\d.]+/g)!.slice(0, 3).map(Number).map((v) => {

@@ -92,7 +92,7 @@ Les identifiants `builtin-…` de cette version sont stables ; toute correction 
 
 ## Préparer un HYROX
 
-Un titre contenant **Hyrox**, quelle que soit la casse (`HYROX`, `hyrox`, `Prépa hYrOx…`), active automatiquement un habillage noir et blanc : logo, motifs de piste et compte à rebours. Il apparaît sur la carte du programme, pendant sa création ou sa modification, dans le catalogue d’ajout d’exercices et pendant l’entraînement, jusque dans la barre de récupération. L’interface LifeOS et ses commandes restent identiques ; les champs et états d’erreur gardent leurs contrastes dans les thèmes clair et sombre.
+Un titre contenant **Hyrox**, quelle que soit la casse (`HYROX`, `hyrox`, `Prépa hYrOx…`), active automatiquement un habillage noir et blanc : logo, motifs de piste et compte à rebours. Il apparaît sur la carte du programme, pendant sa création ou sa modification, dans le catalogue d’ajout d’exercices et pendant l’entraînement, jusque dans la barre de récupération. Le noir et blanc reste limité aux cartes et surfaces délimitées ; le fond de page et les espaces entre les cartes conservent le thème habituel. L’interface LifeOS et ses commandes restent identiques ; les champs et états d’erreur gardent leurs contrastes dans les thèmes clair et sombre.
 
 Dans l’éditeur, **Date de votre prochain HYROX** est facultative. Choisir une date affiche **J−…** avant le départ, **JOUR J** le jour prévu, puis **APRÈS COURSE**. Sans date, le bandeau affiche **EN ROUTE**, sans inventer d’échéance. **Effacer la date de compétition**, puis enregistrer, retire la date. Les dates passées restent acceptées pour conserver un programme et son contexte.
 
