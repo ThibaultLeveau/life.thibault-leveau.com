@@ -190,7 +190,7 @@ test("Sport : bibliothèque, séance mixte, repos, mensurations et statistiques 
     await expect(picker.getByRole("status")).toHaveCount(0);
     await picker
       .locator(".sport-picker-item")
-      .filter({ has: page.getByText(query, { exact: true }) })
+      .filter({ hasText: query })
       .first()
       .click();
     await dialog.getByLabel("Nombre de séries").nth(i).fill("1");
