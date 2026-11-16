@@ -181,6 +181,7 @@ export function TaskSyncProvider({ children }: { children: ReactNode }) {
   const reconciling = useRef(false);
   const reads = useRef(0);
   const [data, setData] = useState<TaskData | null>(null);
+  const [pendingCount, setPendingCount] = useState(0);
   const [failures, setFailures] = useState<Failure[]>([]);
   const [notice, setNotice] = useState("");
   const [recovery, setRecovery] = useState<TaskDraft | null>(null);
@@ -213,13 +214,15 @@ export function TaskSyncProvider({ children }: { children: ReactNode }) {
     };
   }
   function publish() {
-    if (!controller.current.signal.aborted && base.current)
+    if (!controller.current.signal.aborted && base.current) {
+      setPendingCount(pending.current.length + Number(reconciling.current));
       setData(
         pending.current.reduce(
           (value, job) => optimistic(value, resolved(job)),
           base.current,
         ),
       );
+    }
   }
   function fail(job: Pending, error: unknown) {
     if (
@@ -586,7 +589,7 @@ export function TaskSyncProvider({ children }: { children: ReactNode }) {
     <Context.Provider
       value={{
         data,
-        pending: pending.current.length + Number(reconciling.current),
+        pending: pendingCount,
         flashes: new Set(
           [...flashes].map((id) => aliases.current.get(id) ?? id),
         ),

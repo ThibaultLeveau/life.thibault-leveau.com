@@ -576,3 +576,41 @@ test("éditer le titre pendant une résolution récurrente préserve la prochain
   expect(saved.due_date).not.toBe(recurring.due_date);
   await expect(page.locator(".task-sync-error")).toHaveCount(0);
 });
+
+test("une relecture échouée ne laisse pas un enregistrement fantôme", async ({
+  page,
+}) => {
+  const { tasks } = await seed(page);
+  const release = gate();
+  await hold(
+    page,
+    `**/api/v1/tasks/${tasks[0].id}/complete`,
+    release,
+    (route) => route.fulfill({ status: 503, json: {} }),
+  );
+  await page.route("**/api/v1/tasks?**", (route) =>
+    route.fulfill({ status: 503, json: {} }),
+  );
+  try {
+    await row(page, tasks[0]).getByRole("checkbox").click();
+    await expect(row(page, tasks[0]).getByRole("checkbox")).toBeChecked();
+    // A later animation render must not be necessary to clear the saving state.
+    await expect(page.locator(".is-validating")).toHaveCount(0);
+  } finally {
+    release.release();
+  }
+  await expect(page.locator(".task-sync-status")).toHaveAttribute(
+    "data-pending",
+    "0",
+  );
+  await expect(row(page, tasks[0]).getByRole("checkbox")).not.toBeChecked();
+  await page.unroute("**/api/v1/tasks?**");
+  await row(page, tasks[1]).getByRole("checkbox").click();
+  await expect
+    .poll(async () => (await state(page, tasks[1])).completed_at)
+    .not.toBeNull();
+  await expect(page.locator(".task-sync-status")).toHaveAttribute(
+    "data-pending",
+    "0",
+  );
+});

@@ -56,7 +56,7 @@ Un geste tactile de défilement, la molette ou un appui ailleurs suspend ce suiv
 
 Les données privées proviennent exclusivement de l'API. Un `expected_version` périmé déclenche une erreur explicite ; le brouillon de tâche reste disponible via **Reprendre la saisie** et les données sont réconciliées avec l’API. Aucun retry de mutation ne remplace silencieusement la version attendue. La déconnexion/expiration efface les données de session affichables.
 
-L’édition transmet uniquement les champs modifiés : une validation déjà en attente peut ainsi avancer une récurrence sans qu’une modification de titre ne rétablisse l’ancienne date. Les identifiants React restent stables lors de la confirmation d’une création, afin de préserver le focus et la saisie suivante.
+L’édition transmet uniquement les champs modifiés : une validation déjà en attente peut ainsi avancer une récurrence sans qu’une modification de titre ne rétablisse l’ancienne date. L’animation garde la cible cliquable immobile (halo et coche animés). Le compteur d’enregistrements possède son propre état React, même quand une erreur de relecture conserve exactement le même instantané. Les identifiants React restent stables lors de la confirmation d’une création, afin de préserver le focus et la saisie suivante.
 
 Les différences entre dates calendaires sont calculées sur des minuits UTC, sans dépendre de la durée des jours de changement d’heure. Un minuteur jusqu’au prochain minuit local et les événements de focus/visibilité rafraîchissent les libellés et les requêtes. Les échéances sont formatées comme dates locales, sans conversion d'un minuit UTC susceptible de changer de jour. Les événements sont convertis depuis leurs instants UTC vers le fuseau du navigateur.
 

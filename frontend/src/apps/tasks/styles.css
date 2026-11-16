@@ -2163,15 +2163,12 @@
 }
 @keyframes task-validation {
   0% {
-    transform: scale(0.86);
     box-shadow: 0 0 0 0 color-mix(in srgb, var(--ui-accent) 30%, transparent);
   }
   45% {
-    transform: scale(1.16);
     box-shadow: 0 0 0 7px color-mix(in srgb, var(--ui-accent) 0%, transparent);
   }
   100% {
-    transform: scale(1);
     box-shadow: 0 0 0 9px transparent;
   }
 }
