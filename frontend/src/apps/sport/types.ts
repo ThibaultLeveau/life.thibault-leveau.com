@@ -78,6 +78,7 @@ export interface SetRecord {
   set_index: number;
   values: Values;
   completed_at: string;
+  skipped: boolean;
 }
 export interface Metric {
   exercise_id: string;

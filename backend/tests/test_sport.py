@@ -13,6 +13,19 @@ from sqlalchemy.orm import Session
 from life_app.apps.sport.models import Training
 from life_app.cli import migration_config
 
+KIND_VALUES = [
+    ("weight_reps", {"weight_kg": 60, "reps": 10}),
+    ("reps", {"reps": 15}),
+    ("assisted_reps", {"assistance_kg": 20, "reps": 10}),
+    ("duration", {"duration_seconds": 45}),
+    ("distance_duration", {"distance_m": 5000, "duration_seconds": 1800}),
+    ("weight_distance", {"weight_kg": 40, "distance_m": 50}),
+    ("weight_duration", {"weight_kg": 20, "duration_seconds": 30}),
+    ("reps_duration", {"reps": 30, "duration_seconds": 60}),
+    ("distance", {"distance_m": 2.4}),
+    ("calories_duration", {"calories": 25, "duration_seconds": 60}),
+]
+
 
 @pytest.fixture
 def client(authenticated_client):
@@ -111,21 +124,7 @@ def test_catalogue_search_types_pagination_and_customization(client):
     )
 
 
-@pytest.mark.parametrize(
-    ("kind", "values"),
-    [
-        ("weight_reps", {"weight_kg": 60, "reps": 10}),
-        ("reps", {"reps": 15}),
-        ("assisted_reps", {"assistance_kg": 20, "reps": 10}),
-        ("duration", {"duration_seconds": 45}),
-        ("distance_duration", {"distance_m": 5000, "duration_seconds": 1800}),
-        ("weight_distance", {"weight_kg": 40, "distance_m": 50}),
-        ("weight_duration", {"weight_kg": 20, "duration_seconds": 30}),
-        ("reps_duration", {"reps": 30, "duration_seconds": 60}),
-        ("distance", {"distance_m": 2.4}),
-        ("calories_duration", {"calories": 25, "duration_seconds": 60}),
-    ],
-)
+@pytest.mark.parametrize(("kind", "values"), KIND_VALUES)
 def test_each_type_can_plan_train_and_produce_statistics(client, kind, values):
     w = workout(client, exercise(client, kind), target=values)
     t = start(client, w)
@@ -140,6 +139,116 @@ def test_each_type_can_plan_train_and_produce_statistics(client, kind, values):
     next_session = start(client, w)
     assert next_session["sets"] == [] and next_session["rest_until"] is None
     assert next_session["entries"][0]["suggested_values"] == [done["sets"][0]["values"]]
+
+
+@pytest.mark.parametrize(("kind", "values"), KIND_VALUES)
+def test_finish_unperformed_and_partial_sessions_for_each_type(client, kind, values):
+    w = workout(client, exercise(client, kind), sets=2, target=values)
+    empty = start(client, w)
+    zeros = {key: 0 for key in values}
+    # Zero results are produced only by finishing, never by weakening input validation.
+    call(
+        client,
+        "PUT",
+        f"/sessions/{empty['id']}/sets/0/0",
+        {"expected_version": empty["version"], "values": zeros},
+        422,
+    )
+    done = finish(client, empty)
+    assert done["status"] == "completed" and done["version"] == empty["version"] + 1
+    assert done["score"] is None and done["baseline_id"] is None
+    assert done["metrics"][0]["value"] == 0 and done["rest_until"] is None
+    assert len(done["sets"]) == 2
+    for result in done["sets"]:
+        assert result["skipped"] and result["completed_at"] == done["finished_at"]
+        assert {k: v for k, v in result["values"].items() if v is not None} == zeros
+    stats = call(client, "GET", "/statistics")
+    assert stats["completed_sessions"] == 1 and stats["total_sets"] == 0
+    assert stats["total_volume_kg"] == 0 and stats["total_distance_m"] == 0
+
+    full = start(client, w)
+    assert full["entries"][0]["suggested_values"] == [None, None]
+    full = record(client, record(client, full, values), values, index=1)
+    full = finish(client, full)
+    assert full["score"] == 100 and full["baseline_id"] is None
+    assert all(not s["skipped"] for s in full["sets"])
+
+    partial = record(client, start(client, w), values, index=1)
+    assert partial["rest_until"] is not None
+    result = finish(client, partial)
+    assert result["sets"][1] == partial["sets"][0]  # Values and original timestamp are intact.
+    assert result["sets"][0]["skipped"] and result["sets"][0]["values"] == done["sets"][0]["values"]
+    assert result["rest_until"] is None and result["baseline_id"] == full["id"]
+    # Speed/rate metrics stay unchanged; additive metrics halve when one of two sets is skipped.
+    assert result["score"] == (
+        100 if kind in {"distance_duration", "reps_duration", "calories_duration"} else 50
+    )
+    assert call(client, "GET", "/sessions/active") is None
+    assert call(client, "GET", f"/sessions/{result['id']}")["sets"] == result["sets"]
+    stats = call(client, "GET", "/statistics")
+    assert stats["completed_sessions"] == 3 and stats["total_sets"] == 3
+    assert stats["total_volume_kg"] == 3 * values.get("weight_kg", 0) * values.get("reps", 0)
+    assert stats["total_distance_m"] == 3 * values.get("distance_m", 0)
+    for version in (partial["version"], result["version"]):
+        call(
+            client,
+            "PUT",
+            f"/sessions/{result['id']}/finish",
+            {"expected_version": version, "outcome": "completed"},
+            409,
+        )
+    next_session = start(client, w)
+    assert next_session["entries"][0]["suggested_values"] == [s["values"] for s in full["sets"]]
+    cancelled = finish(client, next_session, "cancelled")
+    assert cancelled["sets"] == [] and cancelled["score"] is None
+
+
+def test_partial_finish_preserves_history_suggestions_and_zero_score_baselines(client):
+    a, b = exercise(client), exercise(client, "duration")
+    w = call(
+        client,
+        "POST",
+        "/workouts",
+        {
+            "name": "Deux exercices",
+            "entries": [{"exercise_id": a["id"], "sets": 2}, {"exercise_id": b["id"], "sets": 1}],
+        },
+        201,
+    )
+    early = record(client, start(client, w), {"weight_kg": 20, "reps": 10})
+    early = finish(client, early)
+    assert [m["value"] for m in early["metrics"]] == [210, 0]
+    assert early["score"] is None
+    full = record(client, start(client, w), {"weight_kg": 30, "reps": 10})
+    full = record(client, full, {"weight_kg": 40, "reps": 8}, index=1)
+    full = finish(client, record(client, full, {"duration_seconds": 60}, entry=1))
+    assert full["score"] == 100 and full["baseline_id"] is None
+    partial = record(client, start(client, w), {"weight_kg": 50, "reps": 6}, index=1)
+    # Undoing a validation before finishing also makes this set unperformed.
+    partial = record(client, partial, {"duration_seconds": 90}, entry=1)
+    partial = call(
+        client,
+        "DELETE",
+        f"/sessions/{partial['id']}/sets/1/0",
+        {"expected_version": partial["version"]},
+    )
+    partial = finish(client, partial)
+    assert [s["skipped"] for s in partial["sets"]] == [True, False, True]
+    assert partial["score"] == round(100 * (306 / 638) / 2, 2)
+    assert partial["baseline_id"] == full["id"]
+    empty = finish(client, start(client, w))
+    assert empty["score"] == 0 and empty["baseline_id"] == full["id"]
+    assert call(client, "GET", f"/sessions/{early['id']}")["score"] is None
+    expected = [full["sets"][0]["values"], partial["sets"][1]["values"]]
+    client.put("/api/v1/applications/sport", json={"enabled": False})
+    assert client.get(f"/api/v1/sport/sessions/{partial['id']}").status_code == 403
+    client.put("/api/v1/applications/sport", json={"enabled": True})
+    restored = call(client, "GET", f"/sessions/{partial['id']}")
+    for key in ("sets", "entries", "started_at", "finished_at", "score", "baseline_id", "version"):
+        assert restored[key] == partial[key]
+    next_session = start(client, w)
+    assert next_session["entries"][0]["suggested_values"] == expected
+    assert next_session["entries"][1]["suggested_values"] == [full["sets"][2]["values"]]
 
 
 def test_recovery_versions_correction_restart_and_snapshot(client):
@@ -165,7 +274,7 @@ def test_recovery_versions_correction_restart_and_snapshot(client):
         client,
         "PUT",
         f"/sessions/{t['id']}/finish",
-        {"expected_version": t["version"], "outcome": "completed"},
+        {"expected_version": 1, "outcome": "completed"},
         409,
     )
     t = record(client, t, {"weight_kg": 35, "reps": 8})
@@ -527,6 +636,13 @@ def test_owners_and_csrf_on_all_data_families(client, app):
             404,
         )
         call(bob, "PUT", f"/sessions/{t['id']}/rest", {"expected_version": 1}, 404)
+        call(
+            bob,
+            "PUT",
+            f"/sessions/{t['id']}/finish",
+            {"expected_version": t["version"], "outcome": "completed"},
+            404,
+        )
         assert call(bob, "GET", "/workouts") == [] and call(bob, "GET", "/measurements") == []
         assert call(bob, "GET", "/sessions")["total"] == 0
         assert call(bob, "GET", "/statistics")["completed_sessions"] == 0
@@ -534,6 +650,17 @@ def test_owners_and_csrf_on_all_data_families(client, app):
         assert guest.get("/api/v1/sport/kinds").status_code == 401
         guest.cookies.update(dict(client.cookies))
         assert guest.put("/api/v1/sport/settings", json={"rest_seconds": 3}).status_code == 403
+        assert (
+            guest.put(
+                f"/api/v1/sport/sessions/{t['id']}/finish",
+                json={
+                    "expected_version": t["version"],
+                    "outcome": "completed",
+                },
+            ).status_code
+            == 403
+        )
+        assert call(client, "GET", f"/sessions/{t['id']}")["sets"] == []
     assert (
         client.put(
             "/api/v1/sport/settings",

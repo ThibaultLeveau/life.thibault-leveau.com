@@ -229,7 +229,7 @@ def stop_rest(session_id: UUID, payload: s.Version, user: CurrentUser, db: Datab
 
 @router.put("/sessions/{session_id}/finish", response_model=s.TrainingOutput)
 def finish_session(session_id: UUID, payload: s.SessionFinish, user: CurrentUser, db: Database):
-    """Terminer toutes les séries ou abandonner ; historique ensuite immuable."""
+    """Terminer avec les séries restantes à zéro, ou abandonner ; historique immuable."""
     return commit(db, svc.finish(db, user, session_id, payload), svc.training_output)
 
 

@@ -114,7 +114,7 @@
   "baseline": "· référence",
   "training_score": "Score de l’entraînement",
   "how_is_the_score_calculated": "Comment est calculé le score ?",
-  "the_first_completed_session_of_a_program_scores_100_later": "La première session terminée d’un programme vaut 100. Les suivantes comparent la performance de chaque exercice à cette référence, puis font la moyenne des rapports, avec le même poids pour chaque exercice. 110 représente une hausse moyenne de 10 % selon ces mesures.",
+  "the_first_completed_session_of_a_program_scores_100_later": "La première séance terminée avec une performance positive pour chaque exercice vaut 100. Elle devient la référence des séances suivantes, même incomplètes : les rapports par exercice ont le même poids dans la moyenne. Avant cette référence, une séance avec un exercice entièrement non effectué reste sans score. Les séries non effectuées valent zéro et ne comptent pas dans les séries réalisées.",
   "only_sessions_of_the_same_program_with_the_same_exercises": "Seules les sessions d’un même programme, avec les mêmes exercices, types, ordre et nombres de séries, partagent une référence. Les objectifs peuvent évoluer. Les entraînements abandonnés ne comptent pas.",
   "the_1_allows_comparisons_when_weight_or_assistance_is_zero": "Le « + 1 » permet de comparer une charge ou une assistance nulle. Le score suit des mesures : il ne juge ni la technique, ni la difficulté ressentie, ni la santé. Pour le cardio, la vitesse peut augmenter sur une distance plus courte ; consultez aussi la distance. Les dates des entraînements sont regroupées en UTC.",
   "recovery": "RÉCUPÉRATION",
@@ -123,7 +123,7 @@
   "ready_for_the_next_set": "Prêt pour la prochaine série",
   "skip_rest": "Passer le repos",
   "start": "Début",
-  "100_your_first_completed_training_session_with_these_exercises_and": "100 = votre premier entraînement terminé avec ces exercices et ce nombre de séries. Un score supérieur indique une meilleure performance selon les mesures choisies.",
+  "100_your_first_completed_training_session_with_these_exercises_and": "100 = votre première séance terminée avec une performance positive pour chacun de ces exercices et ce nombre de séries. Un score supérieur indique une meilleure performance selon les mesures choisies.",
   "first_comparable_training_session_it_becomes_your_baseline_at_100": "Premier entraînement comparable : il devient votre référence à 100 points.",
   "set": "Série",
   "leave_the_training_session_without_saving_your_current_entries": "Quitter l’entraînement sans enregistrer les saisies en cours ?",
@@ -146,7 +146,7 @@
   "cancel_training_session": "Abandonner l’entraînement",
   "finish_training_session": "Terminer l’entraînement",
   "save_correct_or_discard_your_current_entries_before_finishing": "Validez, corrigez ou annulez les saisies en cours avant de terminer.",
-  "your_results_will_be_saved_and_your_score_calculated": "Vos résultats seront conservés et votre score calculé.",
+  "your_results_will_be_saved_and_your_score_calculated": "Vos résultats seront conservés et votre score calculé si les résultats sont comparables.",
   "sets_already_recorded_remain_in_your_history_this_training_session": "Les séries déjà saisies restent dans l’historique. Cet entraînement ne comptera pas dans les statistiques.",
   "how_it_felt_and_notes": "Ressenti et notes",
   "save_results": "Enregistrer les résultats",
@@ -218,5 +218,8 @@
   "hyrox_days_until_other": "{{count}} jours avant le départ",
   "more_exercises_one": "+ {{count}} autre exercice",
   "more_exercises_other": "+ {{count}} autres exercices",
-  "archive_program_discard_changes": "Archiver ce programme sans enregistrer vos modifications ?"
+  "archive_program_discard_changes": "Archiver ce programme sans enregistrer vos modifications ?",
+  "unfinished_sets_will_be_zero": "Les séries non validées seront enregistrées à 0 répétition (ou 0 pour les autres mesures). Les séries déjà validées seront conservées.",
+  "set_not_performed": "Non effectuée",
+  "score_needs_positive_baseline": "Pas encore de score : une séance avec une performance positive pour chaque exercice est nécessaire pour établir une référence."
 }

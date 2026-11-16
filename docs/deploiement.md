@@ -203,3 +203,9 @@ Sur le compte synthétique isolé, vérifier le sélecteur Langue/Language, sa p
 Publier le `main` validé par le script habituel, avec sauvegarde préalable et migration additive `0009_tracking`. Aucun service, secret, variable ou changement Caddy/DNS supplémentaire. Voir [compatibilité et restauration](sauvegardes.md#migration-0009-suivi).
 
 Vérifier le SHA réellement exécuté, les sondes, `/tracking`, les guides FR/EN, l’API et le catalogue d’intégrations en HTTPS. Sur un compte de recette isolé : activation, suivi quotidien avec 0/Non, saisie et correction, score 0/10 puis 10/10, filtre Tâches/Sport, instantané préservé quand la source est désactivée, calendrier mobile/ordinateur, archive/restauration et désactivation/réactivation. Vérifier la navigation commune dans Sport et Suivi. Consigner sauvegarde, migration, SHA et résultats dans l’issue. Ne pas utiliser les données personnelles pour les essais.
+
+### Fin de séance Sport incomplète
+
+Publier avec la sauvegarde habituelle, sans nouvelle migration SQL ni variable (révision `0008_locale`). Les résultats JSONB à zéro et le marqueur `skipped` imposent de respecter la [compatibilité de retour arrière](sauvegardes.md#fin-de-seance-sport-incomplete).
+
+Sur un compte synthétique isolé, démarrer plusieurs séries, en valider une puis terminer. Vérifier la confirmation FR/EN, le maintien des saisies en cours, les séries restantes à zéro dans l’historique, les dates préservées, le repos arrêté et le compteur de séries réellement effectuées. Recharger puis relancer le programme : les zéros automatiques ne doivent pas remplacer les derniers résultats proposés. Terminer également une séance sans série validée et contrôler l’absence d’erreur de score, en mobile à 320 px et au clavier. Contrôler le SHA exécuté, les sondes, `/sport`, OpenAPI et les guides français/anglais en HTTPS, puis consigner sauvegarde et résultats dans l’issue.
