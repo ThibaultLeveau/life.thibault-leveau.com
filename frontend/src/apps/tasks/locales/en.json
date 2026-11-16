@@ -371,5 +371,10 @@
   "ordinal_suffix_two": "nd",
   "ordinal_suffix_few": "rd",
   "ordinal_suffix_other": "th",
+  "sync_pending_one": "Saving in the background…",
+  "sync_pending_other": "Saving {{count}} actions in the background…",
+  "dependent_action_cancelled": "This action depended on a save that failed. Check the task before resuming it.",
+  "resume_input": "Resume editing",
+  "check_before_resubmitting": "Check the saved data before submitting this action again.",
   "tasks": "Tasks"
 }

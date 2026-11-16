@@ -1,9 +1,9 @@
 import { tr } from "../i18n";
-import { useState, type FormEvent } from "react";
-import { api } from "../../../platform/api";
+import { type FormEvent } from "react";
+import { useTaskSync } from "../useTaskSync";
 import type { Workspace } from "../types";
 import { WorkspaceParentSelect } from "./WorkspaceParentSelect";
-import { Dialog, ErrorMessage } from "../../../shared/ui/Dialog";
+import { Dialog } from "../../../shared/ui/Dialog";
 
 export function WorkspaceDialog({
   workspaces,
@@ -14,26 +14,25 @@ export function WorkspaceDialog({
   onClose: () => void;
   onCreated: (workspace: Workspace) => void;
 }) {
-  const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
+  const sync = useTaskSync();
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setBusy(true);
-    setError("");
     const values = new FormData(event.currentTarget);
-    try {
-      onCreated(
-        await api<Workspace>("/workspaces", "POST", {
-          ...Object.fromEntries(values),
-          parent_id: values.get("parent_id") || null,
-        }),
-      );
-    } catch (error) {
-      setError((error as Error).message);
-    } finally {
-      setBusy(false);
-    }
+    sync.mutate(
+      "/workspaces",
+      "POST",
+      {
+        ...Object.fromEntries(values),
+        parent_id: values.get("parent_id") || null,
+      },
+      {
+        message: tr("changes_saved"),
+        success: (result) => onCreated(result as Workspace),
+      },
+    );
+    onClose();
   }
+
   return (
     <Dialog title={tr("create_a_workspace")} onClose={onClose}>
       <form className="stack-form dialog-body" onSubmit={submit}>
@@ -64,14 +63,11 @@ export function WorkspaceDialog({
           {tr("color")}
           <input name="color" type="color" defaultValue="#c05a45" />
         </label>
-        <ErrorMessage message={error} />
         <div className="dialog-actions">
           <button className="secondary-button" type="button" onClick={onClose}>
             {tr("cancel")}
           </button>
-          <button className="primary-button" disabled={busy}>
-            {busy ? tr("creating") : tr("create_workspace")}
-          </button>
+          <button className="primary-button">{tr("create_workspace")}</button>
         </div>
       </form>
     </Dialog>

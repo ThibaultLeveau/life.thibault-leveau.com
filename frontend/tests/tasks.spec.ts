@@ -4,12 +4,7 @@ import {
   type Page,
   type APIRequestContext,
 } from "@playwright/test";
-import type {
-  Section,
-  Status,
-  Task,
-  Workspace,
-} from "../src/apps/tasks/types";
+import type { Section, Status, Task, Workspace } from "../src/apps/tasks/types";
 
 const credentials = {
   username: process.env.LIFE_E2E_USERNAME ?? "browser-test",
@@ -266,6 +261,10 @@ test("kanban par lignes, glisser-déposer, ordre et thèmes persistants", async 
   const box = (await cell.boundingBox())!;
   await drag(page, tasks[0], { x: box.x + 100, y: box.y + 55 });
   await expect(cell.getByRole("checkbox")).toBeChecked();
+  await expect(page.locator(".task-sync-status")).toHaveAttribute(
+    "data-pending",
+    "0",
+  );
   await page.reload();
   await expect(
     cell.getByRole("button", { name: tasks[0].title, exact: true }),
@@ -289,6 +288,10 @@ test("kanban par lignes, glisser-déposer, ordre et thèmes persistants", async 
     "background-color",
     "rgb(26, 32, 29)",
   );
+  await expect(page.locator(".task-sync-status")).toHaveAttribute(
+    "data-pending",
+    "0",
+  );
   await page.reload();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await expect(page.locator(".tasks-shell")).toHaveCSS(
@@ -310,12 +313,14 @@ test("kanban par lignes, glisser-déposer, ordre et thèmes persistants", async 
     if (route.request().method() === "GET") await heldView;
     await route.continue();
   });
+  await expect(page.locator(".task-sync-status")).toHaveAttribute(
+    "data-pending",
+    "0",
+  );
   await page.reload();
+  // Initial configuration is still loading; no preference can be overwritten by its late response.
   await expect(
-    page.getByRole("heading", { name: `# ${space.name}`, exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: "Liste", exact: true }),
+    page.getByRole("button", { name: "Ajouter une tâche", exact: true }),
   ).toBeDisabled();
   releaseView();
   await page.getByRole("button", { name: "Liste", exact: true }).click();
@@ -347,6 +352,10 @@ test("mobile, clavier, déplacement entre espaces et gestion des erreurs", async
   const other = await mutate<Workspace>("/workspaces", {
     name: `Travail ${Date.now()}`,
   });
+  await expect(page.locator(".task-sync-status")).toHaveAttribute(
+    "data-pending",
+    "0",
+  );
   await page.reload();
   await page.setViewportSize({ width: 375, height: 812 });
   await page.getByRole("button", { name: tasks[0].title, exact: true }).click();
@@ -424,10 +433,12 @@ test("mobile, clavier, déplacement entre espaces et gestion des erreurs", async
   await dialog
     .getByRole("button", { name: "Enregistrer", exact: true })
     .click();
-  await expect(dialog.getByRole("alert")).toContainText("Cette tâche a changé");
-  await expect(
-    dialog.getByRole("button", { name: "Recharger la tâche enregistrée" }),
-  ).toBeVisible();
+  await expect(dialog).toHaveCount(0);
+  await expect(page.getByRole("alert")).toContainText("Cette tâche a changé");
+  await page.getByRole("button", { name: "Reprendre la saisie" }).click();
+  await expect(dialog.getByLabel("Titre", { exact: true })).toHaveValue(
+    tasks[0].title,
+  );
   await closeDialog(page);
   await page.unroute("**/api/v1/tasks/*");
   await page.route("**/api/v1/tasks/*", (route) =>
@@ -442,9 +453,9 @@ test("mobile, clavier, déplacement entre espaces et gestion des erreurs", async
   await dialog
     .getByRole("button", { name: "Enregistrer", exact: true })
     .click();
-  await expect(dialog.getByRole("alert")).toContainText(
-    "Connexion interrompue",
-  );
+  await expect(dialog).toHaveCount(0);
+  await expect(page.getByRole("alert")).toContainText("Connexion interrompue");
+  await page.getByRole("button", { name: "Reprendre la saisie" }).click();
   await expect(dialog.getByLabel("Titre", { exact: true })).toHaveValue(
     "Saisie conservée hors réseau",
   );
@@ -494,6 +505,10 @@ test("espaces parents : création, déplacement, ordre et archives persistantes"
   const child = await createChild("Voyages", parent.id);
   const leaf = await createChild("Japon", child.id);
   const sibling = await createChild("Maison", parent.id);
+  await expect(page.locator(".task-sync-status")).toHaveAttribute(
+    "data-pending",
+    "0",
+  );
   await page.reload();
   await expect(
     nav.getByRole("button", {
@@ -518,6 +533,10 @@ test("espaces parents : création, déplacement, ordre et archives persistantes"
     })
     .toEqual([sibling.id, child.id]);
   await closeDialog(page);
+  await expect(page.locator(".task-sync-status")).toHaveAttribute(
+    "data-pending",
+    "0",
+  );
   await page.reload();
   const childButtons = nav
     .getByRole("button")
@@ -537,8 +556,11 @@ test("espaces parents : création, déplacement, ordre et archives persistantes"
     await expect(parents.locator(`option[value="${id}"]`)).toHaveCount(0);
   }
   await dialog.getByRole("button", { name: "Archiver", exact: true }).click();
-  await expect(dialog.getByRole("alert")).toContainText("sous-espaces actifs");
-  await closeDialog(page);
+  await expect(dialog).toHaveCount(0);
+  await expect(page.getByRole("alert")).toContainText("sous-espaces actifs");
+  await page
+    .getByRole("button", { name: "Recharger les tâches", exact: true })
+    .click();
   await nav
     .getByRole("button", { name: `# ${parent.name} / Voyages`, exact: true })
     .click();
@@ -553,6 +575,10 @@ test("espaces parents : création, déplacement, ordre et archives persistantes"
     .click();
   await expect(dialog.getByRole("status")).toContainText("enregistrées");
   await closeDialog(page);
+  await expect(page.locator(".task-sync-status")).toHaveAttribute(
+    "data-pending",
+    "0",
+  );
   await page.reload();
   await expect(
     nav.getByRole("button", { name: "# Voyages / Japon", exact: true }),
@@ -581,7 +607,15 @@ test("espaces parents : création, déplacement, ordre et archives persistantes"
     .click();
   await dialog.getByRole("button", { name: "Archiver", exact: true }).click();
   await expect(dialog).toHaveCount(0);
+  await expect(page.locator(".task-sync-status")).toHaveAttribute(
+    "data-pending",
+    "0",
+  );
   await mutate(`/workspaces/${child.id}`, { archived: true }, "PATCH");
+  await expect(page.locator(".task-sync-status")).toHaveAttribute(
+    "data-pending",
+    "0",
+  );
   await page.reload();
   await page
     .getByRole("button", { name: "Ouvrir la navigation", exact: true })
@@ -606,6 +640,10 @@ test("espaces parents : création, déplacement, ordre et archives persistantes"
   await leafRow.getByRole("button", { name: "Restaurer", exact: true }).click();
   await expect(leafRow).toHaveCount(0);
   await closeDialog(page);
+  await expect(page.locator(".task-sync-status")).toHaveAttribute(
+    "data-pending",
+    "0",
+  );
   await page.reload();
   await page
     .getByRole("button", { name: "Ouvrir la navigation", exact: true })

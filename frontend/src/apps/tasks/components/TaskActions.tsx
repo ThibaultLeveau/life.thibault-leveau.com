@@ -11,11 +11,10 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
-import { api } from "../../../platform/api";
+import { useTaskSync } from "../useTaskSync";
 import type { Task, Workspace } from "../types";
 import { useTaskSelection } from "../useTaskSelection";
 import { BulkTaskDialog, type BulkAction } from "./BulkTaskDialog";
-import { ErrorMessage } from "../../../shared/ui/Dialog";
 import { Icon } from "../../../shared/ui/Icon";
 import { TaskMenu, type MenuAnchor } from "./TaskMenu";
 
@@ -36,7 +35,6 @@ export function TaskActions({
   busy,
   children,
   onEdit,
-  onRefresh,
 }: {
   tasks: Task[];
   workspaces: Workspace[];
@@ -44,7 +42,6 @@ export function TaskActions({
   busy: boolean;
   children: ReactNode;
   onEdit: (task: Task) => void;
-  onRefresh: (message?: string) => void;
 }) {
   const root = useRef<HTMLDivElement>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -54,8 +51,7 @@ export function TaskActions({
     action: BulkAction;
     tasks: Task[];
   } | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
+  const sync = useTaskSync();
   const closeMenu = useCallback(() => setMenu(null), []);
   const choose = useCallback((ids: Set<string>) => {
     setSelected(ids);
@@ -68,10 +64,20 @@ export function TaskActions({
   useEffect(() => {
     const visible = new Set(tasks.map((task) => task.id));
     setSelected((previous) => {
-      if ([...previous].every((id) => visible.has(id))) return previous;
-      return new Set([...previous].filter((id) => visible.has(id)));
+      const ids = [...previous]
+        .map(sync.canonicalId)
+        .filter((id) => visible.has(id));
+      if (ids.length === previous.size && ids.every((id) => previous.has(id)))
+        return previous;
+      return new Set(ids);
     });
-    setMenu(null);
+    setMenu((previous) => {
+      if (!previous) return null;
+      const current = tasks.find(
+        (task) => task.id === sync.canonicalId(previous.task.id),
+      );
+      return current ? { ...previous, task: current } : null;
+    });
   }, [tasks]);
   useEffect(() => {
     const escape = (event: KeyboardEvent) => {
@@ -85,7 +91,7 @@ export function TaskActions({
     window.addEventListener("keydown", escape);
     return () => window.removeEventListener("keydown", escape);
   }, [menu, clear]);
-  const disabled = busy || saving || !!dialog || !!menu;
+  const disabled = busy || !!dialog || !!menu;
   const { box, suppressClick } = useTaskSelection(
     root,
     disabled,
@@ -104,7 +110,7 @@ export function TaskActions({
   const openMenu = useCallback(
     (task: Task, event: MouseEvent<HTMLElement>) => {
       event.preventDefault();
-      if (busy || saving || dialog) return;
+      if (busy || dialog) return;
       const trigger =
         (event.target as HTMLElement)
           .closest<HTMLElement>("[data-task-id]")
@@ -123,53 +129,36 @@ export function TaskActions({
             : bounds.bottom + 5,
       });
     },
-    [busy, saving, dialog],
+    [busy, dialog],
   );
   const context = useMemo(
     () => ({
       selected,
       selecting,
-      busy: busy || saving,
+      busy: busy,
       menuId: menu?.task.id,
       toggle,
       openMenu,
     }),
-    [selected, selecting, busy, saving, menu?.task.id, toggle, openMenu],
+    [selected, selecting, busy, menu?.task.id, toggle, openMenu],
   );
   const selectedTasks = tasks.filter((task) => selected.has(task.id));
-  async function duplicate(task: Task) {
-    setSaving(true);
-    setError("");
-    try {
-      await api(`/tasks/${task.id}/duplicate`, "POST", {
-        expected_version: task.version,
-      });
-      onRefresh(tr("task_duplicated"));
-    } catch (error) {
-      setError((error as Error).message);
-    } finally {
-      setSaving(false);
-    }
+  function duplicate(task: Task) {
+    sync.mutate(
+      `/tasks/${task.id}/duplicate`,
+      "POST",
+      { expected_version: task.version },
+      { message: tr("task_duplicated") },
+    );
   }
+
   return (
     <TaskActionContext.Provider value={context}>
       <div className={`task-actions ${selecting ? "is-selecting" : ""}`}>
-        <ErrorMessage message={error} />
-        {error && (
-          <button
-            className="text-button"
-            onClick={() => {
-              setError("");
-              onRefresh();
-            }}
-          >
-            {tr("reload_tasks")}
-          </button>
-        )}
         <div className="selection-entry">
           <button
             className="text-button"
-            disabled={busy || saving || !tasks.length}
+            disabled={busy || !tasks.length}
             aria-pressed={selecting}
             onClick={() => {
               if (selecting) clear();
@@ -285,7 +274,7 @@ export function TaskActions({
             </div>
             <button
               className="selection-clear"
-              disabled={saving || !!dialog}
+              disabled={!!dialog}
               onClick={clear}
               aria-label={tr("deselect_all")}
             >
@@ -326,11 +315,9 @@ export function TaskActions({
             workspaces={workspaces}
             today={today}
             onClose={() => setDialog(null)}
-            onRefresh={onRefresh}
-            onSaved={(message) => {
+            onSaved={() => {
               setDialog(null);
               clear();
-              onRefresh(message);
             }}
           />
         )}

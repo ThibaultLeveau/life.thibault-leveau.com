@@ -4,6 +4,16 @@ Navigation shares its design with Sport. The footer contains the library, Tasks 
 
 Tasks is enabled by default in LifeOS. Open it from Home or enable it again in the [library](applications.md). Disabling Tasks blocks access without changing your records or history.
 
+## Immediate interactions
+
+Checking a task shows a short confirmation animation immediately. You can check another task without waiting. Creation, editing, moving, duplication, archiving/restoring, bulk actions and settings also update immediately while saving in the background. Lists, the board and **Upcoming** remain available; the status above the view shows pending saves.
+
+The server supplies the next date of a recurring task. Natural-language dates still require validation before submission. Confirmation dialogs and form validation remain in place.
+
+If a save fails, a visible message explains the problem and the view is reconciled with saved data. Independent actions continue. **Resume editing** recovers a task draft, including after switching views. Review current values after a conflict. Following a connection failure, reload to check whether the action was saved before submitting it again.
+
+Wait for pending saves before closing or reloading the page. The browser warns when leaving with pending writes; drafts and pending actions are not stored offline. The animation follows the system’s reduced-motion preference.
+
 ## Workspaces and hierarchy
 
 Choose **New workspace** to create a personal space, work area or project. Give it a name, description, colour and optional parent workspace. New workspaces receive **To do**, **In progress** and **Done** statuses when your account language is English. Existing status names remain unchanged when you switch languages, because they are editable personal content.

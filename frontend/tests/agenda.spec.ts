@@ -137,6 +137,10 @@ test("agenda global : périodes, réglages persistants et cycle de tâche", asyn
     ).toHaveText("7 janv. 2027");
     await page.getByLabel("Inclure les retards").uncheck();
     await expect(card(page, tasks["Retard agenda"])).toHaveCount(0);
+    await expect(page.locator(".task-sync-status")).toHaveAttribute(
+      "data-pending",
+      "0",
+    );
     await page.reload();
     await expect(page.getByLabel("Nombre de jours")).toHaveValue("8");
     await expect(page.getByLabel("Inclure les retards")).not.toBeChecked();
@@ -177,6 +181,10 @@ test("agenda global : périodes, réglages persistants et cycle de tâche", asyn
       .getByRole("button", { name: "Enregistrer", exact: true })
       .click();
     await expect(card(page, tasks["Jour agenda"])).toHaveCount(0);
+    await expect(page.locator(".task-sync-status")).toHaveAttribute(
+      "data-pending",
+      "0",
+    );
     const events = await (
       await page.request.get(`/api/v1/tasks/${tasks["Jour agenda"].id}/events`)
     ).json();
@@ -295,6 +303,10 @@ test("dates relatives autour du changement d’heure", async ({ page }) => {
       "/agenda/view",
       { period: "week", include_overdue: false },
       "PUT",
+    );
+    await expect(page.locator(".task-sync-status")).toHaveAttribute(
+      "data-pending",
+      "0",
     );
     await page.reload();
     await expect(card(page, tasks["Jour agenda"]).locator("time")).toHaveText(

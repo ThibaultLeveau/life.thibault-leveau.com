@@ -43,7 +43,7 @@ Les services métier utilisent SQLAlchemy directement : aucune couche génériqu
 1. Le navigateur ouvre une session via l'API et reçoit un cookie opaque HttpOnly.
 2. Les lectures vérifient la session, l’activation de l’application et le propriétaire. Les écritures vérifient aussi l'origine et le jeton CSRF.
 3. Le routeur appelle le service : validation, mutation et événements dans la même transaction PostgreSQL.
-4. L'interface recharge les données enregistrées. Les préférences de vue, de thème et de langue passent par la même API.
+4. Tâches affiche immédiatement les intentions transitoires en mémoire et les enregistre en arrière-plan via les API existantes. Les réponses serveur confirment ou rétablissent les valeurs ; les effets indirects déclenchent une réconciliation. Les préférences de vue, de thème et de langue passent toujours par l’API.
 
 React ne conserve pas de base métier parallèle dans localStorage. Les champs en cours de saisie et l'état des dialogues restent transitoires. Les mutations de tâche exigent `expected_version` et retournent un conflit 409 si une autre écriture a changé la tâche.
 

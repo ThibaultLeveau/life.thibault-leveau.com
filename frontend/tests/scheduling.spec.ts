@@ -88,6 +88,10 @@ test("récurrence naturelle, résolution, annulation et persistance", async ({
   expect(task.title).toBe("Courir");
   expect(task.recurrence?.max_occurrences).toBe(3);
   expect(task.due_date).toBe("2027-01-28");
+  await expect(page.locator(".task-sync-status")).toHaveAttribute(
+    "data-pending",
+    "0",
+  );
   await page.reload();
   await expect(
     page.getByLabel("Récurrence : Chaque semaine · lundi, jeudi"),
@@ -102,7 +106,9 @@ test("récurrence naturelle, résolution, annulation et persistance", async ({
   expect(result.due_date).toBe("2027-02-01");
   expect(result.recurrence_completed).toBe(1);
   await page.getByRole("button", { name: "Annuler la résolution" }).click();
-  await expect(page.locator(".notice")).toContainText("Résolution annulée");
+  await expect(page.locator(".task-sync-status")).toContainText(
+    "Résolution annulée",
+  );
   result = (await (
     await page.request.get(`/api/v1/tasks/${task.id}`)
   ).json()) as Task;
@@ -493,12 +499,24 @@ test("ajout rapide mobile : des plantes chaque vendredi", async ({ page }) => {
   expect(task.due_date).toBe("2027-01-29");
   expect(task.recurrence.rrule).toBe("FREQ=WEEKLY;BYDAY=FR");
   await expect(
-    page.getByRole("checkbox", { name: "Terminer : S’occuper des plantes", exact: true }),
+    page.getByRole("checkbox", {
+      name: "Terminer : S’occuper des plantes",
+      exact: true,
+    }),
   ).toBeVisible();
+  await expect(page.locator(".task-sync-status")).toHaveAttribute(
+    "data-pending",
+    "0",
+  );
   await page.reload();
   await expect(
-    page.getByRole("checkbox", { name: "Terminer : S’occuper des plantes", exact: true }),
+    page.getByRole("checkbox", {
+      name: "Terminer : S’occuper des plantes",
+      exact: true,
+    }),
   ).toBeVisible();
-  const persisted = await (await page.request.get(`/api/v1/tasks/${task.id}`)).json();
+  const persisted = await (
+    await page.request.get(`/api/v1/tasks/${task.id}`)
+  ).json();
   expect(persisted.recurrence.rrule).toBe("FREQ=WEEKLY;BYDAY=FR");
 });

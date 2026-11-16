@@ -51,6 +51,10 @@ export interface Task {
   completed_at: string | null;
   archived_at: string | null;
 }
+/** A recoverable form draft; never sent as an API object. */
+export interface TaskDraft extends Task {
+  recoveryBase?: Task;
+}
 export interface Recurrence {
   rrule: string;
   start_date: string;

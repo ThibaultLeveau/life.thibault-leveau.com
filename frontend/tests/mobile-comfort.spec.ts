@@ -118,7 +118,7 @@ test.describe("confort tactile", () => {
     hasTouch: true,
   });
 
-  test("agenda : continuité pendant actualisation, erreur, disparition et récurrence", async ({
+  test("agenda : continuité pendant enregistrement, erreur, disparition et récurrence", async ({
     page,
   }) => {
     const data = await seed(page);
@@ -138,11 +138,14 @@ test.describe("confort tactile", () => {
       const gate = new Promise<void>((resolve) => {
         release = resolve;
       });
-      await page.route("**/api/v1/agenda/tasks?**", async (route) => {
-        pending = true;
-        await gate;
-        await route.continue();
-      });
+      await page.route(
+        `**/api/v1/tasks/${data.tasks[19].id}/complete`,
+        async (route) => {
+          pending = true;
+          await gate;
+          await route.continue();
+        },
+      );
       await target.getByRole("checkbox").click();
       await expect.poll(() => pending).toBeTruthy();
       try {
@@ -150,7 +153,8 @@ test.describe("confort tactile", () => {
           await retained!.evaluate((node) => node.isConnected),
         ).toBeTruthy();
         expect(await scrollTop(page)).toBeGreaterThan(before - 120);
-        await expect(target.getByRole("checkbox")).toBeDisabled();
+        await expect(target.getByRole("checkbox")).toBeEnabled();
+        await expect(target.getByRole("checkbox")).toBeChecked();
       } finally {
         release();
       }
@@ -160,23 +164,34 @@ test.describe("confort tactile", () => {
       );
       await expect(target.getByRole("checkbox")).toBeEnabled();
       expect(await scrollTop(page)).toBeGreaterThan(before - 120);
-      await page.unroute("**/api/v1/agenda/tasks?**");
-      // A failed refresh leaves the last confirmed rows visible and offers retry.
-      await page.route("**/api/v1/agenda/tasks?**", (route) =>
+      await expect(page.locator(".task-sync-status")).toHaveAttribute(
+        "data-pending",
+        "0",
+      );
+      await page.unroute(`**/api/v1/tasks/${data.tasks[19].id}/complete`);
+      // A rejected write restores its confirmed state without replacing the rows.
+      await page.route(`**/api/v1/tasks/${data.tasks[19].id}/reopen`, (route) =>
         route.fulfill({ status: 503, json: {} }),
       );
       await target.getByRole("checkbox").click();
       await expect(page.getByRole("alert")).toContainText("indisponible");
+      await expect(page.locator(".task-sync-status")).toHaveAttribute(
+        "data-pending",
+        "0",
+      );
+      await expect(target.getByRole("checkbox")).toBeChecked();
       expect(await retained!.evaluate((node) => node.isConnected)).toBeTruthy();
       expect(await scrollTop(page)).toBeGreaterThan(before - 120);
-      await page.unroute("**/api/v1/agenda/tasks?**");
+      await page.unroute(`**/api/v1/tasks/${data.tasks[19].id}/reopen`);
       await page
-        .getByRole("button", { name: "Réessayer", exact: true })
+        .getByRole("button", { name: "Recharger les tâches", exact: true })
         .click();
-      await expect(target.getByRole("checkbox")).toHaveAttribute(
-        "aria-checked",
-        "false",
+      await target.getByRole("checkbox").click();
+      await expect(page.locator(".task-sync-status")).toHaveAttribute(
+        "data-pending",
+        "0",
       );
+      await expect(target.getByRole("checkbox")).not.toBeChecked();
       // A completed row may leave the filter; its neighbors must remain nearby.
       await data.mutate(
         "/agenda/view",
@@ -190,6 +205,10 @@ test.describe("confort tactile", () => {
       await target.getByRole("checkbox").click();
       await expect(target).toHaveCount(0);
       expect(Math.abs((await neighbor.boundingBox())!.y - y)).toBeLessThan(150);
+      await expect(page.locator(".task-sync-status")).toHaveAttribute(
+        "data-pending",
+        "0",
+      );
       const recurring = await data.mutate<Task>(
         `/tasks/${data.tasks[20].id}`,
         {
@@ -209,6 +228,10 @@ test.describe("confort tactile", () => {
       await neighbor.getByRole("checkbox").click();
       await expect(neighbor).toHaveCount(0);
       expect(await scrollTop(page)).toBeGreaterThan(recurringBefore - 150);
+      await expect(page.locator(".task-sync-status")).toHaveAttribute(
+        "data-pending",
+        "0",
+      );
       const saved = await (
         await page.request.get(`/api/v1/tasks/${recurring.id}`)
       ).json();
@@ -577,6 +600,7 @@ for (const mobile of [false, true]) {
           }
           await center(neighbor);
           const failedBefore = await scrollTop(page);
+          const unaffected = await row(page, data.tasks[21]).elementHandle();
           await page.route(
             `**/api/v1/tasks/${data.tasks[20].id}/complete`,
             (route) =>
@@ -594,10 +618,15 @@ for (const mobile of [false, true]) {
             "aria-checked",
             "false",
           );
+          // The changed card moves between kanban columns; other cards stay mounted.
           expect(
-            await retained!.evaluate((node) => node.isConnected),
+            await unaffected!.evaluate((node) => node.isConnected),
           ).toBeTruthy();
           expect(await scrollTop(page)).toBeGreaterThan(failedBefore - 170);
+          await expect(page.locator(".task-sync-status")).toHaveAttribute(
+            "data-pending",
+            "0",
+          );
           await page.unrouteAll();
         }
         if (!mobile) {

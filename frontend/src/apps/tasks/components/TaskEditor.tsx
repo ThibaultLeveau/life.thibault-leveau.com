@@ -1,13 +1,14 @@
 import { formatLocale } from "../../../shared/i18n";
 import { tr } from "../i18n";
 import { useState, type FormEvent } from "react";
-import { api, ApiError } from "../../../platform/api";
+import { api } from "../../../platform/api";
 import type {
   Label,
   Page,
   Section,
   Status,
   Task,
+  TaskDraft,
   TaskEvent,
   Workspace,
 } from "../types";
@@ -17,6 +18,8 @@ import { useScheduleRecognition } from "../scheduling";
 import type { Schedule } from "../types";
 import { SchedulePicker } from "./SchedulePicker";
 import { ScheduleRecognition } from "./ScheduleRecognition";
+
+import { useTaskSync } from "../useTaskSync";
 
 const eventNames = (): Record<string, string> => ({
   created: tr("task_created"),
@@ -41,9 +44,8 @@ export function TaskEditor({
   onClose,
   onSaved,
   onMove,
-  onReload,
 }: {
-  task?: Task;
+  task?: TaskDraft;
   workspace: Workspace;
   sections: Section[];
   statuses: Status[];
@@ -53,12 +55,13 @@ export function TaskEditor({
   onClose: () => void;
   onSaved: () => void;
   onMove: (task: Task) => void;
-  onReload: (task: Task) => void;
 }) {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [conflict, setConflict] = useState(false);
+  const sync = useTaskSync();
+  const existing = task && task.id !== "draft";
   const [selectedLabels, setSelectedLabels] = useState(task?.label_ids ?? []);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const [events, setEvents] = useState<TaskEvent[]>([]);
   const [historyTotal, setHistoryTotal] = useState<number | null>(null);
   const [title, setTitle] = useState(task?.title ?? "");
@@ -77,15 +80,14 @@ export function TaskEditor({
     if (busy || scheduleOpen) return;
     setBusy(true);
     setError("");
-    setConflict(false);
     const values = new FormData(event.currentTarget);
     const data = {
       title,
-      description: values.get("description"),
+      description: String(values.get("description") ?? ""),
       priority: Number(values.get("priority")),
       ...schedule,
-      section_id: values.get("section_id") || null,
-      status_id: values.get("status_id"),
+      section_id: String(values.get("section_id") || "") || null,
+      status_id: String(values.get("status_id")),
       label_ids: selectedLabels,
     };
     try {
@@ -97,69 +99,81 @@ export function TaskEditor({
         data.due_date = parsed.due_date;
         data.recurrence = parsed.recurrence;
       }
-      await api<Task>(
-        task ? `/tasks/${task.id}` : "/tasks",
-        task ? "PATCH" : "POST",
+      const draft: Task = {
+        id: "draft",
+        workspace_id: workspace.id,
+        version: 0,
+        position: 0,
+        created_at: "",
+        updated_at: "",
+        completed_at: null,
+        archived_at: null,
+        recurrence_completed: 0,
+        ...task,
+        ...data,
+      };
+      const baseline = task?.recoveryBase ?? task;
+      const fields =
+        existing && baseline
+          ? (Object.fromEntries(
+              Object.entries(data).filter(
+                ([key, value]) =>
+                  JSON.stringify(value) !==
+                  JSON.stringify(baseline[key as keyof Task]),
+              ),
+            ) as Partial<Task>)
+          : data;
+      sync.mutate(
+        existing ? `/tasks/${task.id}` : "/tasks",
+        existing ? "PATCH" : "POST",
         {
-          ...data,
-          ...(task
+          ...fields,
+          ...(existing
             ? { expected_version: task.version }
             : { workspace_id: workspace.id }),
+        },
+        {
+          message: tr("task_saved"),
+          recover: () => sync.recoverTask(draft, fields),
         },
       );
       onSaved();
     } catch (error) {
       setError((error as Error).message);
-      setConflict(error instanceof ApiError && error.status === 409);
     } finally {
       setBusy(false);
     }
   }
   async function archive() {
     if (!task) return;
-    setBusy(true);
-    setError("");
-    try {
-      await api(`/tasks/${task.id}`, "PATCH", {
-        expected_version: task.version,
-        archived: !task.archived_at,
-      });
-      onSaved();
-    } catch (error) {
-      setError((error as Error).message);
-    } finally {
-      setBusy(false);
-    }
+    sync.mutate(
+      `/tasks/${task.id}`,
+      "PATCH",
+      { expected_version: task.version, archived: !task.archived_at },
+      { message: tr("task_saved") },
+    );
+    onSaved();
   }
+
   async function loadHistory() {
     if (!task) return;
-    setBusy(true);
+    setHistoryLoading(true);
     try {
+      await sync.idle();
       const page = await api<Page<TaskEvent>>(
-        `/tasks/${task.id}/events?limit=50&offset=${events.length}`,
+        `/tasks/${sync.canonicalId(task.id)}/events?limit=50&offset=${events.length}`,
       );
       setEvents((previous) => [...previous, ...page.items]);
       setHistoryTotal(page.total);
     } catch (error) {
       setError((error as Error).message);
     } finally {
-      setBusy(false);
-    }
-  }
-  async function reload() {
-    if (!task) return;
-    setBusy(true);
-    try {
-      onReload(await api<Task>(`/tasks/${task.id}`));
-    } catch (error) {
-      setError((error as Error).message);
-    } finally {
-      setBusy(false);
+      setHistoryLoading(false);
     }
   }
   return (
     <Dialog
-      title={task ? tr("task_details") : tr("a_new_task")}
+      title={existing ? tr("task_details") : tr("a_new_task")}
       onClose={onClose}
     >
       <form onSubmit={submit} className="stack-form dialog-body">
@@ -292,18 +306,8 @@ export function TaskEditor({
           </fieldset>
         )}
         <ErrorMessage message={error} />
-        {conflict && (
-          <button
-            type="button"
-            className="secondary-button"
-            onClick={reload}
-            disabled={busy}
-          >
-            {tr("reload_saved_task")}
-          </button>
-        )}
         <div className="dialog-actions">
-          {task && (
+          {existing && (
             <button
               type="button"
               className="text-button danger"
@@ -330,18 +334,18 @@ export function TaskEditor({
                   : undefined
               }
             >
-              {busy ? tr("saving") : task ? tr("save") : tr("add_task")}
+              {busy ? tr("saving") : existing ? tr("save") : tr("add_task")}
             </button>
           )}
         </div>
       </form>
-      {task && (
+      {existing && (
         <div className="task-history">
           <div className="history-toolbar">
             <button
               className="text-button"
               onClick={loadHistory}
-              disabled={busy || historyTotal !== null}
+              disabled={historyLoading || historyTotal !== null}
             >
               <Icon name="restore" />
               {tr("history")}
@@ -401,7 +405,7 @@ export function TaskEditor({
             <button
               className="text-button"
               onClick={loadHistory}
-              disabled={busy}
+              disabled={historyLoading}
             >
               {tr("load_more")}
             </button>
