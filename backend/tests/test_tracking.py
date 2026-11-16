@@ -241,7 +241,19 @@ def test_types_goals_validation_and_unavailable_dates(client):
         ],
     )
     item = save(c, t, {"sleep": 360, "reports": 2, "mood": "bad"})
+    assert t["fields"][0]["unit"] == item["definition"]["fields"][0]["unit"] == "min"
     assert item["score"] == pytest.approx(3.33)
+    call(
+        c,
+        "POST",
+        "/trackers",
+        {
+            "name": "Invalid duration unit",
+            "start_date": day().isoformat(),
+            "fields": [{"id": "time", "label": "Time", "kind": "duration", "unit": "s"}],
+        },
+        422,
+    )
     for values in ({"sleep": True}, {"sleep": -1}, {"mood": "else"}, {"note": 2}):
         call(
             c,

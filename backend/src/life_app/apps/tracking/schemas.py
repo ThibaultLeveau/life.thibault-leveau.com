@@ -58,6 +58,10 @@ class TrackingField(Contract):
             raise ValueError(tr("invalid"))
         if self.kind == "duration" and self.minimum < 0:
             raise ValueError(tr("invalid"))
+        if self.kind == "duration" and self.source is None:
+            if self.unit not in {"", "min"}:
+                raise ValueError(tr("invalid"))
+            self.unit = "min"
         if self.kind == "choice" and (
             len(self.options) < 2 or len(set(self.options)) != len(self.options)
         ):
