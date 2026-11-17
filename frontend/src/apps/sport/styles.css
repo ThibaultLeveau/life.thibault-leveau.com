@@ -660,14 +660,8 @@
   color: var(--ui-muted);
   font-size: 12px;
 }
-.sport-settings {
-  max-width: 530px;
-  padding: 26px;
-  border: 1px solid var(--ui-border);
-  border-radius: 10px;
-}
-.sport-settings .primary-button {
-  align-self: flex-start;
+.sport-settings p {
+  margin: 0;
 }
 .sport-content,
 .sport-shell .app-dialog {
@@ -923,9 +917,6 @@
   }
   .sport-history-row {
     padding: 18px 0;
-  }
-  .sport-settings {
-    padding: 18px;
   }
   .sport-rest {
     gap: 8px;

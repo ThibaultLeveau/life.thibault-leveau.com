@@ -162,3 +162,10 @@ Old g/l/u writes stay compatible during migration, but old probes reject the rev
 ## Tasks agenda filters and bulk actions {#filtres-dagenda-et-actions-groupees-taches}
 
 The Tasks UX delivery retains 0013_recipe_units and existing tables. Search/workspace/priority/label extend agenda JSON; older preferences use defaults. Normal backup preserves filters/tasks/recurrence/events. Older strict contracts reject the four keys: before returning to earlier code, back up then remove only these keys from affected agenda preferences, or restore the earlier backup with its image. Alembic alone does not prove compatibility. Bulk actions add neither a data type nor historical erasure.
+
+
+## Migration 0014: Sport UX {#migration-0014-finition-sport}
+
+Back up before `0014_sport_ux`. It adds view/version preferences and preparation snapshots without rewriting existing results. Full dumps preserve all five Sport tables and the common progression journal; restoration tests compare every field, including new columns. No additional service, volume or secret.
+
+Downgrade to 0013_recipe_units refuses any saved view preference, explicit context or nonempty preparation snapshot. Without new data it removes columns while preserving sets, dates, scores and rest. Old-image readiness rejects the new revision: prefer a forward fix; otherwise restore a compatible dump and image using this guide’s transaction procedure. Never delete preferences/notes to bypass loss protection. Restoration revokes login sessions, preserves training sessions/deadlines and is verified through the API after signing in again.

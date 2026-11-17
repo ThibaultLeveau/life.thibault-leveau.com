@@ -2,6 +2,8 @@
 
 This is the English translation of the [historical French review](../revue-sport-2026-11-17.md), attached to issue #71. It describes commit `ecab6ac94a64a11f79722bd43b819cb116505ed8`, audited on 17 November 2026 (Europe/Paris). **The 39 improvements below are proposals, not delivered features or architectural approval.** Later releases may have changed the observed behavior.
 
+The [Sport UX delivery](sport-ux-livraison.md) documents the follow-up; observations and measurements below remain those of the audited version.
+
 ## Scope and evidence
 
 The review combined code reading, browser exploration, measurements and existing regression tests:

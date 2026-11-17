@@ -112,7 +112,7 @@ Disabling Sport keeps programs, personal exercises, sets, rest deadlines, histor
 
 The catalogue is packaged with the application, without images, videos, coaching or external runtime requests. All business data goes through the API; there is no browser business-data store, offline mode or instant synchronization between devices. Exercise and session lists are paginated; programs and measurements load in full. A ten-year statistics request may be large for an extensive history.
 
-The supplied catalogue is a versioned editorial selection based on common movement terminology and the public free-exercise-db nomenclature consulted on 14 November 2026. Its instruction texts and images were not imported. See the [provenance record](../sport.md#catalogue-et-provenance), [Sport API](sport-api.md) and [backups](sauvegardes.md), maintained in French.
+The supplied catalogue is a versioned editorial selection based on common movement terminology and the public free-exercise-db nomenclature consulted on 14 November 2026. Its instruction texts and images were not imported. See the [provenance record](../sport.md#catalogue-et-provenance), [Sport API](sport-api.md) and [backups](sauvegardes.md).
 
 ## Preparing for HYROX
 
@@ -148,3 +148,8 @@ Preferences are grouped in [General settings](settings.md). An application’s S
 ![Open Settings to adjust this application’s preferences and usage days.](../assets/screenshots/en/sport-settings.png){ loading=lazy }
 
 *Open Settings to adjust this application’s preferences and usage days.*
+
+
+## Interface review and delivery
+
+The [17 November 2026 review](revue-sport-2026-11-17.md) retains historical observations. The [39-point delivery record](sport-ux-livraison.md) connects each improvement to its behavior, validation and remaining physical-device limitations.

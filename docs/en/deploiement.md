@@ -260,3 +260,10 @@ Publish the validated main using the same backup/build/migration/deployment scri
 ## Deploying general settings
 
 Publish validated main through `scripts/deploy.sh` with its normal backup. No SQL migration, dependency, environment variable or Caddy/DNS change. Verify running SHA, probes, `/settings`, `/settings?application=sport`, legacy `?tab=settings` links, OpenAPI and both settings guides over HTTPS. On an isolated synthetic account, verify the account-name menu, each section/API save, drafts, expiry, disable/reactivate, languages/themes and 320 px. Record backup, SHA and evidence in issue #76.
+
+
+## Sport UX release {#livraison-de-la-finition-sport}
+
+Publish validated main using `scripts/deploy.sh`, with backup before additive migration `0014_sport_ux`. No additional service, secret or dependency. View preferences, explicit context and frozen notes require the [rollback constraints](sauvegardes.md#migration-0014-finition-sport); older images reject this revision.
+
+On an isolated synthetic account, verify list/grid per format, search/return, program copy, exercise selection, set entry/resume, rest ±15 seconds, completion summary, history, measurements/charts and presets at `/settings?application=sport`. Check drafts/conflicts, language/theme and 320 px; disable/re-enable Sport and verify preservation. Compare running SHA, revision, probes, public HTTPS Sport/settings and FR/EN guides. Record backup, SHA and results in issue #74 without using personal data.

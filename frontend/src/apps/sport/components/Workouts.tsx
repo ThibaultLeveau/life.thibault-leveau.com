@@ -134,8 +134,9 @@ export function Workouts({
           <span className="sport-active-copy">
             <strong>{active.name}</strong>
             <small>
-              {active.sets.filter((set) => !set.skipped).length}{" "}
-              {tr("completed_sets_training_session_in_progress")}
+              {tr("completed_sets_training_session_in_progress", {
+                count: active.sets.filter((set) => !set.skipped).length,
+              })}
             </small>
           </span>
           <span>{tr("resume")}</span>

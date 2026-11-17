@@ -1,36 +1,40 @@
 # Sport API
 
-Programs are reusable `Workout` templates; training sessions are their `Training` executions. Technical `/workouts`, workout_id and JSON contracts remain stable. Page creation/editing uses the same POST/PUT without data conversion/migration.
+Programs are reusable `Workout` templates; training sessions are their `Training` executions. Technical `/workouts`, workout_id and JSON contracts remain stable. Page creation/editing uses the same POST/PUT. Additive migration `0014_sport_ux` adds preferences and preparation context without converting existing results.
 
 Routes live under `/api/v1/sport`, requiring session, owner and Sport activation. Mutations use allowed origin/CSRF like [other APIs](api.md). `/api/docs` describes exact fields, bounds and responses.
 
 | Method | Route | Operation |
 | --- | --- | --- |
 | GET | `/kinds` | Types, fields, units, limits and formulas |
-| GET | `/exercises` | Supplied/personal catalogue; q,kind,muscle,equipment,archived,offset,limit (1–1000) |
+| GET | `/exercises` | Supplied/personal catalogue; q,kind,muscle,equipment,origin=all/personal/builtin,archived,offset,limit (1–1000) |
+| GET | `/exercises/filters` | Complete `muscles`/`equipment` facets (`{value,label}`), independent of pagination; origin,archived |
 | GET | `/exercises/{id}` | Supplied/personal exercise, including archived |
 | POST | `/exercises` | Create personal exercise |
 | PUT | `/exercises/{uuid}` | Replace personal exercise with expected_version |
 | PUT | `/exercises/{uuid}/archive` | expected_version/archived; false restores |
-| GET / PUT | `/settings` | rest_seconds 0–3600, default 90 |
-| GET | `/workouts` | Active programs or archived=true |
+| GET / PUT | `/settings` | Rest, view preferences and version; partial updates described below |
+| GET | `/workouts` | archived, search q, sort=updated/name/recent, exercise_id |
 | GET | `/workouts/{uuid}` | Program, including archived |
 | POST | `/workouts` | Name, notes and ordered entries |
 | PUT | `/workouts/{uuid}` | Replace program/order with expected_version |
 | PUT | `/workouts/{uuid}/archive` | Archive/restore without changing sessions |
+| POST | `/workouts/{uuid}/duplicate` | `{expected_version,name}`; new active copy, version 1, no sessions |
 | POST | `/sessions` | `{workout_id,expected_version}` of program; prior-result suggestions |
-| GET | `/sessions` | History, offset/limit 1–100 |
+| GET | `/sessions` | History, offset/limit 1–100, q,workout_id,status=active/completed/cancelled,since,until |
 | GET | `/sessions/active` | Active session or null |
 | GET | `/sessions/{uuid}` | Snapshot, sets, dates, score and baseline |
+| GET | `/sessions/{uuid}/navigation` | `{newer_id,older_id}` within owner and history filters |
 | PUT | `/sessions/{uuid}/sets/{entry}/{set}` | Confirm/correct `{expected_version,values}` |
 | DELETE | `/sessions/{uuid}/sets/{entry}/{set}` | Undo set with expected_version body |
-| PUT | `/sessions/{uuid}/rest` | Skip rest with expected_version |
+| PUT | `/sessions/{uuid}/rest` | Skip with expected_version; adjust with adjustment_seconds: -15 or 15 |
 | PUT | `/sessions/{uuid}/finish` | `{expected_version,outcome:completed/cancelled,notes}` |
 | GET | `/measurements` | Active measurements or archived=true |
+| GET | `/measurements/{uuid}` | Owner’s measurement, including archived |
 | POST | `/measurements` | Dated record with at least one measure |
 | PUT | `/measurements/{uuid}` | Replace with expected_version |
 | PUT | `/measurements/{uuid}/archive` | Archive/restore |
-| GET | `/statistics` | Inclusive since/until, one year default, ten years maximum |
+| GET | `/statistics` | Inclusive since/until, one year default, ten years maximum; exercise_id,workout_id,baseline_id |
 
 Program entries accept only `{exercise_id,sets,target}`. Targets are optional; confirmed set values require every measure specified by `/kinds`. Entry/set indices start at **0**. Supplied exercise IDs are stable strings; private objects use UUIDs. Entry order is program order. Returned snapshot names/types are display-only, not write fields.
 
@@ -132,10 +136,69 @@ Program POST/PUT accept optional ISO calendar competition_date or null. Numbers,
 
 Resolve the exercise ID through catalogue search before using the example. Updates add expected_version; clear with null. Normal session/activation/owner/CSRF/conflict protections apply.
 
-Programs and sessions (active/history/statistics) expose competition_date. The server copies it on start without modifying previous sessions; old sessions return null. Storage is independent of title, but the client displays branding only for a case-insensitive hyrox title. Countdown uses client local timezone and the calendar date, without extra storage or session setting. API clients can manage the entire feature.
+Programs and sessions (active/history/statistics) expose competition_date. The server copies it on start without modifying previous sessions; old sessions return null. Storage is independent of title, while `context` controls branding: `hyrox` forces it, `standard` hides it and `auto` detects a case-insensitive hyrox title. Countdown uses client local timezone and the calendar date, without extra storage or session setting. API clients can manage the entire feature.
 
 ## Bilingual catalogue {#catalogue-bilingue}
 
 builtin distinguishes supplied/personal exercises. Responses also expose stable muscle_id/equipment_id codes (null for personal), separate from display muscle_group/equipment. Do not send response-only fields when creating personal exercises.
 
 Account language localizes supplied names, notes, aliases, facets, kinds and supplied exercise names in programs/training/metrics/statistics. Search uses that language; muscle/equipment filters accept stable codes, current labels and historical French labels. Personal text, results, dates, versions, signatures and scores stay unchanged. Reads never rewrite snapshots. See [language contracts](internationalisation.md#api-independante-de-linterface).
+
+
+## Display preferences and concurrency {#preferences-daffichage-et-concurrence}
+
+`GET /settings` returns these defaults without creating a row:
+
+```json
+{
+  "rest_seconds": 90,
+  "workouts_view": "grid", "workouts_mobile_view": "list",
+  "exercises_view": "list", "exercises_mobile_view": "list",
+  "measurements_view": "grid", "measurements_mobile_view": "list",
+  "version": 1, "server_today": "2026-11-17"
+}
+```
+
+`server_today` is the actual UTC response date, not a writable preference. The UI uses `_mobile_view` keys at widths up to 800 px and the other keys above that width. Each of the six values accepts only `list` or `grid`. `PUT /settings` is **partial**: omitted fields survive; null values are rejected. A real change increments the version; an identical write preserves it. Optional `expected_version` protects modern clients while supporting older clients that write only `rest_seconds`. Changing a view never resets rest.
+
+```python
+settings = request('GET', '/sport/settings')
+settings = request('PUT', '/sport/settings', json={
+    'expected_version': settings['version'], 'workouts_view': 'list',
+})
+```
+
+On 409, keep the draft, reread and compare before using the new version. The same rule applies to exercises, programs, measurements and sessions. Schema error 422 includes field locations in `detail[].loc`; business errors may retain a global message.
+
+## Preparation, copies and history {#preparation-copie-et-historique}
+
+Programs accept `context: auto/standard/hyrox` (default auto). Older writes omitting it preserve the current context. `last_used_at` derives from the latest session start, including completed/cancelled/active sessions; it is null without sessions and does not change the program version. Recent sorting places unused programs last. Program search normalizes accents/case and requires every term to match the name.
+
+```python
+copy = request('POST', f"/sport/workouts/{workout['id']}/duplicate", json={
+    'expected_version': workout['version'], 'name': 'My next cycle',
+})
+```
+
+Copies retain entry snapshots, notes, competition date and context, with a new ID, their own dates, version 1 and no history. The source may be archived; archived exercises must be restored/replaced before starting. Owners remain isolated.
+
+Starting freezes `preparation_notes` and `context` in the session independently of later program edits, without changing signature or score. Old sessions have empty preparation notes: current notes are never presented as historical facts.
+
+Session filters combine. Search q is literal and case-insensitive; percent/underscore have no wildcard meaning. Dates include both UTC days using started_at. Reversed periods and upper bound 9999-12-31 are rejected. Neighbors sort by start then ID, returning null at an end.
+
+```python
+page = request('GET', '/sport/sessions', params={
+    'workout_id': workout['id'], 'status': 'completed', 'limit': 30, 'offset': 0,
+})
+if page['items']:
+    neighbors = request('GET', f"/sport/sessions/{page['items'][0]['id']}/navigation",
+                        params={'workout_id': workout['id'], 'status': 'completed'})
+```
+
+## Rest, completion summary and statistical baselines {#repos-bilan-et-references-statistiques}
+
+`PUT /sessions/{id}/rest` with adjustment_seconds ±15 shifts the existing deadline without changing sets or their confirmation dates. An expired rest returns 409. The deadline is capped at one hour after server time; reducing it to zero stops rest. Omitting adjustment (or sending null) retains the original skip operation. Expected version is required.
+
+The completion response exposes `awarded_xp`: session XP actually recorded in its transaction, **excluding quest bonuses**. A cancelled/empty session awards zero. Later reads return null for this field; the permanent journal and totals remain available through the common progression API. It is neither a score nor an estimated total difference.
+
+Statistics filter sessions by exercise, program or baseline as well as period. Counters cover those sessions; measurements still cover the whole period. `baselines` provides `{id,name,started_at,exercise_count}` for selected sessions’ baselines, even outside the period. Repeated exercise occurrences remain separate metrics in entry order. Heterogeneous measures are never implicitly combined.
