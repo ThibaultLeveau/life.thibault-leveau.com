@@ -126,6 +126,8 @@ Run `scripts/capture-documentation.sh` to regenerate screenshots. It builds the 
 
 `test_sport_ux.py` covers partial/versioned preferences, isolation/preservation, complete facets, copies, frozen preparation/context, history navigation, statistical baselines, actual completion XP, UTC calendar and migration 0014 loss protection. `sport-ux.spec.ts` covers views by format, debounced requests, lists under latency, navigation continuity, drafts, pending-write closure, conflict comparison/copies, selection across pages, direct reorder, set focus and normalized drafts, adjustable rest and summary, collapsed measurements, neutral differences and chronological charts with keyboard access. Tests use the real API; delay/error injection is confined to specified scenarios. Shared navigation checks mobile controls remain hidden on desktop regardless of CSS loading order.
 
+Sport chart geometry checks explicitly wait for the points to render after navigation. Reading the SVG list immediately can precede the API response over HTTPS even when the chart loads correctly.
+
 ### Sport score v2 {#score-sport-v2}
 
 `test_sport_scores.py` covers all ten types from the first empty/partial session, weight/assistance/distance/duration effort, volume and capped pace, partial targets, frozen/unknown references, duplicates, extreme values and owner/CSRF/idempotent repair preserving dates/results/rewards. Existing Sport tests check new scores and suggestions. Browser acceptance verifies FR/EN and desktop/320 px score, completion, difficulty, references and zero chart points, including an entirely omitted exercise. Container restoration retains full metrics JSONB.
