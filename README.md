@@ -90,3 +90,5 @@ Les [réussites](docs/progression.md) proposent **60 quêtes par application**, 
 ## Recettes et courses
 
 [Recettes & Liste de courses](docs/recipes.md) propose un catalogue de **301 ingrédients FR/EN**, vos ingrédients privés, des recettes à portions ajustables, le cumul des ingrédients, des listes et modèles réutilisables et un mode magasin mobile/ordinateur. Ses quatre métriques et **60 quêtes** sont disponibles dans Suivi. Toutes les opérations disposent de leur [API](docs/recipes-api.md). L’application est désactivée par défaut.
+
+Les [réglages généraux](docs/settings.md) réunissent les préférences du compte et de chaque application. Le menu du nom sur l’accueil propose Réglages et Déconnexion ; les liens Réglages des applications ouvrent leur section directement.

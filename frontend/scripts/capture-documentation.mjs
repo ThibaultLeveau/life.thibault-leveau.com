@@ -30,7 +30,7 @@ try {
       else await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
       if (prepare) await prepare();
       await page.evaluate(() => document.fonts.ready);
-      await page.screenshot({ path: `${root}/${locale}/${name}.png`, animations: 'disabled' });
+      await page.screenshot({ path: `${root}/${locale}/${name}.png`, animations: 'disabled', fullPage: name.endsWith('settings') });
       console.log(`${locale}/${name}.png`);
     };
     await capture('general-login', '/tasks');
@@ -110,7 +110,9 @@ try {
     await capture('general-library', '/applications');
     await capture('general-home', '/');
     await capture('general-progress', '/tracking?tab=achievements');
-    await capture('general-settings', '/tracking?tab=settings');
+    await capture('general-settings', '/settings');
+    for (const id of ['tasks', 'sport', 'tracking', 'okr', 'recipes'])
+      await capture(`${id}-settings`, `/settings?application=${id}`);
     await api('PUT', `/workspaces/${data.space.id}/view`, { layout: 'list', show_completed: true });
     await capture('tasks-list', `/tasks?space=${data.space.id}`);
     await api('PUT', `/workspaces/${data.space.id}/view`, { layout: 'board', show_completed: true });

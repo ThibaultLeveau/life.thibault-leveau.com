@@ -1,5 +1,13 @@
 import { api } from "../../platform/api";
-import type { Page, Task, ViewSettings } from "./types";
+import type {
+  AgendaSettings,
+  Label,
+  Page,
+  Status,
+  Task,
+  ViewSettings,
+  Workspace,
+} from "./types";
 import { localDate } from "./types";
 
 export async function allTasks(
@@ -40,3 +48,30 @@ export async function allTasks(
   } while (items.length < total);
   return { items, total };
 }
+
+export const taskSettingsApi = {
+  workspaces: (signal: AbortSignal) =>
+    api<Workspace[]>("/workspaces", "GET", undefined, signal),
+  view: (workspaceId: string, signal: AbortSignal) =>
+    api<AgendaSettings | ViewSettings>(
+      workspaceId ? `/workspaces/${workspaceId}/view` : "/agenda/view",
+      "GET",
+      undefined,
+      signal,
+    ),
+  saveView: (workspaceId: string, value: AgendaSettings | ViewSettings) =>
+    api<AgendaSettings | ViewSettings>(
+      workspaceId ? `/workspaces/${workspaceId}/view` : "/agenda/view",
+      "PUT",
+      value,
+    ),
+  labels: (workspaceId: string, signal: AbortSignal) =>
+    api<Label[]>(`/workspaces/${workspaceId}/labels`, "GET", undefined, signal),
+  statuses: (workspaceId: string, signal: AbortSignal) =>
+    api<Status[]>(
+      `/workspaces/${workspaceId}/statuses`,
+      "GET",
+      undefined,
+      signal,
+    ),
+};

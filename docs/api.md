@@ -448,3 +448,7 @@ Les routes `/api/v1/okr` exposent objectifs, résultats clés, ordre/statut, arc
 ## Recettes et courses
 
 L’application `recipes` fournit le catalogue d’ingrédients bilingue, les recettes à portions ajustables, les listes et modèles, import/cumul, achats, copies, archives et historique. [Contrats, erreurs et exemples](recipes-api.md). La progression et les quatre métriques utilisent les API communes.
+
+## Réglages généraux
+
+La route HTML `/settings` compose les [préférences existantes](settings.md#api-et-conservation) sans nouvel endpoint de données. Les sections utilisent les API de compte, progression, agenda/vues, Sport, Suivi et OKR ; les contrats, validations, propriétaires, CSRF, versions et règles de sauvegarde restent inchangés. Les anciennes URL HTML applicatives `?tab=settings` redirigent vers `/settings?application=<id>`.

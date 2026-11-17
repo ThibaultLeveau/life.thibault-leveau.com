@@ -21,13 +21,14 @@ backend/src/life_app/apps/<id>/
 frontend/src/apps/<id>/
 ├── manifest.ts
 ├── Page.tsx
+├── Settings.tsx       # optional, ADR 007
 ├── api.ts
 ├── types.ts
 ├── components/
 └── styles.css
 ```
 
-1. Choose an immutable identifier: lowercase letter followed by lowercase letters/digits/underscores, at most 50 characters. Supply FR/EN backend manifest names/descriptions under [ADR 004](decisions/004-internationalisation.md). Reserve a unique HTML path outside `/`, `/applications`, `/api`, `/documentation`, `/assets`.
+1. Choose an immutable identifier: lowercase letter followed by lowercase letters/digits/underscores, at most 50 characters. Supply FR/EN backend manifest names/descriptions under [ADR 004](decisions/004-internationalisation.md). Reserve a unique HTML path outside `/`, `/applications`, `/settings`, `/api`, `/documentation`, `/assets`.
 2. Define Pydantic contracts, owner checks and transactional services. Reject unknown fields; derive owner from `CurrentUser`. Routers commit validated mutations. Reuse `core.database.Database` and sessions; no generic repository layer.
 3. Define domain-owned tables and, when needed, a migration in global `migrations/versions/`. The manifest imports the router, which loads models. Importing the registry during migrations must load all ORM metadata. Do not edit an old migration.
 4. Supply `ApplicationDefinition` in `manifest.py` and import it in `apps/registry.py`. Tuple order determines catalogue order. Default activation is false; migration exceptions require justification. Composition mounts the router with automatic activation checks. New business routes use application-specific prefixes; Tasks retains historical URLs.
@@ -95,3 +96,7 @@ Declare the provider in the manifest; the registry stays the only composition po
 ## Evolving the documentation
 
 Keep the seven independent guides declared in `mkdocs.yml`: Technical, General, Tasks, Sport, Tracking, OKR Goals and Cook & Shop. Assign every page to a guide and provide the same relative path under `docs/en/`. The `scripts/documentation.py` hook preserves public URLs and isolates navigation/search; explicit links between guides remain available. Refresh synthetic FR/EN screenshots with `make docs-screenshots`, captions, contracts and browser coverage. The existing image still contains a single MkDocs build, with no additional service or storage.
+
+## Settings panel
+
+[ADR 007](decisions/007-reglages-generaux.md) allows an optional `Settings.tsx` in each application, loaded lazily through its manifest. Implement `SettingsPanelProps` (`onDirty`, `onBusy`), clear these states on unmount and use existing business APIs. Do not import the whole Page or move business logic into the platform. The shell supplies names, activation and the common calendar. Settings links open `/settings?application=<id>`; contextual settings can remain on their objects with an explicit panel link. Test drafts, errors, conflicts, sessions, activation and FR/EN/mobile navigation.

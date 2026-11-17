@@ -28,7 +28,7 @@ Each application has six families of ten quests: Tasks rewards completions, on-t
 
 ## Rest days and vacation
 
-In **Tracking → Settings → Your pace, your rules**, choose the IANA timezone for new activities, choose the expected weekdays separately for each application (at least one day), and add inclusive vacation periods for all applications. Starting vacation today proposes one editable week. Save to apply it. Up to 100 non-overlapping periods are supported. Ending vacation today closes the interval yesterday so today becomes eligible again.
+In [General settings](settings.md), choose **General** for the IANA timezone of new activities and shared vacation periods. Open each application’s section to choose its expected weekdays (at least one day). Starting vacation today proposes one editable week. Save to apply it. Up to 100 non-overlapping periods are supported. Ending vacation today closes the interval yesterday so today becomes eligible again.
 
 For weekly tracking, select Sunday only; for three days of practice, select Monday, Wednesday and Friday. “Every day” and “Monday to Friday” provide shortcuts. The badge displays the scheduled days. Existing preferences remain unchanged: all days, or Monday–Friday if weekends were excluded. Three successful Sundays count as three streak days. A Saturday confirmation does not replace a missed Sunday: these are fixed weekdays, not a flexible weekly quota. Tracker deadlines remain unchanged; this setting only affects the application’s usage streak.
 
@@ -36,9 +36,9 @@ One first confirmation validates an application’s day; more actions do not add
 
 Changing timezone does not move previously recorded activity dates. Selected weekdays and vacation rules recalculate historical streaks without rewriting rewards. Disabling an application preserves its data but does not pause its calendar. Unsaved settings are protected during navigation, language changes and sign-out, and concurrent changes return a conflict.
 
-![Settings: choose your pace, usage days and vacations.](../assets/screenshots/en/general-settings.png){ loading=lazy }
+![General settings: choose the progression timezone and vacation periods.](../assets/screenshots/en/general-settings.png){ loading=lazy }
 
-*Settings: choose your pace, usage days and vacations.*
+*General settings: choose the progression timezone and vacation periods.*
 
 ## Existing data
 
@@ -53,3 +53,5 @@ OKR adds 60 quests across completed objectives, key results reached, personal go
 ## Recipes quests
 
 Recipes adds 60 quests across saved recipes, completed lists, distinct list/recipe imports, non-empty templates, active days and streaks. First confirmations earn 25, 50, 5 and 15 base XP respectively. This application also rewards building your recipe book and reusable templates. Stable identifiers prevent repeated rewards for edits, rechecking, reopening or re-enabling. [Details](recipes.md#tracking-and-rewards). There are now 300 quests across five applications.
+
+Preferences are grouped in [General settings](settings.md). An application’s Settings control opens its section; the progression timezone and vacations are under General, and usage days are in each application section.

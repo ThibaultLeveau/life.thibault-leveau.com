@@ -449,3 +449,7 @@ Unknown fields, invalid timezone/application IDs, non-strict booleans, dates out
 ## Recipes and shopping {#recettes-et-courses}
 
 `recipes` supplies bilingual ingredients, scalable recipes, lists/templates, import/combination, purchases, copies, archives/history. See [contracts/errors/examples](recipes-api.md). Progression and four metrics use shared APIs.
+
+## General settings
+
+The HTML route `/settings` composes [existing preferences](settings.md#api-and-storage) without a new data endpoint. Its sections use account, progression, agenda/view, Sport, Tracking and OKR APIs. Contracts, validation, owners, CSRF, versions and backup rules remain unchanged. Legacy application URLs with `?tab=settings` redirect to `/settings?application=<id>`.

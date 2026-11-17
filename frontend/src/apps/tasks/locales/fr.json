@@ -480,5 +480,8 @@
   "archive_task_confirmation": "Archiver cette tâche ? Vous pourrez la restaurer depuis les archives.",
   "keep_first_500": "Limiter aux 500 premières",
   "search_and_filter": "Rechercher et filtrer",
-  "more_task_views": "Autres vues des tâches"
+  "more_task_views": "Autres vues des tâches",
+  "view_preferences": "Préférences des vues",
+  "view_preferences_hint": "Choisissez l’agenda ou un espace pour retrouver ses préférences enregistrées. Les réglages de structure restent accessibles avec « Configurer l’espace ». Dans les listes, les tâches terminées restent masquées jusqu’à leur affichage explicite.",
+  "view_to_configure": "Vue à configurer"
 }

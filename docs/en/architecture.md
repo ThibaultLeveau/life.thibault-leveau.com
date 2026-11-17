@@ -49,7 +49,7 @@ React stores no parallel business database in localStorage. Input fields and dia
 
 ## HTTP and builds {#http-et-compilation}
 
-`/`, `/applications` and manifest paths (`/tasks`, `/sport`, `/tracking`, `/okr`, `/recipes`) are the only React HTML routes. Assets live under `/assets/`, API under `/api/v1`, Swagger under `/api/docs` and MkDocs under `/documentation/`. Unknown paths remain 404. Frontend API URLs are relative; rendering has no separate network service.
+`/`, `/applications`, `/settings` and manifest paths (`/tasks`, `/sport`, `/tracking`, `/okr`, `/recipes`) are the only React HTML routes. Assets live under `/assets/`, API under `/api/v1`, Swagger under `/api/docs` and MkDocs under `/documentation/`. Unknown paths remain 404. Frontend API URLs are relative; rendering has no separate network service.
 
 ![Multi-stage build: compiled frontend and documentation join the Python runtime.](../assets/diagrams/en/build.svg)
 
@@ -106,3 +106,7 @@ Frontend `platform/progression` supplies API client, settings and the badge inje
 ## Separate documentation guides
 
 The seven FR/EN guides share the existing MkDocs build and static server. `mkdocs.yml` assigns pages to guides; `scripts/documentation.py` supplies navigation, previous/next links and search indexes scoped to each guide and language. The language link opens the equivalent page; an explicit link returns to the directory. Existing source paths and URLs remain stable, with technical translations under `docs/en/`. No service, storage or business boundary changes.
+
+## General settings
+
+[ADR 007](decisions/007-reglages-generaux.md), approved in issue #76, extends the frontend manifest with an optional `Settings` panel. The shell composes `/settings` from the existing registry and server catalogue. Business forms stay in their applications; shared preferences stay in their existing modules. Panels report drafts/pending writes and business panels mount only for enabled applications. No additional table, API or infrastructure. See the [guide](settings.md).

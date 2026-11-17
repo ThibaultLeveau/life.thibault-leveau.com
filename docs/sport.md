@@ -146,3 +146,9 @@ Le badge en haut à droite affiche votre niveau, titre et série. Ouvrez-le pour
 ## Revue de l’interface
 
 La [revue mobile et ordinateur du 17 novembre 2026](revue-sport-2026-11-17.md) inventorie les parcours testés et les améliorations proposées, dont le choix Liste / Grille. Elle décrit un plan d’amélioration ; ces propositions ne sont pas des fonctionnalités déjà livrées.
+
+Les préférences sont réunies dans les [réglages généraux](settings.md). Le lien Réglages de l’application ouvre sa section ; fuseau de progression et vacances se trouvent dans Général, jours d’utilisation dans chaque application.
+
+![Ouvrir Réglages pour adapter les préférences et les jours d’utilisation de cette application.](assets/screenshots/fr/sport-settings.png){ loading=lazy }
+
+*Ouvrir Réglages pour adapter les préférences et les jours d’utilisation de cette application.*

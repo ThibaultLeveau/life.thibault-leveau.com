@@ -108,3 +108,7 @@ Each Page injects `ProgressionBadge` into `ApplicationTopbar`’s optional `stat
 `apps/okr` composes shared frame/badge/footer, horizon-guided forms, key results, board, paginated retrospective and archives. Native status/order controls match dragging; columns stack on narrow screens. Shared transport/resource hooks guard stale responses. Forms protect navigation, browser history, language and sign-out. OKR CSS never overrides navigation/footer; quest links use common library metadata.
 
 Long mobile application names truncate visually to preserve the current breadcrumb and progress counters; full text remains accessible. Shared dialog Close buttons retain 44 px targets.
+
+## General settings
+
+`pages/SettingsPage` receives registered modules from the shell, composes authorized `Settings` panels, and manages direct links, browser history, drafts and pending writes through `SettingsPanelProps`. `useSettingsDraft` reports these states and clears them on unmount. `ProgressionSettings` separates General (timezone/vacations) from application usage days, preserving other fields in versioned writes. The account-name menu on Home/library offers Settings and Sign out with keyboard/Escape/focus return; application footers retain `AccountMenu`. See [ADR 007](decisions/007-reglages-generaux.md) and the [guide](settings.md).

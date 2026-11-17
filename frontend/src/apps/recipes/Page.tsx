@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { tr as common } from "../../shared/i18n";
 import { ApplicationFooter } from "../../platform/auth/ApplicationFooter";
 import { useApplications } from "../../platform/applications/ApplicationProvider";
 import { ProgressionBadge } from "../../platform/progression/ProgressionBadge";
@@ -224,6 +225,24 @@ export function Page() {
               {tr(id)}
             </button>
           ))}
+          <a
+            className="application-nav-item"
+            href="/settings?application=recipes"
+            onClick={(event) => {
+              if (
+                event.metaKey ||
+                event.ctrlKey ||
+                event.shiftKey ||
+                event.altKey
+              )
+                return;
+              if (!permit()) event.preventDefault();
+              else dirty.current = false;
+            }}
+          >
+            <Icon name="settings" />
+            {common("settings")}
+          </a>
         </nav>
       </ApplicationSidebar>
       <main id="recipes-main" className="recipes-main" tabIndex={-1}>

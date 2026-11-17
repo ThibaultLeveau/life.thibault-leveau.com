@@ -66,3 +66,9 @@ The default OKR timezone is `Europe/Paris`. Changing it affects future events an
 Limits: 5,000 objectives per account including archives, 12 key results per objective, titles up to 200 characters, finite numeric values between −10¹² and 10¹², dates from 2000 through 2100. History and accomplishments are paginated in groups of 30. A concurrent update returns a conflict; reload before applying your changes again. Network errors offer retry controls in the affected content.
 
 All operations also use the [versioned API](okr-api.md), including ownership checks and identical validation.
+
+Preferences are grouped in [General settings](settings.md). An application’s Settings control opens its section; the progression timezone and vacations are under General, and usage days are in each application section.
+
+![Open Settings to adjust this application’s preferences and usage days.](../assets/screenshots/en/okr-settings.png){ loading=lazy }
+
+*Open Settings to adjust this application’s preferences and usage days.*

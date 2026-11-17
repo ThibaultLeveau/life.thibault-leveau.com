@@ -91,3 +91,9 @@ Toutes ces opérations sont accessibles par l’[API versionnée](tracking-api.m
 ![Sur mobile, sélectionner un jour puis lire son détail sous le calendrier.](assets/screenshots/fr/tracking-calendar-mobile.png){ loading=lazy width="390" }
 
 *Sur mobile, sélectionner un jour puis lire son détail sous le calendrier.*
+
+Les préférences sont réunies dans les [réglages généraux](settings.md). Le lien Réglages de l’application ouvre sa section ; fuseau de progression et vacances se trouvent dans Général, jours d’utilisation dans chaque application.
+
+![Ouvrir Réglages pour adapter les préférences et les jours d’utilisation de cette application.](assets/screenshots/fr/tracking-settings.png){ loading=lazy }
+
+*Ouvrir Réglages pour adapter les préférences et les jours d’utilisation de cette application.*

@@ -256,3 +256,7 @@ Publish validated main with the usual backup. No new service/secret/SQL migratio
 ## Separate documentation release {#livraison-documentations-separees}
 
 Publish the validated main using the same backup/build/migration/deployment script. No data migration, service or environment setting is added. Verify both directories, all seven guide entries in both languages, language-equivalent links, guide-scoped menus/search, local screenshots and existing application help links. Check mobile/keyboard navigation, actual image SHA and public probes. Record the deployed commit, backup and verification in the issue.
+
+## Deploying general settings
+
+Publish validated main through `scripts/deploy.sh` with its normal backup. No SQL migration, dependency, environment variable or Caddy/DNS change. Verify running SHA, probes, `/settings`, `/settings?application=sport`, legacy `?tab=settings` links, OpenAPI and both settings guides over HTTPS. On an isolated synthetic account, verify the account-name menu, each section/API save, drafts, expiry, disable/reactivate, languages/themes and 320 px. Record backup, SHA and evidence in issue #76.

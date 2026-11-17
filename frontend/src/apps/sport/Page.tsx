@@ -11,7 +11,6 @@ import { sportApi } from "./api";
 import { LoadState, useAction, useResource } from "./components/common";
 import { Exercises } from "./components/Exercises";
 import { Measurements } from "./components/Measurements";
-import { Settings } from "./components/Settings";
 import { Statistics } from "./components/Statistics";
 import { ActiveTraining, History, RestTimer } from "./components/Training";
 import { ProgramEditor } from "./components/ProgramEditor";
@@ -108,6 +107,10 @@ export function Page() {
     saved = false,
   ) {
     if (!saved && !guard.current()) return;
+    if (next === "settings") {
+      window.location.assign("/settings?application=sport");
+      return;
+    }
     const params = new URLSearchParams({ tab: next });
     if (nextProgram) params.set("program", nextProgram);
     if (nextArchived) params.set("archived", "true");
@@ -265,7 +268,6 @@ export function Page() {
               {tab === "measurements" && <Measurements />}
               {tab === "statistics" && <Statistics kinds={kinds.data} />}{" "}
               {tab === "history" && <History kinds={kinds.data} />}{" "}
-              {tab === "settings" && <Settings />}
             </div>
           )}
         </div>

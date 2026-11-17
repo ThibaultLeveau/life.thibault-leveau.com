@@ -35,7 +35,12 @@ def register_static_routes(app: FastAPI, settings: Settings) -> None:
             raise HTTPException(status_code=503, detail=tr("frontend_unavailable"))
         return FileResponse(index, headers={"Cache-Control": "no-cache"})
 
-    for path in ("/", "/applications", *(item.path for item in app.state.applications)):
+    for path in (
+        "/",
+        "/applications",
+        "/settings",
+        *(item.path for item in app.state.applications),
+    ):
         app.add_api_route(path, home, methods=["GET", "HEAD"], include_in_schema=False)
 
     @app.api_route("/favicon.svg", methods=["GET", "HEAD"], include_in_schema=False)

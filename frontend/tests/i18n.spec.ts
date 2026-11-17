@@ -95,7 +95,10 @@ test("anonymous browser language and account preference survive sign-in, theme c
   await expect(
     page.getByRole("switch", { name: "Enable Tasks" }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Sign out", exact: true }).click();
+  await page
+    .getByRole("button", { name: credentials.username, exact: true })
+    .click();
+  await page.getByRole("menuitem", { name: "Sign out", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "Connexion", exact: true }),
   ).toBeVisible();

@@ -66,6 +66,7 @@ extra:
       en: General
       chapters:
         - {file: applications.md, fr: Compte et applications, en: Account and applications}
+        - {file: settings.md, fr: Réglages généraux, en: General settings}
         - {file: progression.md, fr: Réussites et progression, en: Achievements and progress}
     - id: tasks
       fr: Tâches
@@ -136,3 +137,4 @@ extra:
             - {file: decisions/004-internationalisation.md, fr: ADR 004 · Français et anglais, en: ADR 004 · French and English}
             - {file: decisions/005-integrations-tracking.md, fr: ADR 005 · Intégrations et Suivi, en: ADR 005 · Integrations and Tracking}
             - {file: decisions/006-progression-applications.md, fr: ADR 006 · Progression commune, en: ADR 006 · Shared progression}
+            - {file: decisions/007-reglages-generaux.md, fr: ADR 007 · Réglages généraux, en: ADR 007 · General settings}

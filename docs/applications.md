@@ -76,3 +76,5 @@ Le footer propose, dans l’ordre, la **Bibliothèque des applications**, la **D
 Le lien **Documentation** d’une application ouvre uniquement son guide dans la langue du compte. **Toutes les documentations** permet de changer de guide ; **English / Français** ouvre la même page traduite sans modifier votre compte. La recherche reste limitée au guide et à sa langue.
 
 Utilisez Tab/Maj+Tab pour parcourir les commandes, Entrée ou Espace pour les activer, et Échap pour fermer les menus et dialogues. Sur mobile, ouvrez la navigation pour retrouver tous les liens. Les modifications non enregistrées demandent confirmation avant une sortie concernée. Consultez le [guide de progression](progression.md) pour les niveaux, quêtes, jours d’utilisation et vacances.
+
+Les préférences sont réunies dans les [réglages généraux](settings.md). Le lien Réglages de l’application ouvre sa section ; fuseau de progression et vacances se trouvent dans Général, jours d’utilisation dans chaque application.

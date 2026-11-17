@@ -52,6 +52,8 @@ test.beforeEach(async ({ page }) => {
     ).toBeTruthy();
 });
 async function tab(page: Page, name: string) {
+  if (new URL(page.url()).pathname === "/settings")
+    await page.getByRole("link", { name: "Ouvrir Sport", exact: true }).click();
   const opener = page.getByRole("button", {
     name: "Ouvrir la navigation",
     exact: true,
@@ -162,7 +164,7 @@ test("Sport : bibliothèque, séance mixte, repos, mensurations et statistiques 
     .getByLabel("Temps de repos entre les séries (secondes)")
     .fill("120");
   await page.getByRole("button", { name: "Enregistrer les réglages" }).click();
-  await expect(page.locator(".sport-settings").getByRole("status")).toHaveText(
+  await expect(page.locator(".settings-form").getByRole("status")).toHaveText(
     "Réglages enregistrés.",
   );
   await tab(page, "Programmes");
@@ -426,9 +428,10 @@ test("Sport : création personnelle, mobile, clavier, archives et validation en 
     .getByLabel("Temps de repos entre les séries (secondes)")
     .fill("30");
   await page.getByRole("button", { name: "Enregistrer les réglages" }).click();
-  await expect(page.locator(".sport-settings").getByRole("status")).toHaveText(
+  await expect(page.locator(".settings-form").getByRole("status")).toHaveText(
     "Réglages enregistrés.",
   );
+  await page.getByRole("link", { name: "Ouvrir Sport", exact: true }).click();
   await page.getByRole("button", { name: "Ouvrir la navigation" }).click();
   await page
     .getByRole("dialog")

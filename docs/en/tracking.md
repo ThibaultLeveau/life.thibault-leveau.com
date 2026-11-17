@@ -65,3 +65,9 @@ The calendar and trends allow up to 367 days per request. Queries and entry hist
 ![On mobile, select a day and read its details below the calendar.](../assets/screenshots/en/tracking-calendar-mobile.png){ loading=lazy width="390" }
 
 *On mobile, select a day and read its details below the calendar.*
+
+Preferences are grouped in [General settings](settings.md). An application’s Settings control opens its section; the progression timezone and vacations are under General, and usage days are in each application section.
+
+![Open Settings to adjust this application’s preferences and usage days.](../assets/screenshots/en/tracking-settings.png){ loading=lazy }
+
+*Open Settings to adjust this application’s preferences and usage days.*

@@ -70,3 +70,9 @@ Le fuseau par défaut est `Europe/Paris`, modifiable dans **Réglages**. Les ré
 Limites : 5 000 objectifs par compte, archives comprises ; 12 résultats clés par objectif ; titres de 200 caractères ; nombres finis de −10¹² à 10¹² ; dates entre 2000 et 2100. Historique et réalisations sont paginés par 30. Une écriture concurrente produit un conflit : rechargez l’objectif avant de réappliquer vos modifications. Les erreurs réseau affichent une reprise dans le contenu concerné.
 
 Toutes ces opérations disposent d’une [API versionnée](okr-api.md), avec les mêmes règles et contrôles de propriétaire.
+
+Les préférences sont réunies dans les [réglages généraux](settings.md). Le lien Réglages de l’application ouvre sa section ; fuseau de progression et vacances se trouvent dans Général, jours d’utilisation dans chaque application.
+
+![Ouvrir Réglages pour adapter les préférences et les jours d’utilisation de cette application.](assets/screenshots/fr/okr-settings.png){ loading=lazy }
+
+*Ouvrir Réglages pour adapter les préférences et les jours d’utilisation de cette application.*

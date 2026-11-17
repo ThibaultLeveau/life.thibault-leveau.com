@@ -72,3 +72,5 @@ The footer contains, in order, the **Application library**, **Documentation** fo
 An application’s **Documentation** link opens only its guide in your account language. **All documentation** lets you choose another guide; **English / Français** opens the equivalent translated page without changing your account. Search stays within the current guide and language.
 
 Use Tab/Shift+Tab to move between controls, Enter or Space to activate them, and Escape to close menus/dialogs. On mobile, open navigation to reach all links. Affected unsaved forms ask before leaving. See the [progression guide](progression.md) for levels, quests, usage days and vacations.
+
+Preferences are grouped in [General settings](settings.md). An application’s Settings control opens its section; the progression timezone and vacations are under General, and usage days are in each application section.

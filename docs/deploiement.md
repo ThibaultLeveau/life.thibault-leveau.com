@@ -260,3 +260,7 @@ Publier le `main` validé par `scripts/deploy.sh`, sauvegarde habituelle incluse
 ## Livraison documentations séparées
 
 Publier le `main` validé avec la procédure habituelle de sauvegarde, construction, migration et publication. Aucune migration de données, variable ni service supplémentaire. Vérifier les deux accueils, les sept documentations en FR/EN, les liens de langue vers la page équivalente, les menus et recherches propres au guide, les captures locales et les liens d’aide existants des applications. Contrôler mobile/clavier, SHA réellement exécuté et sondes publiques ; consigner commit, sauvegarde et résultats dans l’issue.
+
+## Livraison des réglages généraux
+
+Publier le `main` validé avec `scripts/deploy.sh` et sa sauvegarde habituelle. Aucune migration SQL, dépendance, variable ou modification Caddy/DNS. Vérifier le SHA exécuté, les sondes, `/settings`, `/settings?application=sport`, les anciens liens `?tab=settings`, OpenAPI et les guides réglages FR/EN en HTTPS. Sur compte synthétique : menu du nom, chaque section et sauvegarde API, brouillons, expiration, désactivation/réactivation, langues/thèmes et mobile 320 px. Consigner sauvegarde, SHA et preuves dans l’issue #76.

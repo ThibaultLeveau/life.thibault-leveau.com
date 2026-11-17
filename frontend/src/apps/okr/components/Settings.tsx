@@ -21,9 +21,13 @@ export function Settings({
     onBusy(action.busy);
     return () => onBusy(false);
   }, [onBusy, action.busy]);
+  useEffect(() => {
+    onDirty(timezone !== settings.timezone);
+    return () => onDirty(false);
+  }, [timezone, settings.timezone, onDirty]);
   return (
     <form
-      className="okr-editor"
+      className="settings-form"
       onSubmit={(e) => {
         e.preventDefault();
         void action.run(
@@ -44,7 +48,6 @@ export function Settings({
             value={timezone}
             onChange={(e) => {
               setTimezone(e.target.value);
-              onDirty(true);
             }}
           />
         </label>
