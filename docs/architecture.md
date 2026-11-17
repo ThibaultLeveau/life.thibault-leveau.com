@@ -105,6 +105,10 @@ Le frontend `platform/progression` fournit le client API, les réglages et le ba
 
 `apps/recipes` suit les ADR 003–006 sans nouveau contrat transversal : manifeste, métier, fournisseur de métriques et fournisseur de progression, assemblés par les deux registres existants. La migration additive `0012_recipes` crée six tables : ingrédients globaux/personnels, recettes et lignes, listes/modèles et lignes, événements. Le catalogue bilingue de 301 ingrédients est figé dans les données de migration. PostgreSQL stocke les quantités en `NUMERIC(18,6)` ; les calculs du service utilisent `Decimal`. Aucun stockage métier navigateur ou service externe. Les frontières communes restent inchangées. [Guide](recipes.md), [API](recipes-api.md).
 
+## Documentations séparées
+
+Les sept guides FR/EN partagent la compilation MkDocs et le service statique existants. `mkdocs.yml` associe les pages à leur guide ; le hook `scripts/documentation.py` fournit un menu, des liens précédent/suivant et un index de recherche propres au guide et à sa langue. Le lien de traduction cible la même page ; l’annuaire est accessible explicitement. Les sources et URL existantes restent stables, les traductions techniques suivent `docs/en/`. Aucun changement de service, de stockage ou de frontière métier.
+
 ## Réglages généraux
 
 L’[ADR 007](decisions/007-reglages-generaux.md), approuvé dans l’issue #76, étend le manifeste frontend avec un panneau `Settings` optionnel. Le shell compose `/settings` à partir du registre existant et du catalogue serveur. Les formulaires métier restent dans leurs applications, les préférences communes dans leurs modules actuels. Les panneaux signalent brouillons/écritures et ne sont montés que pour les applications activées. Aucune table, API ni infrastructure supplémentaire. [Guide](settings.md).

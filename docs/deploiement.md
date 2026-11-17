@@ -257,6 +257,10 @@ Vérifier SHA exécuté, sondes, `/recipes`, OpenAPI et guides FR/EN en HTTPS. S
 
 Publier le `main` validé par `scripts/deploy.sh`, sauvegarde habituelle incluse. Aucun nouveau service, secret ou migration SQL ; respecter la [compatibilité des préférences d’agenda](sauvegardes.md#filtres-dagenda-et-actions-groupees-taches). Sur un compte synthétique isolé, vérifier recherche multi-espace avec terminées/archives, précédent/suivant, brouillons, menu sélectionné, priorité/statut/étiquettes en lot, clôture/récurrence et restauration. Vérifier le focus mobile à 320 px, les thèmes/langues, les mouvements réduits, les sondes, OpenAPI, guides FR/EN et le SHA réellement exécuté. Consigner sauvegarde, commit et résultats dans l’issue.
 
+## Livraison documentations séparées
+
+Publier le `main` validé avec la procédure habituelle de sauvegarde, construction, migration et publication. Aucune migration de données, variable ni service supplémentaire. Vérifier les deux accueils, les sept documentations en FR/EN, les liens de langue vers la page équivalente, les menus et recherches propres au guide, les captures locales et les liens d’aide existants des applications. Contrôler mobile/clavier, SHA réellement exécuté et sondes publiques ; consigner commit, sauvegarde et résultats dans l’issue.
+
 ## Livraison des réglages généraux
 
 Publier le `main` validé avec `scripts/deploy.sh` et sa sauvegarde habituelle. Aucune migration SQL, dépendance, variable ou modification Caddy/DNS. Vérifier le SHA exécuté, les sondes, `/settings`, `/settings?application=sport`, les anciens liens `?tab=settings`, OpenAPI et les guides réglages FR/EN en HTTPS. Sur compte synthétique : menu du nom, chaque section et sauvegarde API, brouillons, expiration, désactivation/réactivation, langues/thèmes et mobile 320 px. Consigner sauvegarde, SHA et preuves dans l’issue #76.

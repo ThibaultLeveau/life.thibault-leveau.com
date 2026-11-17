@@ -1,0 +1,24 @@
+---
+config:
+  theme: base
+  themeVariables:
+    primaryColor: '#edf2e9'
+    primaryTextColor: '#202623'
+    primaryBorderColor: '#214c3d'
+    lineColor: '#647567'
+    secondaryColor: '#fafaf7'
+    tertiaryColor: '#f0f2ec'
+    fontFamily: 'Arial, sans-serif'
+---
+flowchart TD
+    browser["Browser"] -->|"HTTPS · life.thibault-leveau.com"| proxy["Caddy · TLS certificate"]
+    subgraph network["Docker network multisite_proxy"]
+      proxy -->|"HTTP · life-web:8000"| app["FastAPI / Uvicorn"]
+      app --> api["/api/v1 · sessions, tasks, preferences"]
+      app --> front["/ et /tasks · compiled React"]
+      app --> docs["/documentation/ · compiled MkDocs"]
+    end
+    subgraph private["Private Life network · no host port"]
+      app -->|"SQLAlchemy / psycopg"| db["PostgreSQL 17"]
+      db --> volume["Volume postgres_data"]
+    end

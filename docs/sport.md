@@ -27,6 +27,10 @@ Le catalogue fournit **680 exercices disponibles en français et en anglais**, c
 
 Les types décrivent des **mesures**, pas une liste fermée de sports. Un même mouvement peut avoir plusieurs variantes de saisie. Les calories sont celles affichées par la machine : aucune estimation physiologique n’est calculée. Les champs inadaptés à un type sont refusés par le serveur. Utiliser la **charge totale**, barre comprise et deux haltères additionnés ; noter l’assistance affichée pour une machine assistée. Pour un élastique sans assistance chiffrable, choisir le type répétitions et préciser la résistance dans les notes.
 
+![Catalogue : rechercher un exercice et choisir son type.](assets/screenshots/fr/sport-catalogue.png){ loading=lazy }
+
+*Catalogue : rechercher un exercice et choisir son type.*
+
 ## Préparer un programme et démarrer un entraînement
 
 Dans **Programmes**, choisir **Nouveau programme**, donner un nom, ajouter des exercices et indiquer leur nombre de séries. Les cibles par série sont facultatives. Les flèches changent l’ordre ; la croix retire un exercice du brouillon. Un programme accepte jusqu’à 50 exercices et 300 séries au total, avec 1 à 30 séries par exercice.
@@ -57,9 +61,25 @@ Les modifications de champs sont des **saisies en cours** jusqu’à validation 
 
 Une session terminée ou abandonnée est conservée et ne se modifie plus. Modifier ou archiver le programme d’origine ne change pas les sessions existantes. Avant un nouveau lancement, les exercices personnels doivent être actifs ; si leur type a changé, retirer puis ajouter à nouveau l’exercice dans le programme pour saisir ses nouveaux objectifs. Une version obsolète produit un conflit explicite, sans écraser les données.
 
+![Programmes : ouvrir, modifier ou démarrer sa prochaine séance.](assets/screenshots/fr/sport-programs.png){ loading=lazy }
+
+*Programmes : ouvrir, modifier ou démarrer sa prochaine séance.*
+
+![Éditeur : définir exercices, séries et objectifs du programme.](assets/screenshots/fr/sport-editor.png){ loading=lazy }
+
+*Éditeur : définir exercices, séries et objectifs du programme.*
+
+![Séance : saisir et valider chaque série ; la suivante conserve les propositions.](assets/screenshots/fr/sport-training.png){ loading=lazy }
+
+*Séance : saisir et valider chaque série ; la suivante conserve les propositions.*
+
 ## Mensurations
 
 Dans **Mensurations**, ajouter un relevé daté : poids, masse grasse, cou, épaules, poitrine, taille, hanches, bras, cuisses et mollets gauche/droit. Un seul champ suffit. Un compte conserve un relevé actif par date ; les dates futures sont refusées selon le jour UTC du serveur. Modifier le relevé pour le compléter ou corriger une saisie. L’archivage retire le relevé des graphiques et reste réversible. Une restauration est refusée si un autre relevé actif utilise déjà cette date.
+
+![Mensurations : enregistrer un relevé daté et consulter son évolution.](assets/screenshots/fr/sport-measurements.png){ loading=lazy }
+
+*Mensurations : enregistrer un relevé daté et consulter son évolution.*
 
 ## Statistiques et score
 
@@ -85,6 +105,10 @@ Le `+ 1` permet de comparer les charges ou assistances nulles ; ces valeurs sont
 Un exercice entièrement non effectué a une performance nulle, y compris pour une mesure de vitesse avec une durée nulle. Avant qu’une référence valide existe, une séance comportant un tel exercice reste sans score (affiché « — ») ; elle apparaît bien dans l’historique et les statistiques. Une fois la référence établie, les exercices non effectués contribuent à zéro et une séance entièrement non effectuée vaut 0. Les séries omises n’ajoutent ni répétitions, ni volume, ni distance ; les métriques de vitesse continuent de comparer les seules mesures effectuées. Les anciens scores restent inchangés.
 
 Une référence n’est partagée que par les sessions d’un même programme, avec les mêmes identifiants d’exercices, types, ordre et nombres de séries. Changer les cibles ne change pas la famille. Changer la structure crée une autre référence. Les scores et leurs métriques sont enregistrés à la fin et ne sont pas recalculés rétroactivement. Aucun score n’est attribué à une session abandonnée.
+
+![Statistiques : consulter séances terminées, volumes et scores comparables.](assets/screenshots/fr/sport-statistics.png){ loading=lazy }
+
+*Statistiques : consulter séances terminées, volumes et scores comparables.*
 
 ## Conservation et limites
 
@@ -124,3 +148,7 @@ Le badge en haut à droite affiche votre niveau, titre et série. Ouvrez-le pour
 La [revue mobile et ordinateur du 17 novembre 2026](revue-sport-2026-11-17.md) inventorie les parcours testés et les améliorations proposées, dont le choix Liste / Grille. Elle décrit un plan d’amélioration ; ces propositions ne sont pas des fonctionnalités déjà livrées.
 
 Les préférences sont réunies dans les [réglages généraux](settings.md). Le lien Réglages de l’application ouvre sa section ; fuseau de progression et vacances se trouvent dans Général, jours d’utilisation dans chaque application.
+
+![Ouvrir Réglages pour adapter les préférences et les jours d’utilisation de cette application.](assets/screenshots/fr/sport-settings.png){ loading=lazy }
+
+*Ouvrir Réglages pour adapter les préférences et les jours d’utilisation de cette application.*

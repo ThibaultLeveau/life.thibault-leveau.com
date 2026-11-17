@@ -83,6 +83,10 @@ Les listes, le kanban et l’agenda partagent le même affichage : **Hier**, **A
 
 Les tâches terminées gardent une date neutre, sans alerte de retard. Les couleurs s’adaptent aux thèmes clair et sombre ; le sens ne repose pas uniquement sur la couleur.
 
+![Agenda : retrouver les échéances de tous ses espaces.](assets/screenshots/fr/tasks-agenda.png){ loading=lazy }
+
+*Agenda : retrouver les échéances de tous ses espaces.*
+
 ## Sections, listes et lignes
 
 **Ajouter une section** ouvre les réglages des sections. Choisir nom, couleur, description et visibilité :
@@ -101,6 +105,10 @@ La zone **Sans section** apparaît lorsqu’elle contient des tâches ou que l�
 Les **colonnes** sont les statuts : changer de ligne change la section ; changer de colonne change le statut. L'onglet Colonnes permet de créer, renommer, colorer et réordonner les statuts. Cocher « Les tâches de cette colonne sont terminées » définit le sens du statut, pas seulement son apparence.
 
 Un espace garde au moins une colonne ouverte et une terminée. Le type d'une colonne utilisée ne peut pas changer : créer la colonne voulue puis déplacer les tâches. Pour retirer une colonne utilisée, choisir un remplacement du même type ; cela préserve les résolutions existantes.
+
+![Liste : les sections regroupent les tâches et leurs échéances.](assets/screenshots/fr/tasks-list.png){ loading=lazy }
+
+*Liste : les sections regroupent les tâches et leurs échéances.*
 
 ## Créer et modifier une tâche
 
@@ -211,6 +219,10 @@ L'action **Déplacer et réordonner** dans les détails propose les mêmes régl
 
 Le clavier permet de parcourir les actions, de fermer un dialogue avec Échap et d'utiliser les flèches dans les onglets de réglages. Une poignée prend la tâche avec Espace, la déplace avec les flèches et la dépose avec Espace ; la commande de déplacement reste l'alternative précise, également sur mobile.
 
+![Tableau : les sections forment les lignes et les statuts les colonnes.](assets/screenshots/fr/tasks-board.png){ loading=lazy }
+
+*Tableau : les sections forment les lignes et les statuts les colonnes.*
+
 ## Affichage et filtres
 
 **Liste / Tableau** change la disposition. **Filtres** sélectionne statut, priorité, étiquette et échéance. La recherche porte sur le titre et la description (`Ctrl+K` ou `⌘K` donne le focus). **Afficher** choisit densité, tâches terminées et tri manuel, priorité ou échéance.
@@ -261,3 +273,7 @@ La vue À venir utilise une colonne centrée : les métadonnées restent sous le
 La navigation conserve Ajouter, À venir et Rechercher. Le bouton à trois points « Autres vues des tâches » donne accès à Toutes les tâches, Sans échéance et Archives des tâches. Échap referme le panneau ou le menu avec retour du focus. Les confirmations de clôture restent compactes et proposent Annuler ainsi qu’une fermeture, sans déplacer la liste.
 
 Les préférences sont réunies dans les [réglages généraux](settings.md). Le lien Réglages de l’application ouvre sa section ; fuseau de progression et vacances se trouvent dans Général, jours d’utilisation dans chaque application.
+
+![Ouvrir Réglages pour adapter les préférences et les jours d’utilisation de cette application.](assets/screenshots/fr/tasks-settings.png){ loading=lazy }
+
+*Ouvrir Réglages pour adapter les préférences et les jours d’utilisation de cette application.*

@@ -1,4 +1,4 @@
-.PHONY: install dev-db migrate dev-backend dev-frontend dev-docs check test test-ui test-container build docs docker-build deploy smoke
+.PHONY: install dev-db migrate dev-backend dev-frontend dev-docs check test test-ui test-container build docs docs-screenshots docker-build deploy smoke
 
 install:
 	uv sync --frozen --group docs
@@ -20,9 +20,10 @@ dev-docs:
 	uv run --group docs mkdocs serve --dev-addr 127.0.0.1:8101
 
 check:
-	uv run ruff check backend
-	uv run ruff format --check backend
+	uv run ruff check backend scripts/documentation.py
+	uv run ruff format --check backend scripts/documentation.py
 	npm --prefix frontend run typecheck
+	node --check frontend/scripts/capture-documentation.mjs
 	@for script in scripts/*.sh infrastructure/postgres/*.sh; do bash -n "$$script" || exit; done
 
 test:
@@ -40,6 +41,9 @@ build:
 
 docs:
 	uv run --group docs mkdocs build --strict
+
+docs-screenshots:
+	bash scripts/capture-documentation.sh
 
 docker-build:
 	docker build --build-arg REVISION=$$(git rev-parse HEAD) -t local/life:$$(git rev-parse HEAD) .

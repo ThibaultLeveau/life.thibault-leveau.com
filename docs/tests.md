@@ -138,3 +138,9 @@ La progression est couverte par `test_progression.py` (barèmes, niveaux, 180 qu
 ## Recettes et courses
 
 `test_recipes.py` couvre le catalogue FR/EN, ingrédients privés, décimaux/portions, cumul par unité, achats partiels, modèles, copie, archives, conflits, métriques/XP, contraintes SQL et garde de migration. `recipes.spec.ts` exerce les parcours interface/API, les erreurs réseau, les brouillons et le mode magasin sur ordinateur/mobile. Les parcours `navigation.spec.ts` incluent la parité du cadre partagé FR/EN et thèmes. Le test conteneur compare les six tables après restauration et vérifie le journal immuable ; le smoke test couvre routes HTML, API privée, documentation et OpenAPI.
+
+## Documentation et captures
+
+Chaque page française possède son équivalent anglais et appartient à un seul guide. La compilation stricte valide les liens ; le hook refuse les pages sans guide ni traduction. Les tests navigateur vérifient la navigation et la recherche limitées au guide et à la langue, les liens de traduction, les captures locales, le clavier/mobile et les anciennes URL.
+
+`make docs-screenshots` (ou `scripts/capture-documentation.sh`) compile l’interface, crée PostgreSQL et deux comptes fictifs jetables, lance un serveur de test sur loopback, capture les deux langues, puis supprime ses propres processus et conteneur. Installer Chromium Playwright et ses dépendances au préalable. Ne jamais utiliser les données de production. Le script Node exige une URL loopback explicite et un dossier temporaire pour son état de capture. Les images versionnées dans `docs/assets/screenshots/fr/` et `en/` ne contiennent aucune donnée personnelle réelle. Relire visuellement les captures, leur texte alternatif et leur légende traduits. Les commandes techniques de Swagger restent en anglais dans les deux captures.

@@ -10,6 +10,11 @@ Le thème **système / clair / sombre** et la langue **français / anglais** son
 
 Le **calendrier de progression** possède son propre fuseau IANA et les périodes de vacances communes. Cliquez sur **Enregistrer mon rythme** pour les conserver. Les vacances neutralisent les jours concernés sans créer d’activité ni supprimer les gains. Ces réglages sont disponibles même si Suivi est désactivé.
 
+
+![Réglages généraux : apparence, langue, fuseau de progression et vacances.](assets/screenshots/fr/general-settings.png){ loading=lazy }
+
+*Réglages généraux : apparence, langue, fuseau de progression et vacances.*
+
 ## Une section par application
 
 | Section | Réglages disponibles |
@@ -45,3 +50,7 @@ La page compose les API existantes, sans nouvelle table ni stockage métier dans
 | Objectifs OKR | `GET /api/v1/okr/settings`, `PUT /api/v1/okr/settings` (`expected_version`) |
 
 Les mutations nécessitent session, origine autorisée et jeton CSRF. Les routes métier exigent l’application active et le propriétaire. Voir les [exemples API](api.md), les [données](donnees.md) et la [sauvegarde/restauration](sauvegardes.md). La sauvegarde PostgreSQL existante conserve tous ces réglages ; cette interface ne nécessite aucune migration.
+
+![Réglages Sport : repos entre séries et jours d’utilisation.](assets/screenshots/fr/sport-settings.png){ loading=lazy }
+
+*Réglages Sport : repos entre séries et jours d’utilisation.*

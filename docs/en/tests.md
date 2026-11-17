@@ -1,0 +1,122 @@
+# Tests and quality
+
+## Required checks {#controles-obligatoires}
+
+From the repository root:
+
+```bash
+make install
+make check
+make test
+make build
+```
+
+Make check runs Ruff, Python formatting, TypeScript (UI/browser tests) and shell syntax. Make build compiles Vite and strict MkDocs. Exact dependencies are locked.
+
+## Python and PostgreSQL {#python-et-postgresql}
+
+Make test starts disposable PostgreSQL 17 on loopback, waits for readiness, runs pytest and removes container/anonymous volumes. With LIFE_TEST_DATABASE_URL it uses that test server and creates/removes a random schema. Missing database does not silently skip business tests. Never use production.
+
+Readiness checks TCP on 127.0.0.1: initialization may answer on a Unix socket before TCP is ready.
+
+```bash
+LIFE_TEST_DATABASE_URL=postgresql+psycopg://user:password@127.0.0.1:5432/test make test
+```
+
+Coverage includes explicit routing/missing files/HEAD/traversal/OpenAPI; initial migration and ORM schema parity; atomic CRUD/order/filter/pagination/preferences; hierarchy/cycles/ownership/archive/concurrent reparenting and creation-versus-archive; migration 0002 data preservation; agenda bounds/overdue/archives/owners/leap/year boundaries; completion/reopening/idempotence/cross-workspace snapshots; recurrence grammar/calendar/exclusions/DST/limits/parse-preview-create parity/undo/end/archive/conflicts/0004 constraints; parent/individual archives and status changes without false completion; SQL constraints/rollback/immutable events; concurrent completion with one winner; sessions/CSRF/origin/owner isolation/rate limiting/expiry/Secure cookies/password reset; no private search/input values in logs/errors.
+
+Routing tests use small synthetic artifacts and do not replace real-image validation.
+
+## Image, browser and backup {#image-navigateur-et-sauvegarde}
+
+```bash
+make docker-build
+(cd frontend && npx playwright install --with-deps chromium)
+make test-container
+```
+
+The script creates private networks, disposable PostgreSQL/web, a non-admin application role, packaged migrations and a synthetic account. Loopback HTTP uses a dynamic port. Runtime is read-only with production capability restrictions. Only test environment relaxes Secure cookies; HTTP tests verify production flags.
+
+Smoke checks cover public routes/database readiness, rejected anonymous access, bundles, MkDocs search and real 404s. Playwright covers forms, complete task lifecycle, row/column dragging, list ordering, themes, 320/375 px mobile, keyboard, cross-workspace movement and conflicts. Hierarchy scenarios cover subtree moves/root return/sibling order/mobile and parent-first restore with API/reload checks. Agenda covers multiple workspaces, saved periods/actions/API parity, list/board dates, local midnight/DST and failed saves. Compiled CSS colors are checked.
+
+The script restores a dump into a second disposable database, compares events/parents/preferences, verifies revoked sessions, removed obsolete objects and rollback after errors, then migrations/immutability. Cleanup removes only script-created resources.
+
+Scheduling browser tests cover immediate recognition/editor/quick-add, literal text, monthly exceptions, API persistence, completion/undo, mobile calendar keyboard/themes. Grammar tests cover written numbers/ordinals/lists/ranges/alternation/positions/bounds/exceptions, 120 permutations of independent clauses, cadence order, partial input, false positives and deterministic malformed vocabulary. HTTP tests check diagnostics, input bounds and CSRF. Browser tests include immediate incomplete saves, literal choice and mobile help.
+
+To target another local image:
+
+```bash
+LIFE_TEST_IMAGE=local/life:ma-validation make test-container
+```
+
+To rerun one suite on an existing **test** server:
+
+```bash
+LIFE_E2E_URL=http://127.0.0.1:8100 \
+LIFE_E2E_USERNAME=compte-test LIFE_E2E_PASSWORD=mot-de-passe-synthetique \
+npm --prefix frontend run test:e2e -- mobile-comfort.spec.ts
+```
+
+These scenarios create real data on the selected server, never production. Prefer make test-container for the full suite: it clears login-limit counters only in its disposable database between files, without weakening the production 30/IP/15-minute limit. Make test-ui does not reset a supplied server. Captures/traces stay ignored under frontend/test-results/, grouped by suite in container runs. Traces can contain cookies/data; only synthetic failure artifacts are uploaded by CI, retained seven days.
+
+## CI and review {#ci-et-revue}
+
+GitHub Actions runs checks, Python tests, builds, image construction and container acceptance. It never publishes. Wait for checks on the latest commit, record full review and resolve findings. Exact results belong in issue/PR. Automated Chromium is not testing every physical phone/browser; verify target compatibility when changing it.
+
+Mobile-comfort tests exercise long-list/board/agenda continuity after complete/reopen, slow/failed reads, filters/recurrence and field dimensions at 320/375 px in both themes. Simulated visualViewport shrinking covers quick-add, description/dialog, native moves, manual scrolling and intentional zoom. This tests integration, not real iPhone keyboard/automatic zoom. Desktop focus/sizes are checked.
+
+Settings scenarios create three sections through API, checking later name/description/add fields and delayed native scroll after keyboard resizing, field visibility below headers, user-scroll priority, resumed typing/draft retention and saved API values. WebKit can rerun the suite; it still does not replace a physical iPhone.
+
+Duplication/bulk tests cover independent history, early-completed recurrence, open/completed types, cross-workspace labels, order, archives/restore, authorization/CSRF and complete rollback on conflict/invalid calendar. Task-actions tests use real pointer/touch events for menus, rectangle, long hold/scroll, bulk/conflicts and mobile themes.
+
+## Applications and library {#applications-et-bibliotheque}
+
+Architecture tests validate folder contracts, unique IDs/routes, frontend/backend manifest parity and import boundaries. Application tests cover defaults/idempotence/owner/CSRF/strict booleans/SQL/migration and retained data. They enumerate every business route to prove disabled denial.
+
+Applications browser tests cover Home login, keyboard activation, persistence, empty Home, disabled direct access, reactivation with task/history, common theme, 320 px, network errors, external activation on foreground and expiry. Existing Tasks flows remain. Container restoration compares activation values; per-file phases reset only disposable login counters.
+
+## Sport {#sport}
+
+HTTP tests cover 680 exercises/ten types, measure validation, ownership/CSRF, snapshots/versions, set/rest lifecycle, comparable scores, measurements/archives, disabled routes, SQL constraints and upgrade/downgrade loss refusal. Browser tests cover API/UI parity, mobile/keyboard/errors/statistics/resume. Restore compares all five tables.
+
+Suggestion tests cover ten types, different set values, corrections, partial cancellation, undo, empty session, old snapshots, owner/program isolation, reordering/duplicates/types. Browser flows preserve neighboring drafts, real conflict/refresh, correction without restarting rest, ignored stale reads and rest across tabs. Measurements at 320/375/1440 px include touch/keyboard simulation, both themes and access to last controls.
+
+Set cards for all types are measured for long titles, aligned fields/buttons, touch targets, compact height, saved/draft states and keyboard corrections verified through API/reload. HYROX tests cover strict ISO/leap/null/omitted/past dates, session snapshots, versions/CSRF/ownership/archive/disable, migration round trip and refusal for dates in either table. Browser tests verify immediate branding/date, list/editor/catalogue/session, 320/1440 px/themes/keyboard/errors/reload, midnight/DST/event-day/past dates and contrast/overflow. Restore compares competition dates too.
+
+Program cards are measured at 320/375/1440 px, FR/EN/light/dark: compact mobile preview, equal HYROX/classic dimensions, aligned actions, 44 px targets, keyboard editing/start. Archives use the editor, protect drafts, recover from network/conflicts and retain exercises/notes/date through API. Captures use supplied catalogue exercises to avoid personal-name collisions in later suites.
+
+## French and English {#francais-et-anglais}
+
+HTTP tests cover fr/en preference/schema, sessions/CSRF/ownership, negotiation/concurrency, catalogue key/parameter parity, all 680 IDs, personal same-name exercises, unchanged snapshots/scores, activation and locale migration. English scheduling covers numbers/dates/cadences/bounds/exclusions/Unicode/diagnostics/literals/help.
+
+I18n browser tests verify anonymous/account language, relogin/theme, English Tasks, localized catalogue/personal data, programs/training/history, stale responses, drafts, mobile/keyboard/errors/expiry. Restore compares saved English preference.
+
+Navigation tests compare shared topbar/sidebar/links/footer across apps at 1440/1000/800/375/320 px, themes and FR/EN, API preferences, focused documentation links, library/logout, focus confinement/Escape/backdrop and mobile-desktop transitions.
+
+## Background Tasks interactions {#interactions-taches-en-arriere-plan}
+
+Task-sync tests deliberately hold write responses: multiple actions must render before release, then match API values/versions. Cover conflicts/errors/drafts, actions before creation receives a server ID, agenda/settings/mobile/keyboard/reduced motion. Existing tests wait for confirmed save before persistence assertions; optimistic rendering alone is insufficient evidence.
+
+No schema/API/recurrence/history changes accompany synchronization. Existing ownership/CSRF/backup/disable tests remain. Task-drag-input covers repeated Enter creation and focus with delayed writes, date errors, title/body dragging, empty sections/cells, cross-workspace drops, API dates/history, off-target drops/Escape/errors. Rectangle selection starts from background; touch scroll/long-hold tests remain.
+
+## Tracking and cross-app metrics {#suivi-et-metriques-inter-applications}
+
+Integration tests cover local/DST windows, net task completions/undo/manual reschedule/owner filters/disabled sources, Sport aggregations and missing observations. Tracking tests cover periods/strict types/scores/XP/versions/dated definitions/snapshots/archive/reenable/errors/SQL protections. Architecture validates optional providers/shared frame; activation tests enumerate the entire router.
+
+Tracking browser tests cover real API/UI empty/error states, zero/No/corrections, keyboard calendar at 320/390/1440 px, month/year, sources/settings/archive/restore/English/dark. Restore compares all five tables; captures use synthetic data only.
+
+Progression tests cover scales/levels/quests, concurrency/owners/calendars/DST/vacations/backfill, immutable journals and loss refusal, plus provider contracts. Browser flows cover live badge, keyboard panel, wall/filter/settings/draft/error/expiry and FR/EN/themes/320 px. Container acceptance imports twice idempotently, compares four tables and immutable rewards. Old-migration fixtures disable new attribution to isolate old invariants; 0010 tests use real rewards.
+
+## OKR Goals {#objectifs-okr}
+
+HTTP tests cover progressive detail, parents, month boundaries/leap dates, rising/falling results, order/concurrency, quarter closure timezone, snapshots/reopen/unique rewards, owner/activation/archives/SQL/migration/loss refusal. Common tests cover routes/manifests/providers/translations/quests. Browser tests cover guided API/UI flow, board/retrospective/Tracking, drafts/errors/mobile/keyboard. Shared navigation includes OKR. Restore compares three tables and immutable events. Publication tests use an isolated account.
+
+## Recipes and shopping {#recettes-et-courses}
+
+HTTP tests cover bilingual/private ingredients, decimals/servings/unit combination, partial purchases, templates/copies/archive/conflicts/metrics/XP/SQL/migration guard. Browser flows cover UI/API, network failures, drafts, desktop/mobile shopping. Shared navigation covers language/theme parity. Restore compares six tables/immutable journal; smoke covers public routes, private API rejection, guides and OpenAPI.
+
+## Documentation and screenshots {#documentation-et-captures}
+
+Every French page has an English counterpart and belongs to one guide. Strict builds validate links; guide hooks reject uncategorized/untranslated pages. Browser acceptance checks scoped navigation/search, translated chrome, language-equivalent links, local screenshots, mobile/keyboard and historical URLs.
+
+Run `scripts/capture-documentation.sh` to regenerate screenshots. It builds the app, creates disposable PostgreSQL and two demo accounts, starts a loopback test server, captures both languages and removes its own server/container. Playwright Chromium and its system dependencies must already be installed. Never point this fixture at production. The Node capture script accepts only an explicit loopback URL and dedicated documentation accounts; its seed state is temporary. Screenshots are versioned in docs/assets/screenshots/fr and en and contain no real account data. Review them visually and add localized alternative text/captions when updating guides. Swagger’s technical controls remain English in both captures.
