@@ -34,6 +34,7 @@ Routes live under `/api/v1/sport`, requiring session, owner and Sport activation
 | POST | `/measurements` | Dated record with at least one measure |
 | PUT | `/measurements/{uuid}` | Replace with expected_version |
 | PUT | `/measurements/{uuid}/archive` | Archive/restore |
+| POST | `/scores/backfill` | Repair only this account’s missing scores; no body; idempotent |
 | GET | `/statistics` | Inclusive since/until, one year default, ten years maximum; exercise_id,workout_id,baseline_id |
 
 Program entries accept only `{exercise_id,sets,target}`. Targets are optional; confirmed set values require every measure specified by `/kinds`. Entry/set indices start at **0**. Supplied exercise IDs are stable strings; private objects use UUIDs. Entry order is program order. Returned snapshot names/types are display-only, not write fields.
@@ -42,7 +43,7 @@ Training entries also expose zero-indexed suggested_values, e.g. weight/reps per
 
 At start, the server finds retained results for the same owner/program/exercise/type, newest completed/cancelled session first. Reordered exercises still match; duplicates match by occurrence rank. Undone, missing or skipped sets do not replace older values. Suggestions are frozen in the snapshot, without changing targets, performed sets, scores, dates or rest. For a new set lacking history, clients may suggest the preceding performed set in the current session, then target. Confirmation always requires explicit PUT, expected version and all required values.
 
-Responses include UTC server_now/rest_until; display max(0, rest_until − server_now − elapsed since response). Corrections preserve completed_at and do not restart rest. Snapshot data/dates survive program edits/archives. Ended sessions are API-immutable; results, metrics, score and baseline_id remain readable. [Score formulas/limits](sport.md#statistics-and-score) apply to independent clients too.
+Responses include UTC server_now/rest_until; display max(0, rest_until − server_now − elapsed since response). Corrections preserve completed_at and do not restart rest. Snapshot data/dates survive program edits/archives. Ended session results are API-immutable; explicit repair may only fill a missing score. Results, metrics, score and baseline_id remain readable. [Score formulas/limits](sport.md#statistics-and-score) apply to independent clients too.
 
 Reads create neither objects nor catalogue copies. Writes are atomic and serialized per owner. On conflicts, reread/reconcile rather than blindly replacing the expected version.
 
@@ -52,7 +53,7 @@ PUT finish with completed outcome works even with no confirmed sets. Within one 
 
 `SetResultValues` permits zero. Input `Values` retains positive repetitions, duration, distance and calories for manual confirmations/targets. skipped is a server-only response field, never sent in set PUTs. Unconfirmed sets become zero even if a nonzero target/suggestion was displayed.
 
-Completed_sessions includes such sessions; total_sets counts only performed sets. Zeros add no volume/distance or suggestions. An entirely omitted exercise has zero metric. Baseline is the first same-program/signature completed session with a positive metric for every exercise. Without one, an exercise at zero leaves score/baseline null. With a baseline, an entirely skipped session scores zero. Previous scores are unchanged; graphs exclude null.
+`completed_sessions` includes these sessions; `total_sets` counts performed sets only. Skipped sets add no volume/distance or suggestions. Every new completed session receives a numeric v2 score, **0** if empty. `score_details` exposes version (2), planned/completed sets, `completion_percent`, `difficulty_percent` (null if empty) and `score`. `metrics[].scoring` stores per-set references (`values`, `sources`: `target`, `history`, `initial`), counts and the unrounded sum of effort ratios. Raw metrics stay unchanged. `baseline_id` points to the first v2 family session, even an empty one; that root has `baseline_id: null`. The [guide](sport.md#statistics-and-score) defines formulas and references. Existing numeric scores stay unchanged with `score_details: null` in a separate family.
 
 Cancelled outcome adds no sets and retains no-score/no-statistics behavior. Session/activation/owner/CSRF/version remain mandatory. Repeating finish after ending returns **409** without adding results/changing history.
 
@@ -99,7 +100,7 @@ with httpx.Client(base_url=base + '/api/v1', headers={'Origin': base}) as client
     })
     print(result['sets'][1]['values']['reps'])  # 0: second set not confirmed
     assert result['sets'][1]['skipped'] is True
-    print(result['score'])  # 100 : cet exercice a une performance positive
+    print(result['score'])  # Realized effort relative to references and planned sets
     print(request('GET', '/sport/statistics')['completed_sessions'])
     next_training = request('POST', '/sport/sessions', json={
         'workout_id': workout['id'], 'expected_version': workout['version'],
@@ -202,3 +203,14 @@ if page['items']:
 The completion response exposes `awarded_xp`: session XP actually recorded in its transaction, **excluding quest bonuses**. A cancelled/empty session awards zero. Later reads return null for this field; the permanent journal and totals remain available through the common progression API. It is neither a score nor an estimated total difference.
 
 Statistics filter sessions by exercise, program or baseline as well as period. Counters cover those sessions; measurements still cover the whole period. `baselines` provides `{id,name,started_at,exercise_count}` for selected sessions’ baselines, even outside the period. Repeated exercise occurrences remain separate metrics in entry order. Heterogeneous measures are never implicitly combined.
+
+## Repair missing scores {#reparer-les-scores-manquants}
+
+`POST /api/v1/sport/scores/backfill`, without a body, computes scores **only** for this account’s `completed` sessions with null `score`. The response is `{"updated_sessions": 2}` (count varies). Repeating it returns zero. Session, CSRF/origin, enabled Sport and the owner lock apply. References are reconstructed in finish/id order from saved snapshots, never future results. Older snapshots without suggestions use targets then initial calibration.
+
+```bash
+curl --fail --request POST "$BASE/api/v1/sport/scores/backfill" \
+  --cookie cookies.txt --header "X-CSRF-Token: $CSRF"
+```
+
+The transaction preserves sets, dates, notes, versions, existing numeric scores, raw metrics and progression. Only score, baseline and calculation details of repaired sessions are saved. Detail/history/statistics GETs then expose the same values; reads never trigger repair. Back up before a production repair; see [deployment](deploiement.md#livraison-du-score-sport-v2).

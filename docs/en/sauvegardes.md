@@ -169,3 +169,9 @@ The Tasks UX delivery retains 0013_recipe_units and existing tables. Search/work
 Back up before `0014_sport_ux`. It adds view/version preferences and preparation snapshots without rewriting existing results. Full dumps preserve all five Sport tables and the common progression journal; restoration tests compare every field, including new columns. No additional service, volume or secret.
 
 Downgrade to 0013_recipe_units refuses any saved view preference, explicit context or nonempty preparation snapshot. Without new data it removes columns while preserving sets, dates, scores and rest. Old-image readiness rejects the new revision: prefer a forward fix; otherwise restore a compatible dump and image using this guide’s transaction procedure. Never delete preferences/notes to bypass loss protection. Restoration revokes login sessions, preserves training sessions/deadlines and is verified through the API after signing in again.
+
+## Sport score v2 {#score-sport-v2}
+
+SQL revision stays `0013_recipe_units`. The calculation adds `scoring` to existing metrics JSONB without changing raw measurements. PostgreSQL dump/transactional restore retains references, provenance, counts, scores and roots; container acceptance compares all Sport tables after creating partial/empty v2 sessions. Existing numeric v1 scores remain unchanged.
+
+Back up before deployment and targeted missing-score repair. Repair preserves sets, dates, notes, versions and rewards; repeating it has no effect. Returning to the previous image is **incompatible** despite the unchanged SQL schema: it rejects unknown JSON fields and could use an empty v2 session as a reference denominator. Prefer a forward fix; restoration needs a compatible dump/image, stopped writes and consideration of data created since backup. Do not delete calculation details to bypass this restriction.

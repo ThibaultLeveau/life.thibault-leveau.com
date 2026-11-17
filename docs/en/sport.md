@@ -81,26 +81,38 @@ Add a dated record with weight, body fat, neck, shoulders, chest, waist, hips, l
 
 **Statistics** shows completed sessions, including incomplete ones, actually performed sets (excluding unperformed sets), actual lifted volume (kg × reps) and total distance. Choose a period, body measurement, exercise and program baseline. Charts include an accessible data table. The horizontal axis follows observations in chronological order; spacing represents elapsed time. Tap points or use Tab and arrow/Home/End keys to inspect values; Escape dismisses the reading. The period includes both endpoint dates, uses UTC training dates, defaults to one year and is limited to ten years.
 
-The first completed session of a program with a positive performance for every exercise scores **100** and becomes the baseline. Later sessions compare each exercise’s current performance with that baseline and average the ratios × 100, giving every exercise equal weight. Scores of 120 or 80 represent an average increase or decrease of 20% according to those measurements. The score does not assess health, technique or perceived difficulty.
+The **v2 score** is available from the first completed session, including partial sessions. Every planned set has equal weight; an unperformed set contributes zero. Session details show the score, **completion** (confirmed / planned sets) and **relative difficulty** (average measured effort of performed sets compared with their references).
 
-| Type | Compared performance |
+```text
+set ratio = performed effort / reference effort
+score = 100 × sum of performed set ratios / number of planned sets
+      = completion (%) × relative difficulty (%) / 100
+```
+
+Calculations use unrounded values; displayed scores and percentages are rounded to two decimals. Completing 3 of 4 sets at 120% of reference effort gives **90 points**. An empty session scores **0**, with difficulty unavailable (“—”). Completion counts confirmed sets: fewer reps in a confirmed set reduce its relative effort. Scores may exceed 100; there is no overall cap.
+
+| Type | Effort or ratio per set |
 | --- | --- |
-| Weight and repetitions | sum of `(weight + 1) × reps` |
-| Repetitions | total reps |
-| Assistance | sum of `reps / (assistance + 1)` |
-| Duration | total duration |
-| Distance and duration | total distance / total duration, m/s |
-| Weight and distance | sum of `(weight + 1) × distance` |
-| Weight and duration | sum of `(weight + 1) × duration` |
-| Timed repetitions | total reps / total duration × 60 |
-| Distance only | total distance |
-| Energy and duration | total displayed energy / total duration × 60 |
+| Weight and reps | `(weight + 1) × reps` |
+| Reps | reps |
+| Assistance | `reps / (assistance + 1)` |
+| Duration | duration |
+| Weight and distance | `(weight + 1) × distance` |
+| Weight and duration | `(weight + 1) × duration` |
+| Distance | distance |
+| Distance and duration | distance ratio × `min(1.5, square root of speed ratio)` |
+| Timed reps | rep ratio × `min(1.5, square root of cadence ratio)` |
+| Energy and duration | displayed calorie ratio × `min(1.5, square root of rate ratio)` |
 
-The `+ 1` supports zero weight or assistance; these comparison points differ from actual lifted volume. Higher speed over a shorter distance may increase the cardio score, so also check distance. Longer stretching duration does not imply better health results.
+Ratios compare performed and reference quantities in the same unit. Pace is quantity / duration. Half the distance at the same speed earns 50%; at twice the speed, about 70.71%; even at extreme speed, no more than 75%. This rewards volume while moderating the pace bonus. The `+ 1` supports zero weight/assistance; comparison points differ from actual lifted volume.
 
-An entirely unperformed exercise has zero performance, including speed metrics with zero duration. Until a valid baseline exists, a session containing such an exercise has no score (shown as “—”), while remaining in history and statistics. Once the baseline exists, unperformed exercises contribute zero and an entirely unperformed session scores 0. Skipped sets add no reps, volume or distance; speed metrics still compare the measurements actually performed. Earlier scores remain unchanged.
+**Frozen references per set and measurement.** A new score family uses the snapshot target, otherwise that set’s suggested historical result (including performed results from cancelled sessions), otherwise its initial performed value. For an omitted set, it uses the average of the exercise’s performed sets when available. **Score references** shows each source. Without values, a field stays unknown until a later performance; skipped sets never create a zero denominator. Partial targets can use history or initial calibration for missing fields.
 
-Only sessions of the same program with identical exercise IDs, types, order and numbers of sets share a baseline. Changing targets preserves the comparison family; changing structure creates another. Scores and metrics are saved at completion and are not recalculated retroactively. Language changes only how default exercise names and units are presented, never results or baseline identity.
+Known references remain fixed for the same program, exercise IDs/types/order and set counts. Editing targets does not replace established references. Changing the structure creates a new family. Without targets or history, initial difficulty is calibrated from your results; it does not compare your fitness with a population norm.
+
+**Historical compatibility.** Previously recorded scores remain unchanged and are labelled historical. They use separate charts and cannot share a Tracking aggregation with the new family. An [explicit API repair](sport-api.md#reparer-les-scores-manquants) fills missing scores of older completed sessions without changing sets, dates, notes, versions or rewards. Reads never write history. Active and cancelled sessions remain unscored. New scores are saved in the completion transaction.
+
+The score describes **relative measured effort**, not technique, perceived exertion, health or comparisons across people or programs. Raw exercise-chart metrics (volume, reps, duration, distance and pace) stay unchanged: v2 adds a volume-and-pace calculation without mixing physical units.
 
 ![Statistics: review completed sessions, volume and comparable scores.](../assets/screenshots/en/sport-statistics.png){ loading=lazy }
 

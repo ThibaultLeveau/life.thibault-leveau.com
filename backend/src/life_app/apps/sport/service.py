@@ -12,6 +12,7 @@ from sqlalchemy.orm import object_session
 
 from life_app.apps.sport import models as m
 from life_app.apps.sport import schemas as s
+from life_app.apps.sport import scoring
 from life_app.apps.sport.catalogue import (
     BY_ID,
     catalogue,
@@ -151,8 +152,9 @@ def training_output(item):
         **{
             key: getattr(item, key, None)
             for key in s.TrainingOutput.model_fields
-            if key != "server_now"
+            if key not in {"server_now", "score_details"}
         },
+        score_details=scoring.summarize(item.metrics),
         server_now=utcnow(),
     )
     output.entries = [
@@ -333,7 +335,7 @@ def metrics(item):
                 reps=sum(v.get("reps", 0) for v in values),
                 distance_m=sum(v.get("distance_m", 0) for v in values),
                 duration_seconds=sum(v.get("duration_seconds", 0) for v in values),
-            ).model_dump()
+            ).model_dump(exclude_none=True)
         )
     return result
 
@@ -356,36 +358,11 @@ def finish(db, user, id, payload):
             for j in range(entry["sets"])
         ]
         item.metrics = metrics(item)
-        baseline = db.scalar(
-            select(m.Training)
-            .where(
-                m.Training.owner_id == user.id,
-                m.Training.workout_id == item.workout_id,
-                m.Training.signature == item.signature,
-                m.Training.status == "completed",
-                # The earliest scored session has positive metrics for every
-                # exercise, so it provides valid denominators for future scores.
-                m.Training.score.is_not(None),
-            )
-            .order_by(m.Training.finished_at, m.Training.id)
-            .limit(1)
-        )
-        item.baseline_id = baseline.id if baseline else None
-        item.score = (
-            round(
-                100
-                * sum(
-                    current["value"] / reference["value"]
-                    for current, reference in zip(item.metrics, baseline.metrics, strict=True)
-                )
-                / len(item.metrics),
-                2,
-            )
-            if baseline
-            else 100.0
-            if all(metric["value"] > 0 for metric in item.metrics)
-            else None
-        )
+        # Keep the row valid if the reference query triggers an autoflush.
+        item.status = "completed"
+        item.finished_at = finished_at
+        item.rest_until = None
+        score_training(db, item)
     item.status = payload.outcome
     item.finished_at = finished_at
     item.rest_until = None
@@ -395,6 +372,45 @@ def finish(db, user, id, payload):
 
     item.awarded_xp = record_completion(db, user, item)
     return item
+
+
+def score_training(db, item):
+    previous = db.scalar(
+        select(m.Training)
+        .where(
+            m.Training.owner_id == item.owner_id,
+            m.Training.workout_id == item.workout_id,
+            m.Training.signature == item.signature,
+            m.Training.status == "completed",
+            m.Training.metrics[0]["scoring"]["version"].as_integer() == 2,
+            tuple_(m.Training.finished_at, m.Training.id) < (item.finished_at, item.id),
+        )
+        .order_by(m.Training.finished_at.desc(), m.Training.id.desc())
+        .limit(1)
+    )
+    details = scoring.calculate(item.entries, item.sets, previous.metrics if previous else ())
+    item.metrics = [
+        {**metric, "scoring": detail} for metric, detail in zip(item.metrics, details, strict=True)
+    ]
+    item.baseline_id = (previous.baseline_id or previous.id) if previous else None
+    item.score = scoring.summarize(item.metrics)["score"]
+
+
+def backfill_scores(db, user):
+    """Explicit, idempotent repair of missing scores; never changes results or rewards."""
+    missing = db.scalars(
+        select(m.Training)
+        .where(
+            m.Training.owner_id == user.id,
+            m.Training.status == "completed",
+            m.Training.score.is_(None),
+        )
+        .order_by(m.Training.finished_at, m.Training.id)
+    ).all()
+    for item in missing:
+        score_training(db, item)
+        db.flush()
+    return s.ScoreBackfill(updated_sessions=len(missing))
 
 
 def measurement_output(item):

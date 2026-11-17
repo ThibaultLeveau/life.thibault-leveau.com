@@ -267,3 +267,9 @@ Publish validated main through `scripts/deploy.sh` with its normal backup. No SQ
 Publish validated main using `scripts/deploy.sh`, with backup before additive migration `0014_sport_ux`. No additional service, secret or dependency. View preferences, explicit context and frozen notes require the [rollback constraints](sauvegardes.md#migration-0014-finition-sport); older images reject this revision.
 
 On an isolated synthetic account, verify list/grid per format, search/return, program copy, exercise selection, set entry/resume, rest ±15 seconds, completion summary, history, measurements/charts and presets at `/settings?application=sport`. Check drafts/conflicts, language/theme and 320 px; disable/re-enable Sport and verify preservation. Compare running SHA, revision, probes, public HTTPS Sport/settings and FR/EN guides. Record backup, SHA and results in issue #74 without using personal data.
+
+## Deploying Sport score v2 {#livraison-du-score-sport-v2}
+
+After checks, self-review, CI and merge, publish with `scripts/deploy.sh` and its normal backup. No new SQL migration, dependency or variable (`0013_recipe_units`). Respect [image compatibility](sauvegardes.md#score-sport-v2). For the affected account, run `POST /api/v1/sport/scores/backfill` after deployment, record the repaired count and confirm a second call returns zero. This targeted repair must not modify other accounts.
+
+On a synthetic account, verify first partial session, entirely omitted exercise, empty session (0), relative difficulty for weight/distance/pace, references, history/statistics, FR/EN, 320 px and keyboard. Check API `score_details`, frozen references, next-session suggestions and preserved results. Verify actual SHA, probes, OpenAPI, `/sport` and FR/EN guides over HTTPS; record backup, repair and results in the issue.

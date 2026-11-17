@@ -281,9 +281,11 @@ test("Sport : bibliothèque, séance mixte, repos, mensurations et statistiques 
     { headers, data: { expected_version: next.version, outcome: "completed" } },
   );
   expect(completed.ok()).toBeTruthy();
-  expect((await completed.json()).score).toBe(120);
+  expect((await completed.json()).score).toBe(117.39);
   await page.reload();
-  await expect(page.locator(".sport-history-row").first()).toContainText("120");
+  await expect(page.locator(".sport-history-row").first()).toContainText(
+    "117,39",
+  );
 
   await tab(page, "Mensurations");
   await page.getByRole("button", { name: "Nouveau relevé" }).click();
@@ -994,6 +996,11 @@ for (const locale of ["fr", "en"] as const) {
         await page.request.get(`/api/v1/sport/sessions/${training.id}`)
       ).json();
       expect(saved.status).toBe("completed");
+      expect(saved.score).toBe(33.33);
+      expect(saved.score_details).toMatchObject({
+        completion_percent: 33.33,
+        difficulty_percent: 100,
+      });
       expect(saved.sets[0]).toEqual(before.sets[0]);
       expect(saved.sets.map((s) => s.skipped)).toEqual([false, true, true]);
       expect(saved.sets.map((s) => s.values.reps)).toEqual([10, 0, 0]);
@@ -1005,6 +1012,30 @@ for (const locale of ["fr", "en"] as const) {
         .filter({ hasText: workout.name })
         .click();
       const detail = page.getByRole("dialog", { name: workout.name });
+      await expect(
+        detail.locator(".sport-summary").first().locator("strong").nth(2),
+      ).toHaveText(locale === "fr" ? "33,33" : "33.33");
+      const breakdown = detail.locator(".sport-summary[aria-label]");
+      await expect(breakdown.locator("strong").nth(0)).toHaveText(
+        locale === "fr" ? "33,33 %" : "33.33 %",
+      );
+      await expect(breakdown.locator("strong").nth(1)).toHaveText("100 %");
+      await detail.screenshot({
+        path: test.info().outputPath(`score-summary-${locale}.png`),
+      });
+      const explanation = detail.locator(".sport-score-explained summary");
+      await explanation.focus();
+      await page.keyboard.press("Enter");
+      await expect(detail.locator(".sport-score-explained")).toHaveAttribute(
+        "open",
+        "",
+      );
+      await detail.locator(".sport-score-references summary").click();
+      await expect(detail.locator(".sport-score-references li")).toHaveCount(3);
+      await page.screenshot({
+        path: test.info().outputPath(`score-partiel-${locale}.png`),
+        fullPage: true,
+      });
       await expect(
         detail
           .locator(".sport-plan-entry p")
@@ -1052,7 +1083,7 @@ for (const locale of ["fr", "en"] as const) {
       expect(
         empty.sets.every((s) => s.skipped && s.values.reps === 0),
       ).toBeTruthy();
-      // A new program with no performed exercise has no score or false zero chart point.
+      // Even a new program with no performed exercise has a real zero score.
       const unperformed = await weightedTraining(page, 1);
       await page.goto("/sport?tab=training");
       await finishButton.click();
@@ -1075,7 +1106,7 @@ for (const locale of ["fr", "en"] as const) {
               locale === "fr" ? "Score de l’entraînement" : "Training score",
           })
           .locator("strong"),
-      ).toHaveText("—");
+      ).toHaveText("0");
       await page.keyboard.press("Escape");
       await page.goto("/sport?tab=statistics");
       const baselines = page.getByRole("combobox", {
@@ -1089,7 +1120,22 @@ for (const locale of ["fr", "en"] as const) {
         baselines
           .locator("option")
           .filter({ hasText: unperformed.workout.name }),
-      ).toHaveCount(0);
+      ).toHaveCount(1);
+      const emptyOption = baselines
+        .locator("option")
+        .filter({ hasText: unperformed.workout.name });
+      await baselines.selectOption((await emptyOption.getAttribute("value"))!);
+      await expect(
+        page
+          .locator(".sport-chart")
+          .filter({
+            has: page.getByRole("heading", {
+              name:
+                locale === "fr" ? "Score de l’entraînement" : "Training score",
+            }),
+          })
+          .locator(".sport-tag"),
+      ).toHaveText("0 points");
     } finally {
       await page.request.put("/api/v1/preferences", {
         headers,
@@ -1098,6 +1144,71 @@ for (const locale of ["fr", "en"] as const) {
     }
   });
 }
+
+test("Sport : premier score avec un exercice entièrement omis", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 740 });
+  const entries = [];
+  for (const kind of ["weight_reps", "distance_duration"]) {
+    const catalog: ExercisePage = await (
+      await page.request.get(`/api/v1/sport/exercises?kind=${kind}&limit=1`)
+    ).json();
+    entries.push({
+      exercise_id: catalog.items[0].id,
+      sets: 1,
+      target:
+        kind === "weight_reps"
+          ? { weight_kg: 49, reps: 10 }
+          : { distance_m: 1000, duration_seconds: 300 },
+    });
+  }
+  const response = await page.request.post("/api/v1/sport/workouts", {
+    headers,
+    data: { name: `Score exercice omis ${Date.now()}`, entries },
+  });
+  expect(response.ok()).toBeTruthy();
+  const program: Workout = await response.json();
+  let session: Training = await (
+    await page.request.post("/api/v1/sport/sessions", {
+      headers,
+      data: { workout_id: program.id, expected_version: program.version },
+    })
+  ).json();
+  session = await (
+    await page.request.put(`/api/v1/sport/sessions/${session.id}/sets/0/0`, {
+      headers,
+      data: {
+        expected_version: session.version,
+        values: { weight_kg: 59, reps: 10 },
+      },
+    })
+  ).json();
+  await page.goto("/sport?tab=training");
+  await page
+    .getByRole("button", { name: "Terminer l’entraînement", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Enregistrer les résultats", exact: true })
+    .click();
+  const row = page
+    .locator(".sport-history-row")
+    .filter({ hasText: program.name });
+  await expect(row.locator(".sport-score")).toContainText("60");
+  await row.click();
+  const detail = page.getByRole("dialog", { name: program.name });
+  const breakdown = detail.locator(".sport-summary[aria-label]");
+  await expect(breakdown.locator("strong").nth(0)).toHaveText("50 %");
+  await expect(breakdown.locator("strong").nth(1)).toHaveText("120 %");
+  await expect(detail.locator(".sport-plan-entry").nth(1)).toContainText(
+    "Non effectuée",
+  );
+  const saved: Training = await (
+    await page.request.get(`/api/v1/sport/sessions/${session.id}`)
+  ).json();
+  expect(saved.score).toBe(60);
+  expect(saved.metrics[1].value).toBe(0);
+});
 
 test("Sport : réponse obsolète, déconnexion et erreur de chargement", async ({
   page,

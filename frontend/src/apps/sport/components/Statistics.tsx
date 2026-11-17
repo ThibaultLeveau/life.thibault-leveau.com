@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { tr } from "../i18n";
+import { ScoreExplanation } from "./ScoreExplanation";
 import { sportApi } from "../api";
 import { useSportSettings } from "../preferences";
 import { queryString, useSportQuery, type SportNavigate } from "../navigation";
@@ -487,25 +488,14 @@ export function Statistics({
               }))}
             emptyAction={chartAction}
           />
-          <details className="sport-score-explained">
-            <summary>{tr("how_is_the_score_calculated")}</summary>
-            <p>
-              {tr("the_first_completed_session_of_a_program_scores_100_later")}
-            </p>
-            <p>
-              {tr("only_sessions_of_the_same_program_with_the_same_exercises")}
-            </p>
-            <ul>
-              {kinds.map((kind) => (
-                <li key={kind.id}>
-                  <strong>{kind.name} :</strong> {kind.metric}.
-                </li>
-              ))}
-            </ul>
-            <p>
-              {tr("the_1_allows_comparisons_when_weight_or_assistance_is_zero")}
-            </p>
-          </details>
+          <ScoreExplanation
+            legacy={
+              stats.sessions.find(
+                (session) =>
+                  (session.baseline_id ?? session.id) === baseline?.id,
+              )?.score_details == null
+            }
+          />
         </>
       )}
     </>
