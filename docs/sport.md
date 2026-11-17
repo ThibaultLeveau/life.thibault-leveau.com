@@ -65,26 +65,38 @@ Dans **Mensurations**, ajouter un relevé daté : poids, masse grasse, cou, épa
 
 **Statistiques** présente les sessions terminées, même incomplètes, le nombre de séries réellement validées (hors séries non effectuées), le volume réellement soulevé (kg × répétitions) et la distance totale. Choisir la période, une mensuration, un exercice et un programme et sa référence de comparaison. Les graphiques proposent aussi un tableau de valeurs, utilisable au clavier et par lecteur d’écran. L’axe horizontal suit les observations dans leur ordre chronologique ; leur espacement n’exprime pas une durée. La période est inclusive et utilise les dates UTC des entraînements, sur un an par défaut et dix ans au maximum.
 
-Le score est un indicateur descriptif, **pas une note de santé ou de technique**. La première session terminée d’un programme avec une performance positive pour chaque exercice vaut **100** et devient la référence. Les suivantes calculent, pour chaque exercice, le rapport entre la performance actuelle et la référence, puis la moyenne de ces rapports × 100. Chaque exercice a le même poids. Par exemple, 120 et 80 représentent une progression ou une baisse moyenne de 20 % selon ces mesures.
+Le score **v2** est calculé dès la première séance terminée, même partielle. Chaque série prévue a le même poids ; une série non effectuée contribue zéro. Le détail affiche le score, la **complétion** (séries confirmées / prévues) et la **difficulté relative** (effort moyen des séries réalisées par rapport aux références).
 
-| Type | Performance comparée |
+```text
+rapport de série = effort réalisé / effort de référence
+score = 100 × somme des rapports des séries réalisées / nombre de séries prévues
+      = complétion (%) × difficulté relative (%) / 100
+```
+
+Les calculs utilisent les valeurs non arrondies ; seuls le score et les pourcentages affichés sont arrondis à deux décimales. Ainsi, 3 séries sur 4 à 120 % de l’effort de référence donnent **90 points**. Une séance vide vaut **0**, avec une difficulté non mesurable (« — »). La complétion compte les séries confirmées : une série avec moins de répétitions est confirmée mais son effort relatif diminue. Le score peut dépasser 100 ; il n’est pas plafonné globalement.
+
+| Type | Effort ou rapport par série |
 | --- | --- |
-| Charge et répétitions | somme de `(charge + 1) × répétitions` |
-| Répétitions | somme des répétitions |
-| Assistance | somme de `répétitions / (assistance + 1)` |
-| Durée | durée totale |
-| Distance et durée | distance totale / durée totale (m/s) |
-| Charge et distance | somme de `(charge + 1) × distance` |
-| Charge et durée | somme de `(charge + 1) × durée` |
-| Répétitions chronométrées | répétitions totales / durée totale × 60 |
-| Distance seule | distance totale |
-| Énergie et durée | énergie affichée totale / durée totale × 60 |
+| Charge et répétitions | `(charge + 1) × répétitions` |
+| Répétitions | répétitions |
+| Assistance | `répétitions / (assistance + 1)` |
+| Durée | durée |
+| Charge et distance | `(charge + 1) × distance` |
+| Charge et durée | `(charge + 1) × durée` |
+| Distance seule | distance |
+| Distance et durée | rapport de distance × `min(1,5 ; racine(rapport de vitesse))` |
+| Répétitions chronométrées | rapport de répétitions × `min(1,5 ; racine(rapport de cadence))` |
+| Énergie et durée | rapport de calories affichées × `min(1,5 ; racine(rapport de débit))` |
 
-Le `+ 1` permet de comparer les charges ou assistances nulles ; ces valeurs sont des points de comparaison, distincts du volume réel en kg. Une vitesse supérieure sur une distance plus courte peut augmenter le score cardio : consulter aussi les distances. Une durée d’étirement plus longue ne signifie pas un meilleur exercice pour la santé.
+Les rapports comparent toujours la réalisation à sa référence dans la même unité. Pour les types chronométrés, allure = quantité / durée. Une demi-distance à la même vitesse vaut 50 % ; à vitesse double, environ 70,71 % ; même à très grande vitesse, au plus 75 %. Cela valorise la distance et modère le bonus d’allure. Le `+ 1` permet les charges/assistances nulles ; ce sont des points de comparaison, distincts du tonnage réel.
 
-Un exercice entièrement non effectué a une performance nulle, y compris pour une mesure de vitesse avec une durée nulle. Avant qu’une référence valide existe, une séance comportant un tel exercice reste sans score (affiché « — ») ; elle apparaît bien dans l’historique et les statistiques. Une fois la référence établie, les exercices non effectués contribuent à zéro et une séance entièrement non effectuée vaut 0. Les séries omises n’ajoutent ni répétitions, ni volume, ni distance ; les métriques de vitesse continuent de comparer les seules mesures effectuées. Les anciens scores restent inchangés.
+**Références figées par série et mesure.** Au début d’une famille de score, utiliser l’objectif de l’instantané, sinon la proposition historique de cette série (y compris les résultats réellement réalisés lors d’un abandon), sinon sa première valeur réalisée. Pour une série omise, utiliser la moyenne des autres séries réalisées de cet exercice si disponible. La provenance apparaît dans **Références du score**. Sans aucune valeur, le champ reste inconnu et se complète lors d’une réalisation suivante ; une série omise ne crée jamais de dénominateur nul. Une cible partielle peut donc être complétée avec l’historique ou la calibration initiale.
 
-Une référence n’est partagée que par les sessions d’un même programme, avec les mêmes identifiants d’exercices, types, ordre et nombres de séries. Changer les cibles ne change pas la famille. Changer la structure crée une autre référence. Les scores et leurs métriques sont enregistrés à la fin et ne sont pas recalculés rétroactivement. Aucun score n’est attribué à une session abandonnée.
+Les références connues sont réutilisées pour le même programme, identifiants/types/ordre d’exercices et nombres de séries. Modifier les objectifs ne modifie pas les références déjà établies. Changer la structure démarre une autre famille. Sans cible ni historique, la difficulté initiale est calibrée à partir des résultats : elle ne compare pas votre niveau à une norme sportive.
+
+**Compatibilité historique.** Les scores déjà enregistrés avec l’ancienne formule restent inchangés et identifiés comme historiques. Ils ne partagent pas le graphique ni une agrégation Suivi avec la nouvelle famille. Les anciennes séances terminées sans score peuvent être réparées par l’[opération API explicite](sport-api.md#reparer-les-scores-manquants), sans changer séries, dates, notes, version ou récompenses. Les lectures n’effectuent aucune écriture. Les sessions actives et abandonnées restent sans score. Une nouvelle séance termine son calcul dans la transaction de fin.
+
+Le score décrit un **effort mesuré relatif**, pas la technique, le ressenti, la santé ni une comparaison entre personnes ou programmes. Les métriques brutes des graphiques par exercice (tonnage, répétitions, durée, distance et vitesse/cadence) restent inchangées : le score v2 ajoute sa propre combinaison du volume et de l’allure, sans mélanger des unités physiques.
 
 ## Conservation et limites
 

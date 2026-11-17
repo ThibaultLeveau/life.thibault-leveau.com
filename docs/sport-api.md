@@ -30,6 +30,7 @@ Toutes les routes sont sous `/api/v1/sport`, avec session, propriétaire et acti
 | POST | `/measurements` | Relevé daté, au moins une mesure |
 | PUT | `/measurements/{uuid}` | Remplacer le relevé avec `expected_version` |
 | PUT | `/measurements/{uuid}/archive` | Archiver/restaurer |
+| POST | `/scores/backfill` | Réparer uniquement les scores manquants du compte, sans corps ; idempotent |
 | GET | `/statistics` | `since` / `until` inclusifs, un an par défaut et dix ans maximum |
 
 Les entrées de programme sont `{exercise_id, sets, target}`. Les objectifs sont facultatifs, mais les mesures d’une série validée doivent toutes être présentes et conformes au type de `/kinds`. Les indices des exercices et séries commencent à **0**. Les identifiants des exercices fournis sont des chaînes stables, ceux des objets privés sont des UUID. L’ordre des `entries` est l’ordre du programme ; conserver les noms/types retournés uniquement pour affichage, les entrées d’écriture n’acceptent que les trois champs ci-dessus.
@@ -38,7 +39,7 @@ Chaque entrée d’entraînement expose aussi `suggested_values`, une liste inde
 
 Au démarrage, le serveur cherche les derniers résultats conservés de chaque série du même compte/programme/exercice/type, du plus récent entraînement terminé ou abandonné au plus ancien. Des exercices réordonnés restent reconnus ; les doublons sont associés par rang d’occurrence. Une série annulée, absente ou marquée `skipped: true` ne remplace pas une valeur plus ancienne. Les propositions sont figées dans l’instantané ; elles ne modifient ni `target`, ni `sets`, ni score, dates ou repos. Une nouvelle série sans historique peut utiliser côté client la dernière série précédente validée dans l’entraînement courant, puis `target`. Toute validation reste un PUT explicite avec `expected_version` et toutes les mesures requises.
 
-Une session renvoie `server_now` et `rest_until` UTC : le client affiche `max(0, rest_until - server_now - temps écoulé depuis la réponse)`. Une correction de série conserve son `completed_at` et ne relance pas le repos. Les dates et données de l’instantané persistent après modification ou archivage du modèle. Les sessions terminées sont immuables via API ; les résultats, `metrics`, `score` et `baseline_id` restent lisibles. Les [formules et limites du score](sport.md#statistiques-et-score) s’appliquent aussi aux clients indépendants.
+Une session renvoie `server_now` et `rest_until` UTC : le client affiche `max(0, rest_until - server_now - temps écoulé depuis la réponse)`. Une correction de série conserve son `completed_at` et ne relance pas le repos. Les dates et données de l’instantané persistent après modification ou archivage du modèle. Les résultats des sessions terminées sont immuables via API ; la réparation explicite peut seulement enrichir un score manquant. Les résultats, `metrics`, `score` et `baseline_id` restent lisibles. Les [formules et limites du score](sport.md#statistiques-et-score) s’appliquent aussi aux clients indépendants.
 
 Les lectures ne créent ni objets ni copies du catalogue en base. Les écritures sont transactionnelles et sérialisées par propriétaire. Sur un conflit, relire l’objet ; ne pas remplacer aveuglément la version par la dernière sans réconcilier les modifications.
 
@@ -48,7 +49,7 @@ Les lectures ne créent ni objets ni copies du catalogue en base. Les écritures
 
 Le contrat de sortie `SetResultValues` accepte les zéros. Le contrat d’entrée `Values` conserve ses bornes strictes : répétitions, durée, distance et calories positives lors d’une validation manuelle ou d’une cible. `skipped` est un champ de réponse réservé au serveur ; il ne se transmet pas dans un PUT de série. Une série non validée est mise à zéro même si une cible ou une proposition non nulle était affichée.
 
-`completed_sessions` inclut les séances ainsi terminées ; `total_sets` compte uniquement les séries réellement validées. Les mesures à zéro n’augmentent aucun volume ni distance et n’alimentent pas `suggested_values`. Un exercice entièrement omis a une métrique nulle. La référence de score est la première séance de même programme/signature dont chaque exercice a une métrique positive. Sans une telle référence, `score` et `baseline_id` restent `null` si un exercice a une métrique nulle ; avec référence, une séance entièrement omise vaut 0. Les scores antérieurs ne sont pas recalculés. Les graphiques de score excluent les valeurs `null`.
+`completed_sessions` inclut ces séances ; `total_sets` compte uniquement les séries réellement validées. Les séries omises n’augmentent aucun volume/distance et n’alimentent pas les propositions. Toute nouvelle séance terminée reçoit un score v2 numérique, **0** si elle est vide. `score_details` expose version (2), séries prévues/réalisées, `completion_percent`, `difficulty_percent` (null si vide) et `score`. `metrics[].scoring` conserve les références par série (`values`, `sources` : `target`, `history`, `initial`), les compteurs et la somme non arrondie des rapports d’effort. Les métriques brutes restent inchangées. `baseline_id` pointe sur la première séance de la famille v2, même vide ; la première a `baseline_id: null`. La formule et les règles de référence sont détaillées dans le [guide](sport.md#statistiques-et-score). Les anciens scores numériques restent inchangés avec `score_details: null`, dans une famille distincte.
 
 `outcome: "cancelled"` n’ajoute aucune série et conserve son comportement sans score ni statistiques. Les contrôles de session, activation, propriétaire, CSRF et version restent obligatoires. Une répétition du PUT après fin retourne **409**, sans ajouter de résultat ni changer l’historique.
 
@@ -95,7 +96,7 @@ with httpx.Client(base_url=base + '/api/v1', headers={'Origin': base}) as client
     })
     print(result['sets'][1]['values']['reps'])  # 0 : seconde série non validée
     assert result['sets'][1]['skipped'] is True
-    print(result['score'])  # 100 : cet exercice a une performance positive
+    print(result['score'])  # Effort réalisé rapporté aux objectifs/références et séries prévues
     print(request('GET', '/sport/statistics')['completed_sessions'])
     next_training = request('POST', '/sport/sessions', json={
         'workout_id': workout['id'], 'expected_version': workout['version'],
@@ -139,3 +140,14 @@ Les réponses des programmes et des séances (actives, historique, statistiques)
 `builtin: true` identifie un exercice par défaut ; `false` un exercice personnel. Les réponses exposent aussi `muscle_id` et `equipment_id` (codes stables pour les exercices fournis, `null` pour les personnels), distincts de `muscle_group` et `equipment` destinés à l’affichage. Ces champs de réponse ne s’envoient pas lors d’une création personnelle.
 
 La langue du compte localise les noms, notes, alias, facettes et `/kinds`, ainsi que les noms des exercices fournis dans programmes, entraînements, métriques et statistiques. `q` cherche dans les libellés de cette langue ; les filtres `muscle`/`equipment` acceptent les codes stables, les libellés courants et les anciens libellés français. Les textes personnels, résultats, dates, versions, signatures et scores restent inchangés. Les instantanés ne sont pas réécrits à la lecture. Voir [langue de compte et exemples HTTP](internationalisation.md#api-independante-de-linterface).
+
+## Réparer les scores manquants
+
+`POST /api/v1/sport/scores/backfill`, sans corps, calcule les scores **uniquement** des séances `completed` du compte dont `score` est null. La réponse est `{"updated_sessions": 2}` (nombre variable). L’opération est idempotente : une répétition renvoie zéro. Session, CSRF/origine, activation Sport et verrou du propriétaire s’appliquent. Les références sont reconstruites dans l’ordre fin/id à partir des instantanés conservés, jamais depuis des résultats futurs. Les anciens instantanés sans propositions utilisent objectifs puis calibration initiale.
+
+```bash
+curl --fail --request POST "$BASE/api/v1/sport/scores/backfill" \
+  --cookie cookies.txt --header "X-CSRF-Token: $CSRF"
+```
+
+La transaction ne modifie ni séries, dates, notes, version, score déjà numérique, métrique brute ou progression. Seuls score, référence et détails du calcul des séances réparées sont enregistrés. GET détail/historique/statistiques expose ensuite les mêmes valeurs ; les lectures ne déclenchent jamais de réparation. Sauvegarder avant une reprise de production ; voir [l’exploitation](deploiement.md#livraison-du-score-sport-v2).

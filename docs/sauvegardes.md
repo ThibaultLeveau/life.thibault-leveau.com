@@ -170,3 +170,9 @@ Les anciennes écritures g/l/u restent compatibles pendant la migration, mais la
 ## Filtres d’agenda et actions groupées Tâches
 
 La livraison UX de Tâches conserve la révision `0013_recipe_units` et les tables existantes. Les filtres `search`, `workspace_id`, `priority`, `label_id` étendent le JSON des préférences d’agenda ; les anciennes préférences reçoivent les défauts à la lecture. Le dump/restauration PostgreSQL habituel conserve filtres, tâches, récurrences et événements. Une ancienne image ne reconnaît pas ces quatre clés (validation stricte) : avant un retour à une version antérieure, sauvegarder puis retirer uniquement ces clés des préférences d’agenda concernées, ou restaurer la sauvegarde préalable avec son image. Ne pas déduire la compatibilité du seul numéro Alembic. Les actions groupées n’introduisent pas de nouveau type de donnée ni d’effacement d’historique.
+
+## Score Sport v2
+
+La révision SQL reste `0013_recipe_units`. Le calcul ajoute `scoring` dans les métriques JSONB existantes, sans modifier les mesures brutes. Le dump PostgreSQL et la restauration transactionnelle conservent références, provenance, compteurs, scores et racines ; la recette conteneur compare intégralement les tables Sport après création de séances v2 partielles et vides. Les anciens scores numériques v1 sont conservés.
+
+Sauvegarder avant la publication et la réparation ciblée des scores manquants. La reprise API ne modifie ni séries, dates, notes, versions ni récompenses et une répétition n’a aucun effet. Revenir à l’image précédente est **incompatible** malgré le même schéma SQL : elle refuse les champs JSON inconnus et pourrait prendre une séance v2 vide comme diviseur de référence. Préférer une correction en avant ; une restauration exige un dump et une image compatibles, l’arrêt des écritures et la prise en compte des données intervenues depuis la sauvegarde. Ne pas supprimer les détails du calcul pour contourner cette limite.

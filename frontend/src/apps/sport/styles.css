@@ -1237,3 +1237,13 @@
     margin-top: 0;
   }
 }
+
+.sport-score-references summary {
+  min-height: 44px;
+  padding-block: 12px;
+  cursor: pointer;
+}
+.sport-score-references li {
+  margin-block: 8px;
+  overflow-wrap: anywhere;
+}

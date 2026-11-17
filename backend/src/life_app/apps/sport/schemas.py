@@ -214,6 +214,34 @@ class SessionFinish(Version):
     notes: str = Field("", max_length=4000)
 
 
+class ScoreReference(Contract):
+    values: dict[str, float] = Field(
+        description="Référence figée par mesure ; champs inconnus absents jusqu’à réalisation."
+    )
+    sources: dict[str, Literal["target", "history", "initial"]]
+
+
+class ScoreMetric(Contract):
+    version: Literal[2] = 2
+    planned_sets: int
+    completed_sets: int
+    effort_ratio_sum: float
+    references: list[ScoreReference]
+
+
+class ScoreSummary(Contract):
+    version: Literal[2] = 2
+    planned_sets: int
+    completed_sets: int
+    completion_percent: float
+    difficulty_percent: float | None
+    score: float
+
+
+class ScoreBackfill(Contract):
+    updated_sessions: int
+
+
 class Metric(Contract):
     exercise_id: str
     name: str
@@ -224,6 +252,9 @@ class Metric(Contract):
     reps: int
     distance_m: float
     duration_seconds: float
+    scoring: ScoreMetric | None = Field(
+        None, description="Calcul v2 conservé à la fin ; null pour les anciens scores v1."
+    )
 
 
 class TrainingOutput(Contract):
@@ -241,7 +272,12 @@ class TrainingOutput(Contract):
     finished_at: datetime | None
     rest_until: datetime | None
     notes: str
-    score: float | None
+    score: float | None = Field(
+        description="Score v2 = complétion × difficulté relative / 100 ; zéro si rien réalisé."
+    )
+    score_details: ScoreSummary | None = Field(
+        None, description="Résumé v2 des métriques persistées ; null pour les anciens scores v1."
+    )
     baseline_id: UUID | None
     metrics: list[Metric]
     server_now: datetime

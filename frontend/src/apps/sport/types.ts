@@ -80,6 +80,25 @@ export interface SetRecord {
   completed_at: string;
   skipped: boolean;
 }
+export interface ScoreReference {
+  values: Values;
+  sources: Partial<Record<keyof Values, "target" | "history" | "initial">>;
+}
+export interface ScoreMetric {
+  version: 2;
+  planned_sets: number;
+  completed_sets: number;
+  effort_ratio_sum: number;
+  references: ScoreReference[];
+}
+export interface ScoreSummary {
+  version: 2;
+  planned_sets: number;
+  completed_sets: number;
+  completion_percent: number;
+  difficulty_percent: number | null;
+  score: number;
+}
 export interface Metric {
   exercise_id: string;
   name: string;
@@ -90,6 +109,7 @@ export interface Metric {
   reps: number;
   distance_m: number;
   duration_seconds: number;
+  scoring: ScoreMetric | null;
 }
 export interface Training {
   id: string;
@@ -105,6 +125,7 @@ export interface Training {
   rest_until: string | null;
   notes: string;
   score: number | null;
+  score_details: ScoreSummary | null;
   baseline_id: string | null;
   metrics: Metric[];
   server_now: string;

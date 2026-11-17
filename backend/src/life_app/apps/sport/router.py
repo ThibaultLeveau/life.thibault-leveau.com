@@ -169,6 +169,18 @@ def current_session(user: CurrentUser, db: Database):
     return svc.training_output(item) if item else None
 
 
+@router.post("/scores/backfill", response_model=s.ScoreBackfill)
+def backfill_scores(user: CurrentUser, db: Database):
+    """Réparer les scores manquants des séances terminées du compte ; opération idempotente.
+
+    Préserve scores déjà numériques, séries, dates, notes, versions et progression.
+    Les lectures ne réécrivent jamais l’historique.
+    """
+    result = svc.backfill_scores(db, user)
+    db.commit()
+    return result
+
+
 @router.get("/sessions/{session_id}", response_model=s.TrainingOutput)
 def get_session(session_id: UUID, user: CurrentUser, db: Database):
     return svc.training_output(svc.owned(db, m.Training, user, session_id))

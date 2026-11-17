@@ -1,5 +1,6 @@
 import { tr } from "../i18n";
 import { useEffect, useId, useRef, useState } from "react";
+import { ScoreExplanation } from "./ScoreExplanation";
 import { sportApi } from "../api";
 import { measureFields, type KindDefinition, type MeasureKey } from "../types";
 import { day, Empty, LoadState, localDay, number, useResource } from "./common";
@@ -321,25 +322,9 @@ export function Statistics({ kinds }: { kinds: KindDefinition[] }) {
               )
               .map((s) => ({ label: day(s.started_at), value: s.score! }))}
           />
-          <details className="sport-score-explained">
-            <summary>{tr("how_is_the_score_calculated")}</summary>
-            <p>
-              {tr("the_first_completed_session_of_a_program_scores_100_later")}
-            </p>
-            <p>
-              {tr("only_sessions_of_the_same_program_with_the_same_exercises")}
-            </p>
-            <ul>
-              {kinds.map((k) => (
-                <li key={k.id}>
-                  <strong>{k.name} :</strong> {k.metric}.
-                </li>
-              ))}
-            </ul>
-            <p>
-              {tr("the_1_allows_comparisons_when_weight_or_assistance_is_zero")}
-            </p>
-          </details>
+          <ScoreExplanation legacy={stats.sessions.find(
+            (s) => (s.baseline_id ?? s.id) === selectedWorkout,
+          )?.score_details == null} />
         </>
       )}
     </>
