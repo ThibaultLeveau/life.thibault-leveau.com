@@ -1672,6 +1672,26 @@
   color: var(--ui-accent);
   font-weight: 650;
 }
+/* Dates remain readable metadata; results lead the session summary. */
+.sport-session-dates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  margin: 16px 0;
+}
+.sport-session-dates > div {
+  flex: 1 1 190px;
+}
+.sport-session-dates dt {
+  color: var(--ui-muted);
+  font-size: 13px;
+}
+.sport-session-dates dd {
+  margin: 4px 0 0;
+  font-size: 15px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
 .sport-history-month {
   font-size: 15px;
   color: var(--ui-muted);

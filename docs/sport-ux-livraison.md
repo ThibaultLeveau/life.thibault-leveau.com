@@ -28,7 +28,7 @@ Cette livraison met en œuvre les suites de la [revue du 17 novembre 2026](revue
 | 22 | Préréglages et ±15 s persistants | Échéance serveur, version, refus de repos terminé |
 | 23 | Bilan, séries réalisées/omises, métriques et XP enregistrés | Réponse de clôture et total de progression réel |
 | 24 | Historique filtré côté API et regroupé par mois | Recherche, programme, état, dates et pagination |
-| 25 | URL de détail, voisins filtrés et métadonnées de séance | Accès direct, retour navigateur, immuabilité |
+| 25 | URL de détail, voisins filtrés, dates compactes et score prioritaire | Accès direct, retour navigateur, immuabilité |
 | 26 | Saisie rapide et section de mensurations complémentaires | Modification du poids sans effacer les tours repliés |
 | 27 | Vue compacte et écarts neutres ; accès au graphique | Valeur précédente disponible et exclusion des archives |
 | 28 | Périodes usuelles, validation et derniers résultats conservés | Période inversée, URL et bouton d’application |

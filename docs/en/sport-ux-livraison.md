@@ -28,7 +28,7 @@ This release implements the follow-up to the [17 November 2026 review](revue-spo
 | 22 | Presets and persistent ±15 seconds | Server deadline, version and rejection after expiration |
 | 23 | Summary, performed/skipped sets, metrics and recorded XP | Completion response and actual progression total |
 | 24 | API-filtered history grouped by month | Search, program, state, dates and pagination |
-| 25 | Detail URL, filtered neighbors and session metadata | Direct access, browser return and immutability |
+| 25 | Detail URL, filtered neighbors, compact dates and score shown first | Direct access, browser return and immutability |
 | 26 | Quick measurements and additional-measure section | Editing weight preserves collapsed measurements |
 | 27 | Compact view, neutral differences and chart access | Previous available value and excluded archives |
 | 28 | Common periods, validation and retained results | Reversed period, URL and apply action |

@@ -165,48 +165,62 @@ export function TrainingDetail({
             ? tr("cancelled")
             : tr("in_progress")}
       </p>
-      <div className="sport-summary">
+      <dl className="sport-session-dates">
         <div>
-          <span>{tr("start")}</span>
-          <strong>{moment(training.started_at)}</strong>
+          <dt>{tr("start")}</dt>
+          <dd>
+            <time dateTime={training.started_at}>
+              {moment(training.started_at)}
+            </time>
+          </dd>
         </div>
         {training.finished_at && (
-          <>
-            <div>
-              <span>{tr("finished_at")}</span>
-              <strong>{moment(training.finished_at)}</strong>
-            </div>
-            <div>
-              <span>{tr("duration_metric")}</span>
-              <strong>
-                {number(
-                  Math.max(
-                    0,
-                    Date.parse(training.finished_at) -
-                      Date.parse(training.started_at),
-                  ) / 60000,
-                )}{" "}
-                min
-              </strong>
-            </div>
-          </>
+          <div>
+            <dt>{tr("finished_at")}</dt>
+            <dd>
+              <time dateTime={training.finished_at}>
+                {moment(training.finished_at)}
+              </time>
+            </dd>
+          </div>
         )}
         {training.competition_date && (
           <div>
-            <span>{tr("hyrox_competition_date")}</span>
-            <strong>{day(training.competition_date)}</strong>
+            <dt>{tr("hyrox_competition_date")}</dt>
+            <dd>
+              <time dateTime={training.competition_date}>
+                {day(training.competition_date)}
+              </time>
+            </dd>
           </div>
         )}
-        <div>
-          <span>{tr("completed_sets")}</span>
-          <strong>{training.sets.filter((s) => !s.skipped).length}</strong>
-        </div>
+      </dl>
+      <div className="sport-summary">
         <div>
           <span>{tr("training_score")}</span>
           <strong>
             {training.score == null ? "—" : number(training.score)}
           </strong>
         </div>
+        <div>
+          <span>{tr("completed_sets")}</span>
+          <strong>{training.sets.filter((s) => !s.skipped).length}</strong>
+        </div>
+        {training.finished_at && (
+          <div>
+            <span>{tr("duration_metric")}</span>
+            <strong>
+              {number(
+                Math.max(
+                  0,
+                  Date.parse(training.finished_at) -
+                    Date.parse(training.started_at),
+                ) / 60000,
+              )}{" "}
+              min
+            </strong>
+          </div>
+        )}
       </div>
       {training.score_details ? (
         <>
