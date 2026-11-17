@@ -252,3 +252,7 @@ Vérifier SHA exécuté, révision, sondes, `/recipes`, guides FR/EN, API et Ope
 Publier le `main` validé avec `scripts/deploy.sh`, sauvegarde puis migration `0013_recipe_units`. Aucune dépendance, variable ni infrastructure supplémentaire. Les anciennes écritures g/l/u restent valides pendant la migration ; respecter la [compatibilité du retour arrière](sauvegardes.md#migration-0013-unites-des-recettes).
 
 Vérifier SHA exécuté, sondes, `/recipes`, OpenAPI et guides FR/EN en HTTPS. Sur un compte synthétique isolé : saisir ml, mg, cuillère à café et cuillère à soupe, recharger, ajuster les portions, importer et cumuler dans une liste, cocher et copier en modèle. Vérifier les libellés FR/EN, clavier et mobile 320 px, ainsi que la séparation des unités différentes. Consigner sauvegarde, révision, SHA et résultats dans l’issue.
+
+## Livraison ergonomie Tâches
+
+Publier le `main` validé par `scripts/deploy.sh`, sauvegarde habituelle incluse. Aucun nouveau service, secret ou migration SQL ; respecter la [compatibilité des préférences d’agenda](sauvegardes.md#filtres-dagenda-et-actions-groupees-taches). Sur un compte synthétique isolé, vérifier recherche multi-espace avec terminées/archives, précédent/suivant, brouillons, menu sélectionné, priorité/statut/étiquettes en lot, clôture/récurrence et restauration. Vérifier le focus mobile à 320 px, les thèmes/langues, les mouvements réduits, les sondes, OpenAPI, guides FR/EN et le SHA réellement exécuté. Consigner sauvegarde, commit et résultats dans l’issue.

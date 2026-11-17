@@ -213,6 +213,7 @@ test("connexion et cycle complet depuis les formulaires", async ({ page }) => {
   await expect(
     dialog.getByText("Tâche rouverte", { exact: true }),
   ).toBeVisible();
+  page.once("dialog", async confirmation => { expect(confirmation.message()).toContain("Archiver cette tâche"); await confirmation.accept(); });
   await dialog.getByRole("button", { name: "Archiver", exact: true }).click();
   await expect(
     page.getByRole("button", { name: "Organiser le séjour", exact: true }),
@@ -570,6 +571,7 @@ test("espaces parents : création, déplacement, ordre et archives persistantes"
   for (const id of [parent.id, child.id, leaf.id, sibling.id]) {
     await expect(parents.locator(`option[value="${id}"]`)).toHaveCount(0);
   }
+  page.once("dialog", async confirmation => { expect(confirmation.message()).toContain("Archiver cette tâche"); await confirmation.accept(); });
   await dialog.getByRole("button", { name: "Archiver", exact: true }).click();
   await expect(dialog).toHaveCount(0);
   await expect(page.getByRole("alert")).toContainText("sous-espaces actifs");
@@ -620,6 +622,7 @@ test("espaces parents : création, déplacement, ordre et archives persistantes"
   await page
     .getByRole("button", { name: "Configurer l’espace", exact: true })
     .click();
+  page.once("dialog", async confirmation => { expect(confirmation.message()).toContain("Archiver cette tâche"); await confirmation.accept(); });
   await dialog.getByRole("button", { name: "Archiver", exact: true }).click();
   await expect(dialog).toHaveCount(0);
   await expect(page.locator(".task-sync-status")).toHaveAttribute(

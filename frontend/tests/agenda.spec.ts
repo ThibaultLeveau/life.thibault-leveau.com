@@ -157,7 +157,7 @@ test("agenda global : périodes, réglages persistants et cycle de tâche", asyn
     );
     const ids = (await read.json()).items.map((item: Task) => item.id);
     await expect(page.locator(".agenda-task")).toHaveCount(ids.length);
-    await page
+    await card(page, tasks["Jour agenda"])
       .getByRole("checkbox", { name: "Terminer : Jour agenda", exact: true })
       .click();
     await expect(card(page, tasks["Jour agenda"])).toHaveCount(0);
@@ -165,13 +165,13 @@ test("agenda global : périodes, réglages persistants et cycle de tâche", asyn
     await expect(card(page, tasks["Jour agenda"]).locator("time")).toHaveClass(
       /is-completed/,
     );
-    await page
+    await card(page, tasks["Jour agenda"])
       .getByRole("checkbox", { name: "Rouvrir : Jour agenda", exact: true })
       .click();
     await expect(card(page, tasks["Jour agenda"]).locator("time")).toHaveClass(
       /is-today/,
     );
-    await page
+    await card(page, tasks["Jour agenda"])
       .getByRole("button", { name: "Jour agenda", exact: true })
       .click();
     await page.locator(".schedule-trigger").click();

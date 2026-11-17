@@ -9,6 +9,7 @@ import {
 import { api, ApiError } from "../../platform/api";
 import { allTasks } from "./api";
 import { tr } from "./i18n";
+import { Icon } from "../../shared/ui/Icon";
 import {
   defaultView,
   localDate,
@@ -94,7 +95,9 @@ async function readDataOnce(
           (task) => task.workspace_id,
         )),
   ]);
-  const spaces = active.filter((space) => needed.has(space.id));
+  const spaces = [...active, ...archived].filter((space) =>
+    needed.has(space.id),
+  );
   const details: Awaited<ReturnType<typeof readSpace>>[] = [];
   // Bound metadata reads and only load spaces visited by the current page.
   for (let offset = 0; offset < spaces.length; offset += 2)
@@ -143,6 +146,9 @@ interface Sync {
   flashes: Set<string>;
   failures: Failure[];
   notice: string;
+  dismissNotice: () => void;
+  undoArchive: () => void;
+  canUndoArchive: boolean;
   recovery: TaskDraft | null;
   recoverTask: (task: Task | null, changes?: Partial<Task>) => void;
   dismiss: (id: string) => void;
@@ -185,6 +191,7 @@ export function TaskSyncProvider({ children }: { children: ReactNode }) {
   const [pendingCount, setPendingCount] = useState(0);
   const [failures, setFailures] = useState<Failure[]>([]);
   const [notice, setNotice] = useState("");
+  const [archived, setArchived] = useState<Task[]>([]);
   const [recovery, setRecovery] = useState<TaskDraft | null>(null);
   const [flashes, setFlashes] = useState(new Set<string>());
   const timers = useRef(new Set<ReturnType<typeof setTimeout>>());
@@ -196,7 +203,12 @@ export function TaskSyncProvider({ children }: { children: ReactNode }) {
     if (Array.isArray(value)) return value.map((item) => resolve(item, field));
     if (value && typeof value === "object")
       return Object.fromEntries(
-        Object.entries(value).map(([k, v]) => [k, resolve(v, k)]),
+        Object.entries(value).map(([k, v]) => [
+          /^(status_ids|label_ids)$/.test(field)
+            ? (aliases.current.get(k) ?? k)
+            : k,
+          resolve(v, /^(status_ids|label_ids)$/.test(field) ? "ids" : k),
+        ]),
       );
     return value;
   }
@@ -276,9 +288,7 @@ export function TaskSyncProvider({ children }: { children: ReactNode }) {
   async function ensureSpace(id: string) {
     if (base.current?.views[id]) return;
     if (loadingSpaces.current.has(id)) return loadingSpaces.current.get(id);
-    const space = base.current?.workspaces.find(
-      (space) => space.id === id && !space.archived_at,
-    );
+    const space = base.current?.workspaces.find((space) => space.id === id);
     if (!space) return;
     const signal = controller.current.signal;
     const load = readSpace(space, signal)
@@ -406,12 +416,15 @@ export function TaskSyncProvider({ children }: { children: ReactNode }) {
     const signal = controller.current.signal;
     revision.current += 1;
     pending.current.push(job);
-    if (path.endsWith("/complete")) {
-      const id = path.split("/")[2];
-      setFlashes((previous) => new Set([...previous, id]));
+    if (path.endsWith("/complete") || body?.action === "complete") {
+      const ids = path.endsWith("/complete")
+        ? [path.split("/")[2]]
+        : (body?.tasks as { id: string }[]).map((task) => task.id);
+      setFlashes((previous) => new Set([...previous, ...ids]));
       const timer = setTimeout(() => {
         setFlashes(
-          (previous) => new Set([...previous].filter((item) => item !== id)),
+          (previous) =>
+            new Set([...previous].filter((id) => !ids.includes(id))),
         );
         timers.current.delete(timer);
       }, 420);
@@ -468,25 +481,33 @@ export function TaskSyncProvider({ children }: { children: ReactNode }) {
         base.current = optimistic(base.current, current);
         if (result && typeof result === "object") {
           const items = Array.isArray(result) ? result : [result];
-          for (const item of items) {
+          for (const [index, item] of items.entries()) {
             if ("version" in item && "title" in item) {
               const task = item as Task;
+              const temporary =
+                payload.action === "duplicate"
+                  ? `${job.temporaryId}:${index}`
+                  : job.temporaryId;
               base.current.tasks = base.current.tasks.filter(
-                (t) => t.id !== job.temporaryId,
+                (t) => t.id !== temporary,
               );
               base.current = replaceTask(base.current, task);
               versions.current.set(task.id, task.version);
               if (
                 current.path === "/tasks" ||
-                current.path.endsWith("/duplicate")
+                current.path.endsWith("/duplicate") ||
+                payload.action === "duplicate"
               ) {
-                aliases.current.set(job.temporaryId, task.id);
-                clientIds.current.set(task.id, job.temporaryId);
+                aliases.current.set(temporary, task.id);
+                clientIds.current.set(task.id, temporary);
               }
             } else if ("id" in item) {
               const parts = current.path.split("/");
               const kind = (parts[3] ?? "workspaces") as
-                "workspaces" | "sections" | "statuses" | "labels";
+                | "workspaces"
+                | "sections"
+                | "statuses"
+                | "labels";
               const rows = base.current[kind] as { id: string }[];
               if (rows) {
                 base.current = {
@@ -543,6 +564,16 @@ export function TaskSyncProvider({ children }: { children: ReactNode }) {
             );
           }
         }
+        if (
+          current.path.startsWith("/tasks/") &&
+          (payload.action === "archive" || payload.archived === true)
+        )
+          setArchived((Array.isArray(result) ? result : [result]) as Task[]);
+        if (
+          current.path.startsWith("/tasks/") &&
+          (payload.action === "restore" || payload.archived === false)
+        )
+          setArchived([]);
         if (job.message) setNotice(job.message);
         job.success?.(result);
       } catch (error) {
@@ -552,6 +583,9 @@ export function TaskSyncProvider({ children }: { children: ReactNode }) {
             ? [taskId]
             : []),
           job.temporaryId,
+          ...((payload.tasks as { id: string }[] | undefined) ?? []).map(
+            (_, index) => `${job.temporaryId}:${index}`,
+          ),
           ...((payload.tasks as { id: string }[] | undefined) ?? []).map(
             (t) => t.id,
           ),
@@ -596,6 +630,24 @@ export function TaskSyncProvider({ children }: { children: ReactNode }) {
         ),
         failures,
         notice,
+        dismissNotice: () => {
+          setNotice("");
+          setArchived([]);
+        },
+        canUndoArchive: archived.length > 0,
+        undoArchive: () =>
+          mutate(
+            "/tasks/bulk",
+            "POST",
+            {
+              action: "restore",
+              tasks: archived.map((t) => ({
+                id: t.id,
+                expected_version: t.version,
+              })),
+            },
+            { message: tr("restored_selection") },
+          ),
         recovery,
         recoverTask: (task, changes) => {
           const saved = base.current?.tasks.find(
@@ -637,9 +689,27 @@ export function SyncFeedback({ inDialog = false }: { inDialog?: boolean }) {
         role="status"
         data-pending={sync.pending}
       >
-        {sync.pending
-          ? tr("sync_pending", { count: sync.pending })
-          : sync.notice}
+        {(sync.pending > 0 || sync.notice) && (
+          <span>
+            {sync.pending
+              ? tr("sync_pending", { count: sync.pending })
+              : sync.notice}
+          </span>
+        )}
+        {!inDialog && !sync.pending && sync.notice && (
+          <button
+            className="icon-button"
+            aria-label={tr("close_message")}
+            onClick={sync.dismissNotice}
+          >
+            <Icon name="x" size={14} />
+          </button>
+        )}
+        {sync.canUndoArchive && (
+          <button className="text-button" onClick={sync.undoArchive}>
+            {tr("undo_archive")}
+          </button>
+        )}
       </p>
       {sync.failures.map((failure) => (
         <div className="task-sync-error" key={failure.id}>

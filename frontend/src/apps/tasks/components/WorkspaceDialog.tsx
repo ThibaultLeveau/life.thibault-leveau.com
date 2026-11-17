@@ -1,4 +1,5 @@
 import { tr } from "../i18n";
+import { useDraftForm } from "../useTaskDrafts";
 import { useState, type FormEvent } from "react";
 import { useTaskSync } from "../useTaskSync";
 import type { Workspace } from "../types";
@@ -17,6 +18,8 @@ export function WorkspaceDialog({
 }) {
   const sync = useTaskSync();
   const [color, setColor] = useState("#c05a45");
+  const draft = useDraftForm(color);
+  const close = () => draft.leave(onClose);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const values = new FormData(event.currentTarget);
@@ -36,8 +39,12 @@ export function WorkspaceDialog({
   }
 
   return (
-    <Dialog title={tr("create_a_workspace")} onClose={onClose}>
-      <form className="stack-form dialog-body" onSubmit={submit}>
+    <Dialog title={tr("create_a_workspace")} onClose={close}>
+      <form
+        ref={draft.ref}
+        className="stack-form dialog-body"
+        onSubmit={submit}
+      >
         <p className="muted">
           {tr("a_workspace_for_your_projects_daily_life_or_whatever_matters")}
         </p>
@@ -63,7 +70,7 @@ export function WorkspaceDialog({
         </label>
         <ColorPicker value={color} onChange={setColor} />
         <div className="dialog-actions">
-          <button className="secondary-button" type="button" onClick={onClose}>
+          <button className="secondary-button" type="button" onClick={close}>
             {tr("cancel")}
           </button>
           <button className="primary-button">{tr("create_workspace")}</button>

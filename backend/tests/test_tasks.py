@@ -1112,6 +1112,10 @@ def test_agenda_calendar_boundaries(client, today, end):
 
 def test_agenda_preferences_validation_and_access(client, app):
     defaults = {
+        "search": "",
+        "workspace_id": None,
+        "priority": None,
+        "label_id": None,
         "period": "today",
         "custom_days": 14,
         "include_overdue": True,
@@ -1119,6 +1123,10 @@ def test_agenda_preferences_validation_and_access(client, app):
     }
     assert client.get("/api/v1/agenda/view").json() == defaults
     settings = {
+        "search": "",
+        "workspace_id": None,
+        "priority": None,
+        "label_id": None,
         "period": "custom",
         "custom_days": 90,
         "include_overdue": False,
@@ -1446,3 +1454,176 @@ def test_simultaneous_bulk_and_single_write_are_serialized(client, app):
         assert saved[0] == items[0]
         assert saved[1]["completed_at"] is not None and saved[1]["due_date"] is None
         assert [event["kind"] for event in history(client, saved[0])] == ["created"]
+
+
+def test_extended_bulk_lifecycle_preserves_recurrences_history_and_sources(client):
+    space, _ = create_space(client)
+    plain = create_task(client, space)
+    recurring = create_task(
+        client,
+        space,
+        title="Répéter",
+        recurrence={
+            "rrule": "FREQ=DAILY",
+            "start_date": "2026-11-17",
+            "max_occurrences": 3,
+        },
+    )
+    done = mutate(client, create_task(client, space, title="Déjà faite"), "complete")
+    response = bulk(client, [plain, recurring, done], "complete")
+    assert response.status_code == 200, response.text
+    plain, recurring, unchanged = response.json()
+    assert plain["completed_at"] and unchanged == done
+    assert recurring["recurrence_completed"] == 1
+    assert recurring["due_date"] == "2026-11-18" and recurring["completed_at"] is None
+    assert [e["kind"] for e in history(client, recurring)] == [
+        "created",
+        "completed",
+        "rescheduled",
+    ]
+    copies = bulk(client, [plain, recurring], "duplicate").json()
+    assert {t["id"] for t in copies}.isdisjoint({plain["id"], recurring["id"]})
+    assert all(t["completed_at"] is None and t["recurrence_completed"] == 0 for t in copies)
+    assert all([e["kind"] for e in history(client, t)] == ["created"] for t in copies)
+    archived = bulk(client, [plain, recurring], "archive").json()
+    restored = bulk(client, archived, "restore").json()
+    for before, after in zip([plain, recurring], restored, strict=True):
+        assert after["archived_at"] is None
+        for field in (
+            "created_at",
+            "completed_at",
+            "due_date",
+            "recurrence",
+            "recurrence_completed",
+        ):
+            assert after[field] == before[field]
+    reopened = bulk(client, restored, "reopen").json()
+    assert all(t["completed_at"] is None for t in reopened)
+    assert reopened[1] == restored[1]  # An open recurring task is not advanced or rewritten.
+
+
+def test_extended_bulk_status_and_labels_require_explicit_workspace_mapping(client):
+    spaces = [create_space(client, name) for name in ("Personnel", "Travail")]
+    items = [create_task(client, space) for space, _ in spaces]
+    mapping = {
+        space["id"]: next(s["id"] for s in statuses if s["name"] == "En cours")
+        for space, statuses in spaces
+    }
+    response = bulk(client, items, "status", status_ids=mapping)
+    assert response.status_code == 200, response.text
+    items = response.json()
+    assert all(t["status_id"] == mapping[t["workspace_id"]] for t in items)
+    assert all(t["completed_at"] is None for t in items)
+    labels = {
+        space["id"]: [
+            client.post(
+                f"/api/v1/workspaces/{space['id']}/labels", json={"name": "Important"}
+            ).json()["id"]
+        ]
+        for space, _ in spaces
+    }
+    response = bulk(client, items, "labels", operation="add", label_ids=labels)
+    assert response.status_code == 200, response.text
+    items = response.json()
+    assert all(t["label_ids"] == labels[t["workspace_id"]] for t in items)
+    items = bulk(client, items, "priority", priority=1).json()
+    assert all(t["priority"] == 1 for t in items)
+    before = items
+    wrong = {**labels, spaces[1][0]["id"]: labels[spaces[0][0]["id"]]}
+    assert bulk(client, items, "labels", operation="remove", label_ids=wrong).status_code == 404
+    assert (
+        bulk(
+            client, items, "status", status_ids={spaces[0][0]["id"]: mapping[spaces[0][0]["id"]]}
+        ).status_code
+        == 422
+    )
+    assert [client.get(f"/api/v1/tasks/{t['id']}").json() for t in items] == before
+    items = bulk(client, items, "labels", operation="remove", label_ids=labels).json()
+    assert all(t["label_ids"] == [] for t in items)
+
+
+@pytest.mark.parametrize(
+    "action,extra",
+    [
+        ("complete", {}),
+        ("reopen", {}),
+        ("duplicate", {}),
+        ("restore", {}),
+        ("priority", {"priority": 2}),
+        ("status", {"status_ids": {}}),
+        ("labels", {"operation": "add", "label_ids": {}}),
+    ],
+)
+def test_extended_bulk_stale_version_owner_and_csrf_are_atomic(client, app, action, extra):
+    space, statuses = create_space(client)
+    items = [create_task(client, space, title=str(i)) for i in range(2)]
+    if action == "restore":
+        items = bulk(client, items, "archive").json()
+    if action == "status":
+        extra = {"status_ids": {space["id"]: statuses[0]["id"]}}
+    if action == "labels":
+        extra = {"operation": "add", "label_ids": {space["id"]: []}}
+    stale = [{**t, "version": t["version"] + 1} if i else t for i, t in enumerate(items)]
+    before = client.get("/api/v1/tasks", params={"archived": action == "restore"}).json()
+    assert bulk(client, stale, action, **extra).status_code == 409
+    assert client.get("/api/v1/tasks", params={"archived": action == "restore"}).json() == before
+    with TestClient(app) as other:
+        login = other.post(
+            "/api/v1/auth/session", json={"username": "bob", "password": PASSWORD}
+        ).json()
+        other.headers["X-CSRF-Token"] = login["csrf_token"]
+        assert bulk(other, items, action, **extra).status_code == 404
+    csrf = client.headers.pop("X-CSRF-Token")
+    assert bulk(client, items, action, **extra).status_code == 403
+    client.headers["X-CSRF-Token"] = csrf
+
+
+def test_bulk_restore_parent_archive_rolls_back_all(client):
+    space, _ = create_space(client)
+    section = create_section(client, space)
+    items = [create_task(client, space), create_task(client, space, section_id=section["id"])]
+    items = bulk(client, items, "archive").json()
+    client.patch(
+        f"/api/v1/workspaces/{space['id']}/sections/{section['id']}", json={"archived": True}
+    )
+    assert bulk(client, items, "restore").status_code == 409
+    assert [client.get(f"/api/v1/tasks/{t['id']}").json() for t in items] == items
+
+
+def test_agenda_filters_are_persistent_scoped_and_match_api(client, app):
+    space, _ = create_space(client)
+    other_space, _ = create_space(client, "Autre")
+    label = client.post(f"/api/v1/workspaces/{space['id']}/labels", json={"name": "Urgent"}).json()
+    expected = create_task(
+        client,
+        space,
+        "Contrat à relire",
+        priority=1,
+        due_date="2026-11-17",
+        label_ids=[label["id"]],
+    )
+    create_task(client, other_space, "Contrat", priority=1, due_date="2026-11-17")
+    create_task(client, space, "Contrat", priority=2, due_date="2026-11-17")
+    filters = {
+        "workspace_id": space["id"],
+        "priority": 1,
+        "label_id": label["id"],
+        "search": "contrat",
+    }
+    assert client.put("/api/v1/agenda/view", json=filters).status_code == 200
+    settings = client.get("/api/v1/agenda/view").json()
+    assert all(settings[k] == v for k, v in filters.items())
+    result = client.get("/api/v1/agenda/tasks?today=2026-11-17").json()
+    assert [t["id"] for t in result["items"]] == [expected["id"]]
+    with TestClient(app) as other:
+        login = other.post(
+            "/api/v1/auth/session", json={"username": "bob", "password": PASSWORD}
+        ).json()
+        other.headers["X-CSRF-Token"] = login["csrf_token"]
+        assert other.put("/api/v1/agenda/view", json=filters).status_code == 404
+    assert (
+        client.put(
+            "/api/v1/agenda/view", json={**filters, "workspace_id": other_space["id"]}
+        ).status_code
+        == 422
+    )

@@ -1,6 +1,7 @@
 import { tr } from "../i18n";
+import { useDraftForm } from "../useTaskDrafts";
 import { useTaskSync } from "../useTaskSync";
-import { useState, type CSSProperties, type FormEvent } from "react";
+import { useRef, useState, type CSSProperties, type FormEvent } from "react";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import {
   type Label,
@@ -32,7 +33,7 @@ interface Props {
     statusId: string,
     schedule?: Schedule,
   ) => Promise<void>;
-  onConfigure: () => void;
+  onConfigure: (sectionId?: string) => void;
 }
 
 function TaskCard({
@@ -126,11 +127,18 @@ function QuickAdd({
   const [error, setError] = useState("");
   const [title, setTitle] = useState("");
   const recognition = useScheduleRecognition(title, open);
+  const draft = useDraftForm();
+  const close = () =>
+    draft.leave(() => {
+      setOpen(false);
+      setTitle("");
+    });
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!title || busy) return;
     const keepOpen =
-      document.activeElement === event.currentTarget.elements.namedItem("title") &&
+      document.activeElement ===
+        event.currentTarget.elements.namedItem("title") &&
       window.matchMedia("(min-width: 801px) and (pointer: fine)").matches;
     setBusy(true);
     setError("");
@@ -146,6 +154,7 @@ function QuickAdd({
         parsed?.matched_text ? parsed : undefined,
       );
       setTitle("");
+      requestAnimationFrame(draft.clean);
       if (!keepOpen) setOpen(false);
     } catch (error) {
       setError((error as Error).message);
@@ -161,7 +170,7 @@ function QuickAdd({
       </button>
     );
   return (
-    <form className="quick-add-form" onSubmit={submit}>
+    <form ref={draft.ref} className="quick-add-form" onSubmit={submit}>
       <label className="sr-only" htmlFor={`quick-${sectionId}-${statusId}`}>
         {tr("task_name")}
       </label>
@@ -176,7 +185,7 @@ function QuickAdd({
         maxLength={500}
         placeholder={tr("read_tomorrow_run_every_monday")}
         onKeyDown={(event) => {
-          if (event.key === "Escape") setOpen(false);
+          if (event.key === "Escape") close();
         }}
       />
       <ScheduleRecognition recognition={recognition} />
@@ -186,11 +195,7 @@ function QuickAdd({
         </p>
       )}
       <div>
-        <button
-          type="button"
-          className="text-button"
-          onClick={() => setOpen(false)}
-        >
+        <button type="button" className="text-button" onClick={close}>
           {tr("cancel")}
         </button>
         <button className="primary-button small-button" disabled={busy}>
@@ -213,6 +218,7 @@ function Cell({
   props: Props;
 }) {
   const sync = useTaskSync();
+  const [shown, setShown] = useState(100);
   const disabled = props.busy || props.view.sort !== "manual";
   const drop = useDroppable({
     id: `cell:${sectionId ?? "none"}:${statusId ?? "list"}`,
@@ -226,7 +232,7 @@ function Cell({
       data-drop-section={sectionId ?? "none"}
       data-drop-status={statusId ?? "list"}
     >
-      {tasks.map((task) => (
+      {tasks.slice(0, shown).map((task) => (
         <TaskCard
           key={sync.keyFor(task.id)}
           task={task}
@@ -239,6 +245,16 @@ function Cell({
           onComplete={() => props.onComplete(task)}
         />
       ))}
+      {shown < tasks.length && (
+        <button
+          className="text-button task-load-more"
+          onClick={() => setShown((value) => value + 100)}
+        >
+          {tr("show_more_tasks", {
+            count: Math.min(100, tasks.length - shown),
+          })}
+        </button>
+      )}
       <QuickAdd
         sectionId={sectionId}
         statusId={
@@ -251,6 +267,8 @@ function Cell({
 }
 
 export function TaskViews(props: Props) {
+  const actions = useTaskActions();
+  const scroll = useRef<HTMLDivElement>(null);
   const board = props.view.layout === "board";
   const sections = props.sections.filter(
     (section) =>
@@ -269,94 +287,144 @@ export function TaskViews(props: Props) {
     gridTemplateColumns: `repeat(${props.statuses.length}, minmax(260px, 1fr))`,
   } as CSSProperties;
   return (
-    <div
-      className={`${board ? "board-scroll" : "task-lists"} density-${props.view.density}`}
-    >
+    <>
       {board && (
-        <div className="board-columns" style={grid}>
-          {props.statuses.map((status) => (
-            <div key={status.id} className="board-column-title">
-              <span
-                className="color-dot"
-                style={{ background: status.color }}
-              />
-              <span>{status.name}</span>
-              <span className="count-badge">
-                {
-                  props.tasks.filter(
-                    (task) =>
-                      task.status_id === status.id &&
-                      (!task.section_id ||
-                        sections.some(
-                          (section) => section.id === task.section_id,
-                        )),
-                  ).length
-                }
-              </span>
-            </div>
+        <nav className="board-navigation" aria-label={tr("board_navigation")}>
+          {props.statuses.map((status, index) => (
+            <button
+              className="text-button"
+              key={status.id}
+              onClick={() => {
+                const column = scroll.current?.querySelectorAll<HTMLElement>(
+                  ".board-column-title",
+                )[index];
+                if (column && scroll.current)
+                  scroll.current.scrollTo({
+                    left: column.offsetLeft - scroll.current.offsetLeft,
+                    behavior: matchMedia("(prefers-reduced-motion: reduce)")
+                      .matches
+                      ? "instant"
+                      : "smooth",
+                  });
+              }}
+            >
+              {status.name}
+            </button>
           ))}
-        </div>
+        </nav>
       )}
-      {groups.map((section) => {
-        const tasks = props.tasks.filter(
-          (task) => task.section_id === section.id,
-        );
-        return (
-          <section
-            className={board ? "board-section" : "task-section"}
-            key={section.id ?? "none"}
-            aria-labelledby={`section-${section.id}`}
-          >
-            <div className="section-heading">
-              <span
-                className="section-marker"
-                style={{ background: section.color }}
-              />
-              <h2 id={`section-${section.id}`}>{section.name}</h2>
-              <span className="section-count">{tasks.length}</span>
-              <span className="spacer" />
-              {section.id && (
-                <button
-                  className="icon-button"
-                  aria-label={tr("configure_section", { name: section.name })}
-                  onClick={props.onConfigure}
-                >
-                  <Icon name="more" size={18} />
-                </button>
-              )}
-            </div>
-            {section.description && (
-              <p className="section-description">{section.description}</p>
-            )}
-            {board ? (
-              <div className="board-row" style={grid}>
-                {props.statuses.map((status) => (
+      <div
+        ref={scroll}
+        className={`${board ? "board-scroll" : "task-lists"} density-${props.view.density}`}
+      >
+        {board && (
+          <div className="board-columns" style={grid}>
+            {props.statuses.map((status) => (
+              <div key={status.id} className="board-column-title">
+                <span
+                  className="color-dot"
+                  style={{ background: status.color }}
+                />
+                <span>{status.name}</span>
+                <span className="count-badge">
+                  {
+                    props.tasks.filter(
+                      (task) =>
+                        task.status_id === status.id &&
+                        (!task.section_id ||
+                          sections.some(
+                            (section) => section.id === task.section_id,
+                          )),
+                    ).length
+                  }
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+        {groups
+          .filter(
+            (section) =>
+              section.id ||
+              !props.tasks.length ||
+              props.tasks.some((task) => !task.section_id),
+          )
+          .map((section) => {
+            const tasks = props.tasks.filter(
+              (task) => task.section_id === section.id,
+            );
+            return (
+              <section
+                className={board ? "board-section" : "task-section"}
+                key={section.id ?? "none"}
+                aria-labelledby={`section-${section.id}`}
+              >
+                <div className="section-heading">
+                  <span
+                    className="section-marker"
+                    style={{ background: section.color }}
+                  />
+                  <h2 id={`section-${section.id}`}>{section.name}</h2>
+                  <span className="section-count">{tasks.length}</span>
+                  <span className="spacer" />
+                  {actions?.selecting && tasks.length > 0 && (
+                    <button
+                      className="text-button"
+                      onClick={() =>
+                        actions.selectMany(tasks.map((task) => task.id))
+                      }
+                    >
+                      {tr("select_group")}
+                    </button>
+                  )}
+                  {section.id && (
+                    <button
+                      className="icon-button"
+                      aria-label={tr("configure_section", {
+                        name: section.name,
+                      })}
+                      onClick={() => props.onConfigure(section.id ?? undefined)}
+                    >
+                      <Icon name="more" size={18} />
+                    </button>
+                  )}
+                </div>
+                {section.description && (
+                  <p className="section-description">{section.description}</p>
+                )}
+                {board ? (
+                  <div className="board-row" style={grid}>
+                    {props.statuses.map((status) => (
+                      <Cell
+                        key={status.id}
+                        sectionId={section.id}
+                        statusId={status.id}
+                        tasks={tasks.filter(
+                          (task) => task.status_id === status.id,
+                        )}
+                        props={props}
+                      />
+                    ))}
+                  </div>
+                ) : (
                   <Cell
-                    key={status.id}
                     sectionId={section.id}
-                    statusId={status.id}
-                    tasks={tasks.filter(
-                      (task) => task.status_id === status.id,
-                    )}
+                    statusId={null}
+                    tasks={tasks}
                     props={props}
                   />
-                ))}
-              </div>
-            ) : (
-              <Cell
-                sectionId={section.id}
-                statusId={null}
-                tasks={tasks}
-                props={props}
-              />
-            )}
-          </section>
-        );
-      })}
-      <button className="add-section-button" onClick={props.onConfigure}>
-        <Icon name="plus" size={16} />
-        {tr("add_a_section")}
-      </button>
-    </div>
+                )}
+              </section>
+            );
+          })}
+        <button
+          className="add-section-button"
+          onClick={() => props.onConfigure("new")}
+        >
+          <Icon name="plus" size={16} />
+          {tr("add_a_section")}
+        </button>
+      </div>
+    </>
   );
 }

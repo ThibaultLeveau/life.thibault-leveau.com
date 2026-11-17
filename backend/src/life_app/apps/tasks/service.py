@@ -569,9 +569,33 @@ def bulk_tasks(db, user, payload):
     items = [task(db, user, reference.id) for reference in payload.tasks]
     for item, reference in zip(items, payload.tasks, strict=True):
         check_version(item, reference.expected_version)
-        check_active(db, user, item)
+        check_active(db, user, item, restoring=payload.action == "restore")
+    spaces = {item.workspace_id for item in items}
+    if isinstance(payload, (s.BulkStatus, s.BulkLabels)):
+        mapping = payload.status_ids if isinstance(payload, s.BulkStatus) else payload.label_ids
+        if set(mapping) != spaces:
+            raise HTTPException(422, tr("batch_workspace_choices"))
+        for space_id, choice in mapping.items():
+            if isinstance(payload, s.BulkStatus):
+                member(db, m.Status, choice, space_id)
+            else:
+                validate_labels(db, space_id, choice)
+    result = []
     for item in items:
-        if isinstance(payload, s.BulkMove):
+        if payload.action in {"complete", "reopen"}:
+            complete_task(
+                db,
+                user,
+                item,
+                s.VersionInput(expected_version=item.version),
+                payload.action == "complete",
+            )
+        elif payload.action == "duplicate":
+            result.append(
+                duplicate_task(db, user, item, s.VersionInput(expected_version=item.version))
+            )
+            continue
+        elif isinstance(payload, s.BulkMove):
             status_id = item.status_id
             if item.workspace_id != payload.workspace_id:
                 workspace(db, user, payload.workspace_id, active=True)
@@ -600,14 +624,29 @@ def bulk_tasks(db, user, payload):
                 ),
             )
         else:
-            changes = (
-                {"due_date": payload.due_date}
-                if isinstance(payload, s.BulkReschedule)
-                else {"archived": True}
-            )
+            if isinstance(payload, s.BulkReschedule):
+                changes = {"due_date": payload.due_date}
+            elif isinstance(payload, s.BulkPriority):
+                changes = {"priority": payload.priority}
+            elif isinstance(payload, s.BulkStatus):
+                changes = {"status_id": payload.status_ids[item.workspace_id]}
+            elif isinstance(payload, s.BulkLabels):
+                current = output(db, item).label_ids
+                chosen = payload.label_ids[item.workspace_id]
+                labels = (
+                    list(dict.fromkeys([*current, *chosen]))
+                    if payload.operation == "add"
+                    else [label for label in current if label not in chosen]
+                )
+                if len(labels) > 100:
+                    raise HTTPException(422, tr("batch_label_limit"))
+                changes = {"label_ids": labels}
+            else:
+                changes = {"archived": payload.action == "archive"}
             patch_task(db, user, item, s.TaskPatch(expected_version=item.version, **changes))
+        result.append(item)
     db.flush()
-    return outputs(db, items)
+    return outputs(db, result)
 
 
 def list_tasks(
@@ -698,6 +737,15 @@ def agenda_settings(db, user):
 
 
 def save_agenda_settings(db, user, payload):
+    if payload.workspace_id:
+        workspace(db, user, payload.workspace_id)
+    if payload.label_id:
+        label = db.get(m.Label, payload.label_id)
+        if label is None:
+            raise HTTPException(404, tr("label_not_found"))
+        workspace(db, user, label.workspace_id)
+        if payload.workspace_id and label.workspace_id != payload.workspace_id:
+            raise HTTPException(422, tr("batch_workspace_choices"))
     item = db.get(m.AgendaPreference, user.id)
     if item is None:
         item = m.AgendaPreference(user_id=user.id)
@@ -720,6 +768,10 @@ def agenda_tasks(db, user, today, offset, limit):
         due_start=start,
         due_end=end,
         include_overdue=settings.include_overdue,
+        search=settings.search,
+        workspace_id=settings.workspace_id,
+        priority=settings.priority,
+        label_id=settings.label_id,
         completed=None if settings.show_completed else False,
         sort="due_date",
         offset=offset,

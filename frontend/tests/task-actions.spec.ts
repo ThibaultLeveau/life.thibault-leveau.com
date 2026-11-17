@@ -64,7 +64,7 @@ async function rectangle(page: Page, first: Task, last: Task) {
   ).toBeEnabled();
   const a = (await row(page, first).boundingBox())!;
   const b = (await row(page, last).boundingBox())!;
-  await page.mouse.move(a.x + 60, a.y - 5);
+  await page.mouse.move(a.x + 60, a.y - 2);
   await page.mouse.down();
   await page.mouse.move(b.x + b.width - 48, b.y + b.height - 4, {
     steps: 12,
@@ -112,10 +112,10 @@ test("menu trois points et clic droit : clavier, copie, suppression réversible"
   await expect(page.getByRole("menu")).toBeVisible();
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(
-    page.getByRole("menuitem", { name: "Modifier", exact: true }),
+    page.getByRole("menuitem", { name: "Terminer", exact: true }),
   ).toBeFocused();
   await page.keyboard.press("ArrowDown");
-  await expect(page.getByRole("menuitem", { name: "Dupliquer" })).toBeFocused();
+  await expect(page.getByRole("menuitem", { name: "Modifier", exact: true })).toBeFocused();
   await page.keyboard.press("Escape");
   await expect(trigger).toBeFocused();
   await row(page, tasks[0])
@@ -142,17 +142,17 @@ test("menu trois points et clic droit : clavier, copie, suppression réversible"
   await row(page, copy)
     .getByRole("button", { name: `Actions : ${copy.title}`, exact: true })
     .click();
-  await page.getByRole("menuitem", { name: "Supprimer", exact: true }).click();
+  await page.getByRole("menuitem", { name: "Archiver", exact: true }).click();
   await page
     .getByRole("dialog")
     .getByRole("button", { name: "Annuler" })
     .click();
   expect((await taskFromAPI(page, copy)).archived_at).toBeNull();
   await row(page, copy).click({ button: "right" });
-  await page.getByRole("menuitem", { name: "Supprimer", exact: true }).click();
+  await page.getByRole("menuitem", { name: "Archiver", exact: true }).click();
   await page
     .getByRole("dialog")
-    .getByRole("button", { name: "Supprimer", exact: true })
+    .getByRole("button", { name: "Archiver", exact: true })
     .click();
   await expect(row(page, copy)).toHaveCount(0);
   expect((await taskFromAPI(page, copy)).archived_at).not.toBeNull();
@@ -233,10 +233,11 @@ test("rectangle et actions groupées : dates, déplacement, suppression et dés�
       exact: true,
     })
     .click();
-  await page.getByRole("button", { name: "Supprimer", exact: true }).click();
+  await page.getByRole("button", { name: "Autres actions", exact: true }).click();
+  await page.getByRole("menuitem", { name: "Archiver", exact: true }).click();
   await page
     .getByRole("dialog")
-    .getByRole("button", { name: "Supprimer", exact: true })
+    .getByRole("button", { name: "Archiver", exact: true })
     .click();
   await expect(row(page, tasks[0])).toHaveCount(0);
   expect((await taskFromAPI(page, tasks[1])).archived_at).not.toBeNull();
@@ -506,10 +507,10 @@ test("rectangle : défilement aux bords, annulation, Ctrl-clic et menu borné", 
   const shortMenu = (await menu.boundingBox())!;
   expect(shortMenu.y + shortMenu.height).toBeLessThanOrEqual(180);
   await menu
-    .getByRole("menuitem", { name: "Supprimer", exact: true })
+    .getByRole("menuitem", { name: "Archiver", exact: true })
     .scrollIntoViewIfNeeded();
   await expect(
-    menu.getByRole("menuitem", { name: "Supprimer", exact: true }),
+    menu.getByRole("menuitem", { name: "Archiver", exact: true }),
   ).toBeInViewport();
   expect((await taskFromAPI(page, hiddenTask)).version).toBe(1);
 });

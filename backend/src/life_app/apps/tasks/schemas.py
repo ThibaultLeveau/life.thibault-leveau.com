@@ -183,7 +183,44 @@ class BulkArchive(BulkTasks):
     action: Literal["archive"]
 
 
-BulkInput = Annotated[BulkReschedule | BulkMove | BulkArchive, Field(discriminator="action")]
+class BulkLifecycle(BulkTasks):
+    action: Literal["complete", "reopen", "duplicate", "restore"]
+
+
+class BulkPriority(BulkTasks):
+    action: Literal["priority"]
+    priority: int = Field(ge=1, le=4)
+
+
+class BulkStatus(BulkTasks):
+    action: Literal["status"]
+    status_ids: dict[UUID, UUID] = Field(
+        min_length=1,
+        max_length=500,
+        description="Statut cible par espace ; exactement les espaces des tâches du lot.",
+    )
+
+
+class BulkLabels(BulkTasks):
+    action: Literal["labels"]
+    operation: Literal["add", "remove"]
+    label_ids: dict[UUID, Annotated[list[UUID], Field(max_length=100)]] = Field(
+        min_length=1,
+        max_length=500,
+        description="Étiquettes par espace ; exactement les espaces des tâches du lot.",
+    )
+
+
+BulkInput = Annotated[
+    BulkReschedule
+    | BulkMove
+    | BulkArchive
+    | BulkLifecycle
+    | BulkPriority
+    | BulkStatus
+    | BulkLabels,
+    Field(discriminator="action"),
+]
 
 
 class TaskOutput(Schema):
@@ -214,6 +251,10 @@ class TaskPage(Schema):
 
 
 class AgendaSettings(Schema):
+    search: str = Field(default="", max_length=500)
+    workspace_id: UUID | None = None
+    priority: int | None = Field(default=None, ge=1, le=4)
+    label_id: UUID | None = None
     period: Literal["today", "tomorrow", "week", "custom"] = "today"
     custom_days: int = Field(default=14, ge=1, le=90)
     include_overdue: bool = True

@@ -8,9 +8,10 @@ import { Icon } from "../../../shared/ui/Icon";
 import { TaskContents } from "./TaskContents";
 import { TaskEditor } from "./TaskEditor";
 import { MoveDialog } from "./MoveDialog";
-import { TaskActions } from "./TaskActions";
+import { TaskActions, SelectTaskGroup } from "./TaskActions";
 
 import { useTaskSync } from "../useTaskSync";
+import { useTaskCompletion, CompletionNotice } from "../useTaskCompletion";
 import { agendaTasks } from "../optimistic";
 const periods = () =>
   [
@@ -24,10 +25,12 @@ export function AgendaView({
   workspaces,
   today,
   onWorkspace,
+  onCreate,
 }: {
   workspaces: Workspace[];
   today: string;
   onWorkspace: (id: string) => void;
+  onCreate: () => void;
 }) {
   const sync = useTaskSync();
   const data = sync.data!;
@@ -55,42 +58,29 @@ export function AgendaView({
       },
     ]),
   );
-  const [notice, setNotice] = useState("");
-  const [undoTask, setUndoTask] = useState<Task | null>(null);
+  const completion = useTaskCompletion(today);
+  const [search, setSearch] = useState(settings.search);
+  useEffect(() => {
+    setSearch(settings.search);
+  }, [settings.search]);
+  useEffect(() => {
+    if (search === settings.search) return;
+    const timer = setTimeout(() => change({ search }), 300);
+    return () => clearTimeout(timer);
+  }, [search, settings]);
+  useEffect(() => {
+    if (settings.workspace_id) void sync.ensureSpace(settings.workspace_id);
+  }, [settings.workspace_id]);
+  const [limits, setLimits] = useState<Record<string, number>>({});
   const [editor, setEditor] = useState<Task | null>(null);
   const [moving, setMoving] = useState<Task | null>(null);
   function change(patch: Partial<AgendaSettings>) {
     sync.mutate("/agenda/view", "PUT", { ...settings, ...patch });
   }
-  function complete(task: Task) {
-    setUndoTask(null);
-    sync.mutate(
-      `/tasks/${task.id}/${task.completed_at ? "reopen" : "complete"}`,
-      "POST",
-      { expected_version: task.version },
-      {
-        success: (result) => {
-          const saved = result as Task;
-          setUndoTask(task.completed_at ? null : saved);
-          setNotice(
-            task.completed_at
-              ? tr("task_reopened")
-              : saved.recurrence && !saved.completed_at
-                ? tr("occurrence_next", {
-                    date: relativeDate(saved.due_date!, today).full,
-                  })
-                : saved.recurrence
-                  ? tr("last_occurrence_completed")
-                  : tr("task_completed"),
-          );
-        },
-      },
-    );
-  }
   function saved() {
     setEditor(null);
     setMoving(null);
-    setUndoTask(null);
+    completion.clear();
   }
   const spacePaths = new Map(
     workspaceTree(workspaces).map(({ space, path }) => [space.id, path]),
@@ -113,7 +103,10 @@ export function AgendaView({
             {tr("your_due_dates_across_all_workspaces")}
           </p>
         </div>
-        <Icon name="calendar" size={28} />
+        <button className="primary-button" onClick={onCreate}>
+          <Icon name="plus" />
+          {tr("new_task")}
+        </button>
       </div>
       {settings && (
         <>
@@ -130,6 +123,96 @@ export function AgendaView({
                 {label}
               </button>
             ))}
+          </div>
+          <div className="global-task-filters agenda-filters">
+            <label>
+              {tr("search_tasks")}
+              <input
+                value={search}
+                maxLength={500}
+                onChange={(event) => setSearch(event.target.value)}
+              />
+            </label>
+            <label>
+              {tr("workspace")}
+              <select
+                value={settings.workspace_id ?? ""}
+                onChange={(event) =>
+                  change({
+                    workspace_id: event.target.value || null,
+                    label_id: null,
+                  })
+                }
+              >
+                <option value="">{tr("all_workspaces")}</option>
+                {workspaceTree(workspaces).map(({ space, path }) => (
+                  <option key={space.id} value={space.id}>
+                    {path}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              {tr("priority")}
+              <select
+                value={settings.priority ?? ""}
+                onChange={(event) =>
+                  change({
+                    priority: event.target.value
+                      ? Number(event.target.value)
+                      : null,
+                  })
+                }
+              >
+                <option value="">{tr("all_priorities")}</option>
+                {[1, 2, 3, 4].map((value) => (
+                  <option key={value} value={value}>
+                    P{value}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {settings.workspace_id && (
+              <label>
+                {tr("label")}
+                <select
+                  value={settings.label_id ?? ""}
+                  onChange={(event) =>
+                    change({ label_id: event.target.value || null })
+                  }
+                >
+                  <option value="">{tr("all_labels")}</option>
+                  {data.labels
+                    .filter(
+                      (label) => label.workspace_id === settings.workspace_id,
+                    )
+                    .map((label) => (
+                      <option key={label.id} value={label.id}>
+                        {label.name}
+                      </option>
+                    ))}
+                </select>
+              </label>
+            )}
+            {(settings.search ||
+              settings.workspace_id ||
+              settings.priority ||
+              settings.label_id) && (
+              <button
+                className="text-button"
+                onClick={() => {
+                  setSearch("");
+                  change({
+                    search: "",
+                    workspace_id: null,
+                    priority: null,
+                    label_id: null,
+                  });
+                }}
+              >
+                {tr("clear_filters")}
+              </button>
+            )}
           </div>
           <div className="agenda-options">
             {settings.period === "custom" && (
@@ -184,34 +267,7 @@ export function AgendaView({
           </div>
         </>
       )}
-      {notice && (
-        <p className="notice" role="status">
-          {notice}
-          {undoTask && (
-            <button
-              className="text-button"
-              onClick={() => {
-                sync.mutate(
-                  `/tasks/${undoTask.id}/undo-complete`,
-                  "POST",
-                  { expected_version: undoTask.version },
-                  {
-                    message: tr(
-                      "completion_undone_the_previous_due_date_is_restored",
-                    ),
-                    success: () => {
-                      setUndoTask(null);
-                      setNotice("");
-                    },
-                  },
-                );
-              }}
-            >
-              {tr("undo_completion")}
-            </button>
-          )}
-        </p>
-      )}
+      <CompletionNotice completion={completion} />
       {page && (
         <>
           <div className="task-summary" role="status">
@@ -262,13 +318,14 @@ export function AgendaView({
                       : relativeDate(key, today).label}
                   </h2>
                   <span className="section-count">{tasks.length}</span>
+                  <SelectTaskGroup tasks={tasks} />
                   {key !== "overdue" && (
                     <span className="agenda-full-date">
                       {relativeDate(key, today).full}
                     </span>
                   )}
                 </div>
-                {tasks.map((task) => {
+                {tasks.slice(0, limits[key] ?? 100).map((task) => {
                   const space = workspaces.find(
                     (space) => space.id === task.workspace_id,
                   );
@@ -288,7 +345,7 @@ export function AgendaView({
                         labels={data?.labels ?? []}
                         busy={false}
                         onOpen={() => setEditor(task)}
-                        onComplete={() => complete(task)}
+                        onComplete={() => completion.complete(task)}
                         context={
                           <button
                             className="agenda-task-context"
@@ -306,6 +363,21 @@ export function AgendaView({
                     </article>
                   );
                 })}
+                {tasks.length > (limits[key] ?? 100) && (
+                  <button
+                    className="text-button task-load-more"
+                    onClick={() =>
+                      setLimits((previous) => ({
+                        ...previous,
+                        [key]: (previous[key] ?? 100) + 100,
+                      }))
+                    }
+                  >
+                    {tr("show_more_tasks", {
+                      count: Math.min(100, tasks.length - (limits[key] ?? 100)),
+                    })}
+                  </button>
+                )}
               </section>
             ))}
           </TaskActions>

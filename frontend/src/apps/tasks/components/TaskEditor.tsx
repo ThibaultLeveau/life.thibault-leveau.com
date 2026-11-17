@@ -1,5 +1,6 @@
 import { formatLocale } from "../../../shared/i18n";
 import { tr } from "../i18n";
+import { useDraftForm } from "../useTaskDrafts";
 import { useState, type FormEvent } from "react";
 import { api } from "../../../platform/api";
 import type {
@@ -59,6 +60,10 @@ export function TaskEditor({
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const sync = useTaskSync();
+  const archivedParent =
+    !!workspace.archived_at ||
+    !!sections.find((section) => section.id === task?.section_id)?.archived_at;
+  const readonly = !!task?.archived_at || archivedParent;
   const existing = task && task.id !== "draft";
   const [selectedLabels, setSelectedLabels] = useState(task?.label_ids ?? []);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -72,8 +77,10 @@ export function TaskEditor({
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const recognition = useScheduleRecognition(
     title,
-    !task?.archived_at && title !== task?.title,
+    !readonly && title !== task?.title,
   );
+  const draft = useDraftForm({ schedule, selectedLabels });
+  const close = () => draft.leave(onClose);
   const displayedSchedule = recognition.suggestion ?? schedule;
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -145,7 +152,12 @@ export function TaskEditor({
     }
   }
   async function archive() {
-    if (!task) return;
+    if (
+      !task ||
+      archivedParent ||
+      (!task.archived_at && !window.confirm(tr("archive_task_confirmation")))
+    )
+      return;
     sync.mutate(
       `/tasks/${task.id}`,
       "PATCH",
@@ -174,9 +186,16 @@ export function TaskEditor({
   return (
     <Dialog
       title={existing ? tr("task_details") : tr("a_new_task")}
-      onClose={onClose}
+      onClose={close}
     >
-      <form onSubmit={submit} className="stack-form dialog-body">
+      <form
+        ref={draft.ref}
+        onSubmit={submit}
+        className="stack-form dialog-body"
+      >
+        {archivedParent && (
+          <p className="muted">{tr("restore_parent_first")}</p>
+        )}
         <p className="dialog-context">
           <span className="color-dot" style={{ background: workspace.color }} />
           {workspace.name}
@@ -191,15 +210,13 @@ export function TaskEditor({
             onChange={(event) => setTitle(event.target.value)}
             autoFocus
             placeholder={tr("read_tomorrow_run_every_monday")}
-            disabled={busy || !!task?.archived_at}
+            disabled={busy || readonly}
           />
         </label>
-        {!task?.archived_at && (
-          <ScheduleRecognition recognition={recognition} />
-        )}
+        {!readonly && <ScheduleRecognition recognition={recognition} />}
         <SchedulePicker
           value={displayedSchedule}
-          disabled={busy || !!task?.archived_at}
+          disabled={busy || readonly}
           completed={task?.recurrence_completed ?? 0}
           onEditingChange={setScheduleOpen}
           onChange={(value) => {
@@ -226,7 +243,7 @@ export function TaskEditor({
             maxLength={20000}
             defaultValue={task?.description}
             placeholder={tr("a_few_details_to_make_things_clearer")}
-            disabled={!!task?.archived_at}
+            disabled={readonly}
           />
         </label>
         <div className="form-grid">
@@ -235,7 +252,7 @@ export function TaskEditor({
             <select
               name="section_id"
               defaultValue={task?.section_id ?? initialSection ?? ""}
-              disabled={!!task?.archived_at}
+              disabled={readonly}
             >
               <option value="">{tr("no_section")}</option>
               {sections.map((section) => (
@@ -254,7 +271,7 @@ export function TaskEditor({
                 initialStatus ??
                 statuses.find((status) => !status.is_completed)?.id
               }
-              disabled={!!task?.archived_at}
+              disabled={readonly}
             >
               {statuses.map((status) => (
                 <option key={status.id} value={status.id}>
@@ -268,7 +285,7 @@ export function TaskEditor({
             <select
               name="priority"
               defaultValue={task?.priority ?? 4}
-              disabled={!!task?.archived_at}
+              disabled={readonly}
             >
               <option value={1}>{tr("p1_urgent")}</option>
               <option value={2}>{tr("p2_high")}</option>
@@ -286,7 +303,7 @@ export function TaskEditor({
                   <input
                     type="checkbox"
                     checked={selectedLabels.includes(label.id)}
-                    disabled={!!task?.archived_at}
+                    disabled={readonly}
                     onChange={(event) =>
                       setSelectedLabels((previous) =>
                         event.target.checked
@@ -311,18 +328,18 @@ export function TaskEditor({
             <button
               type="button"
               className="text-button danger"
-              disabled={busy}
-              onClick={archive}
+              disabled={busy || archivedParent}
+              onClick={() => draft.leave(() => void archive())}
             >
               <Icon name={task.archived_at ? "restore" : "archive"} />
               {task.archived_at ? tr("restore") : tr("archive")}
             </button>
           )}
           <span className="spacer" />
-          <button type="button" className="secondary-button" onClick={onClose}>
+          <button type="button" className="secondary-button" onClick={close}>
             {tr("cancel")}
           </button>
-          {!task?.archived_at && (
+          {!readonly && (
             <button
               className="primary-button"
               disabled={busy || scheduleOpen}
@@ -350,8 +367,11 @@ export function TaskEditor({
               <Icon name="restore" />
               {tr("history")}
             </button>
-            {!task.archived_at && (
-              <button className="text-button" onClick={() => onMove(task)}>
+            {!readonly && (
+              <button
+                className="text-button"
+                onClick={() => draft.leave(() => onMove(task))}
+              >
                 <Icon name="arrow" />
                 {tr("move_and_reorder")}
               </button>

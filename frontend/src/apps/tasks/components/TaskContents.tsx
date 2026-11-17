@@ -1,7 +1,7 @@
 import { tr } from "../i18n";
 import type { ReactNode } from "react";
 import { relativeDate } from "../dates";
-import type { Label, Task } from "../types";
+import type { Label, Status, Task } from "../types";
 import { Icon } from "../../../shared/ui/Icon";
 import { shortRecurrence } from "../scheduling";
 import { useTaskActions } from "./TaskActions";
@@ -16,6 +16,8 @@ export function TaskContents({
   onOpen,
   onComplete,
   context,
+  status,
+  archived = false,
 }: {
   task: Task;
   today: string;
@@ -24,9 +26,13 @@ export function TaskContents({
   onOpen: () => void;
   onComplete: () => void;
   context?: ReactNode;
+  status?: Status;
+  archived?: boolean;
 }) {
   const actions = useTaskActions();
-  const flashing = useTaskSync().flashes.has(task.id);
+  const sync = useTaskSync();
+  status ??= sync.data?.statuses.find((status) => status.id === task.status_id);
+  const flashing = sync.flashes.has(task.id);
   const selecting = actions?.selecting ?? false;
   const selected = actions?.selected.has(task.id) ?? false;
   const completed = !!task.completed_at;
@@ -41,7 +47,9 @@ export function TaskContents({
             ? "task-checkbox task-select"
             : `task-checkbox priority-${task.priority} ${flashing ? "is-validating" : ""}`
         }
-        onClick={() => (selecting ? actions?.toggle(task.id) : onComplete())}
+        onClick={(event) =>
+          selecting ? actions?.toggle(task.id, event.shiftKey) : onComplete()
+        }
         aria-label={tr("action_named", {
           action: selecting
             ? selected
@@ -52,7 +60,7 @@ export function TaskContents({
               : tr("complete"),
           name: task.title,
         })}
-        disabled={busy || actions?.busy}
+        disabled={busy || actions?.busy || (archived && !selecting)}
       >
         {(selecting ? selected : completed || flashing) && (
           <Icon name="check" size={13} />
@@ -72,11 +80,14 @@ export function TaskContents({
         {(date ||
           task.priority < 4 ||
           task.label_ids.length > 0 ||
+          status ||
           context) && (
           <div className="task-meta">
             {date && (
-              <time
-                dateTime={task.due_date!}
+              <button
+                type="button"
+                disabled={archived}
+                onClick={() => actions?.action("reschedule", task)}
                 title={date.full}
                 aria-label={tr("due_label", {
                   date: date.full,
@@ -87,15 +98,21 @@ export function TaskContents({
                 })}
                 className={`task-date is-${completed ? "completed" : date.tone}`}
               >
-                <Icon
-                  name={task.recurrence ? "repeat" : "calendar"}
-                  size={13}
-                />
-                {date.label}
-                {!completed && date.tone === "overdue" && (
-                  <span> {tr("overdue_annotation")}</span>
-                )}
-              </time>
+                <time
+                  dateTime={task.due_date!}
+                  className={`task-date is-${completed ? "completed" : date.tone}`}
+                  title={date.full}
+                >
+                  <Icon
+                    name={task.recurrence ? "repeat" : "calendar"}
+                    size={13}
+                  />
+                  {date.label}
+                  {!completed && date.tone === "overdue" && (
+                    <span> {tr("overdue_annotation")}</span>
+                  )}
+                </time>
+              </button>
             )}
             {task.recurrence && (
               <span
@@ -109,21 +126,47 @@ export function TaskContents({
               </span>
             )}
             {task.priority < 4 && (
-              <span className={`task-priority priority-${task.priority}`}>
+              <button
+                type="button"
+                disabled={archived}
+                onClick={() => actions?.action("priority", task)}
+                className={`task-priority priority-${task.priority}`}
+                aria-label={`${tr("priority")} ${task.priority}`}
+              >
                 <Icon name="flag" size={12} />P{task.priority}
-              </span>
+              </button>
             )}
             {labels
               .filter((label) => task.label_ids.includes(label.id))
               .map((label) => (
-                <span className="task-label" key={label.id}>
+                <button
+                  type="button"
+                  disabled={archived}
+                  onClick={() => actions?.action("labels", task)}
+                  className="task-label"
+                  key={label.id}
+                >
                   <span
                     className="color-dot"
                     style={{ background: label.color }}
                   />
                   {label.name}
-                </span>
+                </button>
               ))}
+            {status && (
+              <button
+                type="button"
+                className="task-status"
+                disabled={archived}
+                onClick={() => actions?.action("status", task)}
+              >
+                <span
+                  className="color-dot"
+                  style={{ background: status.color }}
+                />
+                {status.name}
+              </button>
+            )}
             {context}
           </div>
         )}
