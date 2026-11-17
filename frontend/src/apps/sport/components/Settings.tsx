@@ -14,7 +14,10 @@ import {
   useFormValidation,
 } from "./common";
 
-function SettingsForm({ settings, ...guard }: { settings: SportSettings } & SettingsPanelProps) {
+function SettingsForm({
+  settings,
+  ...guard
+}: { settings: SportSettings } & SettingsPanelProps) {
   const [base, setBase] = useState(settings);
   const [rest, setRest] = useState(String(settings.rest_seconds));
   const [saved, setSaved] = useState(false);
@@ -111,7 +114,7 @@ function SettingsForm({ settings, ...guard }: { settings: SportSettings } & Sett
         describe={describe}
         onReload={load}
         onKeep={(value) => {
-                setBase(value);
+          setBase(value);
           action.clear();
         }}
       />
@@ -129,5 +132,10 @@ function SettingsForm({ settings, ...guard }: { settings: SportSettings } & Sett
 
 export function Settings(guard: SettingsPanelProps) {
   const resource = useResource(sportApi.settings, []);
-  return <><LoadState {...resource} />{resource.data && <SettingsForm settings={resource.data} {...guard} />}</>;
+  return (
+    <>
+      <LoadState {...resource} />
+      {resource.data && <SettingsForm settings={resource.data} {...guard} />}
+    </>
+  );
 }

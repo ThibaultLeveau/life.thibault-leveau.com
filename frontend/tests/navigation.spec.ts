@@ -137,6 +137,9 @@ async function singleLineTopbar(page: Page) {
     expect(menu.height).toBeGreaterThanOrEqual(44);
     expect(menu.x + menu.width).toBeLessThanOrEqual(breadcrumb.x);
     expect(Math.abs(menu.y - badge.y)).toBeLessThan(1);
+  } else {
+    await expect(topbar.locator(".application-nav-mobile")).toBeHidden();
+    await expect(page.locator(".application-nav-close")).toBeHidden();
   }
 }
 

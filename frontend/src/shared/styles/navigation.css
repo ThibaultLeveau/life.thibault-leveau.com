@@ -62,7 +62,8 @@
   background: var(--ui-hover);
   color: var(--ui-text);
 }
-:is(.application-sidebar, .settings-navigation) .application-nav-item.is-active {
+:is(.application-sidebar, .settings-navigation)
+  .application-nav-item.is-active {
   background: var(--ui-accent-bg);
   color: var(--ui-accent);
   font-weight: 600;
@@ -147,7 +148,7 @@
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-.application-nav-mobile,
+.icon-button.application-nav-mobile,
 .application-nav-scrim {
   display: none;
 }
@@ -184,7 +185,7 @@
     transition-property: transform;
     transition-delay: 0s;
   }
-  .application-nav-mobile {
+  .icon-button.application-nav-mobile {
     display: inline-flex;
   }
   .application-nav-scrim {

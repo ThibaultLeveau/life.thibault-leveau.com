@@ -189,7 +189,17 @@ test("Sport UX : recherche temporisée, liste stable et retour à la position", 
   release();
   await expect(rows.first()).toContainText(/squat/i);
   await page.unroute("**/api/v1/sport/exercises?**");
+  const filtered = page.waitForResponse((response) => {
+    const url = new URL(response.url());
+    return (
+      url.pathname === "/api/v1/sport/exercises" &&
+      url.searchParams.get("kind") === "weight_reps" &&
+      response.ok()
+    );
+  });
   await page.getByLabel("Type d’exercice").selectOption("weight_reps");
+  await filtered;
+  await expect(page.locator(".sport-refreshing")).toHaveCount(0);
   await expect(page).toHaveURL(/ex_kind=weight_reps/);
   await rows.last().scrollIntoViewIfNeeded();
   const scroll = await page.evaluate(() => window.scrollY);
@@ -258,10 +268,12 @@ test("Sport UX : brouillon, validation locale et fermeture pendant la sauvegarde
   ).toBe(90);
   await rest.fill("120");
   page.once("dialog", (modal) => modal.dismiss());
-  await tab(page, "Programmes");
+  await page.getByRole("link", { name: "Ouvrir Sport", exact: true }).click();
   await expect(rest).toHaveValue("120");
   await page.getByRole("button", { name: "Enregistrer les réglages" }).click();
-  await expect(page.getByRole("status")).toContainText(/enregistr/);
+  await expect(
+    page.locator(".sport-settings").getByRole("status"),
+  ).toContainText(/enregistr/);
   expect(
     (await read<SportSettings>(page, "/sport/settings")).rest_seconds,
   ).toBe(120);
@@ -587,11 +599,18 @@ test("Sport UX : réglages protégés pour langue et déconnexion, puis rapproch
   await expect(
     page.getByRole("combobox", { name: "Langue", exact: true }),
   ).toHaveValue("fr");
+  await page
+    .getByRole("button", {
+      name: process.env.LIFE_E2E_USERNAME ?? "browser-test",
+      exact: true,
+    })
+    .click();
   page.once("dialog", (modal) => modal.dismiss());
   await page
-    .getByRole("button", { name: "Se déconnecter", exact: true })
+    .getByRole("menuitem", { name: "Se déconnecter", exact: true })
     .click();
   await expect(rest).toHaveValue("180");
+  await page.keyboard.press("Escape");
   await write(page, "/sport/settings", { rest_seconds: 120 });
   await page.getByRole("button", { name: "Enregistrer les réglages" }).click();
   await page

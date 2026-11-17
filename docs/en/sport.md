@@ -120,7 +120,7 @@ With the automatic program style, a title containing **Hyrox**, regardless of ca
 
 **Date of your next HYROX** is optional. Before the date the banner shows **D−…**, on the date **RACE DAY**, and afterwards **AFTER THE RACE**. Without a date it shows **ON THE WAY**. Use **Clear competition date** and save to remove it. Past dates are accepted. The countdown compares civil dates in your browser’s timezone, refreshes every 30 seconds and when the tab returns to the foreground, and has no alarm.
 
-Removing “Hyrox” from the title hides the branding but preserves the date. A session snapshots its name and competition date when it starts; later program edits do not change an active or historical session. Archiving, language changes and disabling/re-enabling Sport preserve dates. The logo is packaged locally; it does not indicate an official partnership. See the [provenance record](../sport.md#preparer-un-hyrox).
+In Automatic style, removing “Hyrox” from the title hides the branding but preserves the date. A session snapshots its name and competition date when it starts; later program edits do not change an active or historical session. Archiving, language changes and disabling/re-enabling Sport preserve dates. The logo is packaged locally; it does not indicate an official partnership. See the [provenance record](../sport.md#preparer-un-hyrox).
 
 
 ## Progress and quests

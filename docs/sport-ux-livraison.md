@@ -1,6 +1,6 @@
 # Finition Sport — suivi des 39 améliorations
 
-Cette livraison met en œuvre les suites de la [revue du 17 novembre 2026](revue-sport-2026-11-17.md), autorisées dans l’[issue #74](https://github.com/ThibaultLeveau/life.thibault-leveau.com/issues/74). Les guides [Sport](sport.md), [Sport en anglais](en/sport.md) et [API](sport-api.md) décrivent les contrats livrés. L’audit original conserve ses constats et ses mesures historiques.
+Cette livraison met en œuvre les suites de la [revue du 17 novembre 2026](revue-sport-2026-11-17.md), autorisées dans l’[issue #74](https://github.com/ThibaultLeveau/life.thibault-leveau.com/issues/74). Les réglages Sport s’intègrent au panneau `/settings?application=sport` de l’ADR 007, avec les gardes communes de brouillon et d’écriture. Les guides [Sport](sport.md), [Sport en anglais](en/sport.md) et [API](sport-api.md) décrivent les contrats livrés. L’audit original conserve ses constats et ses mesures historiques.
 
 | Point | Comportement livré | Vérification principale |
 | --- | --- | --- |
