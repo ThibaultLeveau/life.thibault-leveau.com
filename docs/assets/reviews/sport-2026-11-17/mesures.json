@@ -1,0 +1,4062 @@
+{
+  "reviewed_revision": "ecab6ac94a64a11f79722bd43b819cb116505ed8",
+  "date": "2026-11-17",
+  "data": "synthetic, isolated PostgreSQL; no production user data",
+  "engines": {
+    "playwright": "1.64.1",
+    "chromium": "156.0.8078.4",
+    "webkit": "27.2",
+    "axe": "4.14.0"
+  },
+  "validation": {
+    "chromium_journeys": 55,
+    "webkit_journeys": 25,
+    "backend_tests": 693,
+    "matrix_states": 196,
+    "empty_states": 28,
+    "axe_page_scans": 56,
+    "axe_additional_mobile_navigation_scans": 1
+  },
+  "states": [
+    {
+      "name": "fr-light-320-workouts",
+      "locale": "fr",
+      "theme": "light",
+      "width": 320,
+      "tab": "workouts",
+      "overflow": 0,
+      "scrollHeight": 2632,
+      "cardHeights": [
+        203,
+        179,
+        299,
+        270,
+        179,
+        179,
+        315,
+        228
+      ],
+      "headingBottom": 201,
+      "restHeight": 90
+    },
+    {
+      "name": "fr-light-320-exercises",
+      "locale": "fr",
+      "theme": "light",
+      "width": 320,
+      "tab": "exercises",
+      "overflow": 0,
+      "scrollHeight": 6217,
+      "cardHeights": [],
+      "headingBottom": 201,
+      "restHeight": 90
+    },
+    {
+      "name": "fr-light-320-training",
+      "locale": "fr",
+      "theme": "light",
+      "width": 320,
+      "tab": "training",
+      "overflow": 0,
+      "scrollHeight": 2221,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "fr-light-320-history",
+      "locale": "fr",
+      "theme": "light",
+      "width": 320,
+      "tab": "history",
+      "overflow": 0,
+      "scrollHeight": 3475,
+      "cardHeights": [],
+      "headingBottom": 201,
+      "restHeight": 90
+    },
+    {
+      "name": "fr-light-320-measurements",
+      "locale": "fr",
+      "theme": "light",
+      "width": 320,
+      "tab": "measurements",
+      "overflow": 0,
+      "scrollHeight": 1548,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "fr-light-320-statistics",
+      "locale": "fr",
+      "theme": "light",
+      "width": 320,
+      "tab": "statistics",
+      "overflow": 0,
+      "scrollHeight": 2396,
+      "cardHeights": [],
+      "headingBottom": 201,
+      "restHeight": 90
+    },
+    {
+      "name": "fr-light-320-settings",
+      "locale": "fr",
+      "theme": "light",
+      "width": 320,
+      "tab": "settings",
+      "overflow": 0,
+      "scrollHeight": 844,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "fr-light-390-workouts",
+      "locale": "fr",
+      "theme": "light",
+      "width": 390,
+      "tab": "workouts",
+      "overflow": 0,
+      "scrollHeight": 2550,
+      "cardHeights": [
+        179,
+        179,
+        299,
+        270,
+        179,
+        179,
+        292,
+        228
+      ],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "fr-light-390-exercises",
+      "locale": "fr",
+      "theme": "light",
+      "width": 390,
+      "tab": "exercises",
+      "overflow": 0,
+      "scrollHeight": 5299,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "fr-light-390-training",
+      "locale": "fr",
+      "theme": "light",
+      "width": 390,
+      "tab": "training",
+      "overflow": 0,
+      "scrollHeight": 2118,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "fr-light-390-history",
+      "locale": "fr",
+      "theme": "light",
+      "width": 390,
+      "tab": "history",
+      "overflow": 0,
+      "scrollHeight": 3298,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "fr-light-390-measurements",
+      "locale": "fr",
+      "theme": "light",
+      "width": 390,
+      "tab": "measurements",
+      "overflow": 0,
+      "scrollHeight": 1548,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "fr-light-390-statistics",
+      "locale": "fr",
+      "theme": "light",
+      "width": 390,
+      "tab": "statistics",
+      "overflow": 0,
+      "scrollHeight": 2150,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "fr-light-390-settings",
+      "locale": "fr",
+      "theme": "light",
+      "width": 390,
+      "tab": "settings",
+      "overflow": 0,
+      "scrollHeight": 844,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "fr-light-768-workouts",
+      "locale": "fr",
+      "theme": "light",
+      "width": 768,
+      "tab": "workouts",
+      "overflow": 0,
+      "scrollHeight": 4113,
+      "cardHeights": [
+        884,
+        884,
+        884,
+        884,
+        884,
+        884,
+        884,
+        884
+      ],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-768-exercises",
+      "locale": "fr",
+      "theme": "light",
+      "width": 768,
+      "tab": "exercises",
+      "overflow": 0,
+      "scrollHeight": 4943,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-768-training",
+      "locale": "fr",
+      "theme": "light",
+      "width": 768,
+      "tab": "training",
+      "overflow": 0,
+      "scrollHeight": 1870,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-768-history",
+      "locale": "fr",
+      "theme": "light",
+      "width": 768,
+      "tab": "history",
+      "overflow": 0,
+      "scrollHeight": 3425,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-768-measurements",
+      "locale": "fr",
+      "theme": "light",
+      "width": 768,
+      "tab": "measurements",
+      "overflow": 0,
+      "scrollHeight": 1523,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-768-statistics",
+      "locale": "fr",
+      "theme": "light",
+      "width": 768,
+      "tab": "statistics",
+      "overflow": 0,
+      "scrollHeight": 2112,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-768-settings",
+      "locale": "fr",
+      "theme": "light",
+      "width": 768,
+      "tab": "settings",
+      "overflow": 0,
+      "scrollHeight": 1000,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-800-workouts",
+      "locale": "fr",
+      "theme": "light",
+      "width": 800,
+      "tab": "workouts",
+      "overflow": 0,
+      "scrollHeight": 4115,
+      "cardHeights": [
+        884,
+        884,
+        884,
+        884,
+        884,
+        884,
+        884,
+        884
+      ],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-800-exercises",
+      "locale": "fr",
+      "theme": "light",
+      "width": 800,
+      "tab": "exercises",
+      "overflow": 0,
+      "scrollHeight": 4943,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-800-training",
+      "locale": "fr",
+      "theme": "light",
+      "width": 800,
+      "tab": "training",
+      "overflow": 0,
+      "scrollHeight": 1870,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-800-history",
+      "locale": "fr",
+      "theme": "light",
+      "width": 800,
+      "tab": "history",
+      "overflow": 0,
+      "scrollHeight": 3425,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-800-measurements",
+      "locale": "fr",
+      "theme": "light",
+      "width": 800,
+      "tab": "measurements",
+      "overflow": 0,
+      "scrollHeight": 1523,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-800-statistics",
+      "locale": "fr",
+      "theme": "light",
+      "width": 800,
+      "tab": "statistics",
+      "overflow": 0,
+      "scrollHeight": 2112,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-800-settings",
+      "locale": "fr",
+      "theme": "light",
+      "width": 800,
+      "tab": "settings",
+      "overflow": 0,
+      "scrollHeight": 1000,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-801-workouts",
+      "locale": "fr",
+      "theme": "light",
+      "width": 801,
+      "tab": "workouts",
+      "overflow": 0,
+      "scrollHeight": 7543,
+      "cardHeights": [
+        859,
+        859,
+        859,
+        859,
+        859,
+        859,
+        859,
+        859
+      ],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-801-exercises",
+      "locale": "fr",
+      "theme": "light",
+      "width": 801,
+      "tab": "exercises",
+      "overflow": 0,
+      "scrollHeight": 4989,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-801-training",
+      "locale": "fr",
+      "theme": "light",
+      "width": 801,
+      "tab": "training",
+      "overflow": 0,
+      "scrollHeight": 1873,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-801-history",
+      "locale": "fr",
+      "theme": "light",
+      "width": 801,
+      "tab": "history",
+      "overflow": 0,
+      "scrollHeight": 3431,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-801-measurements",
+      "locale": "fr",
+      "theme": "light",
+      "width": 801,
+      "tab": "measurements",
+      "overflow": 0,
+      "scrollHeight": 1529,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-801-statistics",
+      "locale": "fr",
+      "theme": "light",
+      "width": 801,
+      "tab": "statistics",
+      "overflow": 0,
+      "scrollHeight": 2227,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-801-settings",
+      "locale": "fr",
+      "theme": "light",
+      "width": 801,
+      "tab": "settings",
+      "overflow": 0,
+      "scrollHeight": 1000,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-1024-workouts",
+      "locale": "fr",
+      "theme": "light",
+      "width": 1024,
+      "tab": "workouts",
+      "overflow": 0,
+      "scrollHeight": 4119,
+      "cardHeights": [
+        884,
+        884,
+        884,
+        884,
+        884,
+        884,
+        884,
+        884
+      ],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-1024-exercises",
+      "locale": "fr",
+      "theme": "light",
+      "width": 1024,
+      "tab": "exercises",
+      "overflow": 0,
+      "scrollHeight": 4947,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-1024-training",
+      "locale": "fr",
+      "theme": "light",
+      "width": 1024,
+      "tab": "training",
+      "overflow": 0,
+      "scrollHeight": 1860,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-1024-history",
+      "locale": "fr",
+      "theme": "light",
+      "width": 1024,
+      "tab": "history",
+      "overflow": 0,
+      "scrollHeight": 3431,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-1024-measurements",
+      "locale": "fr",
+      "theme": "light",
+      "width": 1024,
+      "tab": "measurements",
+      "overflow": 0,
+      "scrollHeight": 1529,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-1024-statistics",
+      "locale": "fr",
+      "theme": "light",
+      "width": 1024,
+      "tab": "statistics",
+      "overflow": 0,
+      "scrollHeight": 2114,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-1024-settings",
+      "locale": "fr",
+      "theme": "light",
+      "width": 1024,
+      "tab": "settings",
+      "overflow": 0,
+      "scrollHeight": 1000,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-1440-workouts",
+      "locale": "fr",
+      "theme": "light",
+      "width": 1440,
+      "tab": "workouts",
+      "overflow": 0,
+      "scrollHeight": 3256,
+      "cardHeights": [
+        884,
+        884,
+        884,
+        884,
+        884,
+        884,
+        884,
+        884
+      ],
+      "headingBottom": 208,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-1440-exercises",
+      "locale": "fr",
+      "theme": "light",
+      "width": 1440,
+      "tab": "exercises",
+      "overflow": 0,
+      "scrollHeight": 4959,
+      "cardHeights": [],
+      "headingBottom": 208,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-1440-training",
+      "locale": "fr",
+      "theme": "light",
+      "width": 1440,
+      "tab": "training",
+      "overflow": 0,
+      "scrollHeight": 1887,
+      "cardHeights": [],
+      "headingBottom": 208,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-1440-history",
+      "locale": "fr",
+      "theme": "light",
+      "width": 1440,
+      "tab": "history",
+      "overflow": 0,
+      "scrollHeight": 3443,
+      "cardHeights": [],
+      "headingBottom": 208,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-1440-measurements",
+      "locale": "fr",
+      "theme": "light",
+      "width": 1440,
+      "tab": "measurements",
+      "overflow": 0,
+      "scrollHeight": 1541,
+      "cardHeights": [],
+      "headingBottom": 208,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-1440-statistics",
+      "locale": "fr",
+      "theme": "light",
+      "width": 1440,
+      "tab": "statistics",
+      "overflow": 0,
+      "scrollHeight": 1625,
+      "cardHeights": [],
+      "headingBottom": 208,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-light-1440-settings",
+      "locale": "fr",
+      "theme": "light",
+      "width": 1440,
+      "tab": "settings",
+      "overflow": 0,
+      "scrollHeight": 1000,
+      "cardHeights": [],
+      "headingBottom": 208,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-320-workouts",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 320,
+      "tab": "workouts",
+      "overflow": 0,
+      "scrollHeight": 2632,
+      "cardHeights": [
+        203,
+        179,
+        299,
+        270,
+        179,
+        179,
+        315,
+        228
+      ],
+      "headingBottom": 201,
+      "restHeight": 90
+    },
+    {
+      "name": "fr-dark-320-exercises",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 320,
+      "tab": "exercises",
+      "overflow": 0,
+      "scrollHeight": 6217,
+      "cardHeights": [],
+      "headingBottom": 201,
+      "restHeight": 90
+    },
+    {
+      "name": "fr-dark-320-training",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 320,
+      "tab": "training",
+      "overflow": 0,
+      "scrollHeight": 2221,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "fr-dark-320-history",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 320,
+      "tab": "history",
+      "overflow": 0,
+      "scrollHeight": 3475,
+      "cardHeights": [],
+      "headingBottom": 201,
+      "restHeight": 90
+    },
+    {
+      "name": "fr-dark-320-measurements",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 320,
+      "tab": "measurements",
+      "overflow": 0,
+      "scrollHeight": 1548,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "fr-dark-320-statistics",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 320,
+      "tab": "statistics",
+      "overflow": 0,
+      "scrollHeight": 2396,
+      "cardHeights": [],
+      "headingBottom": 201,
+      "restHeight": 90
+    },
+    {
+      "name": "fr-dark-320-settings",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 320,
+      "tab": "settings",
+      "overflow": 0,
+      "scrollHeight": 844,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "fr-dark-390-workouts",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 390,
+      "tab": "workouts",
+      "overflow": 0,
+      "scrollHeight": 2550,
+      "cardHeights": [
+        179,
+        179,
+        299,
+        270,
+        179,
+        179,
+        292,
+        228
+      ],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "fr-dark-390-exercises",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 390,
+      "tab": "exercises",
+      "overflow": 0,
+      "scrollHeight": 5299,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "fr-dark-390-training",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 390,
+      "tab": "training",
+      "overflow": 0,
+      "scrollHeight": 2118,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "fr-dark-390-history",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 390,
+      "tab": "history",
+      "overflow": 0,
+      "scrollHeight": 3298,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "fr-dark-390-measurements",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 390,
+      "tab": "measurements",
+      "overflow": 0,
+      "scrollHeight": 1548,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "fr-dark-390-statistics",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 390,
+      "tab": "statistics",
+      "overflow": 0,
+      "scrollHeight": 2150,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "fr-dark-390-settings",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 390,
+      "tab": "settings",
+      "overflow": 0,
+      "scrollHeight": 844,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "fr-dark-768-workouts",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 768,
+      "tab": "workouts",
+      "overflow": 0,
+      "scrollHeight": 4113,
+      "cardHeights": [
+        884,
+        884,
+        884,
+        884,
+        884,
+        884,
+        884,
+        884
+      ],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-768-exercises",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 768,
+      "tab": "exercises",
+      "overflow": 0,
+      "scrollHeight": 4943,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-768-training",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 768,
+      "tab": "training",
+      "overflow": 0,
+      "scrollHeight": 1870,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-768-history",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 768,
+      "tab": "history",
+      "overflow": 0,
+      "scrollHeight": 3425,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-768-measurements",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 768,
+      "tab": "measurements",
+      "overflow": 0,
+      "scrollHeight": 1523,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-768-statistics",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 768,
+      "tab": "statistics",
+      "overflow": 0,
+      "scrollHeight": 2112,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-768-settings",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 768,
+      "tab": "settings",
+      "overflow": 0,
+      "scrollHeight": 1000,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-800-workouts",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 800,
+      "tab": "workouts",
+      "overflow": 0,
+      "scrollHeight": 4115,
+      "cardHeights": [
+        884,
+        884,
+        884,
+        884,
+        884,
+        884,
+        884,
+        884
+      ],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-800-exercises",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 800,
+      "tab": "exercises",
+      "overflow": 0,
+      "scrollHeight": 4943,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-800-training",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 800,
+      "tab": "training",
+      "overflow": 0,
+      "scrollHeight": 1870,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-800-history",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 800,
+      "tab": "history",
+      "overflow": 0,
+      "scrollHeight": 3425,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-800-measurements",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 800,
+      "tab": "measurements",
+      "overflow": 0,
+      "scrollHeight": 1523,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-800-statistics",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 800,
+      "tab": "statistics",
+      "overflow": 0,
+      "scrollHeight": 2112,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-800-settings",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 800,
+      "tab": "settings",
+      "overflow": 0,
+      "scrollHeight": 1000,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-801-workouts",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 801,
+      "tab": "workouts",
+      "overflow": 0,
+      "scrollHeight": 7543,
+      "cardHeights": [
+        859,
+        859,
+        859,
+        859,
+        859,
+        859,
+        859,
+        859
+      ],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-801-exercises",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 801,
+      "tab": "exercises",
+      "overflow": 0,
+      "scrollHeight": 4989,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-801-training",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 801,
+      "tab": "training",
+      "overflow": 0,
+      "scrollHeight": 1873,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-801-history",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 801,
+      "tab": "history",
+      "overflow": 0,
+      "scrollHeight": 3431,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-801-measurements",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 801,
+      "tab": "measurements",
+      "overflow": 0,
+      "scrollHeight": 1529,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-801-statistics",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 801,
+      "tab": "statistics",
+      "overflow": 0,
+      "scrollHeight": 2227,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-801-settings",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 801,
+      "tab": "settings",
+      "overflow": 0,
+      "scrollHeight": 1000,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-1024-workouts",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 1024,
+      "tab": "workouts",
+      "overflow": 0,
+      "scrollHeight": 4119,
+      "cardHeights": [
+        884,
+        884,
+        884,
+        884,
+        884,
+        884,
+        884,
+        884
+      ],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-1024-exercises",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 1024,
+      "tab": "exercises",
+      "overflow": 0,
+      "scrollHeight": 4947,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-1024-training",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 1024,
+      "tab": "training",
+      "overflow": 0,
+      "scrollHeight": 1860,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-1024-history",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 1024,
+      "tab": "history",
+      "overflow": 0,
+      "scrollHeight": 3431,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-1024-measurements",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 1024,
+      "tab": "measurements",
+      "overflow": 0,
+      "scrollHeight": 1529,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-1024-statistics",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 1024,
+      "tab": "statistics",
+      "overflow": 0,
+      "scrollHeight": 2114,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-1024-settings",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 1024,
+      "tab": "settings",
+      "overflow": 0,
+      "scrollHeight": 1000,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-1440-workouts",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 1440,
+      "tab": "workouts",
+      "overflow": 0,
+      "scrollHeight": 3256,
+      "cardHeights": [
+        884,
+        884,
+        884,
+        884,
+        884,
+        884,
+        884,
+        884
+      ],
+      "headingBottom": 208,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-1440-exercises",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 1440,
+      "tab": "exercises",
+      "overflow": 0,
+      "scrollHeight": 4959,
+      "cardHeights": [],
+      "headingBottom": 208,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-1440-training",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 1440,
+      "tab": "training",
+      "overflow": 0,
+      "scrollHeight": 1887,
+      "cardHeights": [],
+      "headingBottom": 208,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-1440-history",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 1440,
+      "tab": "history",
+      "overflow": 0,
+      "scrollHeight": 3443,
+      "cardHeights": [],
+      "headingBottom": 208,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-1440-measurements",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 1440,
+      "tab": "measurements",
+      "overflow": 0,
+      "scrollHeight": 1541,
+      "cardHeights": [],
+      "headingBottom": 208,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-1440-statistics",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 1440,
+      "tab": "statistics",
+      "overflow": 0,
+      "scrollHeight": 1625,
+      "cardHeights": [],
+      "headingBottom": 208,
+      "restHeight": 88
+    },
+    {
+      "name": "fr-dark-1440-settings",
+      "locale": "fr",
+      "theme": "dark",
+      "width": 1440,
+      "tab": "settings",
+      "overflow": 0,
+      "scrollHeight": 1000,
+      "cardHeights": [],
+      "headingBottom": 208,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-320-workouts",
+      "locale": "en",
+      "theme": "light",
+      "width": 320,
+      "tab": "workouts",
+      "overflow": 0,
+      "scrollHeight": 2650,
+      "cardHeights": [
+        203,
+        179,
+        299,
+        270,
+        179,
+        179,
+        315,
+        228
+      ],
+      "headingBottom": 201,
+      "restHeight": 90
+    },
+    {
+      "name": "en-light-320-exercises",
+      "locale": "en",
+      "theme": "light",
+      "width": 320,
+      "tab": "exercises",
+      "overflow": 0,
+      "scrollHeight": 5398,
+      "cardHeights": [],
+      "headingBottom": 201,
+      "restHeight": 90
+    },
+    {
+      "name": "en-light-320-training",
+      "locale": "en",
+      "theme": "light",
+      "width": 320,
+      "tab": "training",
+      "overflow": 0,
+      "scrollHeight": 2155,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "en-light-320-history",
+      "locale": "en",
+      "theme": "light",
+      "width": 320,
+      "tab": "history",
+      "overflow": 0,
+      "scrollHeight": 3454,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "en-light-320-measurements",
+      "locale": "en",
+      "theme": "light",
+      "width": 320,
+      "tab": "measurements",
+      "overflow": 0,
+      "scrollHeight": 1548,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "en-light-320-statistics",
+      "locale": "en",
+      "theme": "light",
+      "width": 320,
+      "tab": "statistics",
+      "overflow": 0,
+      "scrollHeight": 2316,
+      "cardHeights": [],
+      "headingBottom": 201,
+      "restHeight": 90
+    },
+    {
+      "name": "en-light-320-settings",
+      "locale": "en",
+      "theme": "light",
+      "width": 320,
+      "tab": "settings",
+      "overflow": 0,
+      "scrollHeight": 844,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "en-light-390-workouts",
+      "locale": "en",
+      "theme": "light",
+      "width": 390,
+      "tab": "workouts",
+      "overflow": 0,
+      "scrollHeight": 2550,
+      "cardHeights": [
+        179,
+        179,
+        299,
+        270,
+        179,
+        179,
+        292,
+        228
+      ],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "en-light-390-exercises",
+      "locale": "en",
+      "theme": "light",
+      "width": 390,
+      "tab": "exercises",
+      "overflow": 0,
+      "scrollHeight": 5173,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "en-light-390-training",
+      "locale": "en",
+      "theme": "light",
+      "width": 390,
+      "tab": "training",
+      "overflow": 0,
+      "scrollHeight": 2118,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "en-light-390-history",
+      "locale": "en",
+      "theme": "light",
+      "width": 390,
+      "tab": "history",
+      "overflow": 0,
+      "scrollHeight": 3298,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "en-light-390-measurements",
+      "locale": "en",
+      "theme": "light",
+      "width": 390,
+      "tab": "measurements",
+      "overflow": 0,
+      "scrollHeight": 1548,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "en-light-390-statistics",
+      "locale": "en",
+      "theme": "light",
+      "width": 390,
+      "tab": "statistics",
+      "overflow": 0,
+      "scrollHeight": 2150,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "en-light-390-settings",
+      "locale": "en",
+      "theme": "light",
+      "width": 390,
+      "tab": "settings",
+      "overflow": 0,
+      "scrollHeight": 844,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "en-light-768-workouts",
+      "locale": "en",
+      "theme": "light",
+      "width": 768,
+      "tab": "workouts",
+      "overflow": 0,
+      "scrollHeight": 4114,
+      "cardHeights": [
+        884,
+        884,
+        884,
+        884,
+        884,
+        884,
+        884,
+        884
+      ],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-768-exercises",
+      "locale": "en",
+      "theme": "light",
+      "width": 768,
+      "tab": "exercises",
+      "overflow": 0,
+      "scrollHeight": 4943,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-768-training",
+      "locale": "en",
+      "theme": "light",
+      "width": 768,
+      "tab": "training",
+      "overflow": 0,
+      "scrollHeight": 1870,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-768-history",
+      "locale": "en",
+      "theme": "light",
+      "width": 768,
+      "tab": "history",
+      "overflow": 0,
+      "scrollHeight": 3425,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-768-measurements",
+      "locale": "en",
+      "theme": "light",
+      "width": 768,
+      "tab": "measurements",
+      "overflow": 0,
+      "scrollHeight": 1523,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-768-statistics",
+      "locale": "en",
+      "theme": "light",
+      "width": 768,
+      "tab": "statistics",
+      "overflow": 0,
+      "scrollHeight": 2112,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-768-settings",
+      "locale": "en",
+      "theme": "light",
+      "width": 768,
+      "tab": "settings",
+      "overflow": 0,
+      "scrollHeight": 1000,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-800-workouts",
+      "locale": "en",
+      "theme": "light",
+      "width": 800,
+      "tab": "workouts",
+      "overflow": 0,
+      "scrollHeight": 4117,
+      "cardHeights": [
+        884,
+        884,
+        884,
+        884,
+        884,
+        884,
+        884,
+        884
+      ],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-800-exercises",
+      "locale": "en",
+      "theme": "light",
+      "width": 800,
+      "tab": "exercises",
+      "overflow": 0,
+      "scrollHeight": 4943,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-800-training",
+      "locale": "en",
+      "theme": "light",
+      "width": 800,
+      "tab": "training",
+      "overflow": 0,
+      "scrollHeight": 1870,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-800-history",
+      "locale": "en",
+      "theme": "light",
+      "width": 800,
+      "tab": "history",
+      "overflow": 0,
+      "scrollHeight": 3425,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-800-measurements",
+      "locale": "en",
+      "theme": "light",
+      "width": 800,
+      "tab": "measurements",
+      "overflow": 0,
+      "scrollHeight": 1523,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-800-statistics",
+      "locale": "en",
+      "theme": "light",
+      "width": 800,
+      "tab": "statistics",
+      "overflow": 0,
+      "scrollHeight": 2112,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-800-settings",
+      "locale": "en",
+      "theme": "light",
+      "width": 800,
+      "tab": "settings",
+      "overflow": 0,
+      "scrollHeight": 1000,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-801-workouts",
+      "locale": "en",
+      "theme": "light",
+      "width": 801,
+      "tab": "workouts",
+      "overflow": 0,
+      "scrollHeight": 7543,
+      "cardHeights": [
+        859,
+        859,
+        859,
+        859,
+        859,
+        859,
+        859,
+        859
+      ],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-801-exercises",
+      "locale": "en",
+      "theme": "light",
+      "width": 801,
+      "tab": "exercises",
+      "overflow": 0,
+      "scrollHeight": 4947,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-801-training",
+      "locale": "en",
+      "theme": "light",
+      "width": 801,
+      "tab": "training",
+      "overflow": 0,
+      "scrollHeight": 1895,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-801-history",
+      "locale": "en",
+      "theme": "light",
+      "width": 801,
+      "tab": "history",
+      "overflow": 0,
+      "scrollHeight": 3431,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-801-measurements",
+      "locale": "en",
+      "theme": "light",
+      "width": 801,
+      "tab": "measurements",
+      "overflow": 0,
+      "scrollHeight": 1529,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-801-statistics",
+      "locale": "en",
+      "theme": "light",
+      "width": 801,
+      "tab": "statistics",
+      "overflow": 0,
+      "scrollHeight": 2227,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-801-settings",
+      "locale": "en",
+      "theme": "light",
+      "width": 801,
+      "tab": "settings",
+      "overflow": 0,
+      "scrollHeight": 1000,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-1024-workouts",
+      "locale": "en",
+      "theme": "light",
+      "width": 1024,
+      "tab": "workouts",
+      "overflow": 0,
+      "scrollHeight": 4120,
+      "cardHeights": [
+        884,
+        884,
+        884,
+        884,
+        884,
+        884,
+        884,
+        884
+      ],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-1024-exercises",
+      "locale": "en",
+      "theme": "light",
+      "width": 1024,
+      "tab": "exercises",
+      "overflow": 0,
+      "scrollHeight": 4947,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-1024-training",
+      "locale": "en",
+      "theme": "light",
+      "width": 1024,
+      "tab": "training",
+      "overflow": 0,
+      "scrollHeight": 1860,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-1024-history",
+      "locale": "en",
+      "theme": "light",
+      "width": 1024,
+      "tab": "history",
+      "overflow": 0,
+      "scrollHeight": 3431,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-1024-measurements",
+      "locale": "en",
+      "theme": "light",
+      "width": 1024,
+      "tab": "measurements",
+      "overflow": 0,
+      "scrollHeight": 1529,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-1024-statistics",
+      "locale": "en",
+      "theme": "light",
+      "width": 1024,
+      "tab": "statistics",
+      "overflow": 0,
+      "scrollHeight": 2114,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-1024-settings",
+      "locale": "en",
+      "theme": "light",
+      "width": 1024,
+      "tab": "settings",
+      "overflow": 0,
+      "scrollHeight": 1000,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-1440-workouts",
+      "locale": "en",
+      "theme": "light",
+      "width": 1440,
+      "tab": "workouts",
+      "overflow": 0,
+      "scrollHeight": 3257,
+      "cardHeights": [
+        884,
+        884,
+        884,
+        884,
+        884,
+        884,
+        884,
+        884
+      ],
+      "headingBottom": 208,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-1440-exercises",
+      "locale": "en",
+      "theme": "light",
+      "width": 1440,
+      "tab": "exercises",
+      "overflow": 0,
+      "scrollHeight": 4959,
+      "cardHeights": [],
+      "headingBottom": 208,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-1440-training",
+      "locale": "en",
+      "theme": "light",
+      "width": 1440,
+      "tab": "training",
+      "overflow": 0,
+      "scrollHeight": 1887,
+      "cardHeights": [],
+      "headingBottom": 208,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-1440-history",
+      "locale": "en",
+      "theme": "light",
+      "width": 1440,
+      "tab": "history",
+      "overflow": 0,
+      "scrollHeight": 3443,
+      "cardHeights": [],
+      "headingBottom": 208,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-1440-measurements",
+      "locale": "en",
+      "theme": "light",
+      "width": 1440,
+      "tab": "measurements",
+      "overflow": 0,
+      "scrollHeight": 1541,
+      "cardHeights": [],
+      "headingBottom": 208,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-1440-statistics",
+      "locale": "en",
+      "theme": "light",
+      "width": 1440,
+      "tab": "statistics",
+      "overflow": 0,
+      "scrollHeight": 1625,
+      "cardHeights": [],
+      "headingBottom": 208,
+      "restHeight": 88
+    },
+    {
+      "name": "en-light-1440-settings",
+      "locale": "en",
+      "theme": "light",
+      "width": 1440,
+      "tab": "settings",
+      "overflow": 0,
+      "scrollHeight": 1000,
+      "cardHeights": [],
+      "headingBottom": 208,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-320-workouts",
+      "locale": "en",
+      "theme": "dark",
+      "width": 320,
+      "tab": "workouts",
+      "overflow": 0,
+      "scrollHeight": 2650,
+      "cardHeights": [
+        203,
+        179,
+        299,
+        270,
+        179,
+        179,
+        315,
+        228
+      ],
+      "headingBottom": 201,
+      "restHeight": 90
+    },
+    {
+      "name": "en-dark-320-exercises",
+      "locale": "en",
+      "theme": "dark",
+      "width": 320,
+      "tab": "exercises",
+      "overflow": 0,
+      "scrollHeight": 5398,
+      "cardHeights": [],
+      "headingBottom": 201,
+      "restHeight": 90
+    },
+    {
+      "name": "en-dark-320-training",
+      "locale": "en",
+      "theme": "dark",
+      "width": 320,
+      "tab": "training",
+      "overflow": 0,
+      "scrollHeight": 2155,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "en-dark-320-history",
+      "locale": "en",
+      "theme": "dark",
+      "width": 320,
+      "tab": "history",
+      "overflow": 0,
+      "scrollHeight": 3454,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "en-dark-320-measurements",
+      "locale": "en",
+      "theme": "dark",
+      "width": 320,
+      "tab": "measurements",
+      "overflow": 0,
+      "scrollHeight": 1548,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "en-dark-320-statistics",
+      "locale": "en",
+      "theme": "dark",
+      "width": 320,
+      "tab": "statistics",
+      "overflow": 0,
+      "scrollHeight": 2316,
+      "cardHeights": [],
+      "headingBottom": 201,
+      "restHeight": 90
+    },
+    {
+      "name": "en-dark-320-settings",
+      "locale": "en",
+      "theme": "dark",
+      "width": 320,
+      "tab": "settings",
+      "overflow": 0,
+      "scrollHeight": 844,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "en-dark-390-workouts",
+      "locale": "en",
+      "theme": "dark",
+      "width": 390,
+      "tab": "workouts",
+      "overflow": 0,
+      "scrollHeight": 2550,
+      "cardHeights": [
+        179,
+        179,
+        299,
+        270,
+        179,
+        179,
+        292,
+        228
+      ],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "en-dark-390-exercises",
+      "locale": "en",
+      "theme": "dark",
+      "width": 390,
+      "tab": "exercises",
+      "overflow": 0,
+      "scrollHeight": 5173,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "en-dark-390-training",
+      "locale": "en",
+      "theme": "dark",
+      "width": 390,
+      "tab": "training",
+      "overflow": 0,
+      "scrollHeight": 2118,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "en-dark-390-history",
+      "locale": "en",
+      "theme": "dark",
+      "width": 390,
+      "tab": "history",
+      "overflow": 0,
+      "scrollHeight": 3298,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "en-dark-390-measurements",
+      "locale": "en",
+      "theme": "dark",
+      "width": 390,
+      "tab": "measurements",
+      "overflow": 0,
+      "scrollHeight": 1548,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "en-dark-390-statistics",
+      "locale": "en",
+      "theme": "dark",
+      "width": 390,
+      "tab": "statistics",
+      "overflow": 0,
+      "scrollHeight": 2150,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "en-dark-390-settings",
+      "locale": "en",
+      "theme": "dark",
+      "width": 390,
+      "tab": "settings",
+      "overflow": 0,
+      "scrollHeight": 844,
+      "cardHeights": [],
+      "headingBottom": 180,
+      "restHeight": 90
+    },
+    {
+      "name": "en-dark-768-workouts",
+      "locale": "en",
+      "theme": "dark",
+      "width": 768,
+      "tab": "workouts",
+      "overflow": 0,
+      "scrollHeight": 4114,
+      "cardHeights": [
+        884,
+        884,
+        884,
+        884,
+        884,
+        884,
+        884,
+        884
+      ],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-768-exercises",
+      "locale": "en",
+      "theme": "dark",
+      "width": 768,
+      "tab": "exercises",
+      "overflow": 0,
+      "scrollHeight": 4943,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-768-training",
+      "locale": "en",
+      "theme": "dark",
+      "width": 768,
+      "tab": "training",
+      "overflow": 0,
+      "scrollHeight": 1870,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-768-history",
+      "locale": "en",
+      "theme": "dark",
+      "width": 768,
+      "tab": "history",
+      "overflow": 0,
+      "scrollHeight": 3425,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-768-measurements",
+      "locale": "en",
+      "theme": "dark",
+      "width": 768,
+      "tab": "measurements",
+      "overflow": 0,
+      "scrollHeight": 1523,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-768-statistics",
+      "locale": "en",
+      "theme": "dark",
+      "width": 768,
+      "tab": "statistics",
+      "overflow": 0,
+      "scrollHeight": 2112,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-768-settings",
+      "locale": "en",
+      "theme": "dark",
+      "width": 768,
+      "tab": "settings",
+      "overflow": 0,
+      "scrollHeight": 1000,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-800-workouts",
+      "locale": "en",
+      "theme": "dark",
+      "width": 800,
+      "tab": "workouts",
+      "overflow": 0,
+      "scrollHeight": 4117,
+      "cardHeights": [
+        884,
+        884,
+        884,
+        884,
+        884,
+        884,
+        884,
+        884
+      ],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-800-exercises",
+      "locale": "en",
+      "theme": "dark",
+      "width": 800,
+      "tab": "exercises",
+      "overflow": 0,
+      "scrollHeight": 4943,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-800-training",
+      "locale": "en",
+      "theme": "dark",
+      "width": 800,
+      "tab": "training",
+      "overflow": 0,
+      "scrollHeight": 1870,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-800-history",
+      "locale": "en",
+      "theme": "dark",
+      "width": 800,
+      "tab": "history",
+      "overflow": 0,
+      "scrollHeight": 3425,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-800-measurements",
+      "locale": "en",
+      "theme": "dark",
+      "width": 800,
+      "tab": "measurements",
+      "overflow": 0,
+      "scrollHeight": 1523,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-800-statistics",
+      "locale": "en",
+      "theme": "dark",
+      "width": 800,
+      "tab": "statistics",
+      "overflow": 0,
+      "scrollHeight": 2112,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-800-settings",
+      "locale": "en",
+      "theme": "dark",
+      "width": 800,
+      "tab": "settings",
+      "overflow": 0,
+      "scrollHeight": 1000,
+      "cardHeights": [],
+      "headingBottom": 190,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-801-workouts",
+      "locale": "en",
+      "theme": "dark",
+      "width": 801,
+      "tab": "workouts",
+      "overflow": 0,
+      "scrollHeight": 7543,
+      "cardHeights": [
+        859,
+        859,
+        859,
+        859,
+        859,
+        859,
+        859,
+        859
+      ],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-801-exercises",
+      "locale": "en",
+      "theme": "dark",
+      "width": 801,
+      "tab": "exercises",
+      "overflow": 0,
+      "scrollHeight": 4947,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-801-training",
+      "locale": "en",
+      "theme": "dark",
+      "width": 801,
+      "tab": "training",
+      "overflow": 0,
+      "scrollHeight": 1895,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-801-history",
+      "locale": "en",
+      "theme": "dark",
+      "width": 801,
+      "tab": "history",
+      "overflow": 0,
+      "scrollHeight": 3431,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-801-measurements",
+      "locale": "en",
+      "theme": "dark",
+      "width": 801,
+      "tab": "measurements",
+      "overflow": 0,
+      "scrollHeight": 1529,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-801-statistics",
+      "locale": "en",
+      "theme": "dark",
+      "width": 801,
+      "tab": "statistics",
+      "overflow": 0,
+      "scrollHeight": 2227,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-801-settings",
+      "locale": "en",
+      "theme": "dark",
+      "width": 801,
+      "tab": "settings",
+      "overflow": 0,
+      "scrollHeight": 1000,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-1024-workouts",
+      "locale": "en",
+      "theme": "dark",
+      "width": 1024,
+      "tab": "workouts",
+      "overflow": 0,
+      "scrollHeight": 4120,
+      "cardHeights": [
+        884,
+        884,
+        884,
+        884,
+        884,
+        884,
+        884,
+        884
+      ],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-1024-exercises",
+      "locale": "en",
+      "theme": "dark",
+      "width": 1024,
+      "tab": "exercises",
+      "overflow": 0,
+      "scrollHeight": 4947,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-1024-training",
+      "locale": "en",
+      "theme": "dark",
+      "width": 1024,
+      "tab": "training",
+      "overflow": 0,
+      "scrollHeight": 1860,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-1024-history",
+      "locale": "en",
+      "theme": "dark",
+      "width": 1024,
+      "tab": "history",
+      "overflow": 0,
+      "scrollHeight": 3431,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-1024-measurements",
+      "locale": "en",
+      "theme": "dark",
+      "width": 1024,
+      "tab": "measurements",
+      "overflow": 0,
+      "scrollHeight": 1529,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-1024-statistics",
+      "locale": "en",
+      "theme": "dark",
+      "width": 1024,
+      "tab": "statistics",
+      "overflow": 0,
+      "scrollHeight": 2114,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-1024-settings",
+      "locale": "en",
+      "theme": "dark",
+      "width": 1024,
+      "tab": "settings",
+      "overflow": 0,
+      "scrollHeight": 1000,
+      "cardHeights": [],
+      "headingBottom": 196,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-1440-workouts",
+      "locale": "en",
+      "theme": "dark",
+      "width": 1440,
+      "tab": "workouts",
+      "overflow": 0,
+      "scrollHeight": 3257,
+      "cardHeights": [
+        884,
+        884,
+        884,
+        884,
+        884,
+        884,
+        884,
+        884
+      ],
+      "headingBottom": 208,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-1440-exercises",
+      "locale": "en",
+      "theme": "dark",
+      "width": 1440,
+      "tab": "exercises",
+      "overflow": 0,
+      "scrollHeight": 4959,
+      "cardHeights": [],
+      "headingBottom": 208,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-1440-training",
+      "locale": "en",
+      "theme": "dark",
+      "width": 1440,
+      "tab": "training",
+      "overflow": 0,
+      "scrollHeight": 1887,
+      "cardHeights": [],
+      "headingBottom": 208,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-1440-history",
+      "locale": "en",
+      "theme": "dark",
+      "width": 1440,
+      "tab": "history",
+      "overflow": 0,
+      "scrollHeight": 3443,
+      "cardHeights": [],
+      "headingBottom": 208,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-1440-measurements",
+      "locale": "en",
+      "theme": "dark",
+      "width": 1440,
+      "tab": "measurements",
+      "overflow": 0,
+      "scrollHeight": 1541,
+      "cardHeights": [],
+      "headingBottom": 208,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-1440-statistics",
+      "locale": "en",
+      "theme": "dark",
+      "width": 1440,
+      "tab": "statistics",
+      "overflow": 0,
+      "scrollHeight": 1625,
+      "cardHeights": [],
+      "headingBottom": 208,
+      "restHeight": 88
+    },
+    {
+      "name": "en-dark-1440-settings",
+      "locale": "en",
+      "theme": "dark",
+      "width": 1440,
+      "tab": "settings",
+      "overflow": 0,
+      "scrollHeight": 1000,
+      "cardHeights": [],
+      "headingBottom": 208,
+      "restHeight": 88
+    }
+  ],
+  "axe": [
+    {
+      "name": "fr-light-320-workouts",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 11
+        }
+      ]
+    },
+    {
+      "name": "fr-light-320-exercises",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "fr-light-320-training",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 9
+        }
+      ]
+    },
+    {
+      "name": "fr-light-320-history",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "fr-light-320-measurements",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "fr-light-320-statistics",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 12
+        }
+      ]
+    },
+    {
+      "name": "fr-light-320-settings",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "fr-light-1440-workouts",
+      "version": "4.14.0",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": [
+            {
+              "target": [
+                ".is-active"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #b84f39, background color: #f8eae5, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+              "html": "<button class=\"application-nav-item is-active\" aria-label=\"Programmes\" aria-current=\"page\">"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 26
+        }
+      ]
+    },
+    {
+      "name": "fr-light-1440-exercises",
+      "version": "4.14.0",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": [
+            {
+              "target": [
+                ".is-active"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #b84f39, background color: #f8eae5, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+              "html": "<button class=\"application-nav-item is-active\" aria-label=\"Exercices\" aria-current=\"page\">"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "fr-light-1440-training",
+      "version": "4.14.0",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": [
+            {
+              "target": [
+                ".is-active"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #b84f39, background color: #f8eae5, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+              "html": "<button class=\"application-nav-item is-active\" aria-label=\"Entraînement\" aria-current=\"page\">"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 8
+        }
+      ]
+    },
+    {
+      "name": "fr-light-1440-history",
+      "version": "4.14.0",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": [
+            {
+              "target": [
+                ".is-active"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #b84f39, background color: #f8eae5, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+              "html": "<button class=\"application-nav-item is-active\" aria-label=\"Historique\" aria-current=\"page\">"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "fr-light-1440-measurements",
+      "version": "4.14.0",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": [
+            {
+              "target": [
+                ".is-active"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #b84f39, background color: #f8eae5, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+              "html": "<button class=\"application-nav-item is-active\" aria-label=\"Mensurations\" aria-current=\"page\">"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "fr-light-1440-statistics",
+      "version": "4.14.0",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": [
+            {
+              "target": [
+                ".is-active"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #b84f39, background color: #f8eae5, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+              "html": "<button class=\"application-nav-item is-active\" aria-label=\"Statistiques\" aria-current=\"page\">"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 13
+        }
+      ]
+    },
+    {
+      "name": "fr-light-1440-settings",
+      "version": "4.14.0",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": [
+            {
+              "target": [
+                ".is-active"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #b84f39, background color: #f8eae5, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+              "html": "<button class=\"application-nav-item is-active\" aria-label=\"Réglages\" aria-current=\"page\">"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "fr-dark-320-workouts",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 11
+        }
+      ]
+    },
+    {
+      "name": "fr-dark-320-exercises",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "fr-dark-320-training",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 9
+        }
+      ]
+    },
+    {
+      "name": "fr-dark-320-history",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "fr-dark-320-measurements",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "fr-dark-320-statistics",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 12
+        }
+      ]
+    },
+    {
+      "name": "fr-dark-320-settings",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "fr-dark-1440-workouts",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 26
+        }
+      ]
+    },
+    {
+      "name": "fr-dark-1440-exercises",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "fr-dark-1440-training",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 8
+        }
+      ]
+    },
+    {
+      "name": "fr-dark-1440-history",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "fr-dark-1440-measurements",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "fr-dark-1440-statistics",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 13
+        }
+      ]
+    },
+    {
+      "name": "fr-dark-1440-settings",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "en-light-320-workouts",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 10
+        }
+      ]
+    },
+    {
+      "name": "en-light-320-exercises",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "en-light-320-training",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 9
+        }
+      ]
+    },
+    {
+      "name": "en-light-320-history",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "en-light-320-measurements",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "en-light-320-statistics",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 12
+        }
+      ]
+    },
+    {
+      "name": "en-light-320-settings",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "en-light-1440-workouts",
+      "version": "4.14.0",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": [
+            {
+              "target": [
+                ".is-active"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #b84f39, background color: #f8eae5, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+              "html": "<button class=\"application-nav-item is-active\" aria-label=\"Programs\" aria-current=\"page\">"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 26
+        }
+      ]
+    },
+    {
+      "name": "en-light-1440-exercises",
+      "version": "4.14.0",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": [
+            {
+              "target": [
+                ".is-active"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #b84f39, background color: #f8eae5, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+              "html": "<button class=\"application-nav-item is-active\" aria-label=\"Exercises\" aria-current=\"page\">"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "en-light-1440-training",
+      "version": "4.14.0",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": [
+            {
+              "target": [
+                ".is-active"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #b84f39, background color: #f8eae5, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+              "html": "<button class=\"application-nav-item is-active\" aria-label=\"Training\" aria-current=\"page\">"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 8
+        }
+      ]
+    },
+    {
+      "name": "en-light-1440-history",
+      "version": "4.14.0",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": [
+            {
+              "target": [
+                ".is-active"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #b84f39, background color: #f8eae5, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+              "html": "<button class=\"application-nav-item is-active\" aria-label=\"History\" aria-current=\"page\">"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "en-light-1440-measurements",
+      "version": "4.14.0",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": [
+            {
+              "target": [
+                ".is-active"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #b84f39, background color: #f8eae5, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+              "html": "<button class=\"application-nav-item is-active\" aria-label=\"Body measurements\" aria-current=\"page\">"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "en-light-1440-statistics",
+      "version": "4.14.0",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": [
+            {
+              "target": [
+                ".is-active"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #b84f39, background color: #f8eae5, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+              "html": "<button class=\"application-nav-item is-active\" aria-label=\"Statistics\" aria-current=\"page\">"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 13
+        }
+      ]
+    },
+    {
+      "name": "en-light-1440-settings",
+      "version": "4.14.0",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": [
+            {
+              "target": [
+                ".is-active"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #b84f39, background color: #f8eae5, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+              "html": "<button class=\"application-nav-item is-active\" aria-label=\"Settings\" aria-current=\"page\">"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "en-dark-320-workouts",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 10
+        }
+      ]
+    },
+    {
+      "name": "en-dark-320-exercises",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "en-dark-320-training",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 9
+        }
+      ]
+    },
+    {
+      "name": "en-dark-320-history",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "en-dark-320-measurements",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "en-dark-320-statistics",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 12
+        }
+      ]
+    },
+    {
+      "name": "en-dark-320-settings",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "en-dark-1440-workouts",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 26
+        }
+      ]
+    },
+    {
+      "name": "en-dark-1440-exercises",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "en-dark-1440-training",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 8
+        }
+      ]
+    },
+    {
+      "name": "en-dark-1440-history",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "en-dark-1440-measurements",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "en-dark-1440-statistics",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 13
+        }
+      ]
+    },
+    {
+      "name": "en-dark-1440-settings",
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        }
+      ]
+    }
+  ],
+  "javascript_errors": [],
+  "probes": [
+    {
+      "id": "exercise-draft-escape",
+      "status": "observed",
+      "confirmation": 0,
+      "afterReopen": "",
+      "issue": true
+    },
+    {
+      "id": "measurement-draft-escape",
+      "status": "observed",
+      "confirmation": 0,
+      "afterReopen": "",
+      "issue": true
+    },
+    {
+      "id": "settings-draft-navigation",
+      "status": "observed",
+      "original": "90",
+      "restored": "90",
+      "confirmation": 0,
+      "issue": true
+    },
+    {
+      "id": "catalogue-pagination-scroll",
+      "status": "observed",
+      "scrollY": 0,
+      "firstY": 391.5,
+      "pager": "Précédent\n41–80 sur 680\nSuivant",
+      "focused": "BODY",
+      "scrollHeight": 4904
+    },
+    {
+      "id": "catalogue-loading-reflow",
+      "status": "observed",
+      "before": 4904,
+      "during": {
+        "height": 1000,
+        "count": 0,
+        "status": [
+          "Chargement…"
+        ]
+      }
+    },
+    {
+      "id": "filter-continuity",
+      "status": "observed",
+      "count": 27,
+      "urlAfterFilter": "/sport?tab=exercises",
+      "queryAfterBack": "",
+      "typeAfterBack": ""
+    },
+    {
+      "id": "picker-browse-limit-and-reset",
+      "status": "observed",
+      "count": 20,
+      "limitText": "hé depuis les blocs\nCharge et répétitions · Barre\n＋\nArraché en puissance\nCharge et répétitions · Barre\n＋\nArraché muscle\nCharge et répétitions · Barre\n＋\nArraché suspendu\nCharge et répétitions · Barre\n＋\n\n20 résultats sur 680 — précisez votre recherche.",
+      "pickerClosedAfterChoice": true,
+      "queryOnReopen": ""
+    },
+    {
+      "id": "exercise-write-error-and-retry",
+      "status": "observed",
+      "draftPreserved": true,
+      "retrySaved": true
+    },
+    {
+      "id": "exercise-pending-close",
+      "status": "observed",
+      "closedWhilePending": true,
+      "savedOnServer": 1,
+      "visibleInCurrentList": 0
+    },
+    {
+      "id": "settings-input-clear",
+      "status": "observed",
+      "valueAfterClear": "0"
+    },
+    {
+      "id": "training-revert-stays-dirty",
+      "status": "observed",
+      "value": "40",
+      "finishDisabled": true,
+      "draftCount": 1
+    },
+    {
+      "id": "training-confirm-focus-feedback",
+      "status": "observed",
+      "focus": "BODY",
+      "focusLabel": null,
+      "animations": [],
+      "first": "Série 1\n1\nkg\nrép.\nCorriger\nValidée\nAnnuler la validation",
+      "timer": "01:30"
+    },
+    {
+      "id": "mobile-nav-background-rest",
+      "status": "observed",
+      "mainInert": true,
+      "restInert": false,
+      "restButtonDisabled": false,
+      "restZ": "30",
+      "dialog": "dialog"
+    },
+    {
+      "id": "reduced-motion",
+      "status": "observed",
+      "transition": "1e-05s",
+      "animation": "1e-05s"
+    },
+    {
+      "id": "training-finish-summary",
+      "status": "observed",
+      "confirmationCopy": "Terminer l’entraînement\n\nVos résultats seront conservés et votre score calculé si les résultats sont comparables.\n\nLes séries non validées seront enregistrées à 0 répétition (ou 0 pour les autres mesures). Les séries déjà validées seront conservées.\n\nRessenti et notes\nEnregistrer les résultats",
+      "destination": "/sport?tab=history",
+      "statusMessages": []
+    },
+    {
+      "id": "history-back-deeplink",
+      "status": "observed",
+      "urlWithDetail": "/sport?tab=history",
+      "dialogAfterReload": 0
+    },
+    {
+      "id": "statistics-date-order",
+      "status": "observed",
+      "alert": "Choisissez une période ordonnée de dix ans maximum.",
+      "summaryVisible": 0
+    },
+    {
+      "id": "program-conflict-recovery",
+      "status": "observed",
+      "error": "Cet élément a changé. Rechargez-le avant de réessayer.",
+      "draft": "Brouillon local",
+      "visibleButtons": [
+        "",
+        "2Novice1",
+        "←Tous les programmes",
+        "",
+        "",
+        "",
+        "Ajouter un exercice",
+        "Annuler",
+        "Enregistrer le programme",
+        "Archiver"
+      ]
+    },
+    {
+      "id": "long-program-mobile-depth",
+      "status": "observed",
+      "firstInputY": 1514.125,
+      "saveY": 5829.125,
+      "pageHeight": 6055
+    },
+    {
+      "id": "touch-history-pagination",
+      "status": "observed",
+      "next": "Précédent\n31–34 sur 34\nSuivant",
+      "previous": "Précédent\n1–30 sur 34\nSuivant",
+      "focus": "BODY"
+    },
+    {
+      "id": "touch-exercise-search-keystrokes",
+      "status": "observed",
+      "requests": [
+        "s",
+        "sq",
+        "squ",
+        "squa",
+        "squat"
+      ]
+    },
+    {
+      "id": "statistics-selectors-and-tables",
+      "status": "observed",
+      "waistRows": "1 mars 2026\t90\n15 avr. 2026\t89\n1 juin 2026\t88\n1 sept. 2026\t87\n1 nov. 2026\t86\n17 nov. 2026\t85",
+      "formulaCount": 10
+    },
+    {
+      "id": "ordinary-branding-first-action",
+      "status": "observed",
+      "firstField": 504.5,
+      "contentHeading": 91.25,
+      "rest": 90.09375
+    },
+    {
+      "id": "landscape-touch-controls",
+      "status": "observed",
+      "overflow": 0,
+      "first": {
+        "x": 333,
+        "y": 119.75,
+        "width": 187.5,
+        "height": 46,
+        "top": 119.75,
+        "right": 520.5,
+        "bottom": 165.75,
+        "left": 333
+      },
+      "rest": {
+        "x": 252,
+        "y": 302.203125,
+        "width": 592,
+        "height": 87.796875,
+        "top": 302.203125,
+        "right": 844,
+        "bottom": 390,
+        "left": 252
+      },
+      "menuVisible": "none",
+      "sidebarWidth": 252
+    },
+    {
+      "id": "mobile-menu-contrast",
+      "status": "observed",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "nodes": [
+            {
+              "target": [
+                ".is-active"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #b84f39, background color: #f8eae5, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "archive-measurements-and-recover",
+      "original": 6,
+      "afterArchive": 5,
+      "afterRestore": 6,
+      "apiAfter": 6
+    },
+    {
+      "id": "french-validation-message",
+      "alert": "La valeur doit contenir au moins 1 caractères.",
+      "fieldInvalid": null
+    },
+    {
+      "id": "chart-irregular-time",
+      "points": [
+        {
+          "x": "50",
+          "label": "1 mars 2026 : 80 kg"
+        },
+        {
+          "x": "134.60000000000002",
+          "label": "15 avr. 2026 : 79,5 kg"
+        },
+        {
+          "x": "219.20000000000002",
+          "label": "1 juin 2026 : 79 kg"
+        },
+        {
+          "x": "303.79999999999995",
+          "label": "1 sept. 2026 : 78,5 kg"
+        },
+        {
+          "x": "388.40000000000003",
+          "label": "1 nov. 2026 : 78 kg"
+        },
+        {
+          "x": "473",
+          "label": "17 nov. 2026 : 77,5 kg"
+        }
+      ]
+    },
+    {
+      "id": "chart-keyboard-values",
+      "tableVisible": true
+    },
+    {
+      "id": "pending-exercise-after-reload",
+      "visibleCount": 1
+    }
+  ],
+  "timezone": {
+    "localDefault": "2026-11-18",
+    "utcDay": "2026-11-17",
+    "error": "Une mensuration ne peut pas être datée dans le futur."
+  },
+  "motion": [
+    {
+      "reducedMotion": "no-preference",
+      "sidebar": {
+        "duration": "0.18s, 0s",
+        "property": "transform, visibility"
+      },
+      "activeAnimations": [
+        {
+          "duration": 180
+        }
+      ]
+    },
+    {
+      "reducedMotion": "reduce",
+      "sidebar": {
+        "duration": "1e-05s",
+        "property": "none"
+      },
+      "activeAnimations": []
+    }
+  ],
+  "system_theme": [
+    {
+      "scheme": "light",
+      "color": "rgb(255, 254, 251)",
+      "theme": "system"
+    },
+    {
+      "scheme": "dark",
+      "color": "rgb(26, 32, 29)",
+      "theme": "system"
+    }
+  ],
+  "limits": [
+    "No physical iPhone/Android",
+    "No screen reader audit",
+    "No Firefox",
+    "No real mobile network/battery/lock-screen benchmark"
+  ],
+  "documentation_and_controls": {
+    "documentation": [
+      {
+        "width": 390,
+        "title": "Revue de Sport — mobile et ordinateur¶",
+        "images": [
+          {
+            "src": "../assets/reviews/sport-2026-11-17/programmes-bureau.png",
+            "loaded": true
+          },
+          {
+            "src": "../assets/reviews/sport-2026-11-17/chargement-catalogue.png",
+            "loaded": true
+          },
+          {
+            "src": "../assets/reviews/sport-2026-11-17/editeur-mobile.png",
+            "loaded": true
+          },
+          {
+            "src": "../assets/reviews/sport-2026-11-17/seance-mobile.png",
+            "loaded": true
+          },
+          {
+            "src": "../assets/reviews/sport-2026-11-17/mensurations-mobile.png",
+            "loaded": true
+          },
+          {
+            "src": "../assets/reviews/sport-2026-11-17/statistiques-bureau.png",
+            "loaded": true
+          },
+          {
+            "src": "../assets/reviews/sport-2026-11-17/navigation-mobile.png",
+            "loaded": true
+          },
+          {
+            "src": "../assets/reviews/sport-2026-11-17/seance-paysage.png",
+            "loaded": true
+          }
+        ],
+        "overflow": 0,
+        "sourceLinks": 76
+      },
+      {
+        "width": 1440,
+        "title": "Revue de Sport — mobile et ordinateur¶",
+        "images": [
+          {
+            "src": "../assets/reviews/sport-2026-11-17/programmes-bureau.png",
+            "loaded": true
+          },
+          {
+            "src": "../assets/reviews/sport-2026-11-17/chargement-catalogue.png",
+            "loaded": true
+          },
+          {
+            "src": "../assets/reviews/sport-2026-11-17/editeur-mobile.png",
+            "loaded": true
+          },
+          {
+            "src": "../assets/reviews/sport-2026-11-17/seance-mobile.png",
+            "loaded": true
+          },
+          {
+            "src": "../assets/reviews/sport-2026-11-17/mensurations-mobile.png",
+            "loaded": true
+          },
+          {
+            "src": "../assets/reviews/sport-2026-11-17/statistiques-bureau.png",
+            "loaded": true
+          },
+          {
+            "src": "../assets/reviews/sport-2026-11-17/navigation-mobile.png",
+            "loaded": true
+          },
+          {
+            "src": "../assets/reviews/sport-2026-11-17/seance-paysage.png",
+            "loaded": true
+          }
+        ],
+        "overflow": 0,
+        "sourceLinks": 76
+      }
+    ],
+    "controls": [
+      {
+        "action": "skip-content",
+        "focused": "sport-main"
+      },
+      {
+        "action": "resume-banner",
+        "url": "/sport?tab=training"
+      },
+      {
+        "action": "exercise-chart-select",
+        "label": "Abduction de hanche à la poulie · Charge et répétitions",
+        "selected": true,
+        "chartHeadings": [
+          "Abduction de hanche à la poulie",
+          "Score de l’entraînement"
+        ]
+      },
+      {
+        "action": "exercise-chart-select",
+        "label": "Air bike · Distance et durée",
+        "selected": true,
+        "chartHeadings": [
+          "Air bike",
+          "Score de l’entraînement"
+        ]
+      },
+      {
+        "action": "program-baseline-select",
+        "label": "Audit série · référence 1",
+        "selected": true,
+        "chartHeadings": [
+          "Air bike",
+          "Score de l’entraînement"
+        ]
+      },
+      {
+        "action": "program-baseline-select",
+        "label": "Audit statistiques cardio · référence 2",
+        "selected": true,
+        "chartHeadings": [
+          "Air bike",
+          "Score de l’entraînement"
+        ]
+      },
+      {
+        "action": "customize-builtin",
+        "original": "Abduction de hanche à la poulie",
+        "saved": [
+          {
+            "name": "Copie audit explicite",
+            "builtin": false
+          }
+        ]
+      }
+    ]
+  }
+}
