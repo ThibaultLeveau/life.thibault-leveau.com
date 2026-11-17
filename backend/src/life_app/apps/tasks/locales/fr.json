@@ -208,5 +208,8 @@
   "integration_days": "jours",
   "integration_workout_id": "Programme",
   "integration_exercise_id": "Exercice",
-  "integration_kind": "Type d’exercice"
+  "integration_kind": "Type d’exercice",
+  "batch_workspace_choices": "Choisissez une destination valide pour chaque espace du lot.",
+  "batch_label_limit": "Une tâche ne peut pas porter plus de 100 étiquettes.",
+  "label_not_found": "Étiquette introuvable."
 }

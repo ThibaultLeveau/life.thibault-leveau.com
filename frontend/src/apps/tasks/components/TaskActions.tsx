@@ -13,8 +13,10 @@ import {
 import { createPortal } from "react-dom";
 import { useTaskSync } from "../useTaskSync";
 import type { Task, Workspace } from "../types";
+import { useTaskMotion } from "../useTaskMotion";
 import { useTaskSelection } from "../useTaskSelection";
-import { BulkTaskDialog, type BulkAction } from "./BulkTaskDialog";
+import { BulkTaskDialog } from "./BulkTaskDialog";
+import type { BulkAction, TaskAction } from "../taskCommands";
 import { Icon } from "../../../shared/ui/Icon";
 import { TaskMenu, type MenuAnchor } from "./TaskMenu";
 
@@ -23,7 +25,9 @@ const TaskActionContext = createContext<{
   selecting: boolean;
   busy: boolean;
   menuId?: string;
-  toggle: (id: string) => void;
+  toggle: (id: string, range?: boolean) => void;
+  selectMany: (ids: string[]) => void;
+  action: (action: TaskAction, task: Task) => void;
   openMenu: (task: Task, event: MouseEvent<HTMLElement>) => void;
 } | null>(null);
 export const useTaskActions = () => useContext(TaskActionContext);
@@ -35,6 +39,7 @@ export function TaskActions({
   busy,
   children,
   onEdit,
+  archived = false,
 }: {
   tasks: Task[];
   workspaces: Workspace[];
@@ -42,8 +47,21 @@ export function TaskActions({
   busy: boolean;
   children: ReactNode;
   onEdit: (task: Task) => void;
+  archived?: boolean;
 }) {
   const root = useRef<HTMLDivElement>(null);
+  const trackFocus = useTaskMotion(
+    root,
+    tasks
+      .map(
+        (task) =>
+          `${task.id}:${task.position}:${task.section_id}:${task.status_id}:${task.completed_at}`,
+      )
+      .join("|"),
+  );
+  const rangeAnchor = useRef<string | null>(null);
+  const currentTasks = useRef(tasks);
+  currentTasks.current = tasks;
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [selecting, setSelecting] = useState(false);
   const [menu, setMenu] = useState<MenuAnchor | null>(null);
@@ -76,7 +94,11 @@ export function TaskActions({
       const current = tasks.find(
         (task) => task.id === sync.canonicalId(previous.task.id),
       );
-      return current ? { ...previous, task: current } : null;
+      return current
+        ? current === previous.task
+          ? previous
+          : { ...previous, task: current }
+        : null;
     });
   }, [tasks]);
   useEffect(() => {
@@ -98,13 +120,30 @@ export function TaskActions({
     selected,
     choose,
   );
-  const toggle = useCallback((id: string) => {
+  const toggle = useCallback((id: string, range = false) => {
+    const rows =
+      range && root.current
+        ? [...root.current.querySelectorAll<HTMLElement>("[data-task-id]")].map(
+            (row) => row.dataset.taskId!,
+          )
+        : currentTasks.current.map((task) => task.id);
+    const start = rows.indexOf(rangeAnchor.current ?? "");
+    const end = rows.indexOf(id);
     setSelected((previous) => {
       const next = new Set(previous);
+      if (range && start >= 0 && end >= 0) {
+        for (const task of rows.slice(
+          Math.min(start, end),
+          Math.max(start, end) + 1,
+        ))
+          next.add(task);
+        return next;
+      }
       if (next.has(id)) next.delete(id);
       else next.add(id);
       return next;
     });
+    rangeAnchor.current = id;
     setSelecting(true);
   }, []);
   const openMenu = useCallback(
@@ -138,24 +177,48 @@ export function TaskActions({
       busy: busy,
       menuId: menu?.task.id,
       toggle,
+      selectMany: (ids: string[]) => {
+        setSelected((previous) => new Set([...previous, ...ids]));
+        setSelecting(true);
+      },
+      action: (action: TaskAction, task: Task) => {
+        if (action === "edit") onEdit(task);
+        else if (action === "select") toggle(task.id);
+        else setDialog({ action, tasks: [task] });
+      },
       openMenu,
     }),
-    [selected, selecting, busy, menu?.task.id, toggle, openMenu],
+    [selected, selecting, busy, menu?.task.id, toggle, openMenu, onEdit],
   );
   const selectedTasks = tasks.filter((task) => selected.has(task.id));
-  function duplicate(task: Task) {
-    sync.mutate(
-      `/tasks/${task.id}/duplicate`,
-      "POST",
-      { expected_version: task.version },
-      { message: tr("task_duplicated") },
-    );
-  }
 
   return (
     <TaskActionContext.Provider value={context}>
-      <div className={`task-actions ${selecting ? "is-selecting" : ""}`}>
+      <div
+        className={`task-actions ${selecting ? "is-selecting" : ""}`}
+        onKeyDown={(event) => {
+          if (
+            selecting &&
+            (event.ctrlKey || event.metaKey) &&
+            event.key.toLowerCase() === "a" &&
+            !(event.target as HTMLElement).closest(
+              "input, textarea, select, [contenteditable=true]",
+            )
+          ) {
+            event.preventDefault();
+            choose(new Set(tasks.map((t) => t.id)));
+          }
+        }}
+      >
         <div className="selection-entry">
+          {selecting && (
+            <button
+              className="text-button"
+              onClick={() => choose(new Set(tasks.map((t) => t.id)))}
+            >
+              {tr("select_all_results", { count: tasks.length })}
+            </button>
+          )}
           <button
             className="text-button"
             disabled={busy || !tasks.length}
@@ -171,6 +234,7 @@ export function TaskActions({
         </div>
         <div
           ref={root}
+          onFocusCapture={(event) => trackFocus(event.target)}
           className={`task-selection-surface ${box ? "is-marquee" : ""}`}
           onKeyDown={(event) => {
             if (
@@ -209,12 +273,12 @@ export function TaskActions({
               return;
             }
             if (
-              (selecting || event.ctrlKey || event.metaKey) &&
+              (selecting || event.ctrlKey || event.metaKey || event.shiftKey) &&
               !target.closest(".task-more, .task-select")
             ) {
               event.preventDefault();
               event.stopPropagation();
-              toggle(id);
+              toggle(id, event.shiftKey);
             }
           }}
         >
@@ -238,39 +302,65 @@ export function TaskActions({
                   selectedTasks.length > 500
                 }
                 onClick={() =>
-                  setDialog({ action: "reschedule", tasks: selectedTasks })
+                  setDialog({
+                    action: archived
+                      ? "restore"
+                      : selectedTasks.some((t) => !t.completed_at)
+                        ? "complete"
+                        : "reopen",
+                    tasks: selectedTasks,
+                  })
                 }
               >
-                <Icon name="calendar" />
-                {tr("reschedule")}
+                <Icon name={archived ? "restore" : "check"} />
+                {archived
+                  ? tr("restore")
+                  : selectedTasks.some((t) => !t.completed_at)
+                    ? tr("complete")
+                    : tr("reopen")}
               </button>
-              <button
-                disabled={
-                  disabled ||
-                  !selectedTasks.length ||
-                  selectedTasks.length > 500
-                }
-                onClick={() =>
-                  setDialog({ action: "move", tasks: selectedTasks })
-                }
-              >
-                <Icon name="folder" />
-                {tr("move")}
-              </button>
-              <button
-                className="danger-text"
-                disabled={
-                  disabled ||
-                  !selectedTasks.length ||
-                  selectedTasks.length > 500
-                }
-                onClick={() =>
-                  setDialog({ action: "archive", tasks: selectedTasks })
-                }
-              >
-                <Icon name="trash" />
-                {tr("delete")}
-              </button>
+              {!archived && (
+                <>
+                  <button
+                    disabled={
+                      disabled ||
+                      !selectedTasks.length ||
+                      selectedTasks.length > 500
+                    }
+                    onClick={() =>
+                      setDialog({ action: "reschedule", tasks: selectedTasks })
+                    }
+                  >
+                    <Icon name="calendar" />
+                    {tr("reschedule")}
+                  </button>
+                  <button
+                    disabled={
+                      disabled ||
+                      !selectedTasks.length ||
+                      selectedTasks.length > 500
+                    }
+                    onClick={() =>
+                      setDialog({ action: "move", tasks: selectedTasks })
+                    }
+                  >
+                    <Icon name="folder" />
+                    {tr("move")}
+                  </button>
+                  <button
+                    aria-haspopup="menu"
+                    disabled={
+                      disabled ||
+                      !selectedTasks.length ||
+                      selectedTasks.length > 500
+                    }
+                    onClick={(event) => openMenu(selectedTasks[0], event)}
+                  >
+                    <Icon name="more" />
+                    {tr("more_actions")}
+                  </button>
+                </>
+              )}
             </div>
             <button
               className="selection-clear"
@@ -282,7 +372,20 @@ export function TaskActions({
               <span>{tr("deselect_all")}</span>
             </button>
             {selectedTasks.length > 500 && (
-              <p role="alert">{tr("select_up_to_500_tasks_per_operation")}</p>
+              <p role="alert">
+                {tr("select_up_to_500_tasks_per_operation")}{" "}
+                <button
+                  onClick={() =>
+                    choose(
+                      new Set(
+                        selectedTasks.slice(0, 500).map((task) => task.id),
+                      ),
+                    )
+                  }
+                >
+                  {tr("keep_first_500")}
+                </button>
+              </p>
             )}
           </div>
         )}
@@ -298,14 +401,32 @@ export function TaskActions({
         {menu && (
           <TaskMenu
             anchor={menu}
+            tasks={selected.has(menu.task.id) ? selectedTasks : [menu.task]}
+            selected={selected.has(menu.task.id)}
+            archived={archived}
             onClose={closeMenu}
             onAction={(action) => {
               const task = menu.task;
               closeMenu();
               if (action === "edit") onEdit(task);
-              else if (action === "duplicate") void duplicate(task);
-              else if (action === "select") toggle(task.id);
-              else setDialog({ action: "archive", tasks: [task] });
+              else if (action === "select") {
+                if (selected.has(task.id) && selectedTasks.length > 1) clear();
+                else toggle(task.id);
+              } else if (
+                action === "duplicate" &&
+                (!selected.has(task.id) || selectedTasks.length === 1)
+              )
+                sync.mutate(
+                  `/tasks/${task.id}/duplicate`,
+                  "POST",
+                  { expected_version: task.version },
+                  { message: tr("task_duplicated") },
+                );
+              else
+                setDialog({
+                  action,
+                  tasks: selected.has(task.id) ? selectedTasks : [task],
+                });
             }}
           />
         )}
@@ -324,4 +445,16 @@ export function TaskActions({
       </div>
     </TaskActionContext.Provider>
   );
+}
+
+export function SelectTaskGroup({ tasks }: { tasks: Task[] }) {
+  const actions = useTaskActions();
+  return actions?.selecting && tasks.length ? (
+    <button
+      className="text-button"
+      onClick={() => actions.selectMany(tasks.map((task) => task.id))}
+    >
+      {tr("select_group")}
+    </button>
+  ) : null;
 }

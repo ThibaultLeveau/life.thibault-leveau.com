@@ -1,5 +1,12 @@
 import { tr } from "../i18n";
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useDraftForm, useTaskDrafts } from "../useTaskDrafts";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type ReactNode,
+} from "react";
 import { SyncFeedback, useTaskSync } from "../useTaskSync";
 import { activeTasks } from "../optimistic";
 import {
@@ -14,7 +21,11 @@ import { Icon } from "../../../shared/ui/Icon";
 import { ColorPicker } from "./ColorPicker";
 
 export type SettingsTab =
-  "space" | "sections" | "statuses" | "labels" | "archives";
+  | "space"
+  | "sections"
+  | "statuses"
+  | "labels"
+  | "archives";
 type Entity = Section | Status | Label;
 type Kind = "sections" | "statuses" | "labels";
 
@@ -30,6 +41,7 @@ function EntityForm({
   children?: ReactNode;
 }) {
   const [color, setColor] = useState(item?.color ?? "#748b79");
+  const draft = useDraftForm(color);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
@@ -41,11 +53,17 @@ function EntityForm({
       form.reset();
       setColor("#748b79");
     }
+    draft.cleanOnCommit();
   }
   const section =
     kind === "sections" ? (item as Section | undefined) : undefined;
   return (
-    <form className="entity-form" onSubmit={submit}>
+    <form
+      ref={draft.ref}
+      data-entity-id={item?.id ?? "new"}
+      className="entity-form"
+      onSubmit={submit}
+    >
       <div className="entity-main">
         <label className="entity-name">
           <span className="sr-only">
@@ -126,6 +144,7 @@ export function WorkspaceSettings({
   statuses,
   labels,
   initialTab,
+  targetSection,
   onClose,
   onArchived,
 }: {
@@ -135,14 +154,32 @@ export function WorkspaceSettings({
   statuses: Status[];
   labels: Label[];
   initialTab: SettingsTab;
+  targetSection?: string;
   onClose: () => void;
   onArchived: () => void;
 }) {
   const [tab, setTab] = useState(initialTab);
+  const panel = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (tab !== "sections" || !targetSection) return;
+    const frame = requestAnimationFrame(() => {
+      const form = [
+        ...(panel.current?.querySelectorAll<HTMLElement>("[data-entity-id]") ??
+          []),
+      ].find((element) => element.dataset.entityId === targetSection);
+      form?.querySelector<HTMLInputElement>('input[name="name"]')?.focus();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [tab, targetSection]);
+  const drafts = useTaskDrafts();
+  const close = () => {
+    if (drafts.confirm(panel.current)) onClose();
+  };
   const [color, setColor] = useState(workspace.color);
+  const draft = useDraftForm(color);
   const sync = useTaskSync();
   function selectTab(value: SettingsTab) {
-    if (value === tab) return;
+    if (value === tab || !drafts.confirm(panel.current)) return;
     setTab(value);
     setColor(workspace.color);
   }
@@ -185,6 +222,7 @@ export function WorkspaceSettings({
       ...Object.fromEntries(values),
       parent_id: values.get("parent_id") || null,
     });
+    draft.clean();
   }
   async function archiveSpace() {
     sync.mutate(
@@ -209,7 +247,7 @@ export function WorkspaceSettings({
         ? statuses
         : labels;
   return (
-    <Dialog title={tr("configure_workspace")} onClose={onClose} wide>
+    <Dialog title={tr("configure_workspace")} onClose={close} wide>
       <div
         className="settings-tabs"
         role="tablist"
@@ -249,6 +287,7 @@ export function WorkspaceSettings({
         ))}
       </div>
       <div
+        ref={panel}
         className="dialog-body settings-body"
         role="tabpanel"
         id={`settings-${tab}`}
@@ -257,7 +296,7 @@ export function WorkspaceSettings({
         <SyncFeedback inDialog />
         {tab === "space" && (
           <>
-            <form className="stack-form" onSubmit={saveSpace}>
+            <form ref={draft.ref} className="stack-form" onSubmit={saveSpace}>
               <label>
                 {tr("name")}
                 <input
@@ -464,7 +503,6 @@ export function WorkspaceSettings({
                   <span>{section.name}</span>
                   <button
                     className="secondary-button small-button"
-
                     onClick={() =>
                       run(`${base}/sections/${section.id}`, "PATCH", {
                         archived: false,

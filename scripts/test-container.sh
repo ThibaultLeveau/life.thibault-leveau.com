@@ -83,6 +83,14 @@ def request(path, data, method='POST', headers=None):
                      method=method, headers={'Content-Type': 'application/json', **(headers or {})})) as response:
         return json.load(response)
 session = request('/auth/session', {'username': 'browser-test', 'password': 'synthetic-browser-password'})
+headers = {'X-CSRF-Token': session['csrf_token']}
+space = request('/workspaces', {'name': 'Sauvegarde filtres Tâches'}, headers=headers)
+label = request(f"/workspaces/{space['id']}/labels", {'name': 'Reprise'}, headers=headers)
+agenda = request('/agenda/view', {
+    'search': 'Reprise après restauration', 'workspace_id': space['id'],
+    'priority': 2, 'label_id': label['id'],
+}, 'PUT', headers)
+assert agenda['search'] == 'Reprise après restauration' and agenda['priority'] == 2
 result = request('/applications/tasks', {'enabled': False}, 'PUT', {'X-CSRF-Token': session['csrf_token']})
 assert result['enabled'] is False
 preferences = request('/preferences', {'locale': 'en'}, 'PUT', {'X-CSRF-Token': session['csrf_token']})

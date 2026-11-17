@@ -384,7 +384,10 @@ def bulk_tasks(payload: s.BulkInput, user: CurrentUser, db: Database):
     ou archive, 422 si lot/calendrier invalide. Toute erreur annule le lot entier.
     reschedule conserve règles et compteurs ; move conserve ouvert/terminé et dates
     de résolution, place en fin de section et reprend les étiquettes ; archive
-    est une suppression réversible, sans effacement de l’historique.
+    et restore préservent dates et historique. complete/reopen utilisent le cycle
+    de vie individuel (une occurrence récurrente) ; duplicate retourne les copies.
+    priority applique 1–4 ; status_ids et label_ids couvrent exactement les espaces
+    représentés. labels ajoute/retire les étiquettes locales, sans dépasser 100.
     """
     result = svc.bulk_tasks(db, user, payload)
     db.commit()

@@ -277,6 +277,7 @@ test.describe("confort tactile", () => {
         await page.locator(".schedule-trigger").click();
         await page.getByRole("tab", { name: "Répéter", exact: true }).click();
         await mobileFields(page);
+        page.once("dialog", async confirmation => { expect(confirmation.message()).toContain("Abandonner"); await confirmation.accept(); });
         await page.getByRole("button", { name: "Fermer", exact: true }).click();
         await page
           .getByRole("button", { name: "Configurer l’espace", exact: true })
@@ -372,6 +373,7 @@ test.describe("confort tactile", () => {
         .boundingBox())!;
       expect(fieldBox.y + fieldBox.height).toBeLessThan(footerBox.y);
       await resize(812);
+      page.once("dialog", async confirmation => { expect(confirmation.message()).toContain("Abandonner"); await confirmation.accept(); });
       await page.getByRole("button", { name: "Fermer", exact: true }).click();
       await expect(dialog).toHaveCount(0);
       await expect(
@@ -517,6 +519,7 @@ test.describe("confort tactile", () => {
           (section: { name: string }) => section.name === "Loisirs",
         ).description,
       ).toBe("Description conservée pendant la saisie. Suite.");
+      page.once("dialog", async confirmation => { expect(confirmation.message()).toContain("Abandonner"); await confirmation.accept(); });
       await dialog.getByRole("button", { name: "Fermer", exact: true }).click();
       await expect(
         page.getByRole("button", { name: "Configurer l’espace", exact: true }),
@@ -549,6 +552,7 @@ test.describe("confort tactile", () => {
         .toBeTruthy();
       await page.setViewportSize({ width: 375, height: 812 });
       await expect(description).toHaveValue("Brouillon après rotation");
+      page.once("dialog", async confirmation => { expect(confirmation.message()).toContain("Abandonner"); await confirmation.accept(); });
       await page.getByRole("button", { name: "Fermer", exact: true }).click();
       await expect(page.getByRole("dialog")).toHaveCount(0);
     } finally {

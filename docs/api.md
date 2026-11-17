@@ -123,10 +123,12 @@ Valeurs : `layout` list/board, `density` comfortable/compact, `sort` manual/prio
 | `GET /agenda/tasks?today=2026-12-31&offset=0&limit=200` | Tâches de tous les espaces actifs selon les préférences enregistrées |
 
 ```json
-{"period":"today","custom_days":14,"include_overdue":true,"show_completed":false}
+{"period":"today","custom_days":14,"include_overdue":true,"show_completed":false,"search":"","workspace_id":null,"priority":null,"label_id":null}
 ```
 
 `period` accepte `today`, `tomorrow`, `week`, `custom`. `custom_days` est un entier entre 1 et 90, conservé aussi dans les autres périodes. `week` couvre aujourd’hui et les six jours suivants ; `custom` couvre `custom_days` jours dès aujourd’hui. `tomorrow` couvre uniquement le lendemain. Les bornes sont inclusives. `include_overdue` ajoute les échéances antérieures à `today` seulement si la tâche est ouverte. `show_completed` inclut les tâches terminées dans la période. Le tri est échéance croissante, puis position et UUID pour un ordre stable.
+
+`search` (0–500 caractères) filtre titre/description ; `workspace_id` et `label_id` sont des UUID facultatifs, `priority` vaut null ou 1 à 4. Les références appartiennent au compte (404 sinon) ; une étiquette doit appartenir à l’espace choisi (422 sinon). Les quatre filtres sont conservés en JSON avec les autres préférences, sans changer les tâches.
 
 La réponse contient `items`, `total`, `offset`, `limit`, ainsi que `today`, `start_date` et `end_date` (`YYYY-MM-DD`). Les champs de chaque tâche sont ceux de `/tasks`. `offset` est positif ou nul ; `limit` vaut 1 à 200 (100 par défaut). `today` est la date locale du client ; son omission utilise la date du serveur. Une période dépassant l’année 9999 retourne 422, comme une date, un réglage ou une pagination invalide.
 
@@ -326,7 +328,14 @@ Les réponses privées portent `Cache-Control: no-store`, erreurs comprises. Une
 | --- | --- | --- |
 | `reschedule` | `due_date` obligatoire, `YYYY-MM-DD` ou null | Modifie la date courante, conserve récurrence, compteur et état. Null est refusé si une tâche est récurrente ; bornes et exceptions s’appliquent. |
 | `move` | `workspace_id`, `section_id` optionnel/null | Place en fin de section dans l’ordre fourni. Dans le même espace, conserve chaque statut ; entre espaces, choisit le premier statut du même type ouvert/terminé. Étiquettes reprises par nom, dates de résolution conservées. |
-| `archive` | Aucun | Suppression réversible de la vue active, avec conservation des dates/règles/compteurs/événements. Restauration individuelle via PATCH existant. |
+| `archive` | Aucun | Suppression réversible de la vue active, avec conservation des dates/règles/compteurs/événements. Restauration individuelle via PATCH ou groupée via `restore`. |
+| `complete` / `reopen` | Aucun | Même cycle de vie que les routes individuelles ; ouverts réouverts et terminés terminés restent inchangés. Une occurrence par tâche récurrente lors de la clôture. |
+| `duplicate` | Aucun | Retourne les copies dans l’ordre des sources ; sources intactes, mêmes règles que la duplication individuelle. |
+| `restore` | Aucun | Restaure des tâches archivées individuellement, en préservant dates, statut et événements ; espace/section archivés : 409 pour tout le lot. |
+| `priority` | `priority` entier 1–4 | Priorité commune. |
+| `status` | `status_ids: {workspace_uuid: status_uuid}` | Exactement une entrée par espace représenté. Les statuts doivent appartenir à leur espace ; les transitions utilisent les règles de clôture/récurrence existantes. |
+| `labels` | `operation: "add"` ou `"remove"`, `label_ids: {workspace_uuid: [label_uuid, …]}` | Exactement une entrée par espace représenté (liste vide autorisée). Étiquettes du même espace ; union dédupliquée ou retrait, autres étiquettes intactes. Maximum 100 étiquettes par tâche. |
+
 
 Les champs d’une autre action sont refusés. Chaque version est contrôlée avant le traitement ; les changements d’ordre internes au lot ne créent pas de faux conflits. Recharger les versions retournées avant une autre mutation. Les règles de session, propriétaire, origine et CSRF sont identiques aux mutations individuelles : 401 sans session, 403 sans CSRF ou origine autorisée, 404 pour tâche/destination inaccessible, 409 pour version périmée ou archive, 422 pour lot/calendrier invalide. Ces codes ne justifient aucun retry automatique avec une version remplacée silencieusement.
 
@@ -360,6 +369,25 @@ response = client.post("/tasks/bulk", json={
 })
 response.raise_for_status()
 ```
+
+```python
+# Après lecture des versions actuelles, même client authentifié :
+selected = [source, copy]
+refs = [{"id": t["id"], "expected_version": t["version"]} for t in selected]
+response = client.post("/tasks/bulk", json={
+    "action": "labels", "tasks": refs, "operation": "add",
+    "label_ids": {str(workspace_id): [str(label_id)]},
+})
+response.raise_for_status()
+updated = response.json()
+response = client.post("/tasks/bulk", json={
+    "action": "complete",
+    "tasks": [{"id": t["id"], "expected_version": t["version"]} for t in updated],
+})
+response.raise_for_status()
+```
+
+Les vues globales utilisent les contrats existants : `GET /tasks?search=mot` sans `workspace_id` cherche dans tous les espaces, `completed=false` limite aux ouvertes, `completed=true` aux terminées, `due=none` aux tâches sans date, `archived=true` aux archives. `workspace_id`, `priority` et `label_id` affinent ces résultats ; les contrôles de propriétaire et la pagination restent identiques.
 
 ## Sport
 

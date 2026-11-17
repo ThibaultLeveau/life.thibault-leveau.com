@@ -148,7 +148,7 @@ for (const locale of ["fr", "en"] as const) {
             picker.getByRole("button", { pressed: true }),
           ).toHaveCount(0);
 
-          // Staying on the same tab keeps the draft; leaving it discards all fields.
+          // Staying on the same tab keeps the draft; confirm before discarding it.
           await blue.click();
           await dialog
             .getByRole("tab", {
@@ -157,6 +157,10 @@ for (const locale of ["fr", "en"] as const) {
             })
             .click();
           await expect(custom).toHaveValue("#3b82b6");
+          page.once("dialog", async confirmation => {
+            expect(confirmation.message()).toContain(fr ? "Abandonner" : "Discard");
+            await confirmation.accept();
+          });
           await dialog
             .getByRole("tab", { name: "Sections", exact: true })
             .click();

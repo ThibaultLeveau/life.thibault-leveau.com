@@ -133,6 +133,10 @@ export function localDate() {
 }
 
 export interface AgendaSettings {
+  search: string;
+  workspace_id: string | null;
+  priority: number | null;
+  label_id: string | null;
   period: "today" | "tomorrow" | "week" | "custom";
   custom_days: number;
   include_overdue: boolean;

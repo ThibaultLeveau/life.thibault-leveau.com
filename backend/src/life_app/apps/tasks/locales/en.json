@@ -208,5 +208,8 @@
   "integration_days": "days",
   "integration_workout_id": "Program",
   "integration_exercise_id": "Exercise",
-  "integration_kind": "Exercise type"
+  "integration_kind": "Exercise type",
+  "batch_workspace_choices": "Choose a valid destination for every workspace in the batch.",
+  "batch_label_limit": "A task cannot have more than 100 labels.",
+  "label_not_found": "Label not found."
 }

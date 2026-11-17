@@ -31,6 +31,7 @@ export function MoveDialog({
   const [sectionId, setSectionId] = useState(task.section_id ?? "");
   const [statusId, setStatusId] = useState(task.status_id);
   const [beforeId, setBeforeId] = useState("");
+  const [attempt, setAttempt] = useState(0);
   const [loading, setLoading] = useState(true);
   const sync = useTaskSync();
   const [error, setError] = useState("");
@@ -54,6 +55,7 @@ export function MoveDialog({
       allTasks(spaceId, defaultView, false, controller.signal),
     ])
       .then(([sections, statuses, page]) => {
+        if (controller.signal.aborted) return;
         setSections(sections);
         setStatuses(statuses);
         setTasks(page.items);
@@ -77,9 +79,10 @@ export function MoveDialog({
         }
       });
     return () => controller.abort();
-  }, [spaceId, task]);
+  }, [spaceId, task, attempt]);
   async function submit(event: FormEvent) {
     event.preventDefault();
+    if (loading || error) return;
     sync.mutate(
       `/tasks/${task.id}/move`,
       "POST",
@@ -172,11 +175,23 @@ export function MoveDialog({
           </p>
         )}
         <ErrorMessage message={error} />
+        {error && (
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={() => setAttempt((value) => value + 1)}
+          >
+            {tr("retry")}
+          </button>
+        )}
         <div className="dialog-actions">
           <button type="button" className="secondary-button" onClick={onClose}>
             {tr("cancel")}
           </button>
-          <button className="primary-button" disabled={loading || !statusId}>
+          <button
+            className="primary-button"
+            disabled={loading || !!error || !statusId}
+          >
             {tr("move")}
           </button>
         </div>

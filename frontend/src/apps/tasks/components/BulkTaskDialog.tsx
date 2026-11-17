@@ -3,14 +3,14 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { api } from "../../../platform/api";
 import { relativeDate } from "../dates";
 import { plusDays } from "../scheduling";
-import type { Section, Task, Workspace } from "../types";
+import type { Label, Status, Section, Task, Workspace } from "../types";
 import { workspaceTree } from "../workspaceTree";
 import { Dialog, ErrorMessage } from "../../../shared/ui/Dialog";
 import { Calendar } from "./ScheduleCalendar";
 
 import { useTaskSync } from "../useTaskSync";
 
-export type BulkAction = "reschedule" | "move" | "archive";
+import { actionLabel, type BulkAction } from "../taskCommands";
 
 export function BulkTaskDialog({
   action,
@@ -27,7 +27,18 @@ export function BulkTaskDialog({
   onClose: () => void;
   onSaved: () => void;
 }) {
-  const [date, setDate] = useState<string | null>(today);
+  const [date, setDate] = useState<string | null>(
+    tasks.length === 1 ? (tasks[0].due_date ?? today) : today,
+  );
+  const [priority, setPriority] = useState(tasks[0].priority);
+  const [statuses, setStatuses] = useState<Status[]>([]);
+  const [labels, setLabels] = useState<Label[]>([]);
+  const [statusIds, setStatusIds] = useState<Record<string, string>>({});
+  const [labelIds, setLabelIds] = useState<Record<string, string[]>>({});
+  const [operation, setOperation] = useState("add");
+  const [attempt, setAttempt] = useState(0);
+  const spaceIds = [...new Set(tasks.map((task) => task.workspace_id))];
+  const spaceKey = spaceIds.join(",");
   const [spaceId, setSpaceId] = useState(tasks[0].workspace_id);
   const [sectionId, setSectionId] = useState("");
   const [sections, setSections] = useState<Section[]>([]);
@@ -35,37 +46,61 @@ export function BulkTaskDialog({
   const sync = useTaskSync();
   const [error, setError] = useState("");
   const calendar = useRef<HTMLFieldSetElement>(null);
-  const verb =
-    action === "archive"
-      ? tr("delete")
-      : action === "move"
-        ? tr("move")
-        : tr("reschedule");
+  const verb = actionLabel(action);
   useEffect(() => {
-    if (action !== "move") return;
+    setSectionId("");
+  }, [spaceId]);
+  useEffect(() => {
+    if (!["move", "status", "labels"].includes(action)) return;
     const controller = new AbortController();
     setLoading(true);
     setError("");
-    setSections([]);
-    setSectionId("");
-    api<Section[]>(
-      `/workspaces/${spaceId}/sections`,
-      "GET",
-      undefined,
-      controller.signal,
+    const kind =
+      action === "move"
+        ? "sections"
+        : action === "status"
+          ? "statuses"
+          : "labels";
+    const targets = action === "move" ? [spaceId] : spaceIds;
+    Promise.all(
+      targets.map((id) =>
+        api<(Section | Status | Label)[]>(
+          `/workspaces/${id}/${kind}`,
+          "GET",
+          undefined,
+          controller.signal,
+        ),
+      ),
     )
-      .then((items) => {
-        setSections(items);
-        setLoading(false);
+      .then((groups) => {
+        if (controller.signal.aborted) return;
+        if (action === "move") setSections(groups.flat() as Section[]);
+        else if (action === "status") setStatuses(groups.flat() as Status[]);
+        else setLabels(groups.flat() as Label[]);
       })
       .catch((error) => {
         if (!controller.signal.aborted) setError(error.message);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, [spaceId, action]);
+  }, [spaceId, action, spaceKey, attempt]);
+  const restoreBlocked =
+    action === "restore" &&
+    tasks.some(
+      (task) =>
+        !task.archived_at ||
+        workspaces.find((space) => space.id === task.workspace_id)
+          ?.archived_at ||
+        sync.data?.sections.find((section) => section.id === task.section_id)
+          ?.archived_at,
+    );
+  const incomplete =
+    action === "status" && spaceIds.some((id) => !statusIds[id]);
   async function submit(event: FormEvent) {
     event.preventDefault();
-    if (loading) return;
+    if (loading || error || incomplete || restoreBlocked) return;
     sync.mutate(
       "/tasks/bulk",
       "POST",
@@ -76,6 +111,16 @@ export function BulkTaskDialog({
           expected_version: task.version,
         })),
         ...(action === "reschedule" ? { due_date: date } : {}),
+        ...(action === "priority" ? { priority } : {}),
+        ...(action === "status" ? { status_ids: statusIds } : {}),
+        ...(action === "labels"
+          ? {
+              operation,
+              label_ids: Object.fromEntries(
+                spaceIds.map((id) => [id, labelIds[id] ?? []]),
+              ),
+            }
+          : {}),
         ...(action === "move"
           ? { workspace_id: spaceId, section_id: sectionId || null }
           : {}),
@@ -90,7 +135,123 @@ export function BulkTaskDialog({
       title={tr(`bulk_title_${action}`, { count: tasks.length })}
       onClose={onClose}
     >
-      <form className="dialog-body stack-form bulk-task-form" onSubmit={submit}>
+      <form
+        className="dialog-body stack-form bulk-task-form"
+        aria-busy={loading}
+        onSubmit={submit}
+      >
+        {loading && <p role="status">{tr("loading")}</p>}
+        <p className="bulk-task-summary">
+          {tr("selected_count", { count: tasks.length })}
+        </p>
+        {action === "complete" && <p>{tr("bulk_complete_help")}</p>}
+        {action === "reopen" && <p>{tr("bulk_reopen_help")}</p>}
+        {action === "duplicate" && <p>{tr("bulk_duplicate_help")}</p>}
+        {action === "restore" && (
+          <p>
+            {tr(restoreBlocked ? "restore_parent_first" : "bulk_restore_help")}
+          </p>
+        )}
+        {action === "priority" && (
+          <label>
+            {tr("priority")}
+            <select
+              value={priority}
+              onChange={(event) => setPriority(Number(event.target.value))}
+            >
+              {[1, 2, 3, 4].map((value) => (
+                <option key={value} value={value}>
+                  {tr(
+                    (["p1_urgent", "p2_high", "p3_normal", "p4_none"] as const)[
+                      value - 1
+                    ],
+                  )}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+        {action === "status" &&
+          spaceIds.map((id) => (
+            <label key={id}>
+              {
+                workspaceTree(workspaces).find((row) => row.space.id === id)
+                  ?.path
+              }
+              <select
+                required
+                disabled={loading}
+                value={statusIds[id] ?? ""}
+                onChange={(event) =>
+                  setStatusIds((previous) => ({
+                    ...previous,
+                    [id]: event.target.value,
+                  }))
+                }
+              >
+                <option value="">{tr("choose_status")}</option>
+                {statuses
+                  .filter((status) => status.workspace_id === id)
+                  .map((status) => (
+                    <option key={status.id} value={status.id}>
+                      {status.name}
+                    </option>
+                  ))}
+              </select>
+            </label>
+          ))}
+        {action === "status" && (
+          <p className="field-help">{tr("bulk_status_help")}</p>
+        )}
+        {action === "labels" && (
+          <>
+            <label>
+              {tr("label_operation")}
+              <select
+                value={operation}
+                onChange={(event) => setOperation(event.target.value)}
+              >
+                <option value="add">{tr("add_labels")}</option>
+                <option value="remove">{tr("remove_labels")}</option>
+              </select>
+            </label>
+            {spaceIds.map((id) => (
+              <fieldset className="label-fieldset" key={id} disabled={loading}>
+                <legend>
+                  {
+                    workspaceTree(workspaces).find((row) => row.space.id === id)
+                      ?.path
+                  }
+                </legend>
+                {!loading &&
+                  !labels.some((label) => label.workspace_id === id) && (
+                    <p className="muted">{tr("no_labels_for_workspace")}</p>
+                  )}
+                {labels
+                  .filter((label) => label.workspace_id === id)
+                  .map((label) => (
+                    <label className="check-label" key={label.id}>
+                      <input
+                        type="checkbox"
+                        checked={(labelIds[id] ?? []).includes(label.id)}
+                        onChange={(event) =>
+                          setLabelIds((previous) => ({
+                            ...previous,
+                            [id]: event.target.checked
+                              ? [...(previous[id] ?? []), label.id]
+                              : (previous[id] ?? []).filter(
+                                  (value) => value !== label.id,
+                                ),
+                          }))
+                        }
+                      />
+                      {label.name}
+                    </label>
+                  ))}
+              </fieldset>
+            ))}
+          </>
+        )}
         {action === "archive" && (
           <p>{tr("these_tasks_will_be_removed_from_your_lists_you_can")}</p>
         )}
@@ -160,7 +321,9 @@ export function BulkTaskDialog({
                 value={spaceId}
                 onChange={(event) => setSpaceId(event.target.value)}
               >
-                {workspaceTree(workspaces).map(({ space, path }) => (
+                {workspaceTree(
+                  workspaces.filter((space) => !space.archived_at),
+                ).map(({ space, path }) => (
                   <option key={space.id} value={space.id}>
                     {path}
                   </option>
@@ -188,13 +351,22 @@ export function BulkTaskDialog({
           </>
         )}
         <ErrorMessage message={error} />
+        {error && (
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={() => setAttempt((value) => value + 1)}
+          >
+            {tr("retry")}
+          </button>
+        )}
         <div className="dialog-actions">
           <button type="button" className="secondary-button" onClick={onClose}>
             {tr("cancel")}
           </button>
           <button
             className={`primary-button ${action === "archive" ? "danger-button" : ""}`}
-            disabled={loading}
+            disabled={loading || !!error || incomplete || restoreBlocked}
           >
             {verb}
           </button>

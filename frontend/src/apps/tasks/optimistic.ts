@@ -82,37 +82,70 @@ export function optimistic(data: TaskData, command: TaskCommand): TaskData {
     return { ...data, agenda: { ...data.agenda, ...body } };
   if (parts[0] === "tasks") {
     if (parts[1] === "bulk") {
-      for (const { id } of body.tasks as { id: string }[]) {
+      for (const [index, { id }] of (
+        body.tasks as { id: string }[]
+      ).entries()) {
         const task = data.tasks.find((t) => t.id === id);
         if (!task) continue;
-        if (body.action === "move") {
-          data = move(
-            data,
-            task,
-            {
-              ...body,
+        let fields: Record<string, unknown> = {};
+        let action = "";
+        switch (body.action) {
+          case "move":
+            action = "move";
+            fields = {
+              workspace_id: body.workspace_id,
+              section_id: body.section_id,
               status_id:
-                statusFor(
-                  data,
-                  body.workspace_id as string,
-                  !!task.completed_at,
-                ) ?? task.status_id,
-            },
-            at,
-          );
-        } else {
-          data = replaceTask(
-            data,
-            patchTask(
-              data,
-              task,
-              body.action === "archive"
-                ? { archived: true }
-                : { due_date: body.due_date },
-              at,
-            ),
-          );
+                body.workspace_id === task.workspace_id
+                  ? task.status_id
+                  : (statusFor(
+                      data,
+                      body.workspace_id as string,
+                      !!task.completed_at,
+                    ) ?? task.status_id),
+            };
+            break;
+          case "complete":
+          case "reopen":
+          case "duplicate":
+            action = body.action;
+            break;
+          case "archive":
+          case "restore":
+            fields = { archived: body.action === "archive" };
+            break;
+          case "reschedule":
+            fields = { due_date: body.due_date };
+            break;
+          case "priority":
+            fields = { priority: body.priority };
+            break;
+          case "status":
+            fields = {
+              status_id: (body.status_ids as Record<string, string>)[
+                task.workspace_id
+              ],
+            };
+            break;
+          case "labels": {
+            const labels =
+              (body.label_ids as Record<string, string[]>)[task.workspace_id] ??
+              [];
+            fields = {
+              label_ids:
+                body.operation === "add"
+                  ? [...new Set([...task.label_ids, ...labels])]
+                  : task.label_ids.filter((id) => !labels.includes(id)),
+            };
+            break;
+          }
         }
+        data = optimistic(data, {
+          ...command,
+          path: `/tasks/${id}${action ? `/${action}` : ""}`,
+          body: fields,
+          temporaryId: `${temporaryId}:${body.action === "duplicate" ? index : id}`,
+        });
       }
       return data;
     }
@@ -173,7 +206,7 @@ export function optimistic(data: TaskData, command: TaskCommand): TaskData {
       const completed = parts[2] === "complete";
       return replaceTask(data, {
         ...task,
-        completed_at: completed ? at : null,
+        completed_at: completed ? (task.completed_at ?? at) : null,
         status_id:
           statusFor(data, task.workspace_id, completed) ?? task.status_id,
       });
@@ -187,7 +220,10 @@ export function optimistic(data: TaskData, command: TaskCommand): TaskData {
       views: { ...data.views, [parts[1]]: body as unknown as ViewSettings },
     };
   const kind = (parts[2] ?? "workspaces") as
-    "workspaces" | "sections" | "statuses" | "labels";
+    | "workspaces"
+    | "sections"
+    | "statuses"
+    | "labels";
   const id = kind === "workspaces" ? parts[1] : parts[3];
   if (id === "order") {
     const ids = body.ids as string[];
@@ -325,6 +361,13 @@ export function agendaTasks(
       (t) =>
         t.due_date &&
         (settings.show_completed || !t.completed_at || flashes.has(t.id)) &&
+        (!settings.workspace_id || t.workspace_id === settings.workspace_id) &&
+        (!settings.priority || t.priority === settings.priority) &&
+        (!settings.label_id || t.label_ids.includes(settings.label_id)) &&
+        (!settings.search ||
+          `${t.title}\n${t.description}`
+            .toLocaleLowerCase()
+            .includes(settings.search.trim().toLocaleLowerCase())) &&
         ((t.due_date >= start && t.due_date <= end) ||
           (settings.include_overdue && t.due_date < today && !t.completed_at)),
     )

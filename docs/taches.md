@@ -6,19 +6,37 @@ Tâches est une application de LifeOS, activée par défaut. Retrouvez-la sur l�
 
 ## Interactions immédiates
 
-Cocher une tâche affiche aussitôt sa validation avec une courte animation. Vous pouvez cocher une autre tâche immédiatement. Création, édition, déplacement, duplication, suppression/restauration, actions groupées et réglages s’affichent également sans attendre leur enregistrement. Les listes, le tableau et **À venir** restent utilisables ; le statut en haut de la page indique les actions en cours d’enregistrement.
+Cocher une tâche affiche aussitôt sa validation avec une courte animation. Vous pouvez cocher une autre tâche immédiatement. Création, édition, déplacement, duplication, archivage/restauration, actions groupées et réglages s’affichent également sans attendre leur enregistrement. Les listes, le tableau et **À venir** restent utilisables ; le statut en haut de la page indique les actions en cours d’enregistrement.
 
-La prochaine échéance d’une tâche récurrente apparaît à réception du calcul serveur. Les dates saisies en langage naturel restent validées avant l’envoi. Les confirmations de suppression et validations de formulaire restent présentes.
+La prochaine échéance d’une tâche récurrente apparaît à réception du calcul serveur. Les dates saisies en langage naturel restent validées avant l’envoi. Les confirmations d’archivage et validations de formulaire restent présentes.
 
 Si l’enregistrement échoue, un message précise le problème et l’affichage est rapproché des données enregistrées. Les autres actions indépendantes continuent. **Reprendre la saisie** permet de récupérer un brouillon de tâche, y compris après navigation entre les vues. Après un conflit, vérifiez les valeurs enregistrées avant de soumettre à nouveau. Après une interruption réseau, rechargez pour vérifier si l’action a été enregistrée avant de la renouveler.
 
 Attendez la fin du statut d’enregistrement avant de fermer ou recharger la page : les actions en attente ne sont pas conservées hors connexion. Le navigateur avertit si vous tentez de quitter pendant l’enregistrement. L’animation respecte le réglage système de réduction des mouvements.
 
+## Recherche globale et navigation
+
+**Rechercher** dans la barre latérale, ou Ctrl/⌘ K hors dialogue, ouvre une recherche dans les titres et descriptions de tous les espaces. Les filtres choisissent espace, priorité, étiquette et état : ouvertes, terminées, ouvertes et terminées, ou archives. L’état initial de la recherche inclut les tâches terminées. La recherche dans la barre d’un espace reste limitée à cet espace.
+
+**Toutes les tâches**, **Sans échéance** et **Archives des tâches** donnent des accès directs. Les filtres globaux sont dans l’URL, sans stockage métier dans le navigateur. Les boutons précédent/suivant du navigateur retrouvent ces vues et leurs critères. Les liens d’espace sur les résultats et les liens parents dans un espace rendent la hiérarchie navigable.
+
+Dans **À venir**, la recherche, l’espace, la priorité et l’étiquette sont enregistrés avec les préférences d’agenda via l’API. **Nouvelle tâche** demande l’espace de destination. Les réglages, les périodes et les filtres s’appliquent aussi à `GET /agenda/tasks`.
+
+Les filtres actifs d’un espace sont comptés et peuvent être retirés individuellement. **Terminées masquées** est un choix de visibilité distinct, avec un bouton pour les afficher. Les tickets montrent leur statut ; date, priorité, statut et étiquettes ouvrent l’action correspondante. Les commandes de section ouvrent directement son formulaire ; **Ajouter une section** place le curseur dans le nouveau nom. Les boutons de colonne permettent de parcourir un tableau sur petit écran.
+
+## Brouillons, clavier et petits écrans
+
+Quitter un éditeur modifié, fermer un ajout rapide avec Échap, changer de vue, de langue ou se déconnecter demande confirmation si une saisie non enregistrée serait perdue. **Annuler** conserve le formulaire. Un rechargement déclenche l’avertissement natif du navigateur. Ces brouillons restent temporaires et ne sont pas stockés hors connexion. Une expiration de session retire toujours les données privées.
+
+Les contrôles de tâche occupent au moins 44 × 44 px sans superposer leurs zones tactiles. La confirmation de clôture ne décale pas la liste ; le focus clavier passe à la tâche suivante, ou précédente en fin de liste. Les déplacements réorganisent les lignes avec une transition courte ; la réduction des mouvements désactive aussi l’animation JavaScript du glisser-déposer. Les annonces de déplacement utilisent le titre et la destination dans la langue du compte.
+
+Les résultats globaux et chaque groupe de liste, d’agenda ou cellule de tableau commencent par 100 tâches. **Afficher plus** ajoute 100 tâches sans modifier le total ni le périmètre de sélection. Les données sont toujours chargées par pages API de 200 pour la synchronisation existante ; il n’y a pas de chargement serveur à la demande ni de garantie pour un volume illimité.
+
 ## Se connecter et créer un espace
 
 Se connecter avec le compte créé par l'opérateur, puis choisir **Ouvrir** sur la carte **Tâches** de l’accueil ou de la bibliothèque. La page de connexion présente les champs **Identifiant** et **Mot de passe**, puis le bouton **Se connecter**. Les erreurs s’affichent dans le formulaire. La déconnexion se trouve à côté du profil. Une session expirée demande une nouvelle connexion ; les données déjà enregistrées restent conservées.
 
-Un espace peut représenter Personnel, Travail ou un projet. **Nouvel espace** définit son nom, sa description, sa couleur et, si souhaité, son **Espace parent**. Les trois colonnes initiales sont À faire, En cours et Terminé. Les réglages `…` à côté du titre permettent de les adapter. L'icône près de **Mes espaces** permet de réordonner les espaces ayant le même parent avec les flèches.
+Un espace peut représenter Personnel, Travail ou un projet. **Nouvel espace** définit son nom, sa description, sa couleur et, si souhaité, son **Espace parent**. Les trois colonnes initiales sont À faire, En cours et Terminé. La création garde son formulaire visible pendant l’enregistrement, puis ouvre le nouvel espace. En cas d’erreur, la saisie est conservée. Les réglages `…` à côté du titre permettent de les adapter. L'icône près de **Mes espaces** permet de réordonner les espaces ayant le même parent avec les flèches.
 
 ### Choisir les couleurs
 
@@ -73,7 +91,7 @@ Les tâches terminées gardent une date neutre, sans alerte de retard. Les coule
 - **Liste uniquement** : une liste, absente du tableau.
 - **Tableau uniquement** : une ligne du tableau, absente de la liste.
 
-La zone **Sans section** reste disponible. Une section masquée dans une vue conserve toutes ses tâches. Les flèches dans les réglages changent l'ordre des sections.
+La zone **Sans section** apparaît lorsqu’elle contient des tâches ou que l’espace est vide ; l’éditeur permet toujours de créer une tâche sans section. Une section masquée dans une vue conserve toutes ses tâches. Les flèches dans les réglages changent l'ordre des sections.
 
 | Section / statut | À faire | En cours | Terminé |
 | --- | --- | --- | --- |
@@ -86,13 +104,13 @@ Un espace garde au moins une colonne ouverte et une terminée. Le type d'une col
 
 ## Créer et modifier une tâche
 
-**Nouvelle tâche** ou **Ajouter une tâche** ouvre l'éditeur. L'ajout rapide dans une liste ou une cellule utilise directement sa section et son statut. Sur ordinateur, valider le titre de l’ajout rapide avec **Entrée** vide le champ et y conserve le curseur pour saisir la tâche suivante, dans la même section et le même statut. **Échap** referme cet ajout. Une tâche comporte titre, description, priorité de P1 urgente à P4 sans priorité, échéance facultative et étiquettes.
+**Nouvelle tâche** ou **Ajouter une tâche** ouvre l'éditeur. L'ajout rapide dans une liste ou une cellule utilise directement sa section et son statut. Sur ordinateur, valider le titre de l’ajout rapide avec **Entrée** vide le champ et y conserve le curseur pour saisir la tâche suivante, dans la même section et le même statut. **Échap** referme cet ajout après confirmation si le titre a changé. Une tâche comporte titre, description, priorité de P1 urgente à P4 sans priorité, échéance facultative et étiquettes.
 
-Cliquer sur le titre ouvre les détails. Le bouton `…` et le clic droit sur une tâche ouvrent un menu : **Modifier**, **Dupliquer**, **Sélectionner** et **Supprimer**. Ce menu existe en liste, tableau et agenda. Il se ferme au clic extérieur ou avec Échap ; les flèches permettent de parcourir ses actions au clavier. Les noms d’étiquettes sont propres à chaque espace ; elles se créent dans ses réglages puis se sélectionnent dans la tâche.
+Cliquer sur le titre ouvre les détails. Le bouton `…` et le clic droit sur une tâche ouvrent le même menu : **Terminer** ou **Rouvrir**, **Modifier**, **Replanifier**, **Déplacer**, **Priorité**, **Statut**, **Étiquettes**, **Dupliquer**, **Sélectionner** et **Archiver**. Les actions dépendent de l’état des tâches ; les archives proposent **Restaurer**. Ce menu existe en liste, tableau et agenda. Il se ferme au clic extérieur ou avec Échap ; les flèches permettent de parcourir ses actions au clavier. Les noms d’étiquettes sont propres à chaque espace ; elles se créent dans ses réglages puis se sélectionnent dans la tâche.
 
 **Dupliquer** crée une tâche ouverte dans le même espace et la même section, en fin de liste. Le titre, la description, la priorité, les étiquettes, l’échéance et la récurrence sont copiés. La copie commence son propre historique et son compteur de résolutions à zéro. L’original reste inchangé.
 
-**Supprimer** demande confirmation puis retire la tâche des vues actives en l’archivant. Elle reste restaurable dans **Réglages de l’espace → Archives**, avec ses dates et son historique.
+**Archiver** demande confirmation puis retire la tâche des vues actives en l’archivant. Elle reste restaurable dans **Archives des tâches** ou **Réglages de l’espace → Archives**, avec ses dates et son historique. **Annuler l’archivage** restaure le dernier lot archivé si ses versions sont toujours valides.
 
 ### Sélectionner plusieurs tâches
 
@@ -100,9 +118,9 @@ Cliquer sur le titre ouvre les détails. Le bouton `…` et le clic droit sur un
 - **Mobile :** maintenir le doigt environ une demi-seconde sur une tâche, puis toucher les autres pour les ajouter ou les retirer de la sélection. Un mouvement avant ce délai reste un défilement normal.
 - **Clavier ou commande explicite :** choisir **Sélectionner** au-dessus des tâches ou dans leur menu, puis utiliser les cases de sélection. En mode sélection, toucher un titre sélectionne la tâche sans ouvrir son éditeur.
 
-La barre affiche le nombre sélectionné et propose **Replanifier**, **Déplacer**, **Supprimer** et **Tout désélectionner**. Échap quitte également la sélection. Replanifier applique une date commune (ou retire la date si aucune tâche n’est récurrente), en conservant règles et compteurs. Déplacer choisit un espace et une section, place les tâches en fin de section et préserve leur état ouvert/terminé, leurs dates de résolution et leurs étiquettes. Supprimer archive le lot après confirmation.
+La barre affiche le nombre sélectionné et propose **Terminer/Rouvrir**, **Replanifier**, **Déplacer**, **Autres actions** et **Tout désélectionner**. **Autres actions** donne accès aux priorités, statuts, étiquettes, duplication et archivage. Échap quitte également la sélection. Replanifier applique une date commune (ou retire la date si aucune tâche n’est récurrente), en conservant règles et compteurs. Déplacer choisit un espace et une section, place les tâches en fin de section et préserve leur état ouvert/terminé, leurs dates de résolution et leurs étiquettes. Archiver conserve le lot après confirmation. Terminer valide une seule occurrence de chaque tâche récurrente ; les tâches déjà terminées ne changent pas. Rouvrir garde les événements passés. Le statut est choisi pour chaque espace ; les étiquettes peuvent être ajoutées ou retirées par espace sans remplacer les autres. Dupliquer crée une copie indépendante de chaque tâche.
 
-Un lot comporte au plus 500 tâches. Les opérations sont atomiques : une version périmée, une destination invalide ou une date incompatible avec une récurrence annule le lot entier. Le dialogue conserve la sélection et permet de recharger après un conflit ; vérifier à nouveau avant de valider. La sélection est temporaire et limitée aux tâches de la vue : changer d’espace, de période ou de filtre la remet à zéro. Aucun geste de sélection n’écrit de données.
+Un lot comporte au plus 500 tâches. Au-delà, **Limiter aux 500 premières** réduit explicitement la sélection avant l’action. Les opérations sont atomiques : une version périmée, une destination invalide ou une date incompatible avec une récurrence annule le lot entier. En cas d’échec, le message de synchronisation permet de recharger les données ; vérifier les versions et refaire la sélection avant de renouveler l’action. Un échec de chargement des destinations garde le dialogue ouvert avec **Réessayer**. La sélection est temporaire et limitée aux tâches de la vue : changer d’espace remet la sélection à zéro ; les changements de période ou de filtre retirent les tâches devenues invisibles. Aucun geste de sélection n’écrit de données. **Tout sélectionner** inclut tous les résultats, même ceux restant à afficher ; **Sélectionner cette section** ajoute son groupe. Maj-clic sélectionne un intervalle. Ctrl/⌘ A sélectionne tous les résultats en mode sélection, hors champ de saisie. Le clic droit ou les trois points d’une tâche sélectionnée appliquent le menu à toute la sélection, dont le nombre est indiqué ; une tâche hors sélection garde ses actions individuelles.
 
 Cocher termine la tâche dans le premier statut terminé de l'ordre configuré. Décocher la rouvre dans le premier statut ouvert. Déplacer une carte vers une colonne terminée produit le même effet. **Historique** montre créations, modifications, déplacements, résolutions, réouvertures et archives ; les anciennes résolutions restent présentes.
 

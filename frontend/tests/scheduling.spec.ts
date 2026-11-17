@@ -14,7 +14,7 @@ async function setup(page: Page, theme = "light") {
   expect(login.ok()).toBeTruthy();
   const { csrf_token } = await login.json();
   const headers = { "X-CSRF-Token": csrf_token };
-  await page.request.put("/api/v1/preferences", { headers, data: { theme } });
+  await page.request.put("/api/v1/preferences", { headers, data: { theme, locale: "fr" } });
   const response = await page.request.post("/api/v1/workspaces", {
     headers,
     data: { name: `Récurrences ${Date.now()}` },

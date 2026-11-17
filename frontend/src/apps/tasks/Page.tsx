@@ -7,7 +7,7 @@ import {
   ApplicationSidebar,
   ApplicationTopbar,
 } from "../../shared/ui/ApplicationNavigation";
-import { relativeDate, useLocalToday } from "./dates";
+import { useLocalToday } from "./dates";
 import { AgendaView } from "./components/AgendaView";
 import { TaskActions } from "./components/TaskActions";
 import {
@@ -36,25 +36,48 @@ import { workspaceTree } from "./workspaceTree";
 import { TaskSyncProvider, SyncFeedback, useTaskSync } from "./useTaskSync";
 import { workspaceTasks } from "./optimistic";
 import "./styles.css";
+import { GlobalTasksView } from "./components/GlobalTasksView";
+import { useTaskNavigation, type TaskLocation } from "./useTaskNavigation";
+import { useTaskCompletion, CompletionNotice } from "./useTaskCompletion";
+import { TaskDraftProvider, useTaskDrafts } from "./useTaskDrafts";
 
 export function Page() {
   return (
-    <TaskSyncProvider>
-      <TasksPage />
-    </TaskSyncProvider>
+    <TaskDraftProvider>
+      <TaskSyncProvider>
+        <TasksPage />
+      </TaskSyncProvider>
+    </TaskDraftProvider>
   );
 }
 
 function TasksPage() {
   const sync = useTaskSync();
+  const drafts = useTaskDrafts();
   const today = useLocalToday();
-  const [agenda, setAgenda] = useState(
-    !new URLSearchParams(window.location.search).has("space"),
-  );
+  const navigation = useTaskNavigation();
+  const { view: locationView, space: workspaceId } = navigation.route;
+  const agenda = locationView === "agenda";
+  const global = locationView !== "agenda" && locationView !== "space";
   const { session } = useSession();
-  const [workspaceId, setWorkspaceId] = useState(
-    new URLSearchParams(window.location.search).get("space") ?? "",
-  );
+  const completion = useTaskCompletion(today);
+  const [chooseWorkspace, setChooseWorkspace] = useState(false);
+  function navigate(view: TaskLocation, id = "") {
+    if (!navigation.navigate(view, id)) return false;
+    sync.dismissNotice();
+    setSidebarOpen(false);
+    setEditor(null);
+    setMoving(null);
+    setShowFilters(false);
+    setShowDisplay(false);
+    completion.clear();
+    return true;
+  }
+  function createTask() {
+    setSidebarOpen(false);
+    if (locationView === "space" && workspaceId) setEditor("new");
+    else setChooseWorkspace(true);
+  }
   const data = sync.data;
   const workspaces =
     data?.workspaces.filter((space) => !space.archived_at) ?? [];
@@ -86,23 +109,34 @@ function TasksPage() {
     : [];
   const [search, setSearch] = useState("");
   const loading =
-    !data || (!agenda && !!workspaceId && !data.views[workspaceId]);
+    !data ||
+    (locationView === "space" && !!workspaceId && !data.views[workspaceId]);
   const spacesLoading = !data;
-  const [notice, setNotice] = useState("");
-  const [undoTask, setUndoTask] = useState<Task | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [showDisplay, setShowDisplay] = useState(false);
   const [createSpace, setCreateSpace] = useState(false);
   const [manageSpaces, setManageSpaces] = useState(false);
+  const [targetSection, setTargetSection] = useState<string>();
   const [settingsTab, setSettingsTab] = useState<SettingsTab | null>(null);
   const [editor, setEditor] = useState<Task | "new" | null>(null);
   const [moving, setMoving] = useState<Task | null>(null);
   const focusSearch = useRef(false);
   useEffect(() => {
+    if (!navigation.route.fromHistory) return;
+    sync.dismissNotice();
+    completion.clear();
+    setEditor(null);
+    setMoving(null);
+    setSettingsTab(null);
+    setChooseWorkspace(false);
+    setShowFilters(false);
+    setShowDisplay(false);
+    setSidebarOpen(false);
+  }, [navigation.route]);
+  useEffect(() => {
     if (!sync.recovery) return;
-    setAgenda(false);
-    setWorkspaceId(sync.recovery.workspace_id);
+    navigate("space", sync.recovery.workspace_id);
     setEditor(sync.recovery);
     sync.recoverTask(null);
   }, [sync.recovery]);
@@ -119,19 +153,6 @@ function TasksPage() {
   useEffect(() => {
     document.title = tr("tasks_lifeos");
   }, []);
-  useEffect(() => {
-    if (data && !workspaces.some((space) => space.id === workspaceId))
-      setWorkspaceId(workspaces[0]?.id ?? "");
-  }, [data, workspaceId]);
-  useEffect(() => {
-    window.history.replaceState(
-      null,
-      "",
-      agenda
-        ? "/tasks?view=agenda"
-        : `/tasks?space=${encodeURIComponent(workspaceId)}`,
-    );
-  }, [agenda, workspaceId]);
   useEffect(() => {
     setSearch(view.search);
   }, [workspaceId, view.search]);
@@ -150,32 +171,48 @@ function TasksPage() {
     [workspaceId, data, view, sync.mutate],
   );
   useEffect(() => {
-    if (agenda || !workspaceId || loading || search === view.search) return;
+    if (
+      locationView !== "space" ||
+      !workspaceId ||
+      loading ||
+      search === view.search
+    )
+      return;
     const timer = setTimeout(() => changeView({ search }), 300);
     return () => clearTimeout(timer);
   }, [search, workspaceId, loading, changeView, agenda, view.search]);
   useEffect(() => {
-    if (!agenda && !loading && focusSearch.current) {
-      const field = document.getElementById("task-search");
+    if (
+      locationView !== "search" ||
+      loading ||
+      sidebarOpen ||
+      !focusSearch.current
+    )
+      return;
+    const frame = requestAnimationFrame(() => {
+      const field = document.getElementById("global-task-search");
       if (field) {
         field.focus();
         focusSearch.current = false;
       }
-    }
-  }, [agenda, loading]);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [locationView, loading, sidebarOpen]);
   function searchTasks() {
+    if (locationView === "search") setSidebarOpen(false);
+    else if (!navigate("search")) return;
     focusSearch.current = true;
-    setAgenda(false);
-    setSidebarOpen(false);
-    const field = document.getElementById("task-search");
-    if (field) {
-      field.focus();
-      focusSearch.current = false;
-    }
+    requestAnimationFrame(() => {
+      if (!sidebarOpen) document.getElementById("global-task-search")?.focus();
+    });
   }
   useEffect(() => {
     const shortcut = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+      if (
+        (event.metaKey || event.ctrlKey) &&
+        event.key.toLowerCase() === "k" &&
+        !document.querySelector('dialog[open], [role="dialog"]')
+      ) {
         event.preventDefault();
         searchTasks();
       }
@@ -187,33 +224,8 @@ function TasksPage() {
     };
     window.addEventListener("keydown", shortcut);
     return () => window.removeEventListener("keydown", shortcut);
-  }, []);
+  });
 
-  function complete(task: Task) {
-    setUndoTask(null);
-    sync.mutate(
-      `/tasks/${task.id}/${task.completed_at ? "reopen" : "complete"}`,
-      "POST",
-      { expected_version: task.version },
-      {
-        success: (result) => {
-          const saved = result as Task;
-          setUndoTask(task.completed_at ? null : saved);
-          setNotice(
-            task.completed_at
-              ? tr("task_reopened")
-              : saved.recurrence && !saved.completed_at
-                ? tr("occurrence_next", {
-                    date: relativeDate(saved.due_date!, today).full,
-                  })
-                : saved.recurrence
-                  ? tr("last_occurrence_completed")
-                  : tr("one_step_forward_task_completed"),
-          );
-        },
-      },
-    );
-  }
   function move(task: Task, destination: Destination) {
     if ("workspace_id" in destination) {
       sync.mutate(
@@ -322,12 +334,11 @@ function TasksPage() {
     !!view.status_id ||
     !!view.priority ||
     !!view.label_id ||
-    view.due !== "all" ||
-    !view.show_completed;
+    view.due !== "all";
   return (
     <TaskDragProvider
-      key={agenda ? "agenda" : workspaceId}
-      disabled={agenda || loading || view.sort !== "manual"}
+      key={locationView === "space" ? workspaceId : locationView}
+      disabled={locationView !== "space" || loading || view.sort !== "manual"}
       onMove={move}
     >
       <ApplicationSidebar
@@ -340,24 +351,24 @@ function TasksPage() {
         footer={
           <ApplicationFooter
             documentation="taches"
-            beforeSessionChange={sync.idle}
+            beforeSessionChange={async () => {
+              if (!drafts.confirm()) return false;
+              await sync.idle();
+            }}
           />
         }
       >
         <button
           className="application-nav-item"
-          disabled={!workspace || loading}
-          onClick={() => {
-            setAgenda(false);
-            setEditor("new");
-            setSidebarOpen(false);
-          }}
+          disabled={!workspaces.length}
+          onClick={createTask}
         >
           <Icon name="plus" />
           {tr("add_a_task")}
         </button>
         <button
-          className="application-nav-item sidebar-search"
+          className={`application-nav-item sidebar-search ${locationView === "search" ? "is-active" : ""}`}
+          aria-current={locationView === "search" ? "page" : undefined}
           onClick={searchTasks}
         >
           <Icon name="search" />
@@ -367,15 +378,28 @@ function TasksPage() {
         <button
           className={`application-nav-item workspace-link agenda-link ${agenda ? "is-active" : ""}`}
           aria-current={agenda ? "page" : undefined}
-          onClick={() => {
-            setAgenda(true);
-            setSidebarOpen(false);
-            setNotice("");
-          }}
+          onClick={() => navigate("agenda")}
         >
           <Icon name="calendar" size={18} />
           <span>{tr("upcoming")}</span>
         </button>
+        {(
+          [
+            ["all", "list", "all_tasks"],
+            ["undated", "calendar", "no_due_date"],
+            ["archives", "archive", "task_archives"],
+          ] as const
+        ).map(([view, icon, label]) => (
+          <button
+            key={view}
+            className={`application-nav-item ${locationView === view ? "is-active" : ""}`}
+            aria-current={locationView === view ? "page" : undefined}
+            onClick={() => navigate(view)}
+          >
+            <Icon name={icon} />
+            <span>{tr(label)}</span>
+          </button>
+        ))}
         <div className="sidebar-divider" />
         <div className="sidebar-label">
           <span>{tr("my_workspaces")}</span>
@@ -398,21 +422,21 @@ function TasksPage() {
               style={{ paddingInlineStart: 12 + Math.min(depth, 6) * 16 }}
               title={path}
               aria-label={depth ? `# ${path}` : undefined}
-              className={`application-nav-item workspace-link ${!agenda && workspaceId === space.id ? "is-active" : ""}`}
+              className={`application-nav-item workspace-link ${locationView === "space" && workspaceId === space.id ? "is-active" : ""}`}
               aria-current={
-                !agenda && workspaceId === space.id ? "page" : undefined
+                locationView === "space" && workspaceId === space.id
+                  ? "page"
+                  : undefined
               }
               onClick={() => {
-                setAgenda(false);
-                setWorkspaceId(space.id);
-                setSidebarOpen(false);
+                navigate("space", space.id);
               }}
             >
               <span className="workspace-symbol" style={{ color: space.color }}>
                 #
               </span>
               <span>{space.name}</span>
-              {!agenda && workspaceId === space.id && (
+              {locationView === "space" && workspaceId === space.id && (
                 <Icon name="chevron" size={14} />
               )}
             </WorkspaceDropLink>
@@ -445,10 +469,20 @@ function TasksPage() {
           status={<ProgressionBadge applicationId="tasks" />}
           name={tr("tasks")}
           current={
-            agenda
-              ? tr("upcoming")
-              : (spaceTree.find(({ space }) => space.id === workspaceId)
-                  ?.path ?? tr("welcome"))
+            global
+              ? tr(
+                  locationView === "search"
+                    ? "global_search"
+                    : locationView === "all"
+                      ? "all_tasks"
+                      : locationView === "undated"
+                        ? "no_due_date"
+                        : "task_archives",
+                )
+              : agenda
+                ? tr("upcoming")
+                : (spaceTree.find(({ space }) => space.id === workspaceId)
+                    ?.path ?? tr("welcome"))
           }
           mainId="tasks-content"
           open={sidebarOpen}
@@ -456,43 +490,20 @@ function TasksPage() {
         />
         <div className="task-page-content">
           <SyncFeedback />
-          {notice && (
-            <p className="notice" role="status">
-              <Icon name="check" size={14} />
-              {notice}
-              {undoTask && (
-                <button
-                  className="text-button"
-                  onClick={() =>
-                    sync.mutate(
-                      `/tasks/${undoTask.id}/undo-complete`,
-                      "POST",
-                      { expected_version: undoTask.version },
-                      {
-                        message: tr(
-                          "completion_undone_the_previous_due_date_is_restored",
-                        ),
-                        success: () => {
-                          setUndoTask(null);
-                          setNotice("");
-                        },
-                      },
-                    )
-                  }
-                >
-                  {tr("undo_completion")}
-                </button>
-              )}
-              <button
-                className="icon-button"
-                onClick={() => setNotice("")}
-                aria-label={tr("close_message")}
-              >
-                <Icon name="x" size={12} />
-              </button>
-            </p>
-          )}
-          {agenda ? (
+          <CompletionNotice completion={completion} />
+          {global ? (
+            data ? (
+              <GlobalTasksView
+                key={navigation.route.key}
+                mode={locationView as "search" | "all" | "undated" | "archives"}
+                today={today}
+                onWorkspace={(id) => navigate("space", id)}
+                onCreate={createTask}
+              />
+            ) : (
+              <p role="status">{tr("loading")}</p>
+            )
+          ) : agenda ? (
             spacesLoading ? (
               <p role="status">{tr("loading_workspaces")}</p>
             ) : (
@@ -500,10 +511,8 @@ function TasksPage() {
                 key={session.user_id}
                 workspaces={workspaces}
                 today={today}
-                onWorkspace={(id) => {
-                  setWorkspaceId(id);
-                  setAgenda(false);
-                }}
+                onWorkspace={(id) => navigate("space", id)}
+                onCreate={createTask}
               />
             )
           ) : !workspace ? (
@@ -529,6 +538,38 @@ function TasksPage() {
             </section>
           ) : (
             <>
+              {workspace.parent_id && (
+                <nav
+                  className="parent-workspaces"
+                  aria-label={tr("parent_workspaces")}
+                >
+                  {(() => {
+                    const parents: Workspace[] = [];
+                    let parent = workspaces.find(
+                      (space) => space.id === workspace.parent_id,
+                    );
+                    while (
+                      parent &&
+                      !parents.some((item) => item.id === parent!.id)
+                    ) {
+                      parents.unshift(parent);
+                      parent = workspaces.find(
+                        (space) => space.id === parent!.parent_id,
+                      );
+                    }
+                    return parents.map((parent) => (
+                      <button
+                        key={parent.id}
+                        className="text-button"
+                        onClick={() => navigate("space", parent.id)}
+                      >
+                        {parent.name}
+                        <Icon name="chevron" size={14} />
+                      </button>
+                    ));
+                  })()}
+                </nav>
+              )}
               <div className="workspace-heading">
                 <div>
                   <p className="eyebrow">{tr("your_space_your_pace")}</p>
@@ -597,7 +638,19 @@ function TasksPage() {
                   >
                     <Icon name="settings" size={16} />
                     <span>{tr("filters")}</span>
-                    {hasFilters && <span className="filter-dot" />}
+                    {hasFilters && (
+                      <span className="count-badge">
+                        {
+                          [
+                            view.search,
+                            view.status_id,
+                            view.priority,
+                            view.label_id,
+                            view.due !== "all",
+                          ].filter(Boolean).length
+                        }
+                      </span>
+                    )}
                   </button>
                   <button
                     className="toolbar-button"
@@ -612,6 +665,47 @@ function TasksPage() {
                   </button>
                 </div>
               </div>
+              {hasFilters && (
+                <div className="active-task-filters">
+                  {view.search && (
+                    <button
+                      onClick={() => {
+                        setSearch("");
+                        changeView({ search: "" });
+                      }}
+                    >
+                      {tr("search")}: {view.search} ×
+                    </button>
+                  )}
+                  {view.status_id && (
+                    <button onClick={() => changeView({ status_id: null })}>
+                      {tr("status")}:{" "}
+                      {
+                        statuses.find((status) => status.id === view.status_id)
+                          ?.name
+                      }{" "}
+                      ×
+                    </button>
+                  )}
+                  {view.priority && (
+                    <button onClick={() => changeView({ priority: null })}>
+                      P{view.priority} ×
+                    </button>
+                  )}
+                  {view.label_id && (
+                    <button onClick={() => changeView({ label_id: null })}>
+                      {tr("label")}:{" "}
+                      {labels.find((label) => label.id === view.label_id)?.name}{" "}
+                      ×
+                    </button>
+                  )}
+                  {view.due !== "all" && (
+                    <button onClick={() => changeView({ due: "all" })}>
+                      {tr("due_date")} ×
+                    </button>
+                  )}
+                </div>
+              )}
               {showFilters && (
                 <div className="filter-panel">
                   <label>
@@ -760,10 +854,20 @@ function TasksPage() {
                         count: visibleTasks.length,
                       })}
                   <span className="summary-dot">·</span>
-                  {tr("completed_count", {
-                    count: visibleTasks.filter((task) => task.completed_at)
-                      .length,
-                  })}
+                  <button
+                    className="text-button"
+                    onClick={() =>
+                      changeView({ show_completed: !view.show_completed })
+                    }
+                  >
+                    {view.show_completed
+                      ? tr("visible_completed", {
+                          count: visibleTasks.filter(
+                            (task) => task.completed_at,
+                          ).length,
+                        })
+                      : tr("completed_hidden")}
+                  </button>
                 </span>
                 <button
                   className="text-button"
@@ -797,9 +901,20 @@ function TasksPage() {
                   {tr("to_use_drag_and_drop")}
                 </p>
               )}
-              {hasFilters && tasks.length === 0 && (
+              {!loading && tasks.length === 0 && (
                 <p className="empty-filter">
-                  {tr("no_tasks_match_these_filters")}
+                  {tr(
+                    hasFilters
+                      ? "no_tasks_match_these_filters"
+                      : data?.tasks.some(
+                            (task) =>
+                              task.workspace_id === workspaceId &&
+                              !task.archived_at &&
+                              task.completed_at,
+                          )
+                        ? "completed_hidden"
+                        : "empty_task_workspace",
+                  )}
                 </p>
               )}
               {loading || !statuses.length ? (
@@ -832,9 +947,12 @@ function TasksPage() {
                     view={view}
                     busy={false}
                     onOpen={setEditor}
-                    onComplete={complete}
+                    onComplete={completion.complete}
                     onAdd={quickAdd}
-                    onConfigure={() => setSettingsTab("sections")}
+                    onConfigure={(id) => {
+                      setTargetSection(id);
+                      setSettingsTab("sections");
+                    }}
                   />
                 </TaskActions>
               )}
@@ -842,14 +960,47 @@ function TasksPage() {
           )}
         </div>
       </main>
+      {chooseWorkspace && (
+        <Dialog
+          title={tr("choose_task_workspace")}
+          onClose={() => setChooseWorkspace(false)}
+        >
+          <div className="dialog-body workspace-chooser">
+            {spaceTree.map(({ space, path }) => (
+              <button
+                className="secondary-button"
+                key={space.id}
+                onClick={() => {
+                  if (navigate("space", space.id)) {
+                    setChooseWorkspace(false);
+                    setEditor("new");
+                  }
+                }}
+              >
+                {path}
+              </button>
+            ))}
+            {!workspaces.length && (
+              <button
+                className="primary-button"
+                onClick={() => {
+                  setChooseWorkspace(false);
+                  setCreateSpace(true);
+                }}
+              >
+                {tr("create_my_first_workspace")}
+              </button>
+            )}
+          </div>
+        </Dialog>
+      )}
       {createSpace && (
         <WorkspaceDialog
           workspaces={workspaces}
           onClose={() => setCreateSpace(false)}
           onCreated={(space) => {
             setCreateSpace(false);
-            setAgenda(false);
-            setWorkspaceId(space.id);
+            navigate("space", space.id);
           }}
         />
       )}
@@ -861,28 +1012,36 @@ function TasksPage() {
           statuses={statuses}
           labels={labels}
           initialTab={settingsTab}
-          onClose={() => setSettingsTab(null)}
+          targetSection={targetSection}
+          onClose={() => {
+            setSettingsTab(null);
+            setTargetSection(undefined);
+          }}
           onArchived={() => {
             setSettingsTab(null);
           }}
         />
       )}
-      {!agenda && !loading && statuses.length > 0 && workspace && editor && (
-        <TaskEditor
-          key={editor === "new" ? "new" : `${editor.id}:${editor.version}`}
-          task={editor === "new" ? undefined : editor}
-          workspace={workspace}
-          sections={sections.filter((section) => !section.archived_at)}
-          statuses={statuses}
-          labels={labels}
-          onClose={() => setEditor(null)}
-          onSaved={savedTask}
-          onMove={(task) => {
-            setEditor(null);
-            setMoving(task);
-          }}
-        />
-      )}
+      {locationView === "space" &&
+        !loading &&
+        statuses.length > 0 &&
+        workspace &&
+        editor && (
+          <TaskEditor
+            key={editor === "new" ? "new" : `${editor.id}:${editor.version}`}
+            task={editor === "new" ? undefined : editor}
+            workspace={workspace}
+            sections={sections.filter((section) => !section.archived_at)}
+            statuses={statuses}
+            labels={labels}
+            onClose={() => setEditor(null)}
+            onSaved={savedTask}
+            onMove={(task) => {
+              setEditor(null);
+              setMoving(task);
+            }}
+          />
+        )}
       {moving && (
         <MoveDialog
           task={moving}

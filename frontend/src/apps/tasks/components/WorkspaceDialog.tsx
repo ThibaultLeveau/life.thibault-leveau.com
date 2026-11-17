@@ -1,6 +1,7 @@
 import { tr } from "../i18n";
+import { useDraftForm } from "../useTaskDrafts";
 import { useState, type FormEvent } from "react";
-import { useTaskSync } from "../useTaskSync";
+import { SyncFeedback, useTaskSync } from "../useTaskSync";
 import type { Workspace } from "../types";
 import { WorkspaceParentSelect } from "./WorkspaceParentSelect";
 import { Dialog } from "../../../shared/ui/Dialog";
@@ -17,9 +18,16 @@ export function WorkspaceDialog({
 }) {
   const sync = useTaskSync();
   const [color, setColor] = useState("#c05a45");
+  const [busy, setBusy] = useState(false);
+  const draft = useDraftForm(color);
+  const close = () => {
+    if (!busy) draft.leave(onClose);
+  };
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (busy) return;
     const values = new FormData(event.currentTarget);
+    setBusy(true);
     sync.mutate(
       "/workspaces",
       "POST",
@@ -29,15 +37,26 @@ export function WorkspaceDialog({
       },
       {
         message: tr("changes_saved"),
-        success: (result) => onCreated(result as Workspace),
+        success: (result) => {
+          draft.clean();
+          onCreated(result as Workspace);
+        },
       },
     );
-    onClose();
+    await sync.idle();
+    setBusy(false);
   }
 
   return (
-    <Dialog title={tr("create_a_workspace")} onClose={onClose}>
-      <form className="stack-form dialog-body" onSubmit={submit}>
+    <Dialog title={tr("create_a_workspace")} onClose={close}>
+      <SyncFeedback inDialog />
+      <form
+        ref={draft.ref}
+        inert={busy}
+        aria-busy={busy}
+        className="stack-form dialog-body"
+        onSubmit={submit}
+      >
         <p className="muted">
           {tr("a_workspace_for_your_projects_daily_life_or_whatever_matters")}
         </p>
@@ -63,7 +82,7 @@ export function WorkspaceDialog({
         </label>
         <ColorPicker value={color} onChange={setColor} />
         <div className="dialog-actions">
-          <button className="secondary-button" type="button" onClick={onClose}>
+          <button className="secondary-button" type="button" onClick={close}>
             {tr("cancel")}
           </button>
           <button className="primary-button">{tr("create_workspace")}</button>

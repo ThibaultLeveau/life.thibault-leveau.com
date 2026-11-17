@@ -2040,3 +2040,424 @@
     animation: none;
   }
 }
+
+/* Task content controls: each touch target owns its space, without overlaps. */
+.task-row,
+.density-compact .task-row {
+  padding: 6px 0 6px 44px;
+  gap: 4px;
+}
+.task-row.agenda-task,
+.task-row.global-task {
+  padding-left: 0;
+}
+.drag-handle,
+.density-compact .drag-handle,
+.task-card .drag-handle {
+  top: 6px;
+  left: 0;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+}
+.task-checkbox,
+.task-checkbox.task-select,
+.task-checkbox:not(.priority-4),
+.is-completed .task-checkbox {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  animation: none;
+}
+.task-checkbox::before {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  border: 1.5px solid var(--priority-color, var(--ui-muted));
+  border-radius: 50%;
+  background: color-mix(
+    in srgb,
+    var(--priority-color, var(--ui-muted)) 7%,
+    transparent
+  );
+}
+.task-checkbox.task-select::before {
+  border-radius: 4px;
+  border-color: var(--ui-accent);
+}
+.task-checkbox.task-select[aria-checked="true"],
+.task-checkbox.is-validating {
+  background: transparent;
+  color: var(--ui-button-text);
+}
+.task-checkbox[aria-checked="true"]::before,
+.task-checkbox.is-validating::before {
+  background: var(--ui-accent);
+  border-color: var(--ui-accent);
+}
+.task-checkbox.is-validating::before {
+  animation: task-validation 420ms ease-out;
+}
+.task-checkbox[aria-checked="true"] {
+  color: var(--ui-button-text);
+}
+.task-checkbox svg {
+  position: relative;
+  z-index: 1;
+}
+.task-checkbox:hover {
+  background: var(--ui-hover);
+}
+.task-title {
+  min-height: 44px;
+  padding-block: 10px;
+}
+.task-description {
+  margin-top: 0;
+}
+.task-meta {
+  gap: 0 8px;
+  margin-top: 0;
+}
+.task-meta button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  max-width: 100%;
+  padding: 4px 2px;
+  border: 0;
+  background: transparent;
+  font-size: inherit;
+  color: inherit;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+.task-meta button:hover:not(:disabled) {
+  text-decoration: underline;
+  color: var(--ui-accent);
+}
+.task-meta .task-date.is-overdue {
+  color: var(--ui-overdue);
+}
+.task-meta .task-priority {
+  color: var(--priority-color);
+}
+.task-status .color-dot {
+  flex-shrink: 0;
+}
+.task-more,
+.task-card .task-more {
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  flex-shrink: 0;
+  opacity: 1;
+}
+.task-card {
+  padding: 6px 44px 8px;
+  gap: 4px;
+}
+.task-card .task-more {
+  top: 6px;
+  right: 0;
+}
+.task-card .task-content {
+  padding-right: 0;
+}
+.task-card .task-checkbox {
+  flex-shrink: 0;
+}
+.selection-entry .text-button,
+.task-selection-bar .selection-clear {
+  min-height: 44px;
+}
+.task-menu-caption {
+  padding: 8px 12px;
+  color: var(--ui-muted);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+  border-bottom: 1px solid var(--ui-border);
+}
+.task-context-menu {
+  max-height: calc(var(--ui-viewport-height, 100dvh) - 16px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.task-context-menu button {
+  min-height: 44px;
+}
+.task-feedback-toast {
+  position: fixed;
+  z-index: 8;
+  bottom: max(18px, env(safe-area-inset-bottom));
+  right: 20px;
+  max-width: min(540px, calc(100vw - 32px));
+  margin: 0;
+  padding: 10px 14px;
+  background: var(--ui-paper);
+  border: 1px solid var(--ui-border);
+  border-radius: 10px;
+  box-shadow: 0 4px 18px #0002;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.task-feedback-toast button {
+  min-height: 44px;
+}
+.task-sync-status {
+  height: 44px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.global-task-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.global-task-filters label {
+  display: grid;
+  gap: 6px;
+  min-width: 120px;
+  flex: 1;
+  font-size: 12px;
+  color: var(--ui-muted);
+}
+.global-task-filters input,
+.global-task-filters select {
+  min-width: 0;
+  width: 100%;
+  min-height: 44px;
+}
+.global-task-filters .global-search-field {
+  display: flex;
+  align-items: center;
+  flex-basis: 100%;
+}
+.global-search-field input {
+  flex: 1;
+}
+.workspace-chooser {
+  display: grid;
+  gap: 12px;
+}
+.task-load-more {
+  text-align: center;
+  margin: 16px auto;
+}
+.board-navigation {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-block: 10px;
+}
+.board-navigation button {
+  min-height: 44px;
+}
+.parent-workspaces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+.parent-workspaces button {
+  min-height: 44px;
+}
+.active-task-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.active-task-filters button {
+  min-height: 44px;
+  border: 1px solid var(--ui-border);
+  border-radius: 6px;
+  background: var(--ui-sidebar);
+  color: var(--ui-text);
+}
+@media (max-width: 560px) {
+  .task-page-content {
+    padding-top: 8px;
+  }
+  .workspace-heading {
+    margin-bottom: 10px;
+    gap: 8px;
+  }
+  .workspace-heading h1 {
+    font-size: 23px;
+  }
+  .workspace-heading .workspace-description {
+    display: none;
+  }
+  .task-toolbar {
+    gap: 6px;
+    padding-bottom: 6px;
+  }
+  .task-summary {
+    margin-block: 6px;
+  }
+  .selection-entry {
+    min-height: 44px;
+    margin-block: 0;
+  }
+  .section-heading {
+    margin-block: 8px;
+    flex-wrap: wrap;
+  }
+  .task-selection-bar .selection-buttons button {
+    flex-direction: column;
+    gap: 3px;
+    min-height: 56px;
+    font-size: 11px;
+  }
+  .task-row {
+    gap: 2px;
+  }
+  .task-title {
+    font-size: 14px;
+  }
+  .task-feedback-toast {
+    right: 8px;
+    max-width: calc(100vw - 16px);
+  }
+  .global-task-filters {
+    gap: 8px;
+  }
+  .global-task-filters label {
+    min-width: 110px;
+  }
+  .global-tasks-view .workspace-heading {
+    flex-wrap: wrap;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .task-checkbox.is-validating::before {
+    animation: none;
+  }
+}
+/* Feedback floats above content instead of reserving a blank first row. */
+.task-page-content > .task-sync-feedback {
+  position: fixed;
+  top: 76px;
+  right: 18px;
+  z-index: 9;
+  width: min(500px, calc(100vw - 32px));
+  max-height: 40dvh;
+  overflow-y: auto;
+  pointer-events: none;
+}
+.task-page-content > .task-sync-feedback > * {
+  pointer-events: auto;
+}
+.task-page-content > .task-sync-feedback .task-sync-status:not(:empty) {
+  min-height: 44px;
+  height: auto;
+  padding: 8px 12px;
+  border: 1px solid var(--ui-border);
+  border-radius: 8px;
+  background: var(--ui-paper);
+  box-shadow: 0 3px 10px #0001;
+  flex-wrap: wrap;
+}
+.task-sync-status:empty {
+  display: none;
+}
+@media (min-width: 1000px) {
+  .task-row .task-content {
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr) auto;
+    align-items: center;
+    gap: 0 16px;
+  }
+  .task-row .task-meta {
+    grid-column: 2;
+    grid-row: 1;
+    justify-content: flex-end;
+    max-width: 420px;
+  }
+  .task-row .task-description {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+.task-page-content > .task-sync-feedback .task-sync-status {
+  pointer-events: none;
+}
+.task-page-content > .task-sync-feedback .task-sync-status button {
+  pointer-events: auto;
+}
+.task-card {
+  padding-left: 0;
+  min-height: 100px;
+}
+.task-card .drag-handle {
+  top: 50px;
+}
+@media (max-width: 560px) {
+  .task-row,
+  .density-compact .task-row {
+    padding-left: 0;
+    min-height: 100px;
+  }
+  .task-row .drag-handle,
+  .density-compact .task-row .drag-handle {
+    top: 50px;
+  }
+}
+/* Errors belong to the affected page flow; only transient status floats. */
+.task-page-content > .task-sync-feedback {
+  position: static;
+  width: auto;
+  max-height: none;
+  overflow: visible;
+  pointer-events: auto;
+}
+.task-page-content > .task-sync-feedback .task-sync-status:not(:empty) {
+  position: fixed;
+  top: 76px;
+  right: 18px;
+  width: min(500px, calc(100vw - 32px));
+  z-index: 9;
+}
+.density-compact .task-card {
+  padding-block: 6px;
+}
+@media (max-width: 560px) {
+  .workspace-heading .workspace-config {
+    margin-top: 0;
+  }
+}
+/* Compact labels and secondary listing commands keep full touch targets. */
+.task-meta button,
+.task-summary .text-button,
+.section-heading button,
+.global-task-filters button,
+.board-navigation button,
+.parent-workspaces button,
+.active-task-filters button,
+.workspace-chooser button,
+button.task-load-more,
+.task-load-more button,
+.task-feedback-toast button,
+.task-sync-feedback button,
+.bulk-task-form button,
+.bulk-task-form .check-label {
+  min-width: 44px;
+  min-height: 44px;
+}
+.workspace-chooser button {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
