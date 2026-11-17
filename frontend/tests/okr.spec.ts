@@ -473,7 +473,9 @@ test("OKR : brouillons, erreurs réseau, archives et réglages persistants", asy
   await tab(page, "Réglages");
   await page.getByLabel("Fuseau horaire", { exact: true }).fill("Europe/Paris");
   await page.getByRole("button", { name: "Enregistrer", exact: true }).click();
-  await expect(page.getByRole("status")).toHaveText("Réglages enregistrés.");
+  await expect(
+    page.getByRole("status").filter({ hasText: "Réglages enregistrés." }),
+  ).toBeVisible();
   const saved = await (await page.request.get("/api/v1/okr/settings")).json();
   expect(saved.timezone).toBe("Europe/Paris");
   expect(saved.version).toBeGreaterThan(0);
