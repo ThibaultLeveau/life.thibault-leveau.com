@@ -3,7 +3,7 @@ import { useApiAction } from "../../../platform/useApiResource";
 import { ErrorMessage } from "../../../shared/ui/Dialog";
 import { Icon } from "../../../shared/ui/Icon";
 import { recipesApi } from "../api";
-import { dateLabel, number, tr } from "../i18n";
+import { dateLabel, number, tr, unitLabel } from "../i18n";
 import { itemInput, type Item, type Kind, type ShoppingList } from "../types";
 import { IngredientPicker } from "./IngredientPicker";
 import { ImportDialog } from "./ImportDialog";
@@ -114,7 +114,7 @@ export function ListDetail({
               <small>
                 {tr("partial", {
                   quantity: number(item.purchased_quantity),
-                  unit: item.unit,
+                  unit: unitLabel(item.unit),
                   total: number(item.quantity),
                 })}
               </small>
@@ -122,7 +122,7 @@ export function ListDetail({
           </span>
           <strong>
             {number(shop && !item.checked ? remaining : item.quantity)}{" "}
-            <small>{item.unit}</small>
+            <small>{unitLabel(item.unit)}</small>
           </strong>
         </Row>
         {!shop && editable && (

@@ -3,7 +3,7 @@ import { useApiAction } from "../../../platform/useApiResource";
 import { ErrorMessage } from "../../../shared/ui/Dialog";
 import { Icon } from "../../../shared/ui/Icon";
 import { recipesApi } from "../api";
-import { tr } from "../i18n";
+import { tr, unitLabel } from "../i18n";
 import { itemInput, type Item, type Recipe } from "../types";
 import { IngredientPicker } from "./IngredientPicker";
 import { useDraft, type DraftProps } from "./common";
@@ -111,7 +111,7 @@ export function RecipeEditor({
                   }}
                 />
               </label>
-              <span>{item.unit}</span>
+              <span>{unitLabel(item.unit)}</span>
               <button
                 className="icon-button"
                 type="button"

@@ -246,3 +246,9 @@ Sur un compte synthétique isolé, sélectionner dimanche uniquement pour Suivi,
 Après contrôles, revue, CI et fusion, publier le `main` propre avec `scripts/deploy.sh`. La sauvegarde précède `0012_recipes`, migration additive qui livre aussi 301 ingrédients FR/EN. Aucun service, secret, dépendance ou changement DNS/Caddy. Respecter la [compatibilité des images et restauration](sauvegardes.md#migration-0012-recettes-et-courses).
 
 Vérifier SHA exécuté, révision, sondes, `/recipes`, guides FR/EN, API et OpenAPI en HTTPS. Sur un compte synthétique isolé : activation, recherche bilingue et ajout personnel, recette pour deux puis calcul pour six, import/cumul, achat partiel et complément, liste terminée et modèle, copie vierge, 60 quêtes et métriques Suivi, archives/restauration et désactivation/réactivation. Contrôler clavier, mobile 320 px, thèmes/langues et protection des brouillons. Consigner sauvegarde, SHA et résultats dans l’issue ; aucune donnée personnelle réelle ne sert aux essais.
+
+### Unités supplémentaires des recettes
+
+Publier le `main` validé avec `scripts/deploy.sh`, sauvegarde puis migration `0013_recipe_units`. Aucune dépendance, variable ni infrastructure supplémentaire. Les anciennes écritures g/l/u restent valides pendant la migration ; respecter la [compatibilité du retour arrière](sauvegardes.md#migration-0013-unites-des-recettes).
+
+Vérifier SHA exécuté, sondes, `/recipes`, OpenAPI et guides FR/EN en HTTPS. Sur un compte synthétique isolé : saisir ml, mg, cuillère à café et cuillère à soupe, recharger, ajuster les portions, importer et cumuler dans une liste, cocher et copier en modèle. Vérifier les libellés FR/EN, clavier et mobile 320 px, ainsi que la séparation des unités différentes. Consigner sauvegarde, révision, SHA et résultats dans l’issue.

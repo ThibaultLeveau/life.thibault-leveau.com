@@ -5,7 +5,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool
 
-Unit = Literal["g", "l", "u"]
+Unit = Literal["g", "mg", "l", "ml", "tsp", "tbsp", "u"]
 Kind = Literal["list", "template"]
 Quantity = Annotated[Decimal, Field(gt=0, le=1000000000, decimal_places=6, allow_inf_nan=False)]
 Servings = Annotated[int, Field(ge=1, le=1000, strict=True)]

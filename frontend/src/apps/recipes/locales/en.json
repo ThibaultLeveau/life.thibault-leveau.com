@@ -97,7 +97,7 @@
   "history": "History",
   "quests_hint": "Your recipes, lists and templates advance your 60 quests.",
   "quests": "See my achievements in Tracking",
-  "stack_hint": "Same ingredient + same unit = one line. Grams, litres and items stay separate.",
+  "stack_hint": "Same ingredient + same unit = one line. Different units stay separate, with no automatic conversion.",
   "portions_hint": "Quantities are calculated from the original recipe, which stays unchanged.",
   "edit_portions_hint": "These quantities match the serving count entered. To scale without changing the recipe, use its detail view.",
   "produce": "Fruit & vegetables",
@@ -126,5 +126,16 @@
   "rename": "Rename",
   "view": "Open",
   "not_found": "This item is no longer available.",
-  "qty_error": "Enter a positive quantity with at most six decimal places."
+  "qty_error": "Enter a positive quantity with at most six decimal places.",
+  "unit_mg": "mg · milligrams",
+  "unit_ml": "ml · millilitres",
+  "unit_tsp": "tsp · teaspoon",
+  "unit_tbsp": "tbsp · tablespoon",
+  "unit_short_g": "g",
+  "unit_short_mg": "mg",
+  "unit_short_l": "l",
+  "unit_short_ml": "ml",
+  "unit_short_tsp": "tsp",
+  "unit_short_tbsp": "tbsp",
+  "unit_short_u": "u"
 }

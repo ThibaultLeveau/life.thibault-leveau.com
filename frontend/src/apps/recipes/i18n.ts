@@ -1,4 +1,5 @@
 import i18next from "i18next";
+import type { Unit } from "./types";
 import fr from "./locales/fr.json";
 import en from "./locales/en.json";
 export const resources = { fr, en };
@@ -18,4 +19,8 @@ export function dateLabel(value: string) {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(value));
+}
+
+export function unitLabel(unit: Unit) {
+  return tr(`unit_short_${unit}`);
 }

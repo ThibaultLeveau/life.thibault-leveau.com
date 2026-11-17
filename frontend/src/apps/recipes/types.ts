@@ -1,4 +1,5 @@
-export type Unit = "g" | "l" | "u";
+export const units = ["g", "mg", "l", "ml", "tsp", "tbsp", "u"] as const;
+export type Unit = (typeof units)[number];
 export type Kind = "list" | "template";
 export interface Ingredient {
   id: string;

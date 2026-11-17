@@ -436,3 +436,130 @@ def test_concurrent_additions_and_ingredient_creation(client, app):
 
     with ThreadPoolExecutor(max_workers=2) as pool:
         assert len(set(pool.map(create_once, range(2)))) == 1
+
+
+@pytest.mark.parametrize("unit", ["ml", "mg", "tsp", "tbsp"])
+def test_additional_units_through_recipe_shopping_and_template(client, unit):
+    i = ingredient(client, unit=unit)
+    assert i["unit"] == unit
+    r = recipe(client, i, items=[{"ingredient_id": i["id"], "quantity": "0.5", "unit": unit}])
+    scaled = client.get(f"/api/v1/recipes/recipes/{r['id']}?servings=3").json()
+    assert scaled["items"][0]["unit"] == unit
+    assert Decimal(scaled["items"][0]["quantity"]) == Decimal("0.75")
+    obj = add(client, shopping(client), i, "0.25", unit)
+    obj = post(
+        client,
+        f"lists/{obj['id']}/import",
+        {
+            "expected_version": obj["version"],
+            "recipe_id": r["id"],
+            "recipe_version": r["version"],
+            "servings": 3,
+        },
+    )
+    assert len(obj["items"]) == 1
+    assert Decimal(obj["items"][0]["quantity"]) == 1
+    line = obj["items"][0]
+    obj = put(client, f"lists/{obj['id']}/items/{line['id']}/check", obj, checked=True)
+    obj = add(client, obj, i, "0.5", unit)
+    assert Decimal(obj["items"][0]["purchased_quantity"]) == 1
+    assert Decimal(obj["items"][0]["quantity"]) == Decimal("1.5")
+    assert not obj["items"][0]["checked"]
+    for other in {"g", "mg", "l", "ml", "tsp", "tbsp", "u"} - {unit}:
+        obj = add(client, obj, i, "1", other)
+    assert len(obj["items"]) == 7
+    template = post(
+        client,
+        f"lists/{obj['id']}/copy",
+        {"title": "Unités", "kind": "template", "expected_version": obj["version"]},
+    )
+    assert {(x["unit"], x["quantity"]) for x in template["items"]} == {
+        (x["unit"], x["quantity"]) for x in obj["items"]
+    }
+    assert all(Decimal(x["purchased_quantity"]) == 0 for x in template["items"])
+    for enabled in [False, True]:
+        assert (
+            client.put("/api/v1/applications/recipes", json={"enabled": enabled}).status_code == 200
+        )
+    assert client.get(f"/api/v1/recipes/lists/{obj['id']}").json() == obj
+    history = client.get(f"/api/v1/recipes/recipes/{r['id']}/history").json()
+    assert history[0]["snapshot"]["items"][0]["unit"] == unit
+
+
+@pytest.mark.parametrize("unit", ["kg", "cup", "café", "", "ML"])
+def test_unknown_recipe_units_rejected(client, unit):
+    i = ingredient(client)
+    assert (
+        client.post(
+            "/api/v1/recipes/ingredients", json={"name": "Invalid", "unit": unit}
+        ).status_code
+        == 422
+    )
+    assert (
+        client.post(
+            "/api/v1/recipes/recipes",
+            json={
+                "title": "Invalid",
+                "items": [{"ingredient_id": i["id"], "quantity": "1", "unit": unit}],
+            },
+        ).status_code
+        == 422
+    )
+    obj = shopping(client)
+    assert (
+        client.post(
+            f"/api/v1/recipes/lists/{obj['id']}/items",
+            json={
+                "ingredient_id": i["id"],
+                "quantity": "1",
+                "unit": unit,
+                "expected_version": obj["version"],
+            },
+        ).status_code
+        == 422
+    )
+
+
+@pytest.mark.parametrize("location", ["ingredient", "recipe", "list", "history"])
+def test_unit_migration_refuses_loss(client, engine, location):
+    i = ingredient(client, unit="ml" if location == "ingredient" else "g")
+    if location in {"recipe", "history"}:
+        r = recipe(client, i, items=[{"ingredient_id": i["id"], "quantity": "1", "unit": "tsp"}])
+        if location == "history":
+            put(
+                client,
+                f"recipes/{r['id']}",
+                r,
+                title=r["title"],
+                servings=2,
+                items=[{"ingredient_id": i["id"], "quantity": "1", "unit": "g"}],
+            )
+    if location == "list":
+        add(client, shopping(client), i, "1", "tbsp")
+    with pytest.raises(RuntimeError, match="New recipe units"), engine.begin() as conn:
+        config = migration_config()
+        config.attributes["connection"] = conn
+        command.downgrade(config, "0012_recipes")
+    with engine.connect() as conn:
+        assert conn.scalar(text("SELECT version_num FROM alembic_version")) == "0013_recipe_units"
+
+
+def test_unit_migration_preserves_old_data_and_constraints(client, engine):
+    i = ingredient(client)
+    r = recipe(client, i)
+    obj = add(client, shopping(client), i)
+    history = client.get(f"/api/v1/recipes/recipes/{r['id']}/history").json()
+    with engine.begin() as conn:
+        config = migration_config()
+        config.attributes["connection"] = conn
+        command.downgrade(config, "0012_recipes")
+        command.upgrade(config, "head")
+    assert client.get(f"/api/v1/recipes/recipes/{r['id']}").json() == r
+    assert client.get(f"/api/v1/recipes/lists/{obj['id']}").json() == obj
+    assert client.get(f"/api/v1/recipes/recipes/{r['id']}/history").json() == history
+    for table in ["recipes_ingredients", "recipes_recipe_items", "recipes_list_items"]:
+        with pytest.raises(IntegrityError), engine.begin() as conn:
+            conn.execute(text(f"UPDATE {table} SET unit='cup'"))
+    for table in ["recipes_recipe_items", "recipes_list_items"]:
+        with pytest.raises(IntegrityError), engine.begin() as conn:
+            conn.execute(text(f"UPDATE {table} SET position=-1"))

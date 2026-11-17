@@ -112,7 +112,10 @@ test("recette, catalogue bilingue, ingrédient inconnu et portions calculées", 
   await page.getByLabel("Nombre de personnes", { exact: true }).fill("2");
   await addIngredient(page, "Riz basmati", "150", "g");
   await addIngredient(page, "Tomate", "2", "u");
-  await addIngredient(page, `Épice du jardin ${stamp}`, "0.5", "g", true);
+  await addIngredient(page, `Épice du jardin ${stamp}`, "0.5", "tsp", true);
+  await addIngredient(page, "Lait", "250", "ml");
+  await addIngredient(page, "Sel", "100", "mg");
+  await addIngredient(page, "Huile d’olive", "1.5", "tbsp");
   await page
     .getByLabel("Préparation", { exact: true })
     .fill(
@@ -129,8 +132,18 @@ test("recette, catalogue bilingue, ingrédient inconnu et portions calculées", 
       )
     ).json()
   ).items[0];
-  expect(recipe.items).toHaveLength(3);
+  expect(recipe.items).toHaveLength(6);
   expect(recipe.base_servings).toBe(2);
+  expect(recipe.items.map((item) => item.unit)).toEqual([
+    "g", "u", "tsp", "ml", "mg", "tbsp",
+  ]);
+  await page.reload();
+  await expect(page.locator(".recipes-ingredient-list")).toContainText(
+    "c. à café",
+  );
+  await expect(page.locator(".recipes-ingredient-list")).toContainText(
+    "c. à soupe",
+  );
   await page.getByLabel("Nombre de personnes", { exact: true }).fill("6");
   await expect(
     page.locator(".recipes-ingredient-list").getByText("450", { exact: false }),
@@ -186,7 +199,7 @@ test("liste, import, cumul exact, achats partiels et fin des courses", async ({
       )
     ).json()
   ).items[0];
-  expect(shopping.items).toHaveLength(3);
+  expect(shopping.items).toHaveLength(6);
   expect(
     Number(shopping.items.find((i) => i.name === "Riz basmati")!.quantity),
   ).toBe(350);
@@ -442,6 +455,16 @@ test("mode magasin FR/EN, thèmes, mobile et quêtes dans Suivi", async ({
             .locator(".recipes-shopping-item")
             .filter({ hasText: `Épice du jardin ${stamp}` }),
         ).toBeVisible();
+        await expect(
+          page.locator(".recipes-shopping-item").filter({
+            hasText: `Épice du jardin ${stamp}`,
+          }),
+        ).toContainText(locale === "fr" ? "c. à café" : "tsp");
+        await expect(
+          page.locator(".recipes-shopping-item").filter({
+            hasText: locale === "fr" ? "Huile d’olive" : "Olive oil",
+          }),
+        ).toContainText(locale === "fr" ? "c. à soupe" : "tbsp");
         if (locale === "en")
           await expect(
             page
