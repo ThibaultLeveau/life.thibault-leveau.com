@@ -134,3 +134,7 @@ La progression est couverte par `test_progression.py` (barèmes, niveaux, 180 qu
 `test_okr.py` couvre précision progressive, parents, frontière du mois (dont janvier et année bissextile), résultats croissants/décroissants, ordre, concurrence, clôture selon fuseau à une frontière de trimestre, instantanés, réouvertures et récompenses uniques, propriétaires, activation, archives, contraintes et migration aller/retour/refus de perte. Les tests communs parcourent toutes les routes désactivées, manifestes, fournisseurs, traductions et quêtes.
 
 `okr.spec.ts` vérifie API/interface, parcours guidé, kanban, rétrospective, Suivi, brouillons, erreurs, petit écran et clavier. Les parcours de navigation communs incluent OKR. Le test conteneur restaure les trois tables et compare leurs valeurs intégralement, puis vérifie l’immuabilité du journal restauré. La recette de publication emploie un compte isolé sans modifier les données personnelles.
+
+## Recettes et courses
+
+`test_recipes.py` couvre le catalogue FR/EN, ingrédients privés, décimaux/portions, cumul par unité, achats partiels, modèles, copie, archives, conflits, métriques/XP, contraintes SQL et garde de migration. `recipes.spec.ts` exerce les parcours interface/API, les erreurs réseau, les brouillons et le mode magasin sur ordinateur/mobile. Les parcours `navigation.spec.ts` incluent la parité du cadre partagé FR/EN et thèmes. Le test conteneur compare les six tables après restauration et vérifie le journal immuable ; le smoke test couvre routes HTML, API privée, documentation et OpenAPI.

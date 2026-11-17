@@ -2,6 +2,12 @@ import { expect, test, type Page } from "@playwright/test";
 
 const applications = [
   {
+    path: "/recipes",
+    name: "Recettes & Liste de courses",
+    document: "recipes",
+    current: "Mes recettes",
+  },
+  {
     path: "/okr",
     name: "Objectifs OKR",
     document: "okr",
@@ -26,7 +32,7 @@ test.beforeEach(async ({ page }) => {
   });
   expect(login.ok()).toBeTruthy();
   headers = { "X-CSRF-Token": (await login.json()).csrf_token };
-  for (const id of ["tasks", "sport", "tracking", "okr"])
+  for (const id of ["tasks", "sport", "tracking", "okr", "recipes"])
     expect(
       (
         await page.request.put(`/api/v1/applications/${id}`, {
@@ -319,7 +325,7 @@ test("topbar compacte : niveau 100, série longue et titres FR/EN accessibles", 
 }, testInfo) => {
   test.setTimeout(120_000);
   await page.route(
-    /\/api\/v1\/progression\/(tasks|sport|tracking|okr)$/,
+    /\/api\/v1\/progression\/(tasks|sport|tracking|okr|recipes)$/,
     async (route) => {
       const response = await route.fetch();
       const summary = await response.json();

@@ -1,0 +1,20 @@
+{
+  "invalid_name": "Enter an ingredient name.",
+  "not_found": "Item not found.",
+  "ingredient_not_found": "An ingredient could not be found in your catalogue.",
+  "limit": "Your catalogue limit has been reached.",
+  "items_limit": "A list can contain at most 300 distinct ingredient and unit pairs.",
+  "conflict": "This item has changed. Reload it before trying again; your input is still displayed.",
+  "read_only": "Restore or reopen this item before editing it.",
+  "quantity_range": "The calculation must give a quantity between 0.000001 and 1,000,000,000.",
+  "template_check": "Create a list from this template to check off purchases.",
+  "incomplete": "Check off every item in a non-empty list before completing it.",
+  "metric_recipes": "Recipes saved",
+  "metric_recipes_description": "First creation of each recipe, including archives; edits do not count again.",
+  "metric_lists": "Shopping lists completed",
+  "metric_lists_description": "First completion of each fully purchased list, including archives; reopening does not multiply the result.",
+  "metric_imports": "Recipes used for shopping",
+  "metric_imports_description": "First import of each list/recipe pair. Imports into templates are excluded.",
+  "metric_templates": "Shopping templates prepared",
+  "metric_templates_description": "First time each template contains an ingredient, including archives."
+}

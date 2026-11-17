@@ -1,0 +1,3012 @@
+[
+  {
+    "id": "1e20c0aa-ecec-5e80-8551-46ca46ce6ab4",
+    "builtin_key": "tomato",
+    "name_fr": "Tomate",
+    "name_en": "Tomato",
+    "normalized_name": "tomate",
+    "search_text": "tomate tomato",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "023817a3-b054-533a-b4c7-321e51e56d41",
+    "builtin_key": "cherry-tomato",
+    "name_fr": "Tomate cerise",
+    "name_en": "Cherry tomato",
+    "normalized_name": "tomate cerise",
+    "search_text": "tomate cerise cherry tomato",
+    "category": "produce",
+    "unit": "g"
+  },
+  {
+    "id": "5f7e3da4-f4c6-55bb-836f-654d48a48efc",
+    "builtin_key": "carrot",
+    "name_fr": "Carotte",
+    "name_en": "Carrot",
+    "normalized_name": "carotte",
+    "search_text": "carotte carrot",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "bb7cb2d3-81f1-5e88-945e-ad1ad0f96f2f",
+    "builtin_key": "potato",
+    "name_fr": "Pomme de terre",
+    "name_en": "Potato",
+    "normalized_name": "pomme de terre",
+    "search_text": "pomme de terre potato",
+    "category": "produce",
+    "unit": "g"
+  },
+  {
+    "id": "35051a8a-7f29-5bf5-a340-dff94bdb1008",
+    "builtin_key": "sweet-potato",
+    "name_fr": "Patate douce",
+    "name_en": "Sweet potato",
+    "normalized_name": "patate douce",
+    "search_text": "patate douce sweet potato",
+    "category": "produce",
+    "unit": "g"
+  },
+  {
+    "id": "b26c807b-d945-5024-bb74-dac4fa6bb358",
+    "builtin_key": "yellow-onion",
+    "name_fr": "Oignon jaune",
+    "name_en": "Yellow onion",
+    "normalized_name": "oignon jaune",
+    "search_text": "oignon jaune yellow onion",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "7e4fb77a-e729-5c33-82bc-c32b7620f7f6",
+    "builtin_key": "red-onion",
+    "name_fr": "Oignon rouge",
+    "name_en": "Red onion",
+    "normalized_name": "oignon rouge",
+    "search_text": "oignon rouge red onion",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "c62dd14a-e00f-5d70-bc6c-e0abfb1f7ebf",
+    "builtin_key": "spring-onion",
+    "name_fr": "Oignon nouveau",
+    "name_en": "Spring onion",
+    "normalized_name": "oignon nouveau",
+    "search_text": "oignon nouveau spring onion",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "636b2a23-d481-50d5-acb1-044f9d8e0162",
+    "builtin_key": "shallot",
+    "name_fr": "Échalote",
+    "name_en": "Shallot",
+    "normalized_name": "echalote",
+    "search_text": "echalote shallot",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "a40da55c-27b2-54d4-9b69-0c7ef5dc275a",
+    "builtin_key": "garlic",
+    "name_fr": "Ail",
+    "name_en": "Garlic",
+    "normalized_name": "ail",
+    "search_text": "ail garlic",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "6430c670-e074-57ae-840d-5b6711feff02",
+    "builtin_key": "leek",
+    "name_fr": "Poireau",
+    "name_en": "Leek",
+    "normalized_name": "poireau",
+    "search_text": "poireau leek",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "c5d2a666-295c-5bb4-b4d0-b2a2492d7593",
+    "builtin_key": "courgette",
+    "name_fr": "Courgette",
+    "name_en": "Courgette",
+    "normalized_name": "courgette",
+    "search_text": "courgette courgette",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "f1b96c69-ce96-53ba-8799-f95bbc878995",
+    "builtin_key": "aubergine",
+    "name_fr": "Aubergine",
+    "name_en": "Aubergine",
+    "normalized_name": "aubergine",
+    "search_text": "aubergine aubergine",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "cfe027ea-078d-5719-9c4e-49c774934ef6",
+    "builtin_key": "red-pepper",
+    "name_fr": "Poivron rouge",
+    "name_en": "Red pepper",
+    "normalized_name": "poivron rouge",
+    "search_text": "poivron rouge red pepper",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "fbd1053f-82e4-59a4-a0e2-37c5cfec90ac",
+    "builtin_key": "green-pepper",
+    "name_fr": "Poivron vert",
+    "name_en": "Green pepper",
+    "normalized_name": "poivron vert",
+    "search_text": "poivron vert green pepper",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "67796a2f-95fe-5c4a-9b6d-dbd961165661",
+    "builtin_key": "yellow-pepper",
+    "name_fr": "Poivron jaune",
+    "name_en": "Yellow pepper",
+    "normalized_name": "poivron jaune",
+    "search_text": "poivron jaune yellow pepper",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "ac6e519d-bdcc-515f-9652-6a955e6d75ae",
+    "builtin_key": "cucumber",
+    "name_fr": "Concombre",
+    "name_en": "Cucumber",
+    "normalized_name": "concombre",
+    "search_text": "concombre cucumber",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "927ba4c3-95ab-5870-af43-d89d32b5dccf",
+    "builtin_key": "broccoli",
+    "name_fr": "Brocoli",
+    "name_en": "Broccoli",
+    "normalized_name": "brocoli",
+    "search_text": "brocoli broccoli",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "b0292bee-8092-5531-a1a8-3f8b7ca8bd32",
+    "builtin_key": "cauliflower",
+    "name_fr": "Chou-fleur",
+    "name_en": "Cauliflower",
+    "normalized_name": "chou-fleur",
+    "search_text": "chou-fleur cauliflower",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "e41b40dd-ac86-583c-a8f7-8cba284cde6d",
+    "builtin_key": "white-cabbage",
+    "name_fr": "Chou blanc",
+    "name_en": "White cabbage",
+    "normalized_name": "chou blanc",
+    "search_text": "chou blanc white cabbage",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "b5c7710b-60da-5623-81b0-9f46692f4a15",
+    "builtin_key": "red-cabbage",
+    "name_fr": "Chou rouge",
+    "name_en": "Red cabbage",
+    "normalized_name": "chou rouge",
+    "search_text": "chou rouge red cabbage",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "fea8f8cb-c711-5800-be06-314e59ce99ea",
+    "builtin_key": "brussels-sprout",
+    "name_fr": "Chou de Bruxelles",
+    "name_en": "Brussels sprout",
+    "normalized_name": "chou de bruxelles",
+    "search_text": "chou de bruxelles brussels sprout",
+    "category": "produce",
+    "unit": "g"
+  },
+  {
+    "id": "8f60a441-4478-5a11-918d-6eb06370884e",
+    "builtin_key": "kale",
+    "name_fr": "Chou kale",
+    "name_en": "Kale",
+    "normalized_name": "chou kale",
+    "search_text": "chou kale kale",
+    "category": "produce",
+    "unit": "g"
+  },
+  {
+    "id": "58de76a6-c28f-592c-9d69-6eaae9d7148b",
+    "builtin_key": "spinach",
+    "name_fr": "Épinard",
+    "name_en": "Spinach",
+    "normalized_name": "epinard",
+    "search_text": "epinard spinach",
+    "category": "produce",
+    "unit": "g"
+  },
+  {
+    "id": "540e9a05-ca01-5b11-9e0d-e4fe3c3ec316",
+    "builtin_key": "lettuce",
+    "name_fr": "Laitue",
+    "name_en": "Lettuce",
+    "normalized_name": "laitue",
+    "search_text": "laitue lettuce",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "91f5a02c-556d-55fd-a639-2eb6217d450c",
+    "builtin_key": "rocket",
+    "name_fr": "Roquette",
+    "name_en": "Rocket",
+    "normalized_name": "roquette",
+    "search_text": "roquette rocket",
+    "category": "produce",
+    "unit": "g"
+  },
+  {
+    "id": "edf791cb-15da-55ef-8111-faa1919d0f0c",
+    "builtin_key": "lamb-s-lettuce",
+    "name_fr": "Mâche",
+    "name_en": "Lamb's lettuce",
+    "normalized_name": "mache",
+    "search_text": "mache lamb's lettuce",
+    "category": "produce",
+    "unit": "g"
+  },
+  {
+    "id": "975cf1fc-6323-50a7-b1f1-5dafab29f1c3",
+    "builtin_key": "chicory",
+    "name_fr": "Endive",
+    "name_en": "Chicory",
+    "normalized_name": "endive",
+    "search_text": "endive chicory",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "a41e7bca-fe1a-501d-aba7-6ed75a299ace",
+    "builtin_key": "radish",
+    "name_fr": "Radis",
+    "name_en": "Radish",
+    "normalized_name": "radis",
+    "search_text": "radis radish",
+    "category": "produce",
+    "unit": "g"
+  },
+  {
+    "id": "56cf4bc0-c341-5eff-9428-f3064a780144",
+    "builtin_key": "beetroot",
+    "name_fr": "Betterave",
+    "name_en": "Beetroot",
+    "normalized_name": "betterave",
+    "search_text": "betterave beetroot",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "4df49e7b-5f22-5a13-a7ef-2898999d55cb",
+    "builtin_key": "turnip",
+    "name_fr": "Navet",
+    "name_en": "Turnip",
+    "normalized_name": "navet",
+    "search_text": "navet turnip",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "6eeda8f4-2748-5f03-8ba1-049dfd7f6921",
+    "builtin_key": "parsnip",
+    "name_fr": "Panais",
+    "name_en": "Parsnip",
+    "normalized_name": "panais",
+    "search_text": "panais parsnip",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "f1ec17f8-692b-5cdc-ba06-9d406ff4e899",
+    "builtin_key": "celery",
+    "name_fr": "Céleri branche",
+    "name_en": "Celery",
+    "normalized_name": "celeri branche",
+    "search_text": "celeri branche celery",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "d88a35ec-6514-5a8c-9f06-a5ae395017d1",
+    "builtin_key": "celeriac",
+    "name_fr": "Céleri-rave",
+    "name_en": "Celeriac",
+    "normalized_name": "celeri-rave",
+    "search_text": "celeri-rave celeriac",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "50891ba7-d911-5819-a0cf-c245fd234352",
+    "builtin_key": "fennel",
+    "name_fr": "Fenouil",
+    "name_en": "Fennel",
+    "normalized_name": "fenouil",
+    "search_text": "fenouil fennel",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "85f42dfc-01a9-555e-893b-0ec284b2ea9c",
+    "builtin_key": "asparagus",
+    "name_fr": "Asperge",
+    "name_en": "Asparagus",
+    "normalized_name": "asperge",
+    "search_text": "asperge asparagus",
+    "category": "produce",
+    "unit": "g"
+  },
+  {
+    "id": "56b10b02-d020-56b8-a87d-0cb33e27178d",
+    "builtin_key": "artichoke",
+    "name_fr": "Artichaut",
+    "name_en": "Artichoke",
+    "normalized_name": "artichaut",
+    "search_text": "artichaut artichoke",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "65e7a17c-2d52-52c5-a559-cf9dafb3fac6",
+    "builtin_key": "green-bean",
+    "name_fr": "Haricot vert",
+    "name_en": "Green bean",
+    "normalized_name": "haricot vert",
+    "search_text": "haricot vert green bean",
+    "category": "produce",
+    "unit": "g"
+  },
+  {
+    "id": "919a8c60-f6d7-53bf-9587-6b636e944730",
+    "builtin_key": "pea",
+    "name_fr": "Petit pois",
+    "name_en": "Pea",
+    "normalized_name": "petit pois",
+    "search_text": "petit pois pea",
+    "category": "produce",
+    "unit": "g"
+  },
+  {
+    "id": "1bc587df-adf2-53f7-8cdc-98b2aa137a5e",
+    "builtin_key": "button-mushroom",
+    "name_fr": "Champignon de Paris",
+    "name_en": "Button mushroom",
+    "normalized_name": "champignon de paris",
+    "search_text": "champignon de paris button mushroom",
+    "category": "produce",
+    "unit": "g"
+  },
+  {
+    "id": "80b67141-011e-59a7-b352-bc583aa60581",
+    "builtin_key": "oyster-mushroom",
+    "name_fr": "Pleurote",
+    "name_en": "Oyster mushroom",
+    "normalized_name": "pleurote",
+    "search_text": "pleurote oyster mushroom",
+    "category": "produce",
+    "unit": "g"
+  },
+  {
+    "id": "bad73c9d-0c44-5169-802d-a6c7cf3e8db7",
+    "builtin_key": "shiitake-mushroom",
+    "name_fr": "Shiitaké",
+    "name_en": "Shiitake mushroom",
+    "normalized_name": "shiitake",
+    "search_text": "shiitake shiitake mushroom",
+    "category": "produce",
+    "unit": "g"
+  },
+  {
+    "id": "07dd4c84-4c1b-5dad-bad9-827cda8ff56b",
+    "builtin_key": "red-kuri-squash",
+    "name_fr": "Potimarron",
+    "name_en": "Red kuri squash",
+    "normalized_name": "potimarron",
+    "search_text": "potimarron red kuri squash",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "1eaef1ac-1ddf-56e2-bba4-aaeaf5a3c895",
+    "builtin_key": "butternut-squash",
+    "name_fr": "Courge butternut",
+    "name_en": "Butternut squash",
+    "normalized_name": "courge butternut",
+    "search_text": "courge butternut butternut squash",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "57f9edce-17cb-5f1c-853e-5b0cd9a6e45d",
+    "builtin_key": "pumpkin",
+    "name_fr": "Potiron",
+    "name_en": "Pumpkin",
+    "normalized_name": "potiron",
+    "search_text": "potiron pumpkin",
+    "category": "produce",
+    "unit": "g"
+  },
+  {
+    "id": "e11cd861-e4ef-5833-b18f-176d5eaa7bb0",
+    "builtin_key": "sweetcorn",
+    "name_fr": "Maïs doux",
+    "name_en": "Sweetcorn",
+    "normalized_name": "mais doux",
+    "search_text": "mais doux sweetcorn",
+    "category": "produce",
+    "unit": "g"
+  },
+  {
+    "id": "9f66c97d-dcd8-5ac6-9353-63db82a1955d",
+    "builtin_key": "avocado",
+    "name_fr": "Avocat",
+    "name_en": "Avocado",
+    "normalized_name": "avocat",
+    "search_text": "avocat avocado",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "298fc328-783f-53e0-9aa4-a41c6773d470",
+    "builtin_key": "fresh-chilli",
+    "name_fr": "Piment frais",
+    "name_en": "Fresh chilli",
+    "normalized_name": "piment frais",
+    "search_text": "piment frais fresh chilli",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "24e221a6-16a6-5a4d-92b0-e58df0a30f70",
+    "builtin_key": "ginger",
+    "name_fr": "Gingembre",
+    "name_en": "Ginger",
+    "normalized_name": "gingembre",
+    "search_text": "gingembre ginger",
+    "category": "produce",
+    "unit": "g"
+  },
+  {
+    "id": "f899d5dd-5cef-5f28-8f05-7770172f8a11",
+    "builtin_key": "lemon",
+    "name_fr": "Citron jaune",
+    "name_en": "Lemon",
+    "normalized_name": "citron jaune",
+    "search_text": "citron jaune lemon",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "a23a5b38-1772-5434-8644-70e275a6d46e",
+    "builtin_key": "lime",
+    "name_fr": "Citron vert",
+    "name_en": "Lime",
+    "normalized_name": "citron vert",
+    "search_text": "citron vert lime",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "283535e8-2a45-57cf-b6b1-f6bcb44f4737",
+    "builtin_key": "apple",
+    "name_fr": "Pomme",
+    "name_en": "Apple",
+    "normalized_name": "pomme",
+    "search_text": "pomme apple",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "74ebef40-e661-5870-b852-b178d09a0f83",
+    "builtin_key": "pear",
+    "name_fr": "Poire",
+    "name_en": "Pear",
+    "normalized_name": "poire",
+    "search_text": "poire pear",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "66eed2d1-4a70-57e6-8220-7cea8975359c",
+    "builtin_key": "banana",
+    "name_fr": "Banane",
+    "name_en": "Banana",
+    "normalized_name": "banane",
+    "search_text": "banane banana",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "28ae4529-8472-5d65-be41-b1478cb22010",
+    "builtin_key": "orange",
+    "name_fr": "Orange",
+    "name_en": "Orange",
+    "normalized_name": "orange",
+    "search_text": "orange orange",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "697cccca-854b-512a-a66b-d0da81b16276",
+    "builtin_key": "clementine",
+    "name_fr": "Clémentine",
+    "name_en": "Clementine",
+    "normalized_name": "clementine",
+    "search_text": "clementine clementine",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "ca1f527b-efa8-5ca8-bb5d-5eb529a3a46d",
+    "builtin_key": "grapefruit",
+    "name_fr": "Pamplemousse",
+    "name_en": "Grapefruit",
+    "normalized_name": "pamplemousse",
+    "search_text": "pamplemousse grapefruit",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "359d6ef7-9cb6-5041-846f-b3a5486af881",
+    "builtin_key": "kiwi",
+    "name_fr": "Kiwi",
+    "name_en": "Kiwi",
+    "normalized_name": "kiwi",
+    "search_text": "kiwi kiwi",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "50e00e84-19c1-59e2-8ce5-ba584b580526",
+    "builtin_key": "strawberry",
+    "name_fr": "Fraise",
+    "name_en": "Strawberry",
+    "normalized_name": "fraise",
+    "search_text": "fraise strawberry",
+    "category": "produce",
+    "unit": "g"
+  },
+  {
+    "id": "d8bfad8e-4087-5342-a769-c7d359506cc8",
+    "builtin_key": "raspberry",
+    "name_fr": "Framboise",
+    "name_en": "Raspberry",
+    "normalized_name": "framboise",
+    "search_text": "framboise raspberry",
+    "category": "produce",
+    "unit": "g"
+  },
+  {
+    "id": "afdd18db-4554-5f36-9c4c-dcf63de0cf80",
+    "builtin_key": "blueberry",
+    "name_fr": "Myrtille",
+    "name_en": "Blueberry",
+    "normalized_name": "myrtille",
+    "search_text": "myrtille blueberry",
+    "category": "produce",
+    "unit": "g"
+  },
+  {
+    "id": "49186dce-cdba-5411-955a-f98fcec7de4f",
+    "builtin_key": "blackberry",
+    "name_fr": "Mûre",
+    "name_en": "Blackberry",
+    "normalized_name": "mure",
+    "search_text": "mure blackberry",
+    "category": "produce",
+    "unit": "g"
+  },
+  {
+    "id": "a1b65b0c-e826-5c5a-8b52-782ef9e63687",
+    "builtin_key": "cherry",
+    "name_fr": "Cerise",
+    "name_en": "Cherry",
+    "normalized_name": "cerise",
+    "search_text": "cerise cherry",
+    "category": "produce",
+    "unit": "g"
+  },
+  {
+    "id": "538113d6-19ec-5edd-9c0d-45bd47b7c4c6",
+    "builtin_key": "grape",
+    "name_fr": "Raisin",
+    "name_en": "Grape",
+    "normalized_name": "raisin",
+    "search_text": "raisin grape",
+    "category": "produce",
+    "unit": "g"
+  },
+  {
+    "id": "43e61e79-6cc7-5f81-a23f-f2d296b86f44",
+    "builtin_key": "peach",
+    "name_fr": "Pêche",
+    "name_en": "Peach",
+    "normalized_name": "peche",
+    "search_text": "peche peach",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "63c5f73f-f8a0-5761-9cb5-4468a2f27525",
+    "builtin_key": "nectarine",
+    "name_fr": "Nectarine",
+    "name_en": "Nectarine",
+    "normalized_name": "nectarine",
+    "search_text": "nectarine nectarine",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "7c1fa094-df51-5444-94e7-2418e1523386",
+    "builtin_key": "apricot",
+    "name_fr": "Abricot",
+    "name_en": "Apricot",
+    "normalized_name": "abricot",
+    "search_text": "abricot apricot",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "74899d2c-3642-596d-acf2-17fc0cb167b7",
+    "builtin_key": "plum",
+    "name_fr": "Prune",
+    "name_en": "Plum",
+    "normalized_name": "prune",
+    "search_text": "prune plum",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "112b04d9-f647-54c7-b836-11723a81cf4a",
+    "builtin_key": "mango",
+    "name_fr": "Mangue",
+    "name_en": "Mango",
+    "normalized_name": "mangue",
+    "search_text": "mangue mango",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "e569cb27-1c07-5392-9431-b46be139be15",
+    "builtin_key": "pineapple",
+    "name_fr": "Ananas",
+    "name_en": "Pineapple",
+    "normalized_name": "ananas",
+    "search_text": "ananas pineapple",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "6958af83-99b8-5b9f-a769-7ce2498f367f",
+    "builtin_key": "melon",
+    "name_fr": "Melon",
+    "name_en": "Melon",
+    "normalized_name": "melon",
+    "search_text": "melon melon",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "33087e64-002d-5990-9fbc-28c3ac2f4c6c",
+    "builtin_key": "watermelon",
+    "name_fr": "Pastèque",
+    "name_en": "Watermelon",
+    "normalized_name": "pasteque",
+    "search_text": "pasteque watermelon",
+    "category": "produce",
+    "unit": "g"
+  },
+  {
+    "id": "e562e852-2925-590d-b8f9-179d9c3b7a3a",
+    "builtin_key": "pomegranate",
+    "name_fr": "Grenade",
+    "name_en": "Pomegranate",
+    "normalized_name": "grenade",
+    "search_text": "grenade pomegranate",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "48b6c728-5e63-5e52-87e4-12e17f788f64",
+    "builtin_key": "passion-fruit",
+    "name_fr": "Fruit de la passion",
+    "name_en": "Passion fruit",
+    "normalized_name": "fruit de la passion",
+    "search_text": "fruit de la passion passion fruit",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "bfce2829-d771-5549-a79c-3243ae3c2b07",
+    "builtin_key": "fig",
+    "name_fr": "Figue",
+    "name_en": "Fig",
+    "normalized_name": "figue",
+    "search_text": "figue fig",
+    "category": "produce",
+    "unit": "u"
+  },
+  {
+    "id": "28cd3c41-a061-575c-87e2-67a9cdce0e09",
+    "builtin_key": "rhubarb",
+    "name_fr": "Rhubarbe",
+    "name_en": "Rhubarb",
+    "normalized_name": "rhubarbe",
+    "search_text": "rhubarbe rhubarb",
+    "category": "produce",
+    "unit": "g"
+  },
+  {
+    "id": "2e049f36-aeac-560f-abc7-0c96ceff3f1c",
+    "builtin_key": "whole-milk",
+    "name_fr": "Lait entier",
+    "name_en": "Whole milk",
+    "normalized_name": "lait entier",
+    "search_text": "lait entier whole milk",
+    "category": "fresh",
+    "unit": "l"
+  },
+  {
+    "id": "72e178a4-f114-5702-aea1-8c4247bb5b2e",
+    "builtin_key": "semi-skimmed-milk",
+    "name_fr": "Lait demi-écrémé",
+    "name_en": "Semi-skimmed milk",
+    "normalized_name": "lait demi-ecreme",
+    "search_text": "lait demi-ecreme semi-skimmed milk",
+    "category": "fresh",
+    "unit": "l"
+  },
+  {
+    "id": "67bcf0e9-eeb3-5139-9e47-d13fba4c9428",
+    "builtin_key": "skimmed-milk",
+    "name_fr": "Lait écrémé",
+    "name_en": "Skimmed milk",
+    "normalized_name": "lait ecreme",
+    "search_text": "lait ecreme skimmed milk",
+    "category": "fresh",
+    "unit": "l"
+  },
+  {
+    "id": "9b39cdff-1376-50aa-91d9-599a6ebe6f10",
+    "builtin_key": "single-cream",
+    "name_fr": "Crème liquide",
+    "name_en": "Single cream",
+    "normalized_name": "creme liquide",
+    "search_text": "creme liquide single cream",
+    "category": "fresh",
+    "unit": "l"
+  },
+  {
+    "id": "a57de76a-839f-523d-9521-defbca64a7b7",
+    "builtin_key": "creme-fraiche",
+    "name_fr": "Crème épaisse",
+    "name_en": "Crème fraîche",
+    "normalized_name": "creme epaisse",
+    "search_text": "creme epaisse creme fraiche",
+    "category": "fresh",
+    "unit": "g"
+  },
+  {
+    "id": "06d1def7-f204-5e1d-871f-7810dbd7ebee",
+    "builtin_key": "unsalted-butter",
+    "name_fr": "Beurre doux",
+    "name_en": "Unsalted butter",
+    "normalized_name": "beurre doux",
+    "search_text": "beurre doux unsalted butter",
+    "category": "fresh",
+    "unit": "g"
+  },
+  {
+    "id": "f9677c4b-d068-530a-9f83-f527aa2d300a",
+    "builtin_key": "salted-butter",
+    "name_fr": "Beurre demi-sel",
+    "name_en": "Salted butter",
+    "normalized_name": "beurre demi-sel",
+    "search_text": "beurre demi-sel salted butter",
+    "category": "fresh",
+    "unit": "g"
+  },
+  {
+    "id": "9a31953e-311f-5e79-887d-a6ab1a4083d6",
+    "builtin_key": "plain-yoghurt",
+    "name_fr": "Yaourt nature",
+    "name_en": "Plain yoghurt",
+    "normalized_name": "yaourt nature",
+    "search_text": "yaourt nature plain yoghurt",
+    "category": "fresh",
+    "unit": "u"
+  },
+  {
+    "id": "4915e736-4bbf-5395-a770-9681dd0c719c",
+    "builtin_key": "greek-yoghurt",
+    "name_fr": "Yaourt grec",
+    "name_en": "Greek yoghurt",
+    "normalized_name": "yaourt grec",
+    "search_text": "yaourt grec greek yoghurt",
+    "category": "fresh",
+    "unit": "g"
+  },
+  {
+    "id": "0d5189ed-7cfa-52aa-bfa3-ba9450f44ff3",
+    "builtin_key": "fromage-blanc",
+    "name_fr": "Fromage blanc",
+    "name_en": "Fromage blanc",
+    "normalized_name": "fromage blanc",
+    "search_text": "fromage blanc fromage blanc",
+    "category": "fresh",
+    "unit": "g"
+  },
+  {
+    "id": "e3f3a0ed-7b23-53af-b6b1-be05cd471743",
+    "builtin_key": "skyr",
+    "name_fr": "Skyr",
+    "name_en": "Skyr",
+    "normalized_name": "skyr",
+    "search_text": "skyr skyr",
+    "category": "fresh",
+    "unit": "g"
+  },
+  {
+    "id": "afef7a98-792c-5559-8369-f5618f93805e",
+    "builtin_key": "egg",
+    "name_fr": "Œuf",
+    "name_en": "Egg",
+    "normalized_name": "oeuf",
+    "search_text": "oeuf egg",
+    "category": "fresh",
+    "unit": "u"
+  },
+  {
+    "id": "d9c354bd-1877-56f3-a6b6-da8dc8480715",
+    "builtin_key": "emmental",
+    "name_fr": "Emmental",
+    "name_en": "Emmental",
+    "normalized_name": "emmental",
+    "search_text": "emmental emmental",
+    "category": "fresh",
+    "unit": "g"
+  },
+  {
+    "id": "a583ee48-de3d-5ce6-8b0e-ad5131adb7c3",
+    "builtin_key": "comte",
+    "name_fr": "Comté",
+    "name_en": "Comté",
+    "normalized_name": "comte",
+    "search_text": "comte comte",
+    "category": "fresh",
+    "unit": "g"
+  },
+  {
+    "id": "eee16225-23b7-5ee8-9385-3f01af746d0e",
+    "builtin_key": "gruyere",
+    "name_fr": "Gruyère",
+    "name_en": "Gruyère",
+    "normalized_name": "gruyere",
+    "search_text": "gruyere gruyere",
+    "category": "fresh",
+    "unit": "g"
+  },
+  {
+    "id": "940a2646-5a24-5fb3-bf95-63d0fe520b72",
+    "builtin_key": "parmesan",
+    "name_fr": "Parmesan",
+    "name_en": "Parmesan",
+    "normalized_name": "parmesan",
+    "search_text": "parmesan parmesan",
+    "category": "fresh",
+    "unit": "g"
+  },
+  {
+    "id": "ad026591-45b2-5413-871e-2e6642911ff9",
+    "builtin_key": "mozzarella",
+    "name_fr": "Mozzarella",
+    "name_en": "Mozzarella",
+    "normalized_name": "mozzarella",
+    "search_text": "mozzarella mozzarella",
+    "category": "fresh",
+    "unit": "g"
+  },
+  {
+    "id": "dc243433-001b-5395-b010-7d2aa3f3818d",
+    "builtin_key": "feta",
+    "name_fr": "Feta",
+    "name_en": "Feta",
+    "normalized_name": "feta",
+    "search_text": "feta feta",
+    "category": "fresh",
+    "unit": "g"
+  },
+  {
+    "id": "9d9ddf79-6651-5fa4-ae4e-f57c72508e11",
+    "builtin_key": "fresh-goat-cheese",
+    "name_fr": "Chèvre frais",
+    "name_en": "Fresh goat cheese",
+    "normalized_name": "chevre frais",
+    "search_text": "chevre frais fresh goat cheese",
+    "category": "fresh",
+    "unit": "g"
+  },
+  {
+    "id": "d29fca27-09a6-5f05-a127-a38e33c8c795",
+    "builtin_key": "ricotta",
+    "name_fr": "Ricotta",
+    "name_en": "Ricotta",
+    "normalized_name": "ricotta",
+    "search_text": "ricotta ricotta",
+    "category": "fresh",
+    "unit": "g"
+  },
+  {
+    "id": "a1d73841-db7b-5d4d-ba14-6deb7f8244fc",
+    "builtin_key": "mascarpone",
+    "name_fr": "Mascarpone",
+    "name_en": "Mascarpone",
+    "normalized_name": "mascarpone",
+    "search_text": "mascarpone mascarpone",
+    "category": "fresh",
+    "unit": "g"
+  },
+  {
+    "id": "6abec86e-4586-578c-830c-6663ebcafcb4",
+    "builtin_key": "cheddar",
+    "name_fr": "Cheddar",
+    "name_en": "Cheddar",
+    "normalized_name": "cheddar",
+    "search_text": "cheddar cheddar",
+    "category": "fresh",
+    "unit": "g"
+  },
+  {
+    "id": "a6b3270e-6471-57ef-8003-47cef921394c",
+    "builtin_key": "camembert",
+    "name_fr": "Camembert",
+    "name_en": "Camembert",
+    "normalized_name": "camembert",
+    "search_text": "camembert camembert",
+    "category": "fresh",
+    "unit": "u"
+  },
+  {
+    "id": "9c40048c-eaa1-5e89-be1f-d14761a6f62f",
+    "builtin_key": "brie",
+    "name_fr": "Brie",
+    "name_en": "Brie",
+    "normalized_name": "brie",
+    "search_text": "brie brie",
+    "category": "fresh",
+    "unit": "g"
+  },
+  {
+    "id": "b8067bf8-bfc9-5085-a6ec-30fc2f8deec4",
+    "builtin_key": "roquefort",
+    "name_fr": "Roquefort",
+    "name_en": "Roquefort",
+    "normalized_name": "roquefort",
+    "search_text": "roquefort roquefort",
+    "category": "fresh",
+    "unit": "g"
+  },
+  {
+    "id": "4b596eea-1dfe-5300-92e5-4053c6be19b1",
+    "builtin_key": "cream-cheese",
+    "name_fr": "Fromage frais",
+    "name_en": "Cream cheese",
+    "normalized_name": "fromage frais",
+    "search_text": "fromage frais cream cheese",
+    "category": "fresh",
+    "unit": "g"
+  },
+  {
+    "id": "37ad3b34-0211-5ef5-86b2-c41308f81334",
+    "builtin_key": "plain-tofu",
+    "name_fr": "Tofu nature",
+    "name_en": "Plain tofu",
+    "normalized_name": "tofu nature",
+    "search_text": "tofu nature plain tofu",
+    "category": "fresh",
+    "unit": "g"
+  },
+  {
+    "id": "093e895a-3c8f-5fbd-a9cb-2e3818f1ceed",
+    "builtin_key": "smoked-tofu",
+    "name_fr": "Tofu fumé",
+    "name_en": "Smoked tofu",
+    "normalized_name": "tofu fume",
+    "search_text": "tofu fume smoked tofu",
+    "category": "fresh",
+    "unit": "g"
+  },
+  {
+    "id": "85cbeb24-6ccb-50ef-9b95-7932b1d16d0d",
+    "builtin_key": "tempeh",
+    "name_fr": "Tempeh",
+    "name_en": "Tempeh",
+    "normalized_name": "tempeh",
+    "search_text": "tempeh tempeh",
+    "category": "fresh",
+    "unit": "g"
+  },
+  {
+    "id": "a0bd315a-56eb-5a74-857d-1ccdbcfaea48",
+    "builtin_key": "seitan",
+    "name_fr": "Seitan",
+    "name_en": "Seitan",
+    "normalized_name": "seitan",
+    "search_text": "seitan seitan",
+    "category": "fresh",
+    "unit": "g"
+  },
+  {
+    "id": "85325fe7-b15d-54c7-8c00-0497bbc25359",
+    "builtin_key": "oat-drink",
+    "name_fr": "Boisson d’avoine",
+    "name_en": "Oat drink",
+    "normalized_name": "boisson d'avoine",
+    "search_text": "boisson d'avoine oat drink",
+    "category": "fresh",
+    "unit": "l"
+  },
+  {
+    "id": "5a578cd3-03d7-5c98-bfe1-0965f664d4e0",
+    "builtin_key": "soya-drink",
+    "name_fr": "Boisson de soja",
+    "name_en": "Soya drink",
+    "normalized_name": "boisson de soja",
+    "search_text": "boisson de soja soya drink",
+    "category": "fresh",
+    "unit": "l"
+  },
+  {
+    "id": "e493bf30-f32d-5796-a9ac-43704becf993",
+    "builtin_key": "almond-drink",
+    "name_fr": "Boisson d’amande",
+    "name_en": "Almond drink",
+    "normalized_name": "boisson d'amande",
+    "search_text": "boisson d'amande almond drink",
+    "category": "fresh",
+    "unit": "l"
+  },
+  {
+    "id": "6619af1a-62b9-5a51-bc91-241e54bb0256",
+    "builtin_key": "soya-cream",
+    "name_fr": "Crème de soja",
+    "name_en": "Soya cream",
+    "normalized_name": "creme de soja",
+    "search_text": "creme de soja soya cream",
+    "category": "fresh",
+    "unit": "l"
+  },
+  {
+    "id": "00823cd2-4306-547b-9c7c-0c3e4005af66",
+    "builtin_key": "chicken-breast",
+    "name_fr": "Blanc de poulet",
+    "name_en": "Chicken breast",
+    "normalized_name": "blanc de poulet",
+    "search_text": "blanc de poulet chicken breast",
+    "category": "protein",
+    "unit": "g"
+  },
+  {
+    "id": "3629752f-6a46-5088-889f-f41fb23b2188",
+    "builtin_key": "chicken-thigh",
+    "name_fr": "Cuisse de poulet",
+    "name_en": "Chicken thigh",
+    "normalized_name": "cuisse de poulet",
+    "search_text": "cuisse de poulet chicken thigh",
+    "category": "protein",
+    "unit": "u"
+  },
+  {
+    "id": "d50e3b7a-661f-55d6-a70c-7577760327d5",
+    "builtin_key": "whole-chicken",
+    "name_fr": "Poulet entier",
+    "name_en": "Whole chicken",
+    "normalized_name": "poulet entier",
+    "search_text": "poulet entier whole chicken",
+    "category": "protein",
+    "unit": "u"
+  },
+  {
+    "id": "6d359396-c4c5-55f0-80ad-0fa7f7d6da4c",
+    "builtin_key": "turkey-breast",
+    "name_fr": "Escalope de dinde",
+    "name_en": "Turkey breast",
+    "normalized_name": "escalope de dinde",
+    "search_text": "escalope de dinde turkey breast",
+    "category": "protein",
+    "unit": "g"
+  },
+  {
+    "id": "8197e17c-9f4c-5b6d-b4e1-d4dc79d42bb9",
+    "builtin_key": "minced-beef",
+    "name_fr": "Bœuf haché",
+    "name_en": "Minced beef",
+    "normalized_name": "boeuf hache",
+    "search_text": "boeuf hache minced beef",
+    "category": "protein",
+    "unit": "g"
+  },
+  {
+    "id": "43bb184f-631a-5b51-89b6-779fce38b1c3",
+    "builtin_key": "beef-steak",
+    "name_fr": "Steak de bœuf",
+    "name_en": "Beef steak",
+    "normalized_name": "steak de boeuf",
+    "search_text": "steak de boeuf beef steak",
+    "category": "protein",
+    "unit": "g"
+  },
+  {
+    "id": "4e451dff-bd86-57df-b179-31c1f9e3e81d",
+    "builtin_key": "stewing-beef",
+    "name_fr": "Bœuf à mijoter",
+    "name_en": "Stewing beef",
+    "normalized_name": "boeuf a mijoter",
+    "search_text": "boeuf a mijoter stewing beef",
+    "category": "protein",
+    "unit": "g"
+  },
+  {
+    "id": "85feabdc-559a-5b86-a5cf-0b0a0f0506ab",
+    "builtin_key": "pork-tenderloin",
+    "name_fr": "Filet de porc",
+    "name_en": "Pork tenderloin",
+    "normalized_name": "filet de porc",
+    "search_text": "filet de porc pork tenderloin",
+    "category": "protein",
+    "unit": "g"
+  },
+  {
+    "id": "cebf1674-d8e4-55ea-a969-6f00edb2215d",
+    "builtin_key": "pork-chop",
+    "name_fr": "Côte de porc",
+    "name_en": "Pork chop",
+    "normalized_name": "cote de porc",
+    "search_text": "cote de porc pork chop",
+    "category": "protein",
+    "unit": "u"
+  },
+  {
+    "id": "3d3aaca9-c338-5e5b-8012-35f8eac686cf",
+    "builtin_key": "bacon-lardon",
+    "name_fr": "Lardon",
+    "name_en": "Bacon lardon",
+    "normalized_name": "lardon",
+    "search_text": "lardon bacon lardon",
+    "category": "protein",
+    "unit": "g"
+  },
+  {
+    "id": "b0241336-778a-5e12-943f-80e348e5d292",
+    "builtin_key": "bacon",
+    "name_fr": "Bacon",
+    "name_en": "Bacon",
+    "normalized_name": "bacon",
+    "search_text": "bacon bacon",
+    "category": "protein",
+    "unit": "g"
+  },
+  {
+    "id": "4d4305af-ddbd-5d1f-91bb-23319ef1e371",
+    "builtin_key": "cooked-ham",
+    "name_fr": "Jambon blanc",
+    "name_en": "Cooked ham",
+    "normalized_name": "jambon blanc",
+    "search_text": "jambon blanc cooked ham",
+    "category": "protein",
+    "unit": "g"
+  },
+  {
+    "id": "aa42eb1b-485c-57d2-8fb6-a489f85234a0",
+    "builtin_key": "cured-ham",
+    "name_fr": "Jambon cru",
+    "name_en": "Cured ham",
+    "normalized_name": "jambon cru",
+    "search_text": "jambon cru cured ham",
+    "category": "protein",
+    "unit": "g"
+  },
+  {
+    "id": "374baf3b-9d36-5bc4-a8d9-added33d2b21",
+    "builtin_key": "sausage",
+    "name_fr": "Saucisse",
+    "name_en": "Sausage",
+    "normalized_name": "saucisse",
+    "search_text": "saucisse sausage",
+    "category": "protein",
+    "unit": "u"
+  },
+  {
+    "id": "34d97b63-6e26-504d-8036-cefd0fb2b03c",
+    "builtin_key": "chorizo",
+    "name_fr": "Chorizo",
+    "name_en": "Chorizo",
+    "normalized_name": "chorizo",
+    "search_text": "chorizo chorizo",
+    "category": "protein",
+    "unit": "g"
+  },
+  {
+    "id": "5dcfb650-0c6c-5fa5-b64b-7f613d547c8b",
+    "builtin_key": "lamb",
+    "name_fr": "Agneau",
+    "name_en": "Lamb",
+    "normalized_name": "agneau",
+    "search_text": "agneau lamb",
+    "category": "protein",
+    "unit": "g"
+  },
+  {
+    "id": "57ad4ea7-da08-56bb-8f74-6e45fcbe1de7",
+    "builtin_key": "veal",
+    "name_fr": "Veau",
+    "name_en": "Veal",
+    "normalized_name": "veau",
+    "search_text": "veau veal",
+    "category": "protein",
+    "unit": "g"
+  },
+  {
+    "id": "f1e95a4f-e736-50c7-be8b-4a7bb02f099c",
+    "builtin_key": "duck-breast",
+    "name_fr": "Magret de canard",
+    "name_en": "Duck breast",
+    "normalized_name": "magret de canard",
+    "search_text": "magret de canard duck breast",
+    "category": "protein",
+    "unit": "g"
+  },
+  {
+    "id": "d24435d3-d5d9-5e49-9c03-e232b8215cba",
+    "builtin_key": "fresh-salmon",
+    "name_fr": "Saumon frais",
+    "name_en": "Fresh salmon",
+    "normalized_name": "saumon frais",
+    "search_text": "saumon frais fresh salmon",
+    "category": "protein",
+    "unit": "g"
+  },
+  {
+    "id": "fdeb4f9b-ee33-5db7-bd93-f34f7f15eb5d",
+    "builtin_key": "smoked-salmon",
+    "name_fr": "Saumon fumé",
+    "name_en": "Smoked salmon",
+    "normalized_name": "saumon fume",
+    "search_text": "saumon fume smoked salmon",
+    "category": "protein",
+    "unit": "g"
+  },
+  {
+    "id": "690b9143-9dba-5c24-b505-710f0f96ffcf",
+    "builtin_key": "cod",
+    "name_fr": "Cabillaud",
+    "name_en": "Cod",
+    "normalized_name": "cabillaud",
+    "search_text": "cabillaud cod",
+    "category": "protein",
+    "unit": "g"
+  },
+  {
+    "id": "d2a8006a-86cb-5682-ba91-b20b15cf8b2d",
+    "builtin_key": "hake",
+    "name_fr": "Colin",
+    "name_en": "Hake",
+    "normalized_name": "colin",
+    "search_text": "colin hake",
+    "category": "protein",
+    "unit": "g"
+  },
+  {
+    "id": "92d3e359-a850-5c28-b0be-caca81d806df",
+    "builtin_key": "trout",
+    "name_fr": "Truite",
+    "name_en": "Trout",
+    "normalized_name": "truite",
+    "search_text": "truite trout",
+    "category": "protein",
+    "unit": "g"
+  },
+  {
+    "id": "36817527-2014-5282-8d11-c162eb9f5ecd",
+    "builtin_key": "fresh-tuna",
+    "name_fr": "Thon frais",
+    "name_en": "Fresh tuna",
+    "normalized_name": "thon frais",
+    "search_text": "thon frais fresh tuna",
+    "category": "protein",
+    "unit": "g"
+  },
+  {
+    "id": "1b4e15f9-73ed-58d4-81dd-d8ce97d5e4be",
+    "builtin_key": "prawn",
+    "name_fr": "Crevette",
+    "name_en": "Prawn",
+    "normalized_name": "crevette",
+    "search_text": "crevette prawn",
+    "category": "protein",
+    "unit": "g"
+  },
+  {
+    "id": "c126dc0c-5afc-52e0-834d-6de9159ceeed",
+    "builtin_key": "mussel",
+    "name_fr": "Moule",
+    "name_en": "Mussel",
+    "normalized_name": "moule",
+    "search_text": "moule mussel",
+    "category": "protein",
+    "unit": "g"
+  },
+  {
+    "id": "91a8a125-9007-5f2b-87c1-476130b09a4c",
+    "builtin_key": "scallop",
+    "name_fr": "Noix de Saint-Jacques",
+    "name_en": "Scallop",
+    "normalized_name": "noix de saint-jacques",
+    "search_text": "noix de saint-jacques scallop",
+    "category": "protein",
+    "unit": "g"
+  },
+  {
+    "id": "ec5e3e09-d71b-55f8-8b37-1d9801aa3136",
+    "builtin_key": "squid",
+    "name_fr": "Calamar",
+    "name_en": "Squid",
+    "normalized_name": "calamar",
+    "search_text": "calamar squid",
+    "category": "protein",
+    "unit": "g"
+  },
+  {
+    "id": "a9023d01-d384-54b4-97ad-1ced13620837",
+    "builtin_key": "fresh-sardine",
+    "name_fr": "Sardine fraîche",
+    "name_en": "Fresh sardine",
+    "normalized_name": "sardine fraiche",
+    "search_text": "sardine fraiche fresh sardine",
+    "category": "protein",
+    "unit": "g"
+  },
+  {
+    "id": "bf52ebf2-00b4-51f6-9f67-ac2e66ada57a",
+    "builtin_key": "basmati-rice",
+    "name_fr": "Riz basmati",
+    "name_en": "Basmati rice",
+    "normalized_name": "riz basmati",
+    "search_text": "riz basmati basmati rice",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "5db90eaa-ad48-5668-8d4b-4964b2d8d2a4",
+    "builtin_key": "brown-rice",
+    "name_fr": "Riz complet",
+    "name_en": "Brown rice",
+    "normalized_name": "riz complet",
+    "search_text": "riz complet brown rice",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "d99916eb-70d0-5d92-be6c-ecbf7671c42d",
+    "builtin_key": "arborio-rice",
+    "name_fr": "Riz arborio",
+    "name_en": "Arborio rice",
+    "normalized_name": "riz arborio",
+    "search_text": "riz arborio arborio rice",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "3eef418e-eb9d-5043-a208-18134819e2f9",
+    "builtin_key": "spaghetti",
+    "name_fr": "Spaghetti",
+    "name_en": "Spaghetti",
+    "normalized_name": "spaghetti",
+    "search_text": "spaghetti spaghetti",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "0d1fc11d-8756-514b-98d2-22f39542c7b2",
+    "builtin_key": "penne",
+    "name_fr": "Penne",
+    "name_en": "Penne",
+    "normalized_name": "penne",
+    "search_text": "penne penne",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "a736c3c6-74b0-50ae-9ae1-5bd7b986beda",
+    "builtin_key": "elbow-pasta",
+    "name_fr": "Coquillette",
+    "name_en": "Elbow pasta",
+    "normalized_name": "coquillette",
+    "search_text": "coquillette elbow pasta",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "8fee8101-0cf3-5912-9983-bff9dfa43ec8",
+    "builtin_key": "tagliatelle",
+    "name_fr": "Tagliatelle",
+    "name_en": "Tagliatelle",
+    "normalized_name": "tagliatelle",
+    "search_text": "tagliatelle tagliatelle",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "d854d0be-cf71-531d-88f0-83f774ea7a03",
+    "builtin_key": "lasagne-sheet",
+    "name_fr": "Feuille de lasagne",
+    "name_en": "Lasagne sheet",
+    "normalized_name": "feuille de lasagne",
+    "search_text": "feuille de lasagne lasagne sheet",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "1e76ed11-f0b2-556f-87db-545f856cee9e",
+    "builtin_key": "rice-noodle",
+    "name_fr": "Nouille de riz",
+    "name_en": "Rice noodle",
+    "normalized_name": "nouille de riz",
+    "search_text": "nouille de riz rice noodle",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "9d67ec39-30d1-5a42-8668-c7d8b1227f6e",
+    "builtin_key": "wheat-noodle",
+    "name_fr": "Nouille de blé",
+    "name_en": "Wheat noodle",
+    "normalized_name": "nouille de ble",
+    "search_text": "nouille de ble wheat noodle",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "108ff3a3-5d32-5003-a1ed-e43eea045c49",
+    "builtin_key": "couscous",
+    "name_fr": "Semoule de couscous",
+    "name_en": "Couscous",
+    "normalized_name": "semoule de couscous",
+    "search_text": "semoule de couscous couscous",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "ac588af5-10a1-59dc-8c15-1c10b64e3adc",
+    "builtin_key": "quinoa",
+    "name_fr": "Quinoa",
+    "name_en": "Quinoa",
+    "normalized_name": "quinoa",
+    "search_text": "quinoa quinoa",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "2ccd213f-0949-56b3-a61e-701c3ca3e47f",
+    "builtin_key": "bulgur",
+    "name_fr": "Boulgour",
+    "name_en": "Bulgur",
+    "normalized_name": "boulgour",
+    "search_text": "boulgour bulgur",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "48bb0224-fe9f-5b19-a6da-1a00837d2415",
+    "builtin_key": "polenta",
+    "name_fr": "Polenta",
+    "name_en": "Polenta",
+    "normalized_name": "polenta",
+    "search_text": "polenta polenta",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "2f77daa7-fb9a-5bf2-bd56-8b0ed3aa03b8",
+    "builtin_key": "rolled-oats",
+    "name_fr": "Flocon d’avoine",
+    "name_en": "Rolled oats",
+    "normalized_name": "flocon d'avoine",
+    "search_text": "flocon d'avoine rolled oats",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "aaa9e2b9-693d-5a51-9825-78fb03a48e76",
+    "builtin_key": "green-lentil",
+    "name_fr": "Lentille verte",
+    "name_en": "Green lentil",
+    "normalized_name": "lentille verte",
+    "search_text": "lentille verte green lentil",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "7d7fd837-77ae-5cbb-8f29-1b06ede921e4",
+    "builtin_key": "red-lentil",
+    "name_fr": "Lentille corail",
+    "name_en": "Red lentil",
+    "normalized_name": "lentille corail",
+    "search_text": "lentille corail red lentil",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "48698631-6f6d-5030-adc0-4e74bdd87a71",
+    "builtin_key": "chickpea",
+    "name_fr": "Pois chiche",
+    "name_en": "Chickpea",
+    "normalized_name": "pois chiche",
+    "search_text": "pois chiche chickpea",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "128bcd0d-7ce6-5497-8cd6-61e7b43c4c92",
+    "builtin_key": "kidney-bean",
+    "name_fr": "Haricot rouge",
+    "name_en": "Kidney bean",
+    "normalized_name": "haricot rouge",
+    "search_text": "haricot rouge kidney bean",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "74270d12-1ab9-5513-a54c-740c299a4dfd",
+    "builtin_key": "white-bean",
+    "name_fr": "Haricot blanc",
+    "name_en": "White bean",
+    "normalized_name": "haricot blanc",
+    "search_text": "haricot blanc white bean",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "59ab2eca-e61a-5e51-9451-a7a82214b168",
+    "builtin_key": "black-bean",
+    "name_fr": "Haricot noir",
+    "name_en": "Black bean",
+    "normalized_name": "haricot noir",
+    "search_text": "haricot noir black bean",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "e9bbb046-4936-5989-89bf-2196177fff99",
+    "builtin_key": "split-pea",
+    "name_fr": "Pois cassé",
+    "name_en": "Split pea",
+    "normalized_name": "pois casse",
+    "search_text": "pois casse split pea",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "2ed450d7-b738-51dd-a92b-6a9efb907b4b",
+    "builtin_key": "chopped-tomato",
+    "name_fr": "Tomate concassée",
+    "name_en": "Chopped tomato",
+    "normalized_name": "tomate concassee",
+    "search_text": "tomate concassee chopped tomato",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "540167e9-5330-565e-982d-33689d23184f",
+    "builtin_key": "tomato-passata",
+    "name_fr": "Coulis de tomate",
+    "name_en": "Tomato passata",
+    "normalized_name": "coulis de tomate",
+    "search_text": "coulis de tomate tomato passata",
+    "category": "pantry",
+    "unit": "l"
+  },
+  {
+    "id": "f058d6ef-55ad-5bae-9f0e-29ad6d923d4e",
+    "builtin_key": "tomato-puree",
+    "name_fr": "Concentré de tomate",
+    "name_en": "Tomato purée",
+    "normalized_name": "concentre de tomate",
+    "search_text": "concentre de tomate tomato puree",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "0edc10b0-7995-5b85-9f04-9f36a4c042e4",
+    "builtin_key": "tinned-tuna",
+    "name_fr": "Thon en conserve",
+    "name_en": "Tinned tuna",
+    "normalized_name": "thon en conserve",
+    "search_text": "thon en conserve tinned tuna",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "6f135e5d-2148-595d-87c9-7de022b24255",
+    "builtin_key": "tinned-sardine",
+    "name_fr": "Sardine en conserve",
+    "name_en": "Tinned sardine",
+    "normalized_name": "sardine en conserve",
+    "search_text": "sardine en conserve tinned sardine",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "b522dc16-2d69-5093-9254-98ad67795dd0",
+    "builtin_key": "tinned-mackerel",
+    "name_fr": "Maquereau en conserve",
+    "name_en": "Tinned mackerel",
+    "normalized_name": "maquereau en conserve",
+    "search_text": "maquereau en conserve tinned mackerel",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "02e72983-2867-58da-82b9-34caeea0bd38",
+    "builtin_key": "coconut-milk",
+    "name_fr": "Lait de coco",
+    "name_en": "Coconut milk",
+    "normalized_name": "lait de coco",
+    "search_text": "lait de coco coconut milk",
+    "category": "pantry",
+    "unit": "l"
+  },
+  {
+    "id": "65efa155-e464-59c6-a154-9247a4e79f35",
+    "builtin_key": "coconut-cream",
+    "name_fr": "Crème de coco",
+    "name_en": "Coconut cream",
+    "normalized_name": "creme de coco",
+    "search_text": "creme de coco coconut cream",
+    "category": "pantry",
+    "unit": "l"
+  },
+  {
+    "id": "eeb5cb85-8f96-5c1e-ae46-2f86a5722de3",
+    "builtin_key": "vegetable-stock",
+    "name_fr": "Bouillon de légumes",
+    "name_en": "Vegetable stock",
+    "normalized_name": "bouillon de legumes",
+    "search_text": "bouillon de legumes vegetable stock",
+    "category": "pantry",
+    "unit": "l"
+  },
+  {
+    "id": "b3fd6636-fb30-5e96-ac65-52ed1ec50b9c",
+    "builtin_key": "chicken-stock",
+    "name_fr": "Bouillon de volaille",
+    "name_en": "Chicken stock",
+    "normalized_name": "bouillon de volaille",
+    "search_text": "bouillon de volaille chicken stock",
+    "category": "pantry",
+    "unit": "l"
+  },
+  {
+    "id": "e9bd7e99-987b-52ab-a98c-98a92bbbcb51",
+    "builtin_key": "stock-cube",
+    "name_fr": "Cube de bouillon",
+    "name_en": "Stock cube",
+    "normalized_name": "cube de bouillon",
+    "search_text": "cube de bouillon stock cube",
+    "category": "pantry",
+    "unit": "u"
+  },
+  {
+    "id": "7d6a5fa2-cf6b-54e1-aebd-b8938ca63e76",
+    "builtin_key": "green-olive",
+    "name_fr": "Olive verte",
+    "name_en": "Green olive",
+    "normalized_name": "olive verte",
+    "search_text": "olive verte green olive",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "3f867d54-71bd-5f73-ba3d-3e4cd2788ef6",
+    "builtin_key": "black-olive",
+    "name_fr": "Olive noire",
+    "name_en": "Black olive",
+    "normalized_name": "olive noire",
+    "search_text": "olive noire black olive",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "506104fe-5404-5a48-887e-07f5b3347dbb",
+    "builtin_key": "gherkin",
+    "name_fr": "Cornichon",
+    "name_en": "Gherkin",
+    "normalized_name": "cornichon",
+    "search_text": "cornichon gherkin",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "6330204f-0808-5012-bf9c-fb3781cb0e07",
+    "builtin_key": "caper",
+    "name_fr": "Câpre",
+    "name_en": "Caper",
+    "normalized_name": "capre",
+    "search_text": "capre caper",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "15c67541-a27c-514f-a9c3-e5aa64b273a1",
+    "builtin_key": "sun-dried-tomato",
+    "name_fr": "Tomate séchée",
+    "name_en": "Sun-dried tomato",
+    "normalized_name": "tomate sechee",
+    "search_text": "tomate sechee sun-dried tomato",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "9d86fe42-bb0b-554b-b679-0cf5587f58dc",
+    "builtin_key": "heart-of-palm",
+    "name_fr": "Cœur de palmier",
+    "name_en": "Heart of palm",
+    "normalized_name": "coeur de palmier",
+    "search_text": "coeur de palmier heart of palm",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "db9aedc4-f010-5601-ab17-886e77f2997b",
+    "builtin_key": "bread",
+    "name_fr": "Pain",
+    "name_en": "Bread",
+    "normalized_name": "pain",
+    "search_text": "pain bread",
+    "category": "pantry",
+    "unit": "u"
+  },
+  {
+    "id": "cd14d79d-2a68-51b1-9c73-dc01b7c746e2",
+    "builtin_key": "baguette",
+    "name_fr": "Baguette",
+    "name_en": "Baguette",
+    "normalized_name": "baguette",
+    "search_text": "baguette baguette",
+    "category": "pantry",
+    "unit": "u"
+  },
+  {
+    "id": "dc042d94-7697-5ddc-9b0d-b984c3ded9f1",
+    "builtin_key": "sliced-bread",
+    "name_fr": "Pain de mie",
+    "name_en": "Sliced bread",
+    "normalized_name": "pain de mie",
+    "search_text": "pain de mie sliced bread",
+    "category": "pantry",
+    "unit": "u"
+  },
+  {
+    "id": "b30f56c0-7ab3-5cae-b003-65191dab5d9c",
+    "builtin_key": "tortilla",
+    "name_fr": "Tortilla",
+    "name_en": "Tortilla",
+    "normalized_name": "tortilla",
+    "search_text": "tortilla tortilla",
+    "category": "pantry",
+    "unit": "u"
+  },
+  {
+    "id": "6ab7726d-c9c2-5157-8e71-b9e0ddb74c27",
+    "builtin_key": "pitta-bread",
+    "name_fr": "Pain pita",
+    "name_en": "Pitta bread",
+    "normalized_name": "pain pita",
+    "search_text": "pain pita pitta bread",
+    "category": "pantry",
+    "unit": "u"
+  },
+  {
+    "id": "5e28bb26-5622-5aff-b0a4-6a26dae5c437",
+    "builtin_key": "puff-pastry",
+    "name_fr": "Pâte feuilletée",
+    "name_en": "Puff pastry",
+    "normalized_name": "pate feuilletee",
+    "search_text": "pate feuilletee puff pastry",
+    "category": "pantry",
+    "unit": "u"
+  },
+  {
+    "id": "6364e0e5-47fc-51a0-9b50-6df2f959eb93",
+    "builtin_key": "shortcrust-pastry",
+    "name_fr": "Pâte brisée",
+    "name_en": "Shortcrust pastry",
+    "normalized_name": "pate brisee",
+    "search_text": "pate brisee shortcrust pastry",
+    "category": "pantry",
+    "unit": "u"
+  },
+  {
+    "id": "dda0e2a7-4ba5-54d2-895e-6a7065254104",
+    "builtin_key": "pizza-dough",
+    "name_fr": "Pâte à pizza",
+    "name_en": "Pizza dough",
+    "normalized_name": "pate a pizza",
+    "search_text": "pate a pizza pizza dough",
+    "category": "pantry",
+    "unit": "u"
+  },
+  {
+    "id": "f3f12e88-602e-5bf7-9403-bb35e708a963",
+    "builtin_key": "breadcrumbs",
+    "name_fr": "Chapelure",
+    "name_en": "Breadcrumbs",
+    "normalized_name": "chapelure",
+    "search_text": "chapelure breadcrumbs",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "1b2cf618-51fa-5bfd-a254-3848fac4e06b",
+    "builtin_key": "wheat-flour",
+    "name_fr": "Farine de blé",
+    "name_en": "Wheat flour",
+    "normalized_name": "farine de ble",
+    "search_text": "farine de ble wheat flour",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "1591fa35-a990-5ace-ac2c-cd50e432e7b2",
+    "builtin_key": "wholemeal-flour",
+    "name_fr": "Farine complète",
+    "name_en": "Wholemeal flour",
+    "normalized_name": "farine complete",
+    "search_text": "farine complete wholemeal flour",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "dbd09c35-6198-5180-adf5-1f9cbf482854",
+    "builtin_key": "buckwheat-flour",
+    "name_fr": "Farine de sarrasin",
+    "name_en": "Buckwheat flour",
+    "normalized_name": "farine de sarrasin",
+    "search_text": "farine de sarrasin buckwheat flour",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "e830f348-9907-5461-87a7-8b794be5a6ff",
+    "builtin_key": "cornflour",
+    "name_fr": "Fécule de maïs",
+    "name_en": "Cornflour",
+    "normalized_name": "fecule de mais",
+    "search_text": "fecule de mais cornflour",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "20066f65-b153-5c60-a635-4d61b2c5ae3e",
+    "builtin_key": "white-sugar",
+    "name_fr": "Sucre blanc",
+    "name_en": "White sugar",
+    "normalized_name": "sucre blanc",
+    "search_text": "sucre blanc white sugar",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "5e6ad24c-4567-519f-a39b-d0f69001fd52",
+    "builtin_key": "brown-sugar",
+    "name_fr": "Cassonade",
+    "name_en": "Brown sugar",
+    "normalized_name": "cassonade",
+    "search_text": "cassonade brown sugar",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "961d1a98-2fc5-55a1-8d69-925dde8d4906",
+    "builtin_key": "icing-sugar",
+    "name_fr": "Sucre glace",
+    "name_en": "Icing sugar",
+    "normalized_name": "sucre glace",
+    "search_text": "sucre glace icing sugar",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "90df084e-81f7-5261-952a-23a635678038",
+    "builtin_key": "vanilla-sugar",
+    "name_fr": "Sucre vanillé",
+    "name_en": "Vanilla sugar",
+    "normalized_name": "sucre vanille",
+    "search_text": "sucre vanille vanilla sugar",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "3123c569-39a7-548e-b0b8-c1defa05ea89",
+    "builtin_key": "baking-powder",
+    "name_fr": "Levure chimique",
+    "name_en": "Baking powder",
+    "normalized_name": "levure chimique",
+    "search_text": "levure chimique baking powder",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "9f3cfbbb-c76f-5aa0-8bad-0110faec7693",
+    "builtin_key": "baker-s-yeast",
+    "name_fr": "Levure boulangère",
+    "name_en": "Baker's yeast",
+    "normalized_name": "levure boulangere",
+    "search_text": "levure boulangere baker's yeast",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "e977d2c7-a241-5565-b1c1-f40810d8ed33",
+    "builtin_key": "bicarbonate-of-soda",
+    "name_fr": "Bicarbonate alimentaire",
+    "name_en": "Bicarbonate of soda",
+    "normalized_name": "bicarbonate alimentaire",
+    "search_text": "bicarbonate alimentaire bicarbonate of soda",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "04eeddfd-cb3d-5569-a616-b5fab91fdff9",
+    "builtin_key": "dark-chocolate",
+    "name_fr": "Chocolat noir",
+    "name_en": "Dark chocolate",
+    "normalized_name": "chocolat noir",
+    "search_text": "chocolat noir dark chocolate",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "c469f12b-ad22-5862-bd56-8e51ebf7dccf",
+    "builtin_key": "milk-chocolate",
+    "name_fr": "Chocolat au lait",
+    "name_en": "Milk chocolate",
+    "normalized_name": "chocolat au lait",
+    "search_text": "chocolat au lait milk chocolate",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "9dbfc8f1-5dda-5683-94d8-556a749dfe2a",
+    "builtin_key": "white-chocolate",
+    "name_fr": "Chocolat blanc",
+    "name_en": "White chocolate",
+    "normalized_name": "chocolat blanc",
+    "search_text": "chocolat blanc white chocolate",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "4a1c7c78-cd26-5e0b-88e6-dbbf3d8ad7d4",
+    "builtin_key": "cocoa-powder",
+    "name_fr": "Cacao en poudre",
+    "name_en": "Cocoa powder",
+    "normalized_name": "cacao en poudre",
+    "search_text": "cacao en poudre cocoa powder",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "87978096-5308-5f9f-9cf5-61162210fc14",
+    "builtin_key": "chocolate-chips",
+    "name_fr": "Pépites de chocolat",
+    "name_en": "Chocolate chips",
+    "normalized_name": "pepites de chocolat",
+    "search_text": "pepites de chocolat chocolate chips",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "63d427be-a4c6-53ea-a7d6-f2cc82fcd826",
+    "builtin_key": "vanilla-extract",
+    "name_fr": "Extrait de vanille",
+    "name_en": "Vanilla extract",
+    "normalized_name": "extrait de vanille",
+    "search_text": "extrait de vanille vanilla extract",
+    "category": "pantry",
+    "unit": "l"
+  },
+  {
+    "id": "904ebf1c-10d6-5694-941d-4271808103f3",
+    "builtin_key": "vanilla-pod",
+    "name_fr": "Gousse de vanille",
+    "name_en": "Vanilla pod",
+    "normalized_name": "gousse de vanille",
+    "search_text": "gousse de vanille vanilla pod",
+    "category": "pantry",
+    "unit": "u"
+  },
+  {
+    "id": "aaca19fb-168d-576e-892d-13cd504aa52c",
+    "builtin_key": "almond",
+    "name_fr": "Amande",
+    "name_en": "Almond",
+    "normalized_name": "amande",
+    "search_text": "amande almond",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "bc84b3b5-3309-5163-a57c-f037fdd7c0e1",
+    "builtin_key": "walnut",
+    "name_fr": "Noix",
+    "name_en": "Walnut",
+    "normalized_name": "noix",
+    "search_text": "noix walnut",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "3db8f43e-1429-5bb5-8f6c-41ac6be0565c",
+    "builtin_key": "hazelnut",
+    "name_fr": "Noisette",
+    "name_en": "Hazelnut",
+    "normalized_name": "noisette",
+    "search_text": "noisette hazelnut",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "61fa6bdd-647b-5e39-ae37-5e9b5f0e96af",
+    "builtin_key": "cashew",
+    "name_fr": "Noix de cajou",
+    "name_en": "Cashew",
+    "normalized_name": "noix de cajou",
+    "search_text": "noix de cajou cashew",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "1a5db550-7304-55d6-8fb9-c6902e11400a",
+    "builtin_key": "pistachio",
+    "name_fr": "Pistache",
+    "name_en": "Pistachio",
+    "normalized_name": "pistache",
+    "search_text": "pistache pistachio",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "50a75573-979a-5ce3-8ae3-0a55d3bb11d7",
+    "builtin_key": "peanut",
+    "name_fr": "Cacahuète",
+    "name_en": "Peanut",
+    "normalized_name": "cacahuete",
+    "search_text": "cacahuete peanut",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "4d8357b5-3ab3-533d-9914-eb06e866ba86",
+    "builtin_key": "pine-nut",
+    "name_fr": "Pignon de pin",
+    "name_en": "Pine nut",
+    "normalized_name": "pignon de pin",
+    "search_text": "pignon de pin pine nut",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "e2dbd012-8f01-5da7-9374-9d0b0eea1d31",
+    "builtin_key": "desiccated-coconut",
+    "name_fr": "Noix de coco râpée",
+    "name_en": "Desiccated coconut",
+    "normalized_name": "noix de coco rapee",
+    "search_text": "noix de coco rapee desiccated coconut",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "29aedf99-db3f-5182-a19f-554c03398a28",
+    "builtin_key": "raisin",
+    "name_fr": "Raisin sec",
+    "name_en": "Raisin",
+    "normalized_name": "raisin sec",
+    "search_text": "raisin sec raisin",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "5c7416c1-9b0f-50e6-9909-11063aaa1811",
+    "builtin_key": "dried-apricot",
+    "name_fr": "Abricot sec",
+    "name_en": "Dried apricot",
+    "normalized_name": "abricot sec",
+    "search_text": "abricot sec dried apricot",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "679149ab-4d22-51a5-8ffe-2772605dd652",
+    "builtin_key": "date",
+    "name_fr": "Datte",
+    "name_en": "Date",
+    "normalized_name": "datte",
+    "search_text": "datte date",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "0222aad5-021e-5cc8-ba0c-679623620773",
+    "builtin_key": "prune",
+    "name_fr": "Pruneau",
+    "name_en": "Prune",
+    "normalized_name": "pruneau",
+    "search_text": "pruneau prune",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "774bcf8c-bd7e-5e2e-8930-313cf42e7739",
+    "builtin_key": "sesame-seed",
+    "name_fr": "Graine de sésame",
+    "name_en": "Sesame seed",
+    "normalized_name": "graine de sesame",
+    "search_text": "graine de sesame sesame seed",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "ab0eeab7-aa90-5368-a177-6a476ab7c52b",
+    "builtin_key": "chia-seed",
+    "name_fr": "Graine de chia",
+    "name_en": "Chia seed",
+    "normalized_name": "graine de chia",
+    "search_text": "graine de chia chia seed",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "54c00356-7707-527e-9ebd-e53eaf51d3fc",
+    "builtin_key": "linseed",
+    "name_fr": "Graine de lin",
+    "name_en": "Linseed",
+    "normalized_name": "graine de lin",
+    "search_text": "graine de lin linseed",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "7dd25cb2-5686-5ca5-b15c-d5fee1b390f0",
+    "builtin_key": "pumpkin-seed",
+    "name_fr": "Graine de courge",
+    "name_en": "Pumpkin seed",
+    "normalized_name": "graine de courge",
+    "search_text": "graine de courge pumpkin seed",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "1244f9d5-5ec6-5526-9523-f85c383dd9e0",
+    "builtin_key": "sunflower-seed",
+    "name_fr": "Graine de tournesol",
+    "name_en": "Sunflower seed",
+    "normalized_name": "graine de tournesol",
+    "search_text": "graine de tournesol sunflower seed",
+    "category": "pantry",
+    "unit": "g"
+  },
+  {
+    "id": "116dfab4-ce3d-5f74-b5e9-057fc3a89312",
+    "builtin_key": "olive-oil",
+    "name_fr": "Huile d’olive",
+    "name_en": "Olive oil",
+    "normalized_name": "huile d'olive",
+    "search_text": "huile d'olive olive oil",
+    "category": "seasoning",
+    "unit": "l"
+  },
+  {
+    "id": "f026a9f6-0dd9-5186-b896-d8e668129d91",
+    "builtin_key": "sunflower-oil",
+    "name_fr": "Huile de tournesol",
+    "name_en": "Sunflower oil",
+    "normalized_name": "huile de tournesol",
+    "search_text": "huile de tournesol sunflower oil",
+    "category": "seasoning",
+    "unit": "l"
+  },
+  {
+    "id": "f7dfd382-41c0-596b-a693-e41bcaedd01b",
+    "builtin_key": "rapeseed-oil",
+    "name_fr": "Huile de colza",
+    "name_en": "Rapeseed oil",
+    "normalized_name": "huile de colza",
+    "search_text": "huile de colza rapeseed oil",
+    "category": "seasoning",
+    "unit": "l"
+  },
+  {
+    "id": "8722a85c-c484-595e-9ea3-8dda90d75089",
+    "builtin_key": "sesame-oil",
+    "name_fr": "Huile de sésame",
+    "name_en": "Sesame oil",
+    "normalized_name": "huile de sesame",
+    "search_text": "huile de sesame sesame oil",
+    "category": "seasoning",
+    "unit": "l"
+  },
+  {
+    "id": "28a8a07f-9190-51ed-a5be-b18b9b9051c1",
+    "builtin_key": "balsamic-vinegar",
+    "name_fr": "Vinaigre balsamique",
+    "name_en": "Balsamic vinegar",
+    "normalized_name": "vinaigre balsamique",
+    "search_text": "vinaigre balsamique balsamic vinegar",
+    "category": "seasoning",
+    "unit": "l"
+  },
+  {
+    "id": "00ac4793-61e7-5d06-8e1e-915843f747a6",
+    "builtin_key": "cider-vinegar",
+    "name_fr": "Vinaigre de cidre",
+    "name_en": "Cider vinegar",
+    "normalized_name": "vinaigre de cidre",
+    "search_text": "vinaigre de cidre cider vinegar",
+    "category": "seasoning",
+    "unit": "l"
+  },
+  {
+    "id": "33a65551-a910-5e86-9f16-0db8fc7a9026",
+    "builtin_key": "wine-vinegar",
+    "name_fr": "Vinaigre de vin",
+    "name_en": "Wine vinegar",
+    "normalized_name": "vinaigre de vin",
+    "search_text": "vinaigre de vin wine vinegar",
+    "category": "seasoning",
+    "unit": "l"
+  },
+  {
+    "id": "6a6a945d-119a-5ece-a332-9c855b423e29",
+    "builtin_key": "rice-vinegar",
+    "name_fr": "Vinaigre de riz",
+    "name_en": "Rice vinegar",
+    "normalized_name": "vinaigre de riz",
+    "search_text": "vinaigre de riz rice vinegar",
+    "category": "seasoning",
+    "unit": "l"
+  },
+  {
+    "id": "6b718c76-434a-5b89-94dc-39ed97b3857c",
+    "builtin_key": "soy-sauce",
+    "name_fr": "Sauce soja",
+    "name_en": "Soy sauce",
+    "normalized_name": "sauce soja",
+    "search_text": "sauce soja soy sauce",
+    "category": "seasoning",
+    "unit": "l"
+  },
+  {
+    "id": "2dc67a08-8a85-53fd-833d-4f2b7cfa6325",
+    "builtin_key": "fish-sauce",
+    "name_fr": "Sauce nuoc-mâm",
+    "name_en": "Fish sauce",
+    "normalized_name": "sauce nuoc-mam",
+    "search_text": "sauce nuoc-mam fish sauce",
+    "category": "seasoning",
+    "unit": "l"
+  },
+  {
+    "id": "10b89c09-97ca-5c40-9916-77cb03206e0e",
+    "builtin_key": "mustard",
+    "name_fr": "Moutarde",
+    "name_en": "Mustard",
+    "normalized_name": "moutarde",
+    "search_text": "moutarde mustard",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "46ebb599-0048-59e8-b403-69f1ae71c4e9",
+    "builtin_key": "mayonnaise",
+    "name_fr": "Mayonnaise",
+    "name_en": "Mayonnaise",
+    "normalized_name": "mayonnaise",
+    "search_text": "mayonnaise mayonnaise",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "70a37998-d13b-5cae-89b5-8a5636d2e499",
+    "builtin_key": "ketchup",
+    "name_fr": "Ketchup",
+    "name_en": "Ketchup",
+    "normalized_name": "ketchup",
+    "search_text": "ketchup ketchup",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "8ff2e101-4c69-5a94-aaec-62fb4a7badef",
+    "builtin_key": "pesto",
+    "name_fr": "Pesto",
+    "name_en": "Pesto",
+    "normalized_name": "pesto",
+    "search_text": "pesto pesto",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "be71bd30-c2df-5f85-b49f-d861758e66b6",
+    "builtin_key": "harissa",
+    "name_fr": "Harissa",
+    "name_en": "Harissa",
+    "normalized_name": "harissa",
+    "search_text": "harissa harissa",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "a547d7ea-ed31-5428-a965-fd4274955431",
+    "builtin_key": "tahini",
+    "name_fr": "Tahini",
+    "name_en": "Tahini",
+    "normalized_name": "tahini",
+    "search_text": "tahini tahini",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "41334516-28d0-546f-8d12-ad968e541605",
+    "builtin_key": "peanut-butter",
+    "name_fr": "Beurre de cacahuète",
+    "name_en": "Peanut butter",
+    "normalized_name": "beurre de cacahuete",
+    "search_text": "beurre de cacahuete peanut butter",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "a7b4db29-fdac-5120-94eb-8b55d8faa616",
+    "builtin_key": "honey",
+    "name_fr": "Miel",
+    "name_en": "Honey",
+    "normalized_name": "miel",
+    "search_text": "miel honey",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "8423a4c1-3d03-58c8-a267-26ad496dd8f7",
+    "builtin_key": "maple-syrup",
+    "name_fr": "Sirop d’érable",
+    "name_en": "Maple syrup",
+    "normalized_name": "sirop d'erable",
+    "search_text": "sirop d'erable maple syrup",
+    "category": "seasoning",
+    "unit": "l"
+  },
+  {
+    "id": "91392931-46a0-501f-b1f9-b6990c269ea6",
+    "builtin_key": "jam",
+    "name_fr": "Confiture",
+    "name_en": "Jam",
+    "normalized_name": "confiture",
+    "search_text": "confiture jam",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "51b746ca-bcd5-5822-91d8-a4cbc6714322",
+    "builtin_key": "fine-salt",
+    "name_fr": "Sel fin",
+    "name_en": "Fine salt",
+    "normalized_name": "sel fin",
+    "search_text": "sel fin fine salt",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "b8f78c8b-1666-5b14-b8f4-97428e10d593",
+    "builtin_key": "coarse-salt",
+    "name_fr": "Gros sel",
+    "name_en": "Coarse salt",
+    "normalized_name": "gros sel",
+    "search_text": "gros sel coarse salt",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "2f8bf9a9-1ff4-52b0-b6ee-a153dbed92af",
+    "builtin_key": "black-pepper",
+    "name_fr": "Poivre noir",
+    "name_en": "Black pepper",
+    "normalized_name": "poivre noir",
+    "search_text": "poivre noir black pepper",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "2f065d19-8356-5dc2-b17d-5b50762b8a5c",
+    "builtin_key": "white-pepper",
+    "name_fr": "Poivre blanc",
+    "name_en": "White pepper",
+    "normalized_name": "poivre blanc",
+    "search_text": "poivre blanc white pepper",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "513dad24-438a-5a43-8550-3af8cc959d4e",
+    "builtin_key": "paprika",
+    "name_fr": "Paprika",
+    "name_en": "Paprika",
+    "normalized_name": "paprika",
+    "search_text": "paprika paprika",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "0458b1f8-0371-52ed-b28f-4a07961a4407",
+    "builtin_key": "smoked-paprika",
+    "name_fr": "Paprika fumé",
+    "name_en": "Smoked paprika",
+    "normalized_name": "paprika fume",
+    "search_text": "paprika fume smoked paprika",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "8294cff9-c009-51ed-8107-92bfffb7e744",
+    "builtin_key": "cumin",
+    "name_fr": "Cumin",
+    "name_en": "Cumin",
+    "normalized_name": "cumin",
+    "search_text": "cumin cumin",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "2fa4c84a-f1ac-5022-85e3-2a01b89ab2ff",
+    "builtin_key": "curry-powder",
+    "name_fr": "Curry",
+    "name_en": "Curry powder",
+    "normalized_name": "curry",
+    "search_text": "curry curry powder",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "5a28fac9-eeda-5e7c-ba64-b4cf05eb1d37",
+    "builtin_key": "turmeric",
+    "name_fr": "Curcuma",
+    "name_en": "Turmeric",
+    "normalized_name": "curcuma",
+    "search_text": "curcuma turmeric",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "bc1659e3-2553-5f57-b4a6-1d9dcaa5125e",
+    "builtin_key": "cinnamon",
+    "name_fr": "Cannelle",
+    "name_en": "Cinnamon",
+    "normalized_name": "cannelle",
+    "search_text": "cannelle cinnamon",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "67c8452a-6237-5b89-9b31-1259e2ae0e2b",
+    "builtin_key": "nutmeg",
+    "name_fr": "Muscade",
+    "name_en": "Nutmeg",
+    "normalized_name": "muscade",
+    "search_text": "muscade nutmeg",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "bebf19a6-8125-5a84-9849-a019275ba218",
+    "builtin_key": "ground-coriander",
+    "name_fr": "Coriandre moulue",
+    "name_en": "Ground coriander",
+    "normalized_name": "coriandre moulue",
+    "search_text": "coriandre moulue ground coriander",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "f73d76c1-f1ea-5712-9019-7f67f326ef8c",
+    "builtin_key": "cayenne-pepper",
+    "name_fr": "Piment de Cayenne",
+    "name_en": "Cayenne pepper",
+    "normalized_name": "piment de cayenne",
+    "search_text": "piment de cayenne cayenne pepper",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "e96c6e28-b4b2-5cb8-9637-2fee2109e98f",
+    "builtin_key": "espelette-pepper",
+    "name_fr": "Piment d’Espelette",
+    "name_en": "Espelette pepper",
+    "normalized_name": "piment d'espelette",
+    "search_text": "piment d'espelette espelette pepper",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "a9b427c5-0562-53bd-9c90-5c9e098af3ec",
+    "builtin_key": "saffron",
+    "name_fr": "Safran",
+    "name_en": "Saffron",
+    "normalized_name": "safran",
+    "search_text": "safran saffron",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "6cdff9e9-9d9f-5c47-b507-73c59ec8291c",
+    "builtin_key": "garam-masala",
+    "name_fr": "Garam masala",
+    "name_en": "Garam masala",
+    "normalized_name": "garam masala",
+    "search_text": "garam masala garam masala",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "7a0ce912-74cf-5497-a06c-9796dd1f401d",
+    "builtin_key": "herbes-de-provence",
+    "name_fr": "Herbes de Provence",
+    "name_en": "Herbes de Provence",
+    "normalized_name": "herbes de provence",
+    "search_text": "herbes de provence herbes de provence",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "2872852d-c989-539e-9889-70469f776e55",
+    "builtin_key": "oregano",
+    "name_fr": "Origan",
+    "name_en": "Oregano",
+    "normalized_name": "origan",
+    "search_text": "origan oregano",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "2c0a63c0-db62-51dd-b609-b80a4d3ade23",
+    "builtin_key": "thyme",
+    "name_fr": "Thym",
+    "name_en": "Thyme",
+    "normalized_name": "thym",
+    "search_text": "thym thyme",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "412face4-5205-574f-b5d3-e6c8dbb59579",
+    "builtin_key": "rosemary",
+    "name_fr": "Romarin",
+    "name_en": "Rosemary",
+    "normalized_name": "romarin",
+    "search_text": "romarin rosemary",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "0d51f952-fb8c-50f0-8627-70dec0e0af70",
+    "builtin_key": "bay-leaf",
+    "name_fr": "Laurier",
+    "name_en": "Bay leaf",
+    "normalized_name": "laurier",
+    "search_text": "laurier bay leaf",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "b4b92edb-e4f2-5873-8f20-454177c56c19",
+    "builtin_key": "basil",
+    "name_fr": "Basilic",
+    "name_en": "Basil",
+    "normalized_name": "basilic",
+    "search_text": "basilic basil",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "0d1b06a3-6eab-504d-b130-ae2def8a8bba",
+    "builtin_key": "parsley",
+    "name_fr": "Persil",
+    "name_en": "Parsley",
+    "normalized_name": "persil",
+    "search_text": "persil parsley",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "6c7ed21c-3686-54ff-84c0-239378a3b7bd",
+    "builtin_key": "fresh-coriander",
+    "name_fr": "Coriandre fraîche",
+    "name_en": "Fresh coriander",
+    "normalized_name": "coriandre fraiche",
+    "search_text": "coriandre fraiche fresh coriander",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "501b584e-7b9a-5e1b-8ea5-04d5320662e9",
+    "builtin_key": "chives",
+    "name_fr": "Ciboulette",
+    "name_en": "Chives",
+    "normalized_name": "ciboulette",
+    "search_text": "ciboulette chives",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "33afd948-4325-5781-a309-fccdb9b3a326",
+    "builtin_key": "mint",
+    "name_fr": "Menthe",
+    "name_en": "Mint",
+    "normalized_name": "menthe",
+    "search_text": "menthe mint",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "18a54cc4-4572-5165-99e6-b7f53ead3f0a",
+    "builtin_key": "dill",
+    "name_fr": "Aneth",
+    "name_en": "Dill",
+    "normalized_name": "aneth",
+    "search_text": "aneth dill",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "fe69beed-481e-56c9-b9d1-d9577620ec5c",
+    "builtin_key": "tarragon",
+    "name_fr": "Estragon",
+    "name_en": "Tarragon",
+    "normalized_name": "estragon",
+    "search_text": "estragon tarragon",
+    "category": "seasoning",
+    "unit": "g"
+  },
+  {
+    "id": "e80f1a00-288f-569c-9ada-0b3f8a558784",
+    "builtin_key": "water",
+    "name_fr": "Eau",
+    "name_en": "Water",
+    "normalized_name": "eau",
+    "search_text": "eau water",
+    "category": "drinks",
+    "unit": "l"
+  },
+  {
+    "id": "b7c91c44-5322-51df-94da-58821db5b1b1",
+    "builtin_key": "sparkling-water",
+    "name_fr": "Eau gazeuse",
+    "name_en": "Sparkling water",
+    "normalized_name": "eau gazeuse",
+    "search_text": "eau gazeuse sparkling water",
+    "category": "drinks",
+    "unit": "l"
+  },
+  {
+    "id": "97da2442-10d8-56bf-acd7-fdc5d29749eb",
+    "builtin_key": "orange-juice",
+    "name_fr": "Jus d’orange",
+    "name_en": "Orange juice",
+    "normalized_name": "jus d'orange",
+    "search_text": "jus d'orange orange juice",
+    "category": "drinks",
+    "unit": "l"
+  },
+  {
+    "id": "4bc7765a-238b-5ffa-b204-7d661ff7d089",
+    "builtin_key": "apple-juice",
+    "name_fr": "Jus de pomme",
+    "name_en": "Apple juice",
+    "normalized_name": "jus de pomme",
+    "search_text": "jus de pomme apple juice",
+    "category": "drinks",
+    "unit": "l"
+  },
+  {
+    "id": "79b31fda-2be4-5d7d-8c8d-6edc0adbeb2b",
+    "builtin_key": "ground-coffee",
+    "name_fr": "Café moulu",
+    "name_en": "Ground coffee",
+    "normalized_name": "cafe moulu",
+    "search_text": "cafe moulu ground coffee",
+    "category": "drinks",
+    "unit": "g"
+  },
+  {
+    "id": "1be430a4-cfff-5729-8878-299fe2ad7791",
+    "builtin_key": "coffee-beans",
+    "name_fr": "Café en grains",
+    "name_en": "Coffee beans",
+    "normalized_name": "cafe en grains",
+    "search_text": "cafe en grains coffee beans",
+    "category": "drinks",
+    "unit": "g"
+  },
+  {
+    "id": "d7e83ab5-dd58-5a7c-a3b8-46f538a789ff",
+    "builtin_key": "coffee-capsule",
+    "name_fr": "Capsule de café",
+    "name_en": "Coffee capsule",
+    "normalized_name": "capsule de cafe",
+    "search_text": "capsule de cafe coffee capsule",
+    "category": "drinks",
+    "unit": "u"
+  },
+  {
+    "id": "81e8ba8b-0d56-521d-b398-c2d24d3a4b59",
+    "builtin_key": "black-tea",
+    "name_fr": "Thé noir",
+    "name_en": "Black tea",
+    "normalized_name": "the noir",
+    "search_text": "the noir black tea",
+    "category": "drinks",
+    "unit": "g"
+  },
+  {
+    "id": "196a9592-a196-5342-92d8-e68f410c7071",
+    "builtin_key": "green-tea",
+    "name_fr": "Thé vert",
+    "name_en": "Green tea",
+    "normalized_name": "the vert",
+    "search_text": "the vert green tea",
+    "category": "drinks",
+    "unit": "g"
+  },
+  {
+    "id": "1b11feec-aa90-5394-be48-55dd07b73b5a",
+    "builtin_key": "herbal-tea",
+    "name_fr": "Tisane",
+    "name_en": "Herbal tea",
+    "normalized_name": "tisane",
+    "search_text": "tisane herbal tea",
+    "category": "drinks",
+    "unit": "g"
+  },
+  {
+    "id": "042de359-c72b-5b87-a9fe-5e6bf7f4db06",
+    "builtin_key": "white-wine",
+    "name_fr": "Vin blanc",
+    "name_en": "White wine",
+    "normalized_name": "vin blanc",
+    "search_text": "vin blanc white wine",
+    "category": "drinks",
+    "unit": "l"
+  },
+  {
+    "id": "29f3b7bf-26bf-52dd-8aa1-62a27a0998d5",
+    "builtin_key": "red-wine",
+    "name_fr": "Vin rouge",
+    "name_en": "Red wine",
+    "normalized_name": "vin rouge",
+    "search_text": "vin rouge red wine",
+    "category": "drinks",
+    "unit": "l"
+  },
+  {
+    "id": "4287af77-2938-571b-832a-5d6c78067488",
+    "builtin_key": "beer",
+    "name_fr": "Bière",
+    "name_en": "Beer",
+    "normalized_name": "biere",
+    "search_text": "biere beer",
+    "category": "drinks",
+    "unit": "l"
+  },
+  {
+    "id": "13d95a0b-676d-5433-a644-71d66d8825ea",
+    "builtin_key": "frozen-spinach",
+    "name_fr": "Épinard surgelé",
+    "name_en": "Frozen spinach",
+    "normalized_name": "epinard surgele",
+    "search_text": "epinard surgele frozen spinach",
+    "category": "frozen",
+    "unit": "g"
+  },
+  {
+    "id": "db30518c-a887-5204-b06e-2621ae36032b",
+    "builtin_key": "frozen-green-bean",
+    "name_fr": "Haricot vert surgelé",
+    "name_en": "Frozen green bean",
+    "normalized_name": "haricot vert surgele",
+    "search_text": "haricot vert surgele frozen green bean",
+    "category": "frozen",
+    "unit": "g"
+  },
+  {
+    "id": "deeb1f5b-cc96-5da3-a9b5-06646ffdb7ff",
+    "builtin_key": "frozen-pea",
+    "name_fr": "Petit pois surgelé",
+    "name_en": "Frozen pea",
+    "normalized_name": "petit pois surgele",
+    "search_text": "petit pois surgele frozen pea",
+    "category": "frozen",
+    "unit": "g"
+  },
+  {
+    "id": "336d552f-c2f9-53e3-9321-f2a8e931ffee",
+    "builtin_key": "frozen-mixed-berry",
+    "name_fr": "Fruit rouge surgelé",
+    "name_en": "Frozen mixed berry",
+    "normalized_name": "fruit rouge surgele",
+    "search_text": "fruit rouge surgele frozen mixed berry",
+    "category": "frozen",
+    "unit": "g"
+  },
+  {
+    "id": "cdc540b8-2b7c-588b-90c3-f3676d82a267",
+    "builtin_key": "frozen-chip",
+    "name_fr": "Frite surgelée",
+    "name_en": "Frozen chip",
+    "normalized_name": "frite surgelee",
+    "search_text": "frite surgelee frozen chip",
+    "category": "frozen",
+    "unit": "g"
+  },
+  {
+    "id": "cb3f7e60-9367-5e61-ad78-3a50cd0f3581",
+    "builtin_key": "vanilla-ice-cream",
+    "name_fr": "Glace à la vanille",
+    "name_en": "Vanilla ice cream",
+    "normalized_name": "glace a la vanille",
+    "search_text": "glace a la vanille vanilla ice cream",
+    "category": "frozen",
+    "unit": "l"
+  },
+  {
+    "id": "f3650179-956a-5e4e-81f1-cda295187b44",
+    "builtin_key": "toilet-paper",
+    "name_fr": "Papier toilette",
+    "name_en": "Toilet paper",
+    "normalized_name": "papier toilette",
+    "search_text": "papier toilette toilet paper",
+    "category": "household",
+    "unit": "u"
+  },
+  {
+    "id": "e7f9efbc-0399-5c10-808f-60d042484de3",
+    "builtin_key": "kitchen-roll",
+    "name_fr": "Essuie-tout",
+    "name_en": "Kitchen roll",
+    "normalized_name": "essuie-tout",
+    "search_text": "essuie-tout kitchen roll",
+    "category": "household",
+    "unit": "u"
+  },
+  {
+    "id": "7470281b-6896-5468-a27a-d360be6763e4",
+    "builtin_key": "tissues",
+    "name_fr": "Mouchoirs",
+    "name_en": "Tissues",
+    "normalized_name": "mouchoirs",
+    "search_text": "mouchoirs tissues",
+    "category": "household",
+    "unit": "u"
+  },
+  {
+    "id": "2d6ddcf9-97c0-5056-9e98-35d77b50e579",
+    "builtin_key": "bin-bag",
+    "name_fr": "Sac poubelle",
+    "name_en": "Bin bag",
+    "normalized_name": "sac poubelle",
+    "search_text": "sac poubelle bin bag",
+    "category": "household",
+    "unit": "u"
+  },
+  {
+    "id": "b02eedbb-0a0c-5197-a47d-f8679c298d43",
+    "builtin_key": "sponge",
+    "name_fr": "Éponge",
+    "name_en": "Sponge",
+    "normalized_name": "eponge",
+    "search_text": "eponge sponge",
+    "category": "household",
+    "unit": "u"
+  },
+  {
+    "id": "6305832d-5d49-5aeb-8ebe-dec2385cad35",
+    "builtin_key": "washing-up-liquid",
+    "name_fr": "Liquide vaisselle",
+    "name_en": "Washing-up liquid",
+    "normalized_name": "liquide vaisselle",
+    "search_text": "liquide vaisselle washing-up liquid",
+    "category": "household",
+    "unit": "l"
+  },
+  {
+    "id": "8abd36b0-9287-584c-a617-6d8dc04fe8ad",
+    "builtin_key": "laundry-detergent",
+    "name_fr": "Lessive",
+    "name_en": "Laundry detergent",
+    "normalized_name": "lessive",
+    "search_text": "lessive laundry detergent",
+    "category": "household",
+    "unit": "l"
+  },
+  {
+    "id": "9651ffa3-25e1-5b02-90a3-98dc39fe5972",
+    "builtin_key": "soap",
+    "name_fr": "Savon",
+    "name_en": "Soap",
+    "normalized_name": "savon",
+    "search_text": "savon soap",
+    "category": "household",
+    "unit": "u"
+  },
+  {
+    "id": "0dbbf2da-bfa6-506f-802e-0ff551b3b297",
+    "builtin_key": "shampoo",
+    "name_fr": "Shampooing",
+    "name_en": "Shampoo",
+    "normalized_name": "shampooing",
+    "search_text": "shampooing shampoo",
+    "category": "household",
+    "unit": "l"
+  },
+  {
+    "id": "5f5d6ac0-3417-5ac8-9356-185fd530ffbb",
+    "builtin_key": "toothpaste",
+    "name_fr": "Dentifrice",
+    "name_en": "Toothpaste",
+    "normalized_name": "dentifrice",
+    "search_text": "dentifrice toothpaste",
+    "category": "household",
+    "unit": "u"
+  },
+  {
+    "id": "0946c1c4-4250-53af-8b34-95f22ad6fe28",
+    "builtin_key": "baking-paper",
+    "name_fr": "Papier cuisson",
+    "name_en": "Baking paper",
+    "normalized_name": "papier cuisson",
+    "search_text": "papier cuisson baking paper",
+    "category": "household",
+    "unit": "u"
+  },
+  {
+    "id": "c8705696-1e80-5d31-bbd0-2c4998ac0636",
+    "builtin_key": "aluminium-foil",
+    "name_fr": "Papier aluminium",
+    "name_en": "Aluminium foil",
+    "normalized_name": "papier aluminium",
+    "search_text": "papier aluminium aluminium foil",
+    "category": "household",
+    "unit": "u"
+  }
+]

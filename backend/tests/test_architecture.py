@@ -92,7 +92,7 @@ def test_frontend_platform_shared_and_apps_respect_dependency_boundaries():
 
 def test_metric_providers_are_owned_by_their_application_and_frames_are_shared():
     providers = [app for app in APPLICATIONS if app.metrics is not None]
-    assert {app.id for app in providers} == {"tasks", "sport", "okr"}
+    assert {app.id for app in providers} == {"tasks", "sport", "okr", "recipes"}
     for app in providers:
         assert type(app.metrics).__module__ == f"life_app.apps.{app.id}.integrations"
         metrics = app.metrics.catalogue()
@@ -102,7 +102,7 @@ def test_metric_providers_are_owned_by_their_application_and_frames_are_shared()
         )
         for metric in metrics:
             assert len({f.id for f in metric.filters}) == len(metric.filters)
-    for app_id in ("sport", "tasks", "tracking", "okr"):
+    for app_id in ("sport", "tasks", "tracking", "okr", "recipes"):
         assert (
             "shared/ui/ApplicationNavigation"
             in (FRONTEND / "apps" / app_id / "Page.tsx").read_text()

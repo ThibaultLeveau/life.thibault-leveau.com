@@ -60,6 +60,8 @@ nav:
   - API Suivi: tracking-api.md
   - Utiliser Objectifs OKR: okr.md
   - API Objectifs OKR: okr-api.md
+  - Recettes et courses: recipes.md
+  - API Recettes et courses: recipes-api.md
   - Réussites et progression: progression.md
   - Intégrations de données: integrations.md
   - Français et anglais: internationalisation.md
@@ -70,6 +72,7 @@ nav:
       - Sport: en/sport.md
       - Tracking: en/tracking.md
       - OKR Goals: en/okr.md
+      - Recipes and shopping: en/recipes.md
       - Achievements: en/progression.md
   - Développer:
       - Démarrage: demarrage.md

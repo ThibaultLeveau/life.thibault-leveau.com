@@ -6,6 +6,7 @@ from uuid import uuid4
 
 import pytest
 from alembic import command
+from alembic.script import ScriptDirectory
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
@@ -76,6 +77,9 @@ def app(engine):
     with engine.begin() as conn:
         names = ", ".join(f'"{name}"' for name in Base.metadata.tables)
         conn.execute(text(f"TRUNCATE {names} CASCADE"))
+        ScriptDirectory.from_config(migration_config()).get_revision(
+            "0012_recipes"
+        ).module.seed_catalogue(conn)
     with Session(engine) as db, db.begin():
         db.add_all([User(username=name, password_hash=PASSWORD_HASH) for name in ("alice", "bob")])
     app = create_app(

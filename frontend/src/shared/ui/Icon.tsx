@@ -1,4 +1,6 @@
 const paths = {
+  book: "M4 3h6a3 3 0 0 1 3 3v16a4 4 0 0 0-4-2H3V4a1 1 0 0 1 1-1M13 6a3 3 0 0 1 3-3h5v17h-4a4 4 0 0 0-4 2M6 7h3M6 11h3M16 7h2M16 11h2",
+  cart: "M2 3h3l3 13h11l3-9H6M9 20h.01M18 20h.01",
   grid: "M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z",
   edit: "m16 3 5 5-12 12-6 1 1-6L16 3M13 6l5 5",
   copy: "M8 8h13v13H8zM16 8V3H3v13h5",

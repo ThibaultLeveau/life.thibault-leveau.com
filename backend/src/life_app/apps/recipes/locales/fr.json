@@ -1,0 +1,20 @@
+{
+  "invalid_name": "Saisissez un nom d’ingrédient.",
+  "not_found": "Élément introuvable.",
+  "ingredient_not_found": "Un ingrédient est introuvable dans votre catalogue.",
+  "limit": "La limite de votre catalogue est atteinte.",
+  "items_limit": "Une liste peut contenir au maximum 300 ingrédients et unités distincts.",
+  "conflict": "Cet élément a changé. Rechargez-le avant de réessayer ; votre saisie reste affichée.",
+  "read_only": "Restaurez ou rouvrez cet élément avant de le modifier.",
+  "quantity_range": "Le calcul doit donner une quantité entre 0,000001 et 1 000 000 000.",
+  "template_check": "Créez une liste depuis ce modèle pour cocher vos achats.",
+  "incomplete": "Cochez tous les articles d’une liste non vide avant de la terminer.",
+  "metric_recipes": "Recettes enregistrées",
+  "metric_recipes_description": "Première création de chaque recette, archives comprises ; les modifications ne comptent pas à nouveau.",
+  "metric_lists": "Listes de courses terminées",
+  "metric_lists_description": "Première fin de chaque liste entièrement achetée, archives comprises ; rouvrir ne multiplie pas le résultat.",
+  "metric_imports": "Recettes utilisées pour les courses",
+  "metric_imports_description": "Premier import de chaque couple liste/recette. Les imports dans un modèle sont exclus.",
+  "metric_templates": "Modèles de courses préparés",
+  "metric_templates_description": "Première fois où chaque modèle contient un ingrédient, archives comprises."
+}

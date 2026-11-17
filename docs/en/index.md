@@ -17,3 +17,5 @@ The technical and operations documentation is maintained in French: [architectur
 [Tracking](tracking.md) adds personal habits and goals, Tasks/Sport data sources, guided entry, a responsive calendar, statistics and rewards.
 
 [OKR Goals](okr.md) connects your 10-year, 3-year, annual and quarterly goals with measurable key results, a quarterly board, accomplishment snapshots, Tracking metrics and 60 quests.
+
+[Recipes & Shopping Lists](recipes.md): 301 bilingual ingredients, scalable recipes, reusable shopping lists and templates, shopping mode and 60 quests.

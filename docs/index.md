@@ -33,3 +33,5 @@ Les décisions initiales restent dans l'[ADR 001](decisions/001-architecture-ini
 ## Suivi personnel
 
 [Suivi](tracking.md) rejoint Tâches et Sport : habitudes et objectifs sur quatre fréquences, calendrier mobile/ordinateur, intégrations de données, saisies guidées et récompenses. [API Suivi](tracking-api.md) · [Métriques disponibles](integrations.md).
+
+[Recettes & Liste de courses](recipes.md) : 301 ingrédients bilingues, recettes à portions ajustables, listes et modèles réutilisables, mode magasin et 60 quêtes.

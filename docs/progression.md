@@ -2,7 +2,7 @@
 
 [English guide](en/progression.md)
 
-Chaque application possède ses points d’expérience, son niveau, son titre et sa série. Le badge en haut à droite de Tâches, Sport, Suivi et Objectifs OKR donne votre progression et les trois quêtes inachevées les plus proches de leur objectif. Ouvrez-le au clavier avec Entrée ; Échap ferme le panneau et rend le focus au bouton.
+Chaque application possède ses points d’expérience, son niveau, son titre et sa série. Le badge en haut à droite de Tâches, Sport, Suivi, Objectifs OKR et Recettes donne votre progression et les trois quêtes inachevées les plus proches de leur objectif. Ouvrez-le au clavier avec Entrée ; Échap ferme le panneau et rend le focus au bouton.
 
 Dans **Suivi → Réussites**, choisissez une application : le mur présente ses **60 quêtes**, leurs conditions, leur progression et leurs points. Filtrez les quêtes à accomplir ou accomplies, ou recherchez un objectif. Le parcours des titres montre tous les paliers ; le journal détaille chaque gain, avec pagination. Seules les applications activées sont consultables. Désactiver conserve tout ; la progression de Tâches et Sport reste utilisable lorsque Suivi est désactivé.
 
@@ -16,7 +16,7 @@ Dans **Suivi → Réussites**, choisissez une application : le mur présente ses
 
 Les coefficients de base **1 / 2 / 6** distinguent une action fréquente, une saisie structurée et une séance nécessitant davantage d’effort. Le bonus Sport distingue une séance courte d’une séance plus fournie, sans croissance illimitée. Le bonus Suivi vaut deux fois le score sur 10, arrondi à l’entier. Sans objectif, il vaut zéro. Ces points sont une convention de motivation, pas une mesure médicale ou de performance comparable entre personnes.
 
-Créer, consulter, rafraîchir, modifier ou archiver ne rapporte aucun point. Une séance annulée ou entièrement passée ne rapporte rien. Les points et quêtes restent **acquis** après confirmation : réouvrir, annuler une résolution ou corriger une saisie ne retire pas les gains, et ne permet pas de les recevoir à nouveau. Les objectifs des quêtes sont évalués sur cette première confirmation. Une correction ultérieure peut améliorer le score statistique d’un suivi sans réécrire les récompenses.
+Dans Tâches, Sport et Suivi, créer, consulter, rafraîchir, modifier ou archiver ne rapporte aucun point. Une séance annulée ou entièrement passée ne rapporte rien. Les points et quêtes restent **acquis** après confirmation : réouvrir, annuler une résolution ou corriger une saisie ne retire pas les gains, et ne permet pas de les recevoir à nouveau. Les objectifs des quêtes sont évalués sur cette première confirmation. Une correction ultérieure peut améliorer le score statistique d’un suivi sans réécrire les récompenses.
 
 L’unicité repose sur la tâche non récurrente, sur la tâche et la date d’échéance de l’occurrence récurrente, sur la période de suivi ou sur la séance. Les séances multiples et les tâches distinctes restent des actions distinctes ; ce système personnel ne cherche pas à détecter une saisie volontairement fictive. Le serveur calcule les gains, y compris pour les actions effectuées directement par API.
 
@@ -26,7 +26,7 @@ Le niveau commence à 1 et s’arrête à **100**. Passer du niveau L à L+1 co�
 
 Un nouveau titre apparaît tous les dix niveaux : dix titres propres à chaque application, jusqu’à « Légende des projets », « Légende du sport » et « Légende du quotidien ». Avant le niveau 10, le titre est « Novice ». Le parcours indique les niveaux et points nécessaires ; il ne demande aucune action pour réclamer un titre.
 
-## 180 quêtes
+## Quêtes par application
 
 Chaque application propose six familles de dix paliers. Chaque palier est une quête distincte avec son identifiant, son objectif et sa récompense unique.
 
@@ -64,3 +64,7 @@ L’[API de progression](api.md#progression-par-application) fournit toutes les 
 ## Quêtes Objectifs OKR
 
 OKR ajoute 60 quêtes : objectifs accomplis, résultats clés atteints, objectifs personnels, professionnels, jours actifs et séries (dix paliers par famille). Une première clôture vaut 100 XP ; une première atteinte de résultat clé vaut 15 XP. Les identifiants de l’objectif et du résultat dans cet objectif dédupliquent les gains, même après correction/réouverture. Les instantanés fixent les domaines au premier succès. Le badge fonctionne sans Suivi ; le mur et les réglages communs sont disponibles dans Suivi. [Règles et exemples](okr.md#suivi-quetes-et-motivation).
+
+## Quêtes Recettes et courses
+
+Recettes ajoute 60 quêtes : recettes enregistrées, listes terminées, couples liste/recette importés, modèles non vides, jours actifs et séries. Les premières confirmations donnent respectivement 25, 50, 5 et 15 XP de base. Cette application récompense donc aussi la constitution du carnet et des modèles. Les identifiants stables dédupliquent les récompenses ; aucune recoche, modification, réouverture ou réactivation ne multiplie un gain. [Règles détaillées](recipes.md#suivi-quetes-et-motivation). Le catalogue total comprend désormais 300 quêtes pour les cinq applications.

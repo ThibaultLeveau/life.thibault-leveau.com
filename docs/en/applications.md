@@ -32,7 +32,7 @@ An expired session returns to sign-in and removes private views. HTML pages cont
 
 ## Shared navigation
 
-Tasks, Sport, Tracking and OKR Goals share the same top bar and sidebar. The breadcrumb identifies the application and current view. On mobile, **Open navigation** shows the same links and footer; **Escape** or **Close navigation** closes the menu.
+Tasks, Sport, Tracking, OKR Goals and Recipes share the same top bar and sidebar. The breadcrumb identifies the application and current view. On mobile, **Open navigation** shows the same links and footer; **Escape** or **Close navigation** closes the menu.
 
 The footer contains, in order, the **Application library**, **Documentation** for the current application and language, the **light / dark / system** theme, **Language**, then the user and **Sign out**. Theme and language are saved to the account through the API. Business archives and settings remain among each application's navigation links.
 
@@ -41,3 +41,7 @@ The footer contains, in order, the **Application library**, **Documentation** fo
 ## OKR Goals available
 
 **OKR Goals** starts disabled. Enable it to define personal/professional horizons, measure key results, work through a quarterly board and revisit past accomplishments. Quarterly plans fit within one month. Tracking discovers its metrics and 60 quests through the shared providers. [OKR guide](okr.md).
+
+## Recipes and shopping available
+
+**Recipes & Shopping Lists** starts disabled. Save recipes, scale servings, choose from 301 bilingual ingredients or your private catalogue, combine quantities and reuse templates or previous lists. The shopping mode, four Tracking metrics and 60 quests are included. [Guide](recipes.md).
