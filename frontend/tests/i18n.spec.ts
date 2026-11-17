@@ -148,7 +148,7 @@ test("English task scheduling preserves personal titles and existing workspace l
   await page
     .getByRole("checkbox", { name: "Complete: Lire mon livre", exact: true })
     .click();
-  await expect(page.locator(".notice")).toContainText(
+  await expect(page.locator(".task-feedback-toast")).toContainText(
     "Occurrence completed. Next:",
   );
   await language(page, "fr");

@@ -479,6 +479,8 @@
   "bulk_labels_other": "{{count}} tasks updated.",
   "archive_task_confirmation": "Archive this task? You can restore it from the archives.",
   "keep_first_500": "Keep the first 500",
+  "search_and_filter": "Search and filter",
+  "more_task_views": "More task views",
   "view_preferences": "View preferences",
   "view_preferences_hint": "Choose Upcoming or a workspace to see its saved preferences. Structure settings remain available through “Configure workspace”. Lists hide completed tasks until you explicitly show them.",
   "view_to_configure": "View to configure"

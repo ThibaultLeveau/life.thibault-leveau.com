@@ -235,3 +235,12 @@
     text-overflow: ellipsis;
   }
 }
+
+/* Optional secondary destinations reuse the common navigation items. */
+.application-nav-dropdown:not([hidden]) {
+  padding: 4px;
+  border: 1px solid var(--ui-border);
+  border-radius: 9px;
+  background: var(--ui-paper);
+  box-shadow: 0 3px 10px #0001;
+}
