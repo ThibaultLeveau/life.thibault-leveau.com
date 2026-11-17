@@ -416,3 +416,7 @@ Les corps inconnus, fuseaux invalides, identifiants non enregistrés, booléens 
 ## Objectifs OKR
 
 Les routes `/api/v1/okr` exposent objectifs, résultats clés, ordre/statut, archives, historique trimestriel et fuseau, avec versions et protections communes. Les fournisseurs communs exposent métriques et progression. Voir les [contrats et exemples HTTP OKR](okr-api.md).
+
+## Recettes et courses
+
+L’application `recipes` fournit le catalogue d’ingrédients bilingue, les recettes à portions ajustables, les listes et modèles, import/cumul, achats, copies, archives et historique. [Contrats, erreurs et exemples](recipes-api.md). La progression et les quatre métriques utilisent les API communes.

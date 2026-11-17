@@ -121,3 +121,7 @@ Les identifiants et unités sont stables ; les noms, descriptions et filtres son
 ## Fournisseur Objectifs OKR
 
 L’application `okr` fournit `completed`, `key_results` et `check_ins`, uniquement en agrégation `count`. Les options `objective_id` restent limitées au propriétaire, archives comprises ; `domain` et `horizon` sont des filtres de sélection. Les deux premières métriques comptent les premières réussites distinctes, identifiées avant les bornes temporelles ; les corrections ne déplacent pas un premier succès vers une période ultérieure. `check_ins` compte les confirmations explicites, y compris corrections, et exclut l’édition du formulaire. Domaine et horizon proviennent des instantanés immuables. Un compteur vide est zéro ; aucun état courant n’est projeté dans le passé. Désactiver la source bloque les nouvelles lectures sans effacer les valeurs déjà confirmées dans Suivi. [Exemples API](okr-api.md#metriques-et-progression).
+
+## Source Recettes et courses
+
+`recipes` fournit `recipes` (recettes créées), `lists` (listes terminées), `imports` (couples liste/recette importés) et `templates` (modèles devenus non vides). Ces quatre métriques historiques acceptent uniquement `count`, sans filtres. Elles comptent les premières confirmations dans la période/fuseau demandés, archives comprises. Une réouverture ou correction ne compte pas une seconde fois. Zéro correspond à l’absence d’événement, source désactivée à une indisponibilité ; les instantanés Suivi restent préservés. [Guide](recipes.md#suivi-quetes-et-motivation).

@@ -149,6 +149,13 @@ for okr_table in okr_objectives okr_events okr_settings; do
   restored_okr=$(docker exec "$db" psql -U life -d life_restored -Atc "$okr_query")
   [[ "$source_okr" != '[]' && "$source_okr" == "$restored_okr" ]]
 done
+# All recipe quantities, purchase states, templates, ingredients and history survive intact.
+for recipes_table in recipes_ingredients recipes_recipes recipes_recipe_items recipes_lists recipes_list_items recipes_events; do
+  recipes_query="SELECT coalesce(jsonb_agg(to_jsonb(t) ORDER BY to_jsonb(t)::text), '[]'::jsonb) FROM $recipes_table t"
+  source_recipes=$(docker exec "$db" psql -U life -d life -Atc "$recipes_query")
+  restored_recipes=$(docker exec "$db" psql -U life -d life_restored -Atc "$recipes_query")
+  [[ "$source_recipes" != '[]' && "$source_recipes" == "$restored_recipes" ]]
+done
 # Progression preferences, first confirmations, rewards and import markers survive intact.
 for progression_table in progression_settings progression_activity progression_rewards progression_imports; do
   progression_query="SELECT coalesce(jsonb_agg(to_jsonb(t) ORDER BY to_jsonb(t)::text), '[]'::jsonb) FROM $progression_table t"
@@ -181,6 +188,10 @@ if docker exec "$db" psql -U life -d life_restored --set ON_ERROR_STOP=1 -c "UPD
 fi
 if docker exec "$db" psql -U life -d life_restored --set ON_ERROR_STOP=1 -c "UPDATE okr_events SET kind = 'updated'" >"$temporary/okr-immutable-check" 2>&1; then
   echo 'Le journal OKR restauré doit rester immuable.' >&2
+  exit 1
+fi
+if docker exec "$db" psql -U life -d life_restored --set ON_ERROR_STOP=1 -c "UPDATE recipes_events SET kind = 'list_updated'" >"$temporary/recipes-immutable-check" 2>&1; then
+  echo 'Le journal Recettes restauré doit rester immuable.' >&2
   exit 1
 fi
 printf 'Image, navigateur, rôle PostgreSQL et restauration vérifiés (%s événements conservés).\n' "$source_count"

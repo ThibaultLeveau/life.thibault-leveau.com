@@ -38,6 +38,7 @@ def test_catalogue_defaults_and_idempotence(client, engine):
         ("sport", False),
         ("tracking", False),
         ("okr", False),
+        ("recipes", False),
     ]
     assert response.json()[0]["updated_at"] is None
     off = toggle(client, False)

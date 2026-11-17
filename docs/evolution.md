@@ -2,7 +2,7 @@
 
 ## État disponible
 
-LifeOS possède un socle commun, une bibliothèque avec activation par compte et les applications **Tâches**, **Sport**, **Suivi** et **Objectifs OKR**. Ménage et plantes restent des pistes futures. L’[ADR 003](decisions/003-applications-lifeos.md) décrit l’organisation approuvée ; les ADR précédents conservent l’historique du socle et de la persistance.
+LifeOS possède un socle commun, une bibliothèque avec activation par compte et les applications **Tâches**, **Sport**, **Suivi**, **Objectifs OKR** et **Recettes & Liste de courses**. Ménage et plantes restent des pistes futures. L’[ADR 003](decisions/003-applications-lifeos.md) décrit l’organisation approuvée ; les ADR précédents conservent l’historique du socle et de la persistance.
 
 Toutes les applications suivent les mêmes conventions et isolent leur métier. Les dossiers ne sont pas des copies de Tâches : ils réutilisent connexion, transport API, activation, thème et composants accessibles du socle.
 
@@ -87,3 +87,7 @@ Le client HTTP et les types de métriques réutilisables sont dans `frontend/src
 L’[ADR 006](decisions/006-progression-applications.md) approuve `ApplicationDefinition.progression`. Définir un fournisseur dans `apps/<id>/progression.py` : catalogue de quêtes stables et localisées, dix titres, barème et historique limité au propriétaire. Transformer une première confirmation métier en `Activity` (clé stable, instant UTC, XP, compteurs, dimensions), puis appeler le moteur commun dans la transaction existante. La clé doit survivre aux corrections/réouvertures et identifier une occurrence distincte lorsque le métier le permet. Aucun accès aux tables d’une autre application.
 
 Déclarer le fournisseur dans le manifeste ; le registre demeure l’unique assemblage. Injecter `ProgressionBadge` dans le slot `status` de la topbar partagée. Utiliser `/progression` pour les lectures et réglages ; aucune attribution depuis le navigateur. Documenter unicité, corrections, jours d’activité, rétroactivité, reprise historique et barème. Tester quotas de quêtes/traductions, propriétaire, concurrence, activation, déduplication et restauration. Une modification des frontières ou du contrat exige à nouveau un accord explicite.
+
+## Recettes disponible
+
+**Recettes & Liste de courses** est une application livrée (`recipes`, `/recipes`), désactivée par défaut. Son catalogue bilingue, ses recettes, listes et modèles, son mode magasin et ses fournisseurs Suivi/progression réutilisent les contrats existants. [Guide](recipes.md) et [API](recipes-api.md). Ménage et plantes restent futurs.

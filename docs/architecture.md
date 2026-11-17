@@ -49,7 +49,7 @@ React ne conserve pas de base métier parallèle dans localStorage. Les champs e
 
 ## HTTP et compilation
 
-`/` (accueil), `/applications` (bibliothèque) et les chemins des manifestes (`/tasks`, `/sport`, `/tracking` et `/okr`) sont les seules routes HTML React. Les assets sont sous `/assets/`, l'API sous `/api/v1`, Swagger sous `/api/docs` et MkDocs sous `/documentation/`. Tout chemin inconnu reste 404. Le frontend utilise des URL API relatives, sans service réseau distinct pour le rendu.
+`/` (accueil), `/applications` (bibliothèque) et les chemins des manifestes (`/tasks`, `/sport`, `/tracking`, `/okr` et `/recipes`) sont les seules routes HTML React. Les assets sont sous `/assets/`, l'API sous `/api/v1`, Swagger sous `/api/docs` et MkDocs sous `/documentation/`. Tout chemin inconnu reste 404. Le frontend utilise des URL API relatives, sans service réseau distinct pour le rendu.
 
 ![Construction multi-étapes : frontend et documentation compilés rejoignent le runtime Python.](assets/diagrams/build.svg)
 
@@ -100,3 +100,7 @@ Le frontend `platform/progression` fournit le client API, les réglages et le ba
 ## Objectifs OKR
 
 `apps/okr` ajoute un métier selon l’ADR 003 : objectifs, résultats clés et historique trimestriel. Ses fournisseurs `integrations.py` et `progression.py` suivent les ADR 005/006 existants. Les deux registres sont les seuls assemblages ; aucune modification des frontières ni nouvelle infrastructure. La migration additive `0011_okr` ajoute trois tables. Les valeurs de résultats clés et les instantanés restent JSONB dans PostgreSQL ; seuls les brouillons sont transitoires dans React. Voir [guide](okr.md), [API](okr-api.md) et [données](donnees.md#donnees-okr).
+
+## Recettes et courses
+
+`apps/recipes` suit les ADR 003–006 sans nouveau contrat transversal : manifeste, métier, fournisseur de métriques et fournisseur de progression, assemblés par les deux registres existants. La migration additive `0012_recipes` crée six tables : ingrédients globaux/personnels, recettes et lignes, listes/modèles et lignes, événements. Le catalogue bilingue de 301 ingrédients est figé dans les données de migration. PostgreSQL stocke les quantités en `NUMERIC(18,6)` ; les calculs du service utilisent `Decimal`. Aucun stockage métier navigateur ou service externe. Les frontières communes restent inchangées. [Guide](recipes.md), [API](recipes-api.md).

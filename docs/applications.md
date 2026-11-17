@@ -34,7 +34,7 @@ Le menu du compte propose **Langue / Language**, disponible aussi dans la naviga
 
 ## Navigation commune
 
-Tâches, Sport, Suivi et Objectifs OKR partagent la même barre supérieure et la même barre latérale. Le fil d’Ariane indique l’application et la vue courante. Sur mobile, **Ouvrir la navigation** affiche les mêmes liens et le même footer ; **Échap** ou **Fermer la navigation** referme le menu.
+Tâches, Sport, Suivi, Objectifs OKR et Recettes partagent la même barre supérieure et la même barre latérale. Le fil d’Ariane indique l’application et la vue courante. Sur mobile, **Ouvrir la navigation** affiche les mêmes liens et le même footer ; **Échap** ou **Fermer la navigation** referme le menu.
 
 Le footer propose, dans l’ordre, la **Bibliothèque des applications**, la **Documentation** propre à l’application et à la langue courante, le thème **clair / sombre / système**, la **Langue**, puis l’utilisateur et **Se déconnecter**. Thème et langue sont conservés sur le compte par l’API. Les archives et réglages métier restent dans la navigation de chaque application.
 
@@ -45,3 +45,7 @@ Le footer propose, dans l’ordre, la **Bibliothèque des applications**, la **D
 ## Objectifs OKR disponible
 
 **Objectifs OKR** est désactivée par défaut. Activez-la pour définir vos horizons personnels/professionnels, préciser les résultats clés, avancer dans le kanban trimestriel et revoir les réalisations passées. Les plans trimestriels tiennent dans un mois. La source de métriques et les 60 quêtes sont découvertes automatiquement par Suivi lorsque l’application est activée. [Guide OKR](okr.md).
+
+## Recettes et courses disponible
+
+**Recettes & Liste de courses** est désactivée par défaut. Activez-la pour conserver vos recettes, adapter les portions, choisir parmi 301 ingrédients bilingues ou vos ingrédients personnels, préparer des listes qui cumulent les quantités et réutiliser vos modèles ou anciennes listes. Le mode magasin, les quatre métriques Suivi et 60 quêtes sont inclus. [Guide](recipes.md).

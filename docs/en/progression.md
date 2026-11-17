@@ -2,7 +2,7 @@
 
 [Guide français](../progression.md)
 
-Tasks, Sport, Tracking and OKR Goals each have their own XP, level, title and streak. Open the badge at the top right to see your progress and the three unfinished quests closest to completion. Enter opens the panel; Escape closes it and returns focus.
+Tasks, Sport, Tracking, OKR Goals and Recipes each have their own XP, level, title and streak. Open the badge at the top right to see your progress and the three unfinished quests closest to completion. Enter opens the panel; Escape closes it and returns focus.
 
 In **Tracking → Achievements**, choose an enabled application to explore its **60 quests**, filter completed or unfinished quests, search objectives and browse the points journal. The title journey shows all ten milestones. Disabling an application preserves its progress; Tasks and Sport still work when Tracking is disabled.
 
@@ -41,3 +41,7 @@ All features use the [versioned progression API](../api.md#progression-par-appli
 ## OKR quests
 
 OKR adds 60 quests across completed objectives, key results reached, personal goals, professional goals, active days and streaks. First completion earns 100 XP per objective; first attainment earns 15 XP per key result within an objective. Corrections and reopening keep rewards without duplicating them. Snapshot areas are fixed at first success. The badge works without Tracking. [OKR details](okr.md#tracking-and-quests).
+
+## Recipes quests
+
+Recipes adds 60 quests across saved recipes, completed lists, distinct list/recipe imports, non-empty templates, active days and streaks. First confirmations earn 25, 50, 5 and 15 base XP respectively. This application also rewards building your recipe book and reusable templates. Stable identifiers prevent repeated rewards for edits, rechecking, reopening or re-enabling. [Details](recipes.md#tracking-and-rewards). There are now 300 quests across five applications.
