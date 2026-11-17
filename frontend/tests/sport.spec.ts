@@ -1013,7 +1013,13 @@ for (const locale of ["fr", "en"] as const) {
         .click();
       const detail = page.getByRole("dialog", { name: workout.name });
       await expect(
-        detail.locator(".sport-summary").first().locator("strong").nth(2),
+        detail
+          .locator(".sport-summary > div")
+          .filter({
+            hasText:
+              locale === "fr" ? "Score de l’entraînement" : "Training score",
+          })
+          .locator("strong"),
       ).toHaveText(locale === "fr" ? "33,33" : "33.33");
       const breakdown = detail.locator(".sport-summary[aria-label]");
       await expect(breakdown.locator("strong").nth(0)).toHaveText(
