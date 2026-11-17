@@ -36,7 +36,7 @@ Les résultats globaux et chaque groupe de liste, d’agenda ou cellule de table
 
 Se connecter avec le compte créé par l'opérateur, puis choisir **Ouvrir** sur la carte **Tâches** de l’accueil ou de la bibliothèque. La page de connexion présente les champs **Identifiant** et **Mot de passe**, puis le bouton **Se connecter**. Les erreurs s’affichent dans le formulaire. La déconnexion se trouve à côté du profil. Une session expirée demande une nouvelle connexion ; les données déjà enregistrées restent conservées.
 
-Un espace peut représenter Personnel, Travail ou un projet. **Nouvel espace** définit son nom, sa description, sa couleur et, si souhaité, son **Espace parent**. Les trois colonnes initiales sont À faire, En cours et Terminé. Les réglages `…` à côté du titre permettent de les adapter. L'icône près de **Mes espaces** permet de réordonner les espaces ayant le même parent avec les flèches.
+Un espace peut représenter Personnel, Travail ou un projet. **Nouvel espace** définit son nom, sa description, sa couleur et, si souhaité, son **Espace parent**. Les trois colonnes initiales sont À faire, En cours et Terminé. La création garde son formulaire visible pendant l’enregistrement, puis ouvre le nouvel espace. En cas d’erreur, la saisie est conservée. Les réglages `…` à côté du titre permettent de les adapter. L'icône près de **Mes espaces** permet de réordonner les espaces ayant le même parent avec les flèches.
 
 ### Choisir les couleurs
 

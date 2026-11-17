@@ -1,7 +1,7 @@
 import { tr } from "../i18n";
 import { useDraftForm } from "../useTaskDrafts";
 import { useState, type FormEvent } from "react";
-import { useTaskSync } from "../useTaskSync";
+import { SyncFeedback, useTaskSync } from "../useTaskSync";
 import type { Workspace } from "../types";
 import { WorkspaceParentSelect } from "./WorkspaceParentSelect";
 import { Dialog } from "../../../shared/ui/Dialog";
@@ -18,11 +18,16 @@ export function WorkspaceDialog({
 }) {
   const sync = useTaskSync();
   const [color, setColor] = useState("#c05a45");
+  const [busy, setBusy] = useState(false);
   const draft = useDraftForm(color);
-  const close = () => draft.leave(onClose);
+  const close = () => {
+    if (!busy) draft.leave(onClose);
+  };
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (busy) return;
     const values = new FormData(event.currentTarget);
+    setBusy(true);
     sync.mutate(
       "/workspaces",
       "POST",
@@ -32,16 +37,23 @@ export function WorkspaceDialog({
       },
       {
         message: tr("changes_saved"),
-        success: (result) => onCreated(result as Workspace),
+        success: (result) => {
+          draft.clean();
+          onCreated(result as Workspace);
+        },
       },
     );
-    onClose();
+    await sync.idle();
+    setBusy(false);
   }
 
   return (
     <Dialog title={tr("create_a_workspace")} onClose={close}>
+      <SyncFeedback inDialog />
       <form
         ref={draft.ref}
+        inert={busy}
+        aria-busy={busy}
         className="stack-form dialog-body"
         onSubmit={submit}
       >

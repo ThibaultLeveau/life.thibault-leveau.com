@@ -511,3 +511,59 @@ test("duplication groupée en attente : modifier les copies avant leur réponse"
   for (const original of tasks)
     expect((await saved(page, original)).priority).toBe(4);
 });
+
+test("création d’espace : erreur récupérable et contexte stable pendant la réponse", async ({
+  page,
+}) => {
+  await seed(page, 1);
+  await page.getByRole("button", { name: "À venir", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Nouvel espace", exact: true })
+    .click();
+  const name = `Espace lent ${Date.now()}`;
+  await page.getByLabel("Nom de l’espace", { exact: true }).fill(name);
+  let broken = true;
+  let release!: () => void;
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route("**/api/v1/workspaces", async (route) => {
+    if (route.request().method() !== "POST") return route.continue();
+    if (broken)
+      return route.fulfill({
+        status: 503,
+        contentType: "application/json",
+        body: JSON.stringify({ detail: "Recette" }),
+      });
+    await held;
+    await route.continue();
+  });
+  const dialog = page.getByRole("dialog");
+  await dialog
+    .getByRole("button", { name: "Créer l’espace", exact: true })
+    .click();
+  await expect(dialog.getByRole("alert")).toBeVisible();
+  await expect(dialog.locator("form")).toHaveAttribute("aria-busy", "false");
+  await expect(
+    dialog.getByLabel("Nom de l’espace", { exact: true }),
+  ).toHaveValue(name);
+  broken = false;
+  try {
+    await dialog
+      .getByRole("button", { name: "Créer l’espace", exact: true })
+      .click();
+    await expect(dialog.locator("form")).toHaveAttribute("aria-busy", "true");
+    await expect(dialog.locator("form")).toHaveAttribute("inert", "");
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeVisible();
+  } finally {
+    release();
+  }
+  await expect(dialog).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: `# ${name}`, exact: true })).toBeVisible();
+  await page
+    .getByRole("button", { name: "Nouvelle tâche", exact: true })
+    .click();
+  await expect(dialog.getByLabel("Titre", { exact: true })).toBeVisible();
+  await expect(dialog.locator(".dialog-context")).toContainText(name);
+});
