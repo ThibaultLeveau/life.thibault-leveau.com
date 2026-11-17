@@ -2,6 +2,7 @@ import { tr } from "../shared/i18n";
 import { Component, Suspense, useEffect, type ReactNode } from "react";
 import { applications } from "../apps/registry";
 import { AppLayout } from "../components/layout/AppLayout";
+import { SettingsPage } from "../pages/SettingsPage";
 import { HomePage } from "../pages/HomePage";
 import { LibraryPage } from "../pages/LibraryPage";
 import { SessionProvider } from "../platform/auth/SessionProvider";
@@ -72,6 +73,12 @@ function Routes() {
         <LibraryPage />
       </AppLayout>
     );
+  if (path === "/settings")
+    return (
+      <ApplicationBoundary>
+        <SettingsPage modules={applications} />
+      </ApplicationBoundary>
+    );
   const application = items.find((item) => item.path === path);
   const module = applications.find((item) => item.id === application?.id);
   if (!application || !module)
@@ -81,6 +88,8 @@ function Routes() {
         <a href="/">{tr("back_to_home")}</a>
       </AppLayout>
     );
+  if (new URLSearchParams(location.search).get("tab") === "settings")
+    return <SettingsRedirect applicationId={application.id} />;
   if (!application.enabled)
     return (
       <AppLayout>
@@ -112,6 +121,18 @@ function Routes() {
         <module.Page />
       </Suspense>
     </ApplicationBoundary>
+  );
+}
+function SettingsRedirect({ applicationId }: { applicationId: string }) {
+  useEffect(() => {
+    window.location.replace(
+      `/settings?application=${encodeURIComponent(applicationId)}`,
+    );
+  }, [applicationId]);
+  return (
+    <AppLayout>
+      <p role="status">{tr("settings_loading")}</p>
+    </AppLayout>
   );
 }
 export function App() {

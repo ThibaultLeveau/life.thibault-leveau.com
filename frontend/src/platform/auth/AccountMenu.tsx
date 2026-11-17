@@ -1,6 +1,7 @@
 import { tr } from "../../shared/i18n";
 import type { Locale } from "../i18n";
 import { useState } from "react";
+import { AccountDropdown } from "./AccountDropdown";
 import { ErrorMessage } from "../../shared/ui/Dialog";
 import { Icon } from "../../shared/ui/Icon";
 import { useSession } from "./SessionProvider";
@@ -8,9 +9,11 @@ import type { Theme } from "./types";
 
 export function AccountMenu({
   disabled = false,
+  dropdown = false,
   beforeSessionChange,
 }: {
   disabled?: boolean;
+  dropdown?: boolean;
   beforeSessionChange?: () => boolean | void | Promise<boolean | void>;
 }) {
   const { session, changeTheme, changeLocale, logout } = useSession();
@@ -65,20 +68,35 @@ export function AccountMenu({
           </option>
         </select>
       </label>
-      <span className="account-name">{session.username}</span>
-      <button
-        className="icon-button"
-        aria-label={tr("sign_out")}
-        disabled={busy || disabled}
-        onClick={() =>
-          void act(async () => {
-            if ((await beforeSessionChange?.()) === false) return;
-            await logout();
-          })
-        }
-      >
-        <Icon name="logout" />
-      </button>
+      {dropdown ? (
+        <AccountDropdown
+          username={session.username}
+          disabled={busy || disabled}
+          onLogout={() =>
+            void act(async () => {
+              if ((await beforeSessionChange?.()) === false) return;
+              await logout();
+            })
+          }
+        />
+      ) : (
+        <>
+          <span className="account-name">{session.username}</span>
+          <button
+            className="icon-button"
+            aria-label={tr("sign_out")}
+            disabled={busy || disabled}
+            onClick={() =>
+              void act(async () => {
+                if ((await beforeSessionChange?.()) === false) return;
+                await logout();
+              })
+            }
+          >
+            <Icon name="logout" />
+          </button>
+        </>
+      )}
       <ErrorMessage message={error} />
     </div>
   );

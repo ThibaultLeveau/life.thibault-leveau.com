@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { tr } from "../../shared/i18n";
 import { ErrorMessage } from "../../shared/ui/Dialog";
 import { Icon } from "../../shared/ui/Icon";
 import { useApplications } from "../applications/ApplicationProvider";
 import { useApiAction, useApiResource } from "../useApiResource";
+import { useSettingsDraft } from "../applications/useSettingsDraft";
 import { progressionApi } from "./api";
 import { WEEKDAYS, usageDays, weekdayLabel } from "./calendar";
 import type { ProgressionSettings as Settings } from "./types";
@@ -25,10 +26,15 @@ function shiftDay(day: string, amount: number) {
   date.setUTCDate(date.getUTCDate() + amount);
   return date.toISOString().slice(0, 10);
 }
+const noop = () => {};
 export function ProgressionSettings({
   onDirty,
+  onBusy = noop,
+  scope = "all",
 }: {
   onDirty: (dirty: boolean) => void;
+  onBusy?: (busy: boolean) => void;
+  scope?: string;
 }) {
   const result = useApiResource(progressionApi.settings, []);
   return (
@@ -42,16 +48,30 @@ export function ProgressionSettings({
           {tr("try_again")}
         </button>
       )}
-      {result.data && <SettingsForm initial={result.data} onDirty={onDirty} />}
+      {result.data && (
+        <SettingsForm
+          initial={result.data}
+          onDirty={onDirty}
+          onBusy={onBusy}
+          scope={scope}
+          onReload={result.reload}
+        />
+      )}
     </section>
   );
 }
 function SettingsForm({
   initial,
   onDirty,
+  onBusy,
+  scope,
+  onReload,
 }: {
   initial: Settings;
   onDirty: (dirty: boolean) => void;
+  onBusy: (busy: boolean) => void;
+  scope: string;
+  onReload: () => void;
 }) {
   const [value, setValue] = useState(initial);
   const [baseline, setBaseline] = useState(initial);
@@ -59,10 +79,8 @@ function SettingsForm({
   const { items } = useApplications();
   const action = useApiAction();
   const dirty = JSON.stringify(value) !== JSON.stringify(baseline);
-  useEffect(() => {
-    onDirty(dirty);
-    return () => onDirty(false);
-  }, [dirty, onDirty]);
+  useSettingsDraft({ onDirty, onBusy }, dirty, action.busy);
+  const general = scope === "general" || scope === "all";
   const today = dayInZone(value.timezone);
   const vacation = value.vacations.find(
     (v) => v.start <= today && today <= v.end,
@@ -86,193 +104,231 @@ function SettingsForm({
       }}
     >
       <fieldset disabled={action.busy}>
-        <label>
-          {tr("progression_timezone")}
-          <input
-            required
-            maxLength={100}
-            value={value.timezone}
-            onChange={(e) => change({ timezone: e.target.value })}
-            list="progression-timezones"
-          />
-        </label>
-        <datalist id="progression-timezones">
-          {[
-            "Europe/Paris",
-            "Europe/London",
-            "America/Montreal",
-            "America/New_York",
-            "Asia/Tokyo",
-            "UTC",
-          ].map((zone) => (
-            <option key={zone} value={zone} />
-          ))}
-        </datalist>
-        <small className="progression-muted">
-          {tr("progression_timezone_hint")}
-        </small>
-        <h3>{tr("progression_usage_days")}</h3>
-        <p className="progression-muted">{tr("progression_usage_days_hint")}</p>
-        <div className="progression-schedules">
-          {items?.map((app) => {
-            const days = usageDays(value, app.id);
-            const setDays = (next: number[]) =>
-              change({ usage_days: { ...value.usage_days, [app.id]: next } });
-            return (
-              <fieldset className="progression-schedule" key={app.id}>
-                <legend>{app.name}</legend>
-                <p className="progression-muted">
-                  {tr("progression_days_per_week", { count: days.length })}
-                </p>
-                <div className="progression-day-presets">
+        {general && (
+          <>
+            <label>
+              {tr("progression_timezone")}
+              <input
+                required
+                maxLength={100}
+                value={value.timezone}
+                onChange={(e) => change({ timezone: e.target.value })}
+                list="progression-timezones"
+              />
+            </label>
+            <datalist id="progression-timezones">
+              {[
+                "Europe/Paris",
+                "Europe/London",
+                "America/Montreal",
+                "America/New_York",
+                "Asia/Tokyo",
+                "UTC",
+              ].map((zone) => (
+                <option key={zone} value={zone} />
+              ))}
+            </datalist>
+            <small className="progression-muted">
+              {tr("progression_timezone_hint")}
+            </small>
+          </>
+        )}
+        {scope !== "general" && (
+          <>
+            <h3>{tr("progression_usage_days")}</h3>
+            <p className="progression-muted">
+              {tr("progression_usage_days_hint")}
+            </p>
+            <div className="progression-schedules">
+              {items
+                ?.filter((app) => scope === "all" || app.id === scope)
+                .map((app) => {
+                  const days = usageDays(value, app.id);
+                  const setDays = (next: number[]) =>
+                    change({
+                      usage_days: { ...value.usage_days, [app.id]: next },
+                    });
+                  return (
+                    <fieldset className="progression-schedule" key={app.id}>
+                      <legend>{app.name}</legend>
+                      <p className="progression-muted">
+                        {tr("progression_days_per_week", {
+                          count: days.length,
+                        })}
+                      </p>
+                      <div className="progression-day-presets">
+                        <button
+                          type="button"
+                          className="text-button"
+                          onClick={() => setDays(WEEKDAYS)}
+                        >
+                          {tr("progression_every_day")}
+                        </button>
+                        <button
+                          type="button"
+                          className="text-button"
+                          onClick={() => setDays(WEEKDAYS.slice(0, 5))}
+                        >
+                          {tr("progression_workweek")}
+                        </button>
+                      </div>
+                      <div className="progression-usage-days">
+                        {WEEKDAYS.map((day) => (
+                          <label key={day}>
+                            <input
+                              type="checkbox"
+                              aria-label={weekdayLabel(day)}
+                              checked={days.includes(day)}
+                              disabled={days.length === 1 && days.includes(day)}
+                              onChange={(event) =>
+                                setDays(
+                                  event.target.checked
+                                    ? [...days, day].sort((a, b) => a - b)
+                                    : days.filter((d) => d !== day),
+                                )
+                              }
+                            />
+                            <span>{weekdayLabel(day, "short")}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </fieldset>
+                  );
+                })}
+            </div>
+          </>
+        )}
+        {general && (
+          <>
+            <div className="progression-vacation-heading">
+              <div>
+                <h3>{tr("progression_vacation")}</h3>
+                {vacation && (
+                  <span className="progression-vacation-active">
+                    <Icon name="sun" size={15} />
+                    {tr("progression_vacation_active")}
+                  </span>
+                )}
+              </div>
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={() => {
+                  if (vacation)
+                    change({
+                      vacations: value.vacations.flatMap((v) =>
+                        v !== vacation
+                          ? [v]
+                          : v.start < today
+                            ? [{ ...v, end: shiftDay(today, -1) }]
+                            : [],
+                      ),
+                    });
+                  else
+                    change({
+                      vacations: [
+                        ...value.vacations,
+                        { start: today, end: shiftDay(today, 6) },
+                      ],
+                    });
+                }}
+              >
+                {tr(
+                  vacation
+                    ? "progression_vacation_stop"
+                    : "progression_vacation_start_now",
+                )}
+              </button>
+            </div>
+            <p className="progression-muted">
+              {tr("progression_vacation_hint")}
+            </p>
+            <div className="progression-vacation-list">
+              {value.vacations.map((period, index) => (
+                <div className="progression-vacation-row" key={index}>
+                  <label>
+                    {tr("progression_since")}
+                    <input
+                      type="date"
+                      required
+                      min="2000-01-01"
+                      max={period.end || "2100-12-31"}
+                      value={period.start}
+                      onChange={(e) =>
+                        change({
+                          vacations: value.vacations.map((v, i) =>
+                            i === index ? { ...v, start: e.target.value } : v,
+                          ),
+                        })
+                      }
+                    />
+                  </label>
+                  <label>
+                    {tr("progression_until")}
+                    <input
+                      type="date"
+                      required
+                      min={period.start || "2000-01-01"}
+                      max="2100-12-31"
+                      value={period.end}
+                      onChange={(e) =>
+                        change({
+                          vacations: value.vacations.map((v, i) =>
+                            i === index ? { ...v, end: e.target.value } : v,
+                          ),
+                        })
+                      }
+                    />
+                  </label>
                   <button
                     type="button"
-                    className="text-button"
-                    onClick={() => setDays(WEEKDAYS)}
+                    className="icon-button"
+                    aria-label={tr("progression_vacation_remove")}
+                    onClick={() =>
+                      change({
+                        vacations: value.vacations.filter(
+                          (_, i) => i !== index,
+                        ),
+                      })
+                    }
                   >
-                    {tr("progression_every_day")}
-                  </button>
-                  <button
-                    type="button"
-                    className="text-button"
-                    onClick={() => setDays(WEEKDAYS.slice(0, 5))}
-                  >
-                    {tr("progression_workweek")}
+                    <Icon name="trash" />
                   </button>
                 </div>
-                <div className="progression-usage-days">
-                  {WEEKDAYS.map((day) => (
-                    <label key={day}>
-                      <input
-                        type="checkbox"
-                        aria-label={weekdayLabel(day)}
-                        checked={days.includes(day)}
-                        disabled={days.length === 1 && days.includes(day)}
-                        onChange={(event) =>
-                          setDays(event.target.checked
-                            ? [...days, day].sort((a, b) => a - b)
-                            : days.filter((d) => d !== day))
-                        }
-                      />
-                      <span>{weekdayLabel(day, "short")}</span>
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
-            );
-          })}
-        </div>
-        <div className="progression-vacation-heading">
-          <div>
-            <h3>{tr("progression_vacation")}</h3>
-            {vacation && (
-              <span className="progression-vacation-active">
-                <Icon name="sun" size={15} />
-                {tr("progression_vacation_active")}
-              </span>
-            )}
-          </div>
-          <button
-            type="button"
-            className="secondary-button"
-            onClick={() => {
-              if (vacation)
-                change({
-                  vacations: value.vacations.flatMap((v) =>
-                    v !== vacation
-                      ? [v]
-                      : v.start < today
-                        ? [{ ...v, end: shiftDay(today, -1) }]
-                        : [],
-                  ),
-                });
-              else
+              ))}
+            </div>
+            <button
+              type="button"
+              className="text-button"
+              disabled={value.vacations.length >= 100}
+              onClick={() => {
+                const start = shiftDay(value.vacations.at(-1)?.end || today, 1);
                 change({
                   vacations: [
                     ...value.vacations,
-                    { start: today, end: shiftDay(today, 6) },
+                    { start, end: shiftDay(start, 6) },
                   ],
                 });
+              }}
+            >
+              <Icon name="plus" size={16} />
+              {tr("progression_vacation_add")}
+            </button>
+          </>
+        )}
+        <ErrorMessage message={action.error} />
+        {action.error && (
+          <button
+            type="button"
+            className="text-button"
+            onClick={() => {
+              if (!dirty || window.confirm(tr("progression_unsaved")))
+                onReload();
             }}
           >
-            {tr(
-              vacation
-                ? "progression_vacation_stop"
-                : "progression_vacation_start_now",
-            )}
+            {tr("settings_reload")}
           </button>
-        </div>
-        <p className="progression-muted">{tr("progression_vacation_hint")}</p>
-        <div className="progression-vacation-list">
-          {value.vacations.map((period, index) => (
-            <div className="progression-vacation-row" key={index}>
-              <label>
-                {tr("progression_since")}
-                <input
-                  type="date"
-                  required
-                  min="2000-01-01"
-                  max={period.end || "2100-12-31"}
-                  value={period.start}
-                  onChange={(e) =>
-                    change({
-                      vacations: value.vacations.map((v, i) =>
-                        i === index ? { ...v, start: e.target.value } : v,
-                      ),
-                    })
-                  }
-                />
-              </label>
-              <label>
-                {tr("progression_until")}
-                <input
-                  type="date"
-                  required
-                  min={period.start || "2000-01-01"}
-                  max="2100-12-31"
-                  value={period.end}
-                  onChange={(e) =>
-                    change({
-                      vacations: value.vacations.map((v, i) =>
-                        i === index ? { ...v, end: e.target.value } : v,
-                      ),
-                    })
-                  }
-                />
-              </label>
-              <button
-                type="button"
-                className="icon-button"
-                aria-label={tr("progression_vacation_remove")}
-                onClick={() =>
-                  change({
-                    vacations: value.vacations.filter((_, i) => i !== index),
-                  })
-                }
-              >
-                <Icon name="trash" />
-              </button>
-            </div>
-          ))}
-        </div>
-        <button
-          type="button"
-          className="text-button"
-          disabled={value.vacations.length >= 100}
-          onClick={() => {
-            const start = shiftDay(value.vacations.at(-1)?.end || today, 1);
-            change({
-              vacations: [
-                ...value.vacations,
-                { start, end: shiftDay(start, 6) },
-              ],
-            });
-          }}
-        >
-          <Icon name="plus" size={16} />
-          {tr("progression_vacation_add")}
-        </button>
-        <ErrorMessage message={action.error} />
+        )}
         <div className="progression-settings-save">
           <button className="primary-button" disabled={!dirty || action.busy}>
             {tr("progression_save")}

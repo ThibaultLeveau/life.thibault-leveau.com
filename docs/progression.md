@@ -40,7 +40,7 @@ Les dix paliers de chaque famille rapportent respectivement **25, 40, 60, 90, 13
 
 ## Un rythme qui respecte vos pauses
 
-Dans **Suivi → Réglages → Votre rythme, vos règles** :
+Dans les [réglages généraux](settings.md), choisissez **Général** pour le fuseau et les vacances, ou une application pour ses jours d’utilisation :
 
 - Choisissez le fuseau IANA des nouvelles activités, par défaut `Europe/Paris`.
 - Choisissez les **jours d’utilisation de chaque application**, du lundi au dimanche, avec au moins un jour. Par exemple : dimanche uniquement pour un suivi hebdomadaire ; lundi, mercredi et vendredi pour trois jours de pratique. Les raccourcis « Tous les jours » et « Du lundi au vendredi » facilitent le choix. Le badge rappelle les jours prévus.
@@ -68,3 +68,5 @@ OKR ajoute 60 quêtes : objectifs accomplis, résultats clés atteints, objectif
 ## Quêtes Recettes et courses
 
 Recettes ajoute 60 quêtes : recettes enregistrées, listes terminées, couples liste/recette importés, modèles non vides, jours actifs et séries. Les premières confirmations donnent respectivement 25, 50, 5 et 15 XP de base. Cette application récompense donc aussi la constitution du carnet et des modèles. Les identifiants stables dédupliquent les récompenses ; aucune recoche, modification, réouverture ou réactivation ne multiplie un gain. [Règles détaillées](recipes.md#suivi-quetes-et-motivation). Le catalogue total comprend désormais 300 quêtes pour les cinq applications.
+
+Les préférences sont réunies dans les [réglages généraux](settings.md). Le lien Réglages de l’application ouvre sa section ; fuseau de progression et vacances se trouvent dans Général, jours d’utilisation dans chaque application.

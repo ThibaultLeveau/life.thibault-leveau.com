@@ -478,5 +478,8 @@
   "bulk_title_labels_other": "Modifier les étiquettes de {{count}} tâches",
   "bulk_labels_other": "{{count}} tâches mises à jour.",
   "archive_task_confirmation": "Archiver cette tâche ? Vous pourrez la restaurer depuis les archives.",
-  "keep_first_500": "Limiter aux 500 premières"
+  "keep_first_500": "Limiter aux 500 premières",
+  "view_preferences": "Préférences des vues",
+  "view_preferences_hint": "Choisissez l’agenda ou un espace pour retrouver ses préférences enregistrées. Les réglages de structure restent accessibles avec « Configurer l’espace ». Dans les listes, les tâches terminées restent masquées jusqu’à leur affichage explicite.",
+  "view_to_configure": "Vue à configurer"
 }

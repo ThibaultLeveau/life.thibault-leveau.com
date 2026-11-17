@@ -57,3 +57,5 @@ Four historical metrics are available to Tracking: recipes saved, shopping lists
 Per account: 2,000 recipes, 2,000 lists/templates and 3,000 personal ingredients. A recipe accepts 200 lines and a list 300 distinct ingredient/unit pairs. Positive quantities have up to six decimals, capped at 1,000,000,000; servings are integers from 1 to 1,000. Out-of-range calculations are rejected without partial imports. Dates use UTC.
 
 Sharing, photos, prices, nutrition, meal planning and permanent recipe/list/template deletion are not included. Drafts are protected when leaving, changing language or signing out. All persistent actions have a versioned API. See [API examples](../recipes-api.md) and [backup/restore](../sauvegardes.md#migration-0012-recettes-et-courses).
+
+Preferences are grouped in [General settings](settings.md). An application’s Settings control opens its section; the progression timezone and vacations are under General, and usage days are in each application section.

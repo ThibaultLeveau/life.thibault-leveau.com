@@ -253,3 +253,5 @@ Les titres, espaces, sections, étiquettes et statuts enregistrés ne sont jamai
 ## Progression et quêtes
 
 Le badge en haut à droite affiche votre niveau, titre et série. Ouvrez-le pour consulter les quêtes les plus proches ; le mur complet et le journal sont dans Suivi → Réussites. [Barèmes, 60 quêtes et règles de séries](progression.md).
+
+Les préférences sont réunies dans les [réglages généraux](settings.md). Le lien Réglages de l’application ouvre sa section ; fuseau de progression et vacances se trouvent dans Général, jours d’utilisation dans chaque application.

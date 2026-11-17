@@ -45,3 +45,5 @@ Existing entries keep their original goals and definition. Edits apply to new pe
 Archive removes a tracker from current entry lists and preserves history. Restore it from Archives. Past calendar periods and started longer periods remain; new periods follow archive/restore dates. Reorder active trackers with Up/Down. Up to 50 trackers may be active. Permanent deletion is not offered.
 
 The calendar and trends allow up to 367 days per request. Queries and entry histories used for calculation are bounded at 20,000 records. All persistent operations have a [versioned API](../tracking-api.md). PostgreSQL backups contain definitions, values, source snapshots and immutable revision histories; see [backup procedures](../sauvegardes.md#migration-0009-suivi).
+
+Preferences are grouped in [General settings](settings.md). An application’s Settings control opens its section; the progression timezone and vacations are under General, and usage days are in each application section.

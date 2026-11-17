@@ -15,7 +15,6 @@ import { ObjectiveCard } from "./components/ObjectiveCard";
 import { ObjectiveDetail } from "./components/ObjectiveDetail";
 import { ObjectiveEditor } from "./components/ObjectiveEditor";
 import { Retrospective } from "./components/Retrospective";
-import { Settings } from "./components/Settings";
 import { quarterLabel, tr } from "./i18n";
 import {
   horizons,
@@ -133,6 +132,10 @@ export function Page() {
     dirty.current = false;
     setSelected(null);
     setMobile(false);
+    if (tab === "settings") {
+      window.location.assign("/settings?application=okr");
+      return;
+    }
     const params = new URLSearchParams({ tab });
     if (edit) params.set("edit", edit);
     if (!saved) index.current++;
@@ -548,18 +551,6 @@ export function Page() {
                   ) : (
                     <Empty title={tr("empty_archive")} />
                   ))}
-                {view.tab === "settings" && (
-                  <Settings
-                    key={settings.version}
-                    settings={settings}
-                    onBusy={onBusy}
-                    onDirty={onDirty}
-                    onSaved={() => {
-                      refresh();
-                      setNotice(tr("settings_saved"));
-                    }}
-                  />
-                )}
                 {(view.tab === "horizons" || view.tab === "quarter") && (
                   <aside className="okr-quests-note">
                     <Icon name="flag" />

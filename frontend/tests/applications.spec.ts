@@ -174,7 +174,10 @@ test("thème partagé, navigation et bibliothèque à 320 px", async ({
   await page
     .getByRole("combobox", { name: "Apparence", exact: true })
     .selectOption("system");
-  await page.getByRole("button", { name: "Se déconnecter" }).click();
+  await page
+    .getByRole("button", { name: credentials.username, exact: true })
+    .click();
+  await page.getByRole("menuitem", { name: "Se déconnecter" }).click();
   await expect(
     page.getByRole("heading", { name: "Connexion", exact: true }),
   ).toBeVisible();

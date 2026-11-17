@@ -478,5 +478,8 @@
   "bulk_title_labels_other": "Edit labels for {{count}} tasks",
   "bulk_labels_other": "{{count}} tasks updated.",
   "archive_task_confirmation": "Archive this task? You can restore it from the archives.",
-  "keep_first_500": "Keep the first 500"
+  "keep_first_500": "Keep the first 500",
+  "view_preferences": "View preferences",
+  "view_preferences_hint": "Choose Upcoming or a workspace to see its saved preferences. Structure settings remain available through “Configure workspace”. Lists hide completed tasks until you explicitly show them.",
+  "view_to_configure": "View to configure"
 }
