@@ -28,13 +28,21 @@ Workspaces, sections, columns and labels offer the same **16-colour grid** on de
 
 **Custom color** opens your browser’s free colour picker. Its appearance depends on the device, while the LifeOS grid and its colours stay identical. The selected hexadecimal code is displayed next to the picker. Existing custom colours are preserved even when absent from the grid. Selecting a colour does not submit the form: use **Create workspace**, **Add** or **Save** afterwards. After adding a section, column or label, the creation form returns to its default colour.
 
-Colours are saved through the [existing APIs](../api.md#espaces-et-configuration) in the `color` field as `#RRGGBB` and appear on other devices after reloading. The palette does not restrict accepted values; no data changes or migration are required.
+Colours are saved through the [existing APIs](api.md#espaces-et-configuration) in the `color` field as `#RRGGBB` and appear on other devices after reloading. The palette does not restrict accepted values; no data changes or migration are required.
+
+![List: sections group tasks and their due dates.](../assets/screenshots/en/tasks-list.png){ loading=lazy }
+
+*List: sections group tasks and their due dates.*
 
 ## Upcoming tasks
 
 **Upcoming** combines due tasks from active workspaces and is the default `/tasks` view. A link with `?space=…` still opens that workspace. Tasks are grouped chronologically by date with their full workspace path and section.
 
 Choose the period and whether to include overdue or completed tasks. Custom horizons range from 1 to 90 days. These settings are saved to your account. Tasks without a due date remain in their workspace and do not appear in the agenda. Dates use the browser’s local day, including after midnight or when returning to an open tab.
+
+![Agenda: see upcoming dates across your workspaces.](../assets/screenshots/en/tasks-agenda.png){ loading=lazy }
+
+*Agenda: see upcoming dates across your workspaces.*
 
 ## Create and organize tasks
 
@@ -47,6 +55,10 @@ Other view preferences, including layout, density, sorting and filters, persist 
 In manual order on desktop, drag a task by its title, body or handle to reorder it or change its list section or board row/column, including empty cells. Drop it on another workspace in the sidebar to move it to **No section**, preserving its open/completed state in the first compatible status. Releasing outside a target or pressing Escape cancels the drag. Area selection starts only on the background outside tasks and controls; it never starts from a task. On touchscreens, use the handle to drag. The accessible move command offers a keyboard alternative and also moves tasks between workspaces. Select several tasks to complete, reopen, reschedule, move, change priority/status/labels, duplicate or archive. The context menu offers the same actions and applies to the whole selection when opened on a selected task. Use Escape to dismiss menus or clear selection. A touch hold starts selection; moving before activation continues scrolling. A task keeps its identity and history when moved.
 
 Marking a task complete records its completion time. Reopening preserves the earlier completion event. Archiving is reversible and does not erase task history. Archived workspaces and sections must be restored before their content can be active again; active child workspaces prevent archiving a parent. There is no permanent deletion operation in this release.
+
+![Board: sections form rows and statuses form columns.](../assets/screenshots/en/tasks-board.png){ loading=lazy }
+
+*Board: sections form rows and statuses form columns.*
 
 ## Global search and bulk controls
 
@@ -93,9 +105,9 @@ The completion notice offers an undo action. Undo records a compensating event a
 
 The interface supports keyboard navigation, named controls, focus-contained dialogs and narrow screens in light and dark themes. The board scrolls inside its own region. Your browser can still zoom manually. Menus and dialogs close with Escape and restore focus to their trigger where applicable.
 
-All records belong to the signed-in account. Writes require the session, CSRF token and allowed origin. There is no offline business-data store or instant synchronization between devices. A session expiry removes private views; records already saved remain intact. Task-resolution statistics and OKRs are future work.
+All records belong to the signed-in account. Writes require the session, CSRF token and allowed origin. There is no offline business-data store or instant synchronization between devices. A session expiry removes private views; records already saved remain intact. Dedicated task-resolution statistics remain future work. [OKR Goals](okr.md) is available as its own application.
 
-See [language preferences](index.md), the [French detailed task guide](../taches.md) and the [API reference](../api.md).
+See [language preferences](applications.md), the [French task guide](../taches.md) and the [API reference](api.md).
 
 
 ## Progress and quests
@@ -109,3 +121,7 @@ Upcoming uses a centered reading column, with metadata below each task title and
 Navigation keeps Add, Upcoming and Search visible. The icon-only “More task views” button opens All tasks, No due date and Task archives. Escape closes the panel or menu and returns focus. Completion notifications keep the message, Undo and dismissal compact without shifting the list.
 
 Preferences are grouped in [General settings](settings.md). An application’s Settings control opens its section; the progression timezone and vacations are under General, and usage days are in each application section.
+
+![Open Settings to adjust this application’s preferences and usage days.](../assets/screenshots/en/tasks-settings.png){ loading=lazy }
+
+*Open Settings to adjust this application’s preferences and usage days.*

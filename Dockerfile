@@ -17,6 +17,7 @@ RUN uv sync --frozen --no-default-groups --no-editable
 FROM python-build AS documentation
 RUN uv sync --frozen --no-default-groups --group docs --no-editable
 COPY mkdocs.yml ./
+COPY scripts/documentation.py scripts/documentation.py
 COPY docs/ docs/
 RUN uv run --no-sync mkdocs build --strict
 

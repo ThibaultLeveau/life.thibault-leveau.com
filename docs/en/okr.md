@@ -15,6 +15,10 @@ Choose **Personal** or **Professional**. Optionally link to a goal in the same a
 
 A quarterly goal must be achievable **within one month**, not three months. A plan starting November 16 can end no later than December 15. Starting January 31 means February 27, or February 28 in a leap year: the next month is clamped to its last day, then one day is subtracted. Shorter plans are welcome. The start date defines the planned quarter; a plan may cross a quarter boundary. Other horizons allow optional dates supplied as a pair.
 
+![Horizons: connect a long-term direction to nearer goals.](../assets/screenshots/en/okr-horizons.png){ loading=lazy }
+
+*Horizons: connect a long-term direction to nearer goals.*
+
 ## Key results and check-ins
 
 Each goal supports up to 12 key results with a title, starting value, target, current value and optional unit. A target must differ from the starting value. Use a lower target to measure a reduction, or 0 → 1 for a binary result.
@@ -23,6 +27,10 @@ Progress is `(current − start) / (target − start)`, clamped to 0–100%. Obj
 
 Open a card and choose **Check in** to record a value and an optional learning note. **History** preserves previous values, targets, edits and notes. Results may be added, edited or removed while the objective is open; previous snapshots survive. Reaching 100% never completes an objective automatically.
 
+![Editor: define the expected outcome and key results.](../assets/screenshots/en/okr-editor.png){ loading=lazy }
+
+*Editor: define the expected outcome and key results.*
+
 ## Quarterly board
 
 **This quarter** shows quarterly goals in **To prepare**, **In progress** and **Done**. Filter by area and quarter. Open goals from earlier quarters carry forward with their original quarter. Completed cards appear in their actual completion quarter.
@@ -30,6 +38,10 @@ Open a card and choose **Check in** to record a value and an optional learning n
 Drag a card's handle to a column or before another card. Status selectors and up/down buttons provide equivalent keyboard and mobile controls. Order persists per horizon and status across areas and quarters. Columns stack on narrow screens.
 
 **Complete objective** requires every key result to have reached its target. Completing a goal at any horizon records it in the current quarter, calculated on the server in the OKR timezone. Planned dates do not determine the accomplishment quarter.
+
+![Quarterly plan: move objectives as work progresses.](../assets/screenshots/en/okr-board.png){ loading=lazy }
+
+*Quarterly plan: move objectives as work progresses.*
 
 ## Accomplishments and lifecycle
 
@@ -53,6 +65,10 @@ The default OKR timezone is `Europe/Paris`. Changing it affects future events an
 
 Limits: 5,000 objectives per account including archives, 12 key results per objective, titles up to 200 characters, finite numeric values between −10¹² and 10¹², dates from 2000 through 2100. History and accomplishments are paginated in groups of 30. A concurrent update returns a conflict; reload before applying your changes again. Network errors offer retry controls in the affected content.
 
-All operations also use the [versioned API](../okr-api.md), including ownership checks and identical validation.
+All operations also use the [versioned API](okr-api.md), including ownership checks and identical validation.
 
 Preferences are grouped in [General settings](settings.md). An application’s Settings control opens its section; the progression timezone and vacations are under General, and usage days are in each application section.
+
+![Open Settings to adjust this application’s preferences and usage days.](../assets/screenshots/en/okr-settings.png){ loading=lazy }
+
+*Open Settings to adjust this application’s preferences and usage days.*

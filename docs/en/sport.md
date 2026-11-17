@@ -27,6 +27,10 @@ Supplied exercises are marked **Default**. Their names, notes, aliases, muscles 
 
 Types describe measurements, not a closed list of sports. A movement can have variants with different input types. Calories are the machine’s displayed value; no physiological estimate is calculated. The server rejects fields that do not belong to the selected type. Enter **total weight**, including the bar and both dumbbells. For a band without measurable assistance, use repetitions and describe the resistance in notes.
 
+![Catalogue: find an exercise and choose its type.](../assets/screenshots/en/sport-catalogue.png){ loading=lazy }
+
+*Catalogue: find an exercise and choose its type.*
+
 ## Programs and training
 
 In **Programs**, choose **New program**, name it and add exercises. Each exercise accepts 1–30 sets; a program accepts at most 50 exercises and 300 sets. Targets per set are optional. Arrow buttons reorder entries and the remove button removes an entry from the draft.
@@ -55,9 +59,25 @@ Unsaved field edits remain pending until completion or correction. Errors and re
 
 Finished or cancelled sessions are immutable. Editing or archiving the source program does not change them. A personal exercise must be active to start another session; if its type changed, remove and re-add it in the program to configure new targets. Obsolete versions fail explicitly instead of overwriting saved results.
 
+![Programs: open, edit or start your next session.](../assets/screenshots/en/sport-programs.png){ loading=lazy }
+
+*Programs: open, edit or start your next session.*
+
+![Editor: set program exercises, sets and targets.](../assets/screenshots/en/sport-editor.png){ loading=lazy }
+
+*Editor: set program exercises, sets and targets.*
+
+![Training: enter and confirm each set; the next retains suggested values.](../assets/screenshots/en/sport-training.png){ loading=lazy }
+
+*Training: enter and confirm each set; the next retains suggested values.*
+
 ## Body measurements
 
 Add a dated record with weight, body fat, neck, shoulders, chest, waist, hips, left/right arms, thighs or calves. One value is enough. Each account can have one active record per date; future dates are rejected using the server’s UTC day. Edit to complete or correct a record. Archiving removes it from charts and is reversible. Restoration is rejected if another active record already uses that date.
+
+![Body measurements: save a dated measurement and follow changes.](../assets/screenshots/en/sport-measurements.png){ loading=lazy }
+
+*Body measurements: save a dated measurement and follow changes.*
 
 ## Statistics and score
 
@@ -92,9 +112,13 @@ Ratios compare performed and reference quantities in the same unit. Pace is quan
 
 Known references remain fixed for the same program, exercise IDs/types/order and set counts. Editing targets does not replace established references. Changing the structure creates a new family. Without targets or history, initial difficulty is calibrated from your results; it does not compare your fitness with a population norm.
 
-**Historical compatibility.** Previously recorded scores remain unchanged and are labelled historical. They use separate charts and cannot share a Tracking aggregation with the new family. An [explicit API repair](../sport-api.md#reparer-les-scores-manquants) fills missing scores of older completed sessions without changing sets, dates, notes, versions or rewards. Reads never write history. Active and cancelled sessions remain unscored. New scores are saved in the completion transaction.
+**Historical compatibility.** Previously recorded scores remain unchanged and are labelled historical. They use separate charts and cannot share a Tracking aggregation with the new family. An [explicit API repair](sport-api.md#reparer-les-scores-manquants) fills missing scores of older completed sessions without changing sets, dates, notes, versions or rewards. Reads never write history. Active and cancelled sessions remain unscored. New scores are saved in the completion transaction.
 
 The score describes **relative measured effort**, not technique, perceived exertion, health or comparisons across people or programs. Raw exercise-chart metrics (volume, reps, duration, distance and pace) stay unchanged: v2 adds a volume-and-pace calculation without mixing physical units.
+
+![Statistics: review completed sessions, volume and comparable scores.](../assets/screenshots/en/sport-statistics.png){ loading=lazy }
+
+*Statistics: review completed sessions, volume and comparable scores.*
 
 ## Retention and limits
 
@@ -102,7 +126,7 @@ Disabling Sport keeps programs, personal exercises, sets, rest deadlines, histor
 
 The catalogue is packaged with the application, without images, videos, coaching or external runtime requests. All business data goes through the API; there is no browser business-data store, offline mode or instant synchronization between devices. Exercise and session lists are paginated; programs and measurements load in full. A ten-year statistics request may be large for an extensive history.
 
-The supplied catalogue is a versioned editorial selection based on common movement terminology and the public free-exercise-db nomenclature consulted on 14 November 2026. Its instruction texts and images were not imported. See the [provenance record](../sport.md#catalogue-et-provenance), [Sport API](../sport-api.md) and [backups](../sauvegardes.md), maintained in French.
+The supplied catalogue is a versioned editorial selection based on common movement terminology and the public free-exercise-db nomenclature consulted on 14 November 2026. Its instruction texts and images were not imported. See the [provenance record](../sport.md#catalogue-et-provenance), [Sport API](sport-api.md) and [backups](sauvegardes.md), maintained in French.
 
 ## Preparing for HYROX
 
@@ -118,3 +142,7 @@ Removing “Hyrox” from the title hides the branding but preserves the date. A
 The top-right badge shows your level, title and streak. Open it for nearby quests; the full wall and journal are in Tracking → Achievements. [Points, 60 quests and streak rules](progression.md).
 
 Preferences are grouped in [General settings](settings.md). An application’s Settings control opens its section; the progression timezone and vacations are under General, and usage days are in each application section.
+
+![Open Settings to adjust this application’s preferences and usage days.](../assets/screenshots/en/sport-settings.png){ loading=lazy }
+
+*Open Settings to adjust this application’s preferences and usage days.*

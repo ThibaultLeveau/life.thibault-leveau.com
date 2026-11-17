@@ -5,8 +5,13 @@ docs_dir: docs
 site_dir: site
 strict: true
 use_directory_urls: true
+hooks:
+  - scripts/documentation.py
+exclude_docs: |
+  theme/
 theme:
   name: material
+  custom_dir: docs/theme
   language: fr
   font: false
   favicon: assets/favicon.svg
@@ -16,7 +21,6 @@ theme:
     primary: custom
     accent: custom
   features:
-    - navigation.sections
     - navigation.top
     - navigation.tracking
     - search.suggest
@@ -28,6 +32,7 @@ plugins:
         - fr
         - en
 markdown_extensions:
+  - md_in_html
   - admonition
   - attr_list
   - def_list
@@ -50,54 +55,86 @@ extra:
     - icon: material/home-outline
       link: https://life.thibault-leveau.com/
       name: Ouvrir Life
-nav:
-  - Présentation: index.md
-  - Vos applications: applications.md
-  - Réglages généraux: settings.md
-  - Utiliser les tâches: taches.md
-  - Utiliser Sport: sport.md
-  - API Sport: sport-api.md
-  - Utiliser Suivi: tracking.md
-  - API Suivi: tracking-api.md
-  - Utiliser Objectifs OKR: okr.md
-  - API Objectifs OKR: okr-api.md
-  - Recettes et courses: recipes.md
-  - API Recettes et courses: recipes-api.md
-  - Réussites et progression: progression.md
-  - Intégrations de données: integrations.md
-  - Français et anglais: internationalisation.md
-  - English user guides:
-      - Welcome: en/index.md
-      - Your applications: en/applications.md
-      - General settings: en/settings.md
-      - Tasks: en/taches.md
-      - Sport: en/sport.md
-      - Tracking: en/tracking.md
-      - OKR Goals: en/okr.md
-      - Recipes and shopping: en/recipes.md
-      - Achievements: en/progression.md
-  - Développer:
-      - Démarrage: demarrage.md
-      - Architecture: architecture.md
-      - Données et historique: donnees.md
-      - Backend: backend.md
-      - Frontend: frontend.md
-      - Configuration: configuration.md
-      - Référence API: api.md
-      - Tests et qualité: tests.md
-  - Mettre en production:
-      - Déploiement: deploiement.md
-      - Sauvegardes et restauration: sauvegardes.md
-      - Exploitation: exploitation.md
-      - Sécurité: securite.md
-  - Faire évoluer:
-      - Ajouter une fonctionnalité: evolution.md
-      - Revue Sport mobile et PC: revue-sport-2026-11-17.md
-      - Spécification des tâches: taches-specification.md
-      - Décision initiale: decisions/001-architecture-initiale.md
-      - Tâches et persistance: decisions/002-gestion-taches.md
-      - Applications LifeOS: decisions/003-applications-lifeos.md
-      - Français et anglais: decisions/004-internationalisation.md
-      - Intégrations et Suivi: decisions/005-integrations-tracking.md
-      - Progression commune: decisions/006-progression-applications.md
-      - Réglages généraux: decisions/007-reglages-generaux.md
+  documentation_guides:
+    - id: directory
+      fr: Documentation
+      en: Documentation
+      chapters:
+        - {file: index.md, fr: Choisir une documentation, en: Choose a guide}
+    - id: general
+      fr: Général
+      en: General
+      chapters:
+        - {file: applications.md, fr: Compte et applications, en: Account and applications}
+        - {file: settings.md, fr: Réglages généraux, en: General settings}
+        - {file: progression.md, fr: Réussites et progression, en: Achievements and progress}
+    - id: tasks
+      fr: Tâches
+      en: Tasks
+      chapters:
+        - {file: taches.md, fr: Guide des tâches, en: Tasks guide}
+    - id: sport
+      fr: Sport
+      en: Sport
+      chapters:
+        - {file: sport.md, fr: Guide Sport, en: Sport guide}
+    - id: tracking
+      fr: Suivi
+      en: Tracking
+      chapters:
+        - {file: tracking.md, fr: Guide Suivi, en: Tracking guide}
+    - id: okr
+      fr: Objectifs OKR
+      en: OKR Goals
+      chapters:
+        - {file: okr.md, fr: Guide Objectifs OKR, en: OKR Goals guide}
+    - id: recipes
+      fr: Cook & Shop · Recettes et courses
+      en: Cook & Shop · Recipes and shopping
+      chapters:
+        - {file: recipes.md, fr: Guide recettes et courses, en: Recipes and shopping guide}
+    - id: technical
+      fr: Documentation technique
+      en: Technical documentation
+      chapters:
+        - {file: technique.md, fr: Accueil technique, en: Technical overview}
+        - fr: Développer
+          en: Development
+          pages:
+            - {file: demarrage.md, fr: Démarrage, en: Getting started}
+            - {file: architecture.md, fr: Architecture, en: Architecture}
+            - {file: donnees.md, fr: Données et historique, en: Data and history}
+            - {file: backend.md, fr: Backend, en: Backend}
+            - {file: frontend.md, fr: Frontend, en: Frontend}
+            - {file: configuration.md, fr: Configuration, en: Configuration}
+            - {file: tests.md, fr: Tests et qualité, en: Tests and quality}
+            - {file: internationalisation.md, fr: Internationalisation, en: Internationalization}
+        - fr: Références API
+          en: API references
+          pages:
+            - {file: api.md, fr: Socle et Tâches, en: Platform and Tasks}
+            - {file: sport-api.md, fr: API Sport, en: Sport API}
+            - {file: tracking-api.md, fr: API Suivi, en: Tracking API}
+            - {file: okr-api.md, fr: API Objectifs OKR, en: OKR Goals API}
+            - {file: recipes-api.md, fr: API Recettes et courses, en: Recipes and shopping API}
+            - {file: integrations.md, fr: Intégrations de données, en: Data integrations}
+        - fr: Exploiter
+          en: Operations
+          pages:
+            - {file: deploiement.md, fr: Déploiement, en: Deployment}
+            - {file: sauvegardes.md, fr: Sauvegardes et restauration, en: Backup and restore}
+            - {file: exploitation.md, fr: Exploitation, en: Operations}
+            - {file: securite.md, fr: Sécurité, en: Security}
+        - fr: Évolution et décisions
+          en: Evolution and decisions
+          pages:
+            - {file: evolution.md, fr: Faire évoluer LifeOS, en: Evolving LifeOS}
+            - {file: revue-sport-2026-11-17.md, fr: Revue Sport du 17 novembre 2026, en: Sport review — 17 November 2026}
+            - {file: taches-specification.md, fr: Spécification des tâches, en: Tasks specification}
+            - {file: decisions/001-architecture-initiale.md, fr: ADR 001 · Socle initial, en: ADR 001 · Initial architecture}
+            - {file: decisions/002-gestion-taches.md, fr: ADR 002 · Tâches et persistance, en: ADR 002 · Tasks and persistence}
+            - {file: decisions/003-applications-lifeos.md, fr: ADR 003 · Applications LifeOS, en: ADR 003 · LifeOS applications}
+            - {file: decisions/004-internationalisation.md, fr: ADR 004 · Français et anglais, en: ADR 004 · French and English}
+            - {file: decisions/005-integrations-tracking.md, fr: ADR 005 · Intégrations et Suivi, en: ADR 005 · Integrations and Tracking}
+            - {file: decisions/006-progression-applications.md, fr: ADR 006 · Progression commune, en: ADR 006 · Shared progression}
+            - {file: decisions/007-reglages-generaux.md, fr: ADR 007 · Réglages généraux, en: ADR 007 · General settings}

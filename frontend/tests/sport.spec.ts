@@ -999,6 +999,7 @@ for (const locale of ["fr", "en"] as const) {
       const breakdown = detail.locator(".sport-summary[aria-label]");
       await expect(breakdown.locator("strong").nth(0)).toHaveText(locale === "fr" ? "33,33 %" : "33.33 %");
       await expect(breakdown.locator("strong").nth(1)).toHaveText("100 %");
+      await detail.screenshot({ path: test.info().outputPath(`score-summary-${locale}.png`) });
       const explanation = detail.locator(".sport-score-explained summary");
       await explanation.focus();
       await page.keyboard.press("Enter");

@@ -12,13 +12,17 @@ Add up to 30 fields: numbers with units, Yes/No, durations (hours/minutes, store
 
 Goals support at least, at most, between two bounds and exactly. The distance that scores zero controls the gradient; the weight controls each goal’s contribution. For example, at least 2 litres with a zero-score distance of 2 gives 0/10 at zero, 5/10 at one litre and 10/10 at two or more. Boolean and choice goals score either zero or ten. Notes have no goal.
 
+![Tracker editor: choose fields and goals to measure.](../assets/screenshots/en/tracking-editor.png){ loading=lazy }
+
+*Tracker editor: choose fields and goals to measure.*
+
 ## Connect applications
 
 Choose **From an application**, an enabled source and a searchable metric. Select the tracker’s period, or the day, week, month or year containing the selected entry date. Add supported filters, search their options and calculate a preview.
 
 Examples include completed tasks in a workspace this week, tasks completed late, manual due-date changes for tasks changed more than three times within the selected period and filters, completed training for a program, sets of an exercise, distance, volume and body measurements. All source references belong to your account.
 
-Current-state metrics, such as currently open tasks, cannot reconstruct past states. Missing measurements and unavailable sources remain distinct from zero. Activity statistics use recorded business actions and results; screen time, page visits and page usage duration are not collected. See the [metric catalogue](../integrations.md) for calculation details.
+Current-state metrics, such as currently open tasks, cannot reconstruct past states. Missing measurements and unavailable sources remain distinct from zero. Activity statistics use recorded business actions and results; screen time, page visits and page usage duration are not collected. See the [metric catalogue](integrations.md) for calculation details.
 
 ## Enter and correct values
 
@@ -27,6 +31,10 @@ Current-state metrics, such as currently open tasks, cannot reconstruct past sta
 Automatic values are calculated on the server when first saved. Saved entries retain their source query, calculation time and value. Later changes in Tasks or Sport do not silently rewrite them. Enable **Refresh automatic values** to recalculate on the next save; this creates a history revision. A disabled source blocks new reads but preserves existing snapshots. An unavailable required value prevents completion; existing saved values remain readable without refreshing.
 
 Errors preserve your input. Concurrent edits return a conflict: reload and apply your correction. The interface warns before leaving changed forms. Unsaved forms are temporary; business data is never stored in browser storage. Sign-out and session expiry remove private views.
+
+![Today: start or resume entries for scheduled periods.](../assets/screenshots/en/tracking-today.png){ loading=lazy }
+
+*Today: start or resume entries for scheduled periods.*
 
 ## Calendar, statistics and rewards
 
@@ -38,12 +46,28 @@ Statistics show numeric/boolean trends and a data table, with an average across 
 
 Achievements provide 60 quests per application, increasing level costs up to 100, ten titles and an immutable points journal. The shared badge shows your level, title and streak. Choose usage days for each application and global vacation periods in Settings. See the [complete achievements guide](progression.md) for scoring, corrections and historical imports.
 
+![Calendar: colors and scores distinguish recorded periods.](../assets/screenshots/en/tracking-calendar.png){ loading=lazy }
+
+*Calendar: colors and scores distinguish recorded periods.*
+
 ## Lifecycle and limits
 
 Existing entries keep their original goals and definition. Edits apply to new periods, no earlier than the local edit date; an already-started longer period keeps its earlier definition. Frequency, first day and time zone are fixed after creation. Changing a field’s type or unit starts a separate measurement series.
 
 Archive removes a tracker from current entry lists and preserves history. Restore it from Archives. Past calendar periods and started longer periods remain; new periods follow archive/restore dates. Reorder active trackers with Up/Down. Up to 50 trackers may be active. Permanent deletion is not offered.
 
-The calendar and trends allow up to 367 days per request. Queries and entry histories used for calculation are bounded at 20,000 records. All persistent operations have a [versioned API](../tracking-api.md). PostgreSQL backups contain definitions, values, source snapshots and immutable revision histories; see [backup procedures](../sauvegardes.md#migration-0009-suivi).
+The calendar and trends allow up to 367 days per request. Queries and entry histories used for calculation are bounded at 20,000 records. All persistent operations have a [versioned API](tracking-api.md). PostgreSQL backups contain definitions, values, source snapshots and immutable revision histories; see [backup procedures](sauvegardes.md#migration-0009-suivi).
+
+![Statistics: select a tracker to read its trends.](../assets/screenshots/en/tracking-statistics.png){ loading=lazy }
+
+*Statistics: select a tracker to read its trends.*
+
+![On mobile, select a day and read its details below the calendar.](../assets/screenshots/en/tracking-calendar-mobile.png){ loading=lazy width="390" }
+
+*On mobile, select a day and read its details below the calendar.*
 
 Preferences are grouped in [General settings](settings.md). An application’s Settings control opens its section; the progression timezone and vacations are under General, and usage days are in each application section.
+
+![Open Settings to adjust this application’s preferences and usage days.](../assets/screenshots/en/tracking-settings.png){ loading=lazy }
+
+*Open Settings to adjust this application’s preferences and usage days.*

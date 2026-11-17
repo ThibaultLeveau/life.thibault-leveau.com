@@ -10,6 +10,11 @@ From Home or the library, click your name in the top right corner and choose **S
 
 The **progression calendar** contains its own IANA timezone and shared vacation periods. Choose **Save my rhythm** to keep changes. Vacation days do not break a streak or create activity and do not remove earned rewards. These settings remain accessible when Tracking is disabled.
 
+
+![General settings: account appearance, language, progression timezone and vacations.](../assets/screenshots/en/general-settings.png){ loading=lazy }
+
+*General settings: account appearance, language, progression timezone and vacations.*
+
 ## Application sections
 
 | Section | Available settings |
@@ -32,6 +37,10 @@ Failed reads offer **Try again**. Failed saves retain your input and show an err
 
 ## API and storage
 
-The page reuses existing versioned APIs: `/preferences`, `/progression/settings`, `/agenda/view`, `/workspaces/{id}/view`, `/sport/settings`, `/tracking/settings` and `/okr/settings`, all under `/api/v1`, with GET and PUT. Account preference updates accept partial fields; progression and OKR updates require `expected_version`. See [API examples](../api.md).
+The page reuses existing versioned APIs: `/preferences`, `/progression/settings`, `/agenda/view`, `/workspaces/{id}/view`, `/sport/settings`, `/tracking/settings` and `/okr/settings`, all under `/api/v1`, with GET and PUT. Account preference updates accept partial fields; progression and OKR updates require `expected_version`. See [API examples](api.md).
 
-Writes require the existing session, allowed origin and CSRF token. Business settings enforce application activation and ownership. PostgreSQL backups already preserve these preferences. No new tables, migration, browser business storage or deployment service are required; see [backup and restore](../sauvegardes.md).
+Writes require the existing session, allowed origin and CSRF token. Business settings enforce application activation and ownership. PostgreSQL backups already preserve these preferences. No new tables, migration, browser business storage or deployment service are required; see [backup and restore](sauvegardes.md).
+
+![Sport settings: rest between sets and usage days.](../assets/screenshots/en/sport-settings.png){ loading=lazy }
+
+*Sport settings: rest between sets and usage days.*

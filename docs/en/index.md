@@ -1,21 +1,65 @@
-# Welcome to LifeOS
+# LifeOS documentation
 
-LifeOS brings your personal applications together in one private space. Sign in with the account created by your administrator, then open an enabled application from the home page.
+Choose a guide. Each has its own navigation and search, in French and English. **English / Français** keeps you on the equivalent page.
 
-- [Choose your applications, language and appearance](applications.md).
-- [Tasks: workspaces, upcoming dates, lists, boards and recurring tasks](taches.md).
-- [Sport: exercises, programs, training, body measurements and statistics](sport.md).
+## User documentation
 
-Choose **English** or **Français** in the account menu’s **Language** selector. On a small screen, open navigation to find it. Your choice is saved to your account and applies across LifeOS after sign-in, independently of your appearance setting. Existing accounts start in French. Before sign-in, the browser language chooses the form language, with French as the fallback; you can change it on the form.
+<div class="guide-cards" markdown>
 
-Interface text and default Sport exercises are translated. Your titles, notes, workspace labels and personal exercises remain exactly as you wrote them. Dates and numbers follow French or British English conventions; measurements remain metric. Numeric dates entered in natural language use **day/month/year** in both languages. ISO dates are also accepted.
+<div markdown>
 
-Changing language reloads the current view. Save temporary form entries first; Sport asks before leaving a changed program or unsaved training entries. Saved sets, active training and history are preserved. Signing out or session expiry clears private information from the screen.
+[General](applications.md)
 
-The technical and operations documentation is maintained in French: [architecture](../architecture.md), [API](../api.md), [language contracts](../internationalisation.md), [deployment](../deploiement.md) and [backups](../sauvegardes.md).
+Sign-in, library, language, appearance and progress.
 
-[Tracking](tracking.md) adds personal habits and goals, Tasks/Sport data sources, guided entry, a responsive calendar, statistics and rewards.
+</div>
 
-[OKR Goals](okr.md) connects your 10-year, 3-year, annual and quarterly goals with measurable key results, a quarterly board, accomplishment snapshots, Tracking metrics and 60 quests.
+<div markdown>
 
-[Recipes & Shopping Lists](recipes.md): 301 bilingual ingredients, scalable recipes, reusable shopping lists and templates, shopping mode and 60 quests.
+[Tasks](taches.md)
+
+Workspaces, lists, boards, agenda and recurring tasks.
+
+</div>
+
+<div markdown>
+
+[Sport](sport.md)
+
+Exercises, programs, training and statistics.
+
+</div>
+
+<div markdown>
+
+[Tracking](tracking.md)
+
+Habits, check-ins, calendar, sources and goals.
+
+</div>
+
+<div markdown>
+
+[OKR Goals](okr.md)
+
+Horizons, key results, quarterly plans and accomplishments.
+
+</div>
+
+<div markdown>
+
+[Cook & Shop](recipes.md)
+
+Recipes, servings, lists, templates and shopping mode.
+
+</div>
+
+</div>
+
+## Technical documentation
+
+[Develop, integrate and operate LifeOS](technique.md){ .md-button }
+
+Architecture, APIs, configuration, tests, deployment, backups and decisions.
+
+Guide screenshots use demonstration data. Your own account content is never automatically translated.

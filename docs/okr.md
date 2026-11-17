@@ -19,6 +19,10 @@ Exemple : « Vivre de mon activité » → « Construire une activité indépend
 
 L’objectif trimestriel représente une avancée **réalisable en un mois maximum**, pas un chantier de trois mois. Du 16 novembre, la date limite est le 15 décembre inclus. Pour un départ le 31 janvier, le mois suivant est ajusté à son dernier jour, puis diminué d’un jour : le 27 février, ou le 28 février d’une année bissextile. Des actions plus courtes sont possibles. Le trimestre prévu est celui de la date de début ; un plan peut franchir une frontière trimestrielle. Les autres horizons acceptent des dates facultatives, fournies par paire.
 
+![Horizons : relier son cap à long terme aux objectifs plus proches.](assets/screenshots/fr/okr-horizons.png){ loading=lazy }
+
+*Horizons : relier son cap à long terme aux objectifs plus proches.*
+
 ## Mesurer avec les résultats clés
 
 Ajoutez jusqu’à 12 résultats clés par objectif : titre, départ, cible, valeur actuelle et unité facultative. Une cible doit être différente du départ. Une cible plus basse suit une réduction, par exemple de 10 à 2 heures. Un résultat binaire s’exprime avec départ 0 et cible 1.
@@ -27,6 +31,10 @@ La progression d’un résultat est `(actuel − départ) / (cible − départ)`
 
 Ouvrez une carte, choisissez **Mettre à jour**, saisissez la valeur et, si utile, ce que vous avez appris. Les valeurs précédentes, cibles et notes restent consultables dans **Historique**. Les résultats clés peuvent aussi être ajoutés, modifiés ou retirés dans le formulaire tant que l’objectif est ouvert ; les instantanés antérieurs restent intacts. L’atteinte de 100 % ne clôture jamais l’objectif automatiquement.
 
+![Éditeur : préciser la réussite attendue et les résultats clés.](assets/screenshots/fr/okr-editor.png){ loading=lazy }
+
+*Éditeur : préciser la réussite attendue et les résultats clés.*
+
 ## Avancer dans le kanban
 
 **Ce trimestre** affiche les objectifs trimestriels : **À préparer**, **En cours**, **Terminé**. Filtrez par domaine et trimestre. Les objectifs encore ouverts des trimestres précédents sont reportés avec leur trimestre d’origine ; les objectifs futurs attendent le trimestre choisi. Les cartes terminées apparaissent dans leur trimestre réel de réalisation.
@@ -34,6 +42,10 @@ Ouvrez une carte, choisissez **Mettre à jour**, saisissez la valeur et, si util
 Déplacez la poignée d’une carte vers une colonne ou avant une autre carte. Les commandes de statut et les flèches monter/descendre offrent le même fonctionnement au clavier et sur mobile. L’ordre est enregistré par horizon et statut, commun aux domaines et trimestres ; les filtres ne créent pas un ordre indépendant. Sur un écran étroit, les colonnes s’empilent pour rester lisibles.
 
 **Terminer l’objectif** exige que chaque résultat clé soit atteint. La clôture de tout horizon, personnel ou professionnel, rejoint le trimestre en cours calculé par le serveur dans le fuseau des réglages OKR. La date prévue ne décide pas du trimestre de réalisation.
+
+![Plan trimestriel : déplacer les objectifs selon leur avancement.](assets/screenshots/fr/okr-board.png){ loading=lazy }
+
+*Plan trimestriel : déplacer les objectifs selon leur avancement.*
 
 ## Célébrer les trimestres accomplis
 
@@ -60,3 +72,7 @@ Limites : 5 000 objectifs par compte, archives comprises ; 12 résultats clés p
 Toutes ces opérations disposent d’une [API versionnée](okr-api.md), avec les mêmes règles et contrôles de propriétaire.
 
 Les préférences sont réunies dans les [réglages généraux](settings.md). Le lien Réglages de l’application ouvre sa section ; fuseau de progression et vacances se trouvent dans Général, jours d’utilisation dans chaque application.
+
+![Ouvrir Réglages pour adapter les préférences et les jours d’utilisation de cette application.](assets/screenshots/fr/okr-settings.png){ loading=lazy }
+
+*Ouvrir Réglages pour adapter les préférences et les jours d’utilisation de cette application.*
