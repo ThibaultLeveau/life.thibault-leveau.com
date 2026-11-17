@@ -275,9 +275,28 @@ test("clôture clavier : focus suivant et géométrie stable, mouvement réduit"
 test("mobile 320px : recherche focalisée, cibles de 44px, menu complet et création agenda", async ({
   page,
 }) => {
-  const { tasks } = await seed(page);
+  const { tasks, space, write } = await seed(page);
+  const label = await write<Label>(`/workspaces/${space.id}/labels`, {
+    name: "X",
+  });
+  await write(
+    `/tasks/${tasks[0].id}`,
+    {
+      expected_version: tasks[0].version,
+      priority: 1,
+      label_ids: [label.id],
+    },
+    "PATCH",
+  );
+  await page.reload();
   await page.setViewportSize({ width: 320, height: 740 });
-  for (const selector of [".task-checkbox", ".task-more", ".drag-handle"]) {
+  for (const selector of [
+    ".task-checkbox",
+    ".task-more",
+    ".drag-handle",
+    ".task-priority",
+    ".task-label",
+  ]) {
     const bounds = (await row(page, tasks[0]).locator(selector).boundingBox())!;
     expect(bounds.width).toBeGreaterThanOrEqual(44);
     expect(bounds.height).toBeGreaterThanOrEqual(44);
@@ -560,7 +579,9 @@ test("création d’espace : erreur récupérable et contexte stable pendant la 
     release();
   }
   await expect(dialog).toHaveCount(0);
-  await expect(page.getByRole("heading", { name: `# ${name}`, exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: `# ${name}`, exact: true }),
+  ).toBeVisible();
   await page
     .getByRole("button", { name: "Nouvelle tâche", exact: true })
     .click();

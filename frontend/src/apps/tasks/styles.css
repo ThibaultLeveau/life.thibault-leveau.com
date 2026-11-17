@@ -2439,3 +2439,25 @@
     margin-top: 0;
   }
 }
+/* Compact labels and secondary listing commands keep full touch targets. */
+.task-meta button,
+.task-summary .text-button,
+.section-heading button,
+.global-task-filters button,
+.board-navigation button,
+.parent-workspaces button,
+.active-task-filters button,
+.workspace-chooser button,
+button.task-load-more,
+.task-load-more button,
+.task-feedback-toast button,
+.task-sync-feedback button,
+.bulk-task-form button,
+.bulk-task-form .check-label {
+  min-width: 44px;
+  min-height: 44px;
+}
+.workspace-chooser button {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
