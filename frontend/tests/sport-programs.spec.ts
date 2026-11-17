@@ -352,7 +352,15 @@ test("Toutes les pages Sport : mobile, tablette, ordinateur, thèmes et formulai
     await page.setViewportSize({ width, height: 900 });
     for (const tab of tabs) {
       await page.goto(`/sport?tab=${tab}`);
-      await expect(page.locator(".sport-content h1")).toBeVisible();
+      if (tab === "settings") {
+        await expect(page).toHaveURL(/\/settings\?application=sport$/);
+        await expect(page.locator("#settings-section-title")).toHaveText("Sport");
+        await expect(
+          page.getByLabel("Temps de repos entre les séries (secondes)"),
+        ).toBeVisible();
+      } else {
+        await expect(page.locator(".sport-content h1")).toBeVisible();
+      }
       await expect(page.getByText("Chargement…", { exact: true })).toHaveCount(
         0,
       );
@@ -360,7 +368,7 @@ test("Toutes les pages Sport : mobile, tablette, ordinateur, thèmes et formulai
       if (width < 800) {
         const small = await page
           .locator(
-            ".sport-content input, .sport-content select, .sport-content textarea",
+            ":is(.sport-content, .settings-content) :is(input, select, textarea)",
           )
           .evaluateAll((fields) =>
             fields
@@ -503,13 +511,10 @@ test.describe("programme tactile", () => {
       .getByRole("button", { name: "Réglages", exact: true })
       .click();
     await expect(
-      page.getByRole("heading", { name: "Réglages", exact: true }),
+      page.getByRole("heading", { name: "Sport", exact: true }),
     ).toBeFocused();
-    await expect
-      .poll(() =>
-        page.locator(".sport-shell").evaluate((element) => element.scrollTop),
-      )
-      .toBe(0);
+    await expect(page).toHaveURL(/\/settings\?application=sport$/);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
   });
 });
 
