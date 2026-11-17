@@ -5,6 +5,7 @@ import { useTaskSync } from "../useTaskSync";
 import { workspaceTree } from "../workspaceTree";
 import type { Task } from "../types";
 import { TaskActions } from "./TaskActions";
+import { TaskFilterDisclosure } from "./TaskFilterDisclosure";
 import { TaskContents } from "./TaskContents";
 import { TaskEditor } from "./TaskEditor";
 import { MoveDialog } from "./MoveDialog";
@@ -149,96 +150,101 @@ export function GlobalTasksView({
           </button>
         )}
       </div>
-      <div className="global-task-filters">
-        <label className="global-search-field">
-          <span className="sr-only">{tr("global_search")}</span>
-          <Icon name="search" />
-          <input
-            id="global-task-search"
-            value={search}
-            maxLength={500}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder={tr("search_everywhere")}
-          />
-          {search && (
-            <button
-              className="icon-button"
-              aria-label={tr("clear_search")}
-              onClick={() => setSearch("")}
-            >
-              <Icon name="x" />
-            </button>
-          )}
-        </label>
-        <label>
-          {tr("task_state")}
-          <select
-            value={scope}
-            onChange={(event) => setScope(event.target.value)}
-          >
-            <option value="open">{tr("open_tasks")}</option>
-            <option value="completed">{tr("completed_tasks")}</option>
-            <option value="all">{tr("all_states")}</option>
-            <option value="archives">{tr("archive_scope")}</option>
-          </select>
-        </label>
-        <label>
-          {tr("workspace")}
-          <select
-            value={spaceId}
-            onChange={(event) => {
-              setSpaceId(event.target.value);
-              setLabelId("");
-            }}
-          >
-            <option value="">{tr("all_workspaces")}</option>
-            {workspaceTree(
-              workspaces.filter((space) => archived || !space.archived_at),
-            ).map(({ space, path }) => (
-              <option key={space.id} value={space.id}>
-                {path}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          {tr("priority")}
-          <select
-            value={priority}
-            onChange={(event) => setPriority(event.target.value)}
-          >
-            <option value="">{tr("all_priorities")}</option>
-            {[1, 2, 3, 4].map((value) => (
-              <option key={value} value={value}>
-                P{value}
-              </option>
-            ))}
-          </select>
-        </label>
-        {spaceId && (
+      <TaskFilterDisclosure
+        alwaysOpen={mode === "search"}
+        active={[search, spaceId, priority, labelId].filter(Boolean).length}
+      >
+        <div className="global-task-filters">
+          <label className="global-search-field">
+            <span className="sr-only">{tr("global_search")}</span>
+            <Icon name="search" />
+            <input
+              id="global-task-search"
+              value={search}
+              maxLength={500}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder={tr("search_everywhere")}
+            />
+            {search && (
+              <button
+                className="icon-button"
+                aria-label={tr("clear_search")}
+                onClick={() => setSearch("")}
+              >
+                <Icon name="x" />
+              </button>
+            )}
+          </label>
           <label>
-            {tr("label")}
+            {tr("task_state")}
             <select
-              value={labelId}
-              onChange={(event) => setLabelId(event.target.value)}
+              value={scope}
+              onChange={(event) => setScope(event.target.value)}
             >
-              <option value="">{tr("all_labels")}</option>
-              {data.labels
-                .filter((label) => label.workspace_id === spaceId)
-                .map((label) => (
-                  <option key={label.id} value={label.id}>
-                    {label.name}
-                  </option>
-                ))}
+              <option value="open">{tr("open_tasks")}</option>
+              <option value="completed">{tr("completed_tasks")}</option>
+              <option value="all">{tr("all_states")}</option>
+              <option value="archives">{tr("archive_scope")}</option>
             </select>
           </label>
-        )}
-        {(search || spaceId || priority || labelId) && (
-          <button className="text-button" onClick={clear}>
-            {tr("clear_filters")}
-          </button>
-        )}
-      </div>
+          <label>
+            {tr("workspace")}
+            <select
+              value={spaceId}
+              onChange={(event) => {
+                setSpaceId(event.target.value);
+                setLabelId("");
+              }}
+            >
+              <option value="">{tr("all_workspaces")}</option>
+              {workspaceTree(
+                workspaces.filter((space) => archived || !space.archived_at),
+              ).map(({ space, path }) => (
+                <option key={space.id} value={space.id}>
+                  {path}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            {tr("priority")}
+            <select
+              value={priority}
+              onChange={(event) => setPriority(event.target.value)}
+            >
+              <option value="">{tr("all_priorities")}</option>
+              {[1, 2, 3, 4].map((value) => (
+                <option key={value} value={value}>
+                  P{value}
+                </option>
+              ))}
+            </select>
+          </label>
+          {spaceId && (
+            <label>
+              {tr("label")}
+              <select
+                value={labelId}
+                onChange={(event) => setLabelId(event.target.value)}
+              >
+                <option value="">{tr("all_labels")}</option>
+                {data.labels
+                  .filter((label) => label.workspace_id === spaceId)
+                  .map((label) => (
+                    <option key={label.id} value={label.id}>
+                      {label.name}
+                    </option>
+                  ))}
+              </select>
+            </label>
+          )}
+          {(search || spaceId || priority || labelId) && (
+            <button className="text-button" onClick={clear}>
+              {tr("clear_filters")}
+            </button>
+          )}
+        </div>
+      </TaskFilterDisclosure>
       <CompletionNotice completion={completion} />
       <div className="task-summary" role="status">
         {tr("result_count", { count: items.length })}

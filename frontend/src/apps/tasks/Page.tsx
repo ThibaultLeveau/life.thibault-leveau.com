@@ -36,6 +36,8 @@ import { workspaceTree } from "./workspaceTree";
 import { TaskSyncProvider, SyncFeedback, useTaskSync } from "./useTaskSync";
 import { workspaceTasks } from "./optimistic";
 import "./styles.css";
+import { TaskFilterDisclosure } from "./components/TaskFilterDisclosure";
+import { TaskNavigationMore } from "./components/TaskNavigationMore";
 import { GlobalTasksView } from "./components/GlobalTasksView";
 import { useTaskNavigation, type TaskLocation } from "./useTaskNavigation";
 import { useTaskCompletion, CompletionNotice } from "./useTaskCompletion";
@@ -367,6 +369,14 @@ function TasksPage() {
           {tr("add_a_task")}
         </button>
         <button
+          className={`application-nav-item workspace-link agenda-link ${agenda ? "is-active" : ""}`}
+          aria-current={agenda ? "page" : undefined}
+          onClick={() => navigate("agenda")}
+        >
+          <Icon name="calendar" size={18} />
+          <span>{tr("upcoming")}</span>
+        </button>
+        <button
           className={`application-nav-item sidebar-search ${locationView === "search" ? "is-active" : ""}`}
           aria-current={locationView === "search" ? "page" : undefined}
           onClick={searchTasks}
@@ -375,31 +385,7 @@ function TasksPage() {
           {tr("search")}
           <kbd>⌘ K</kbd>
         </button>
-        <button
-          className={`application-nav-item workspace-link agenda-link ${agenda ? "is-active" : ""}`}
-          aria-current={agenda ? "page" : undefined}
-          onClick={() => navigate("agenda")}
-        >
-          <Icon name="calendar" size={18} />
-          <span>{tr("upcoming")}</span>
-        </button>
-        {(
-          [
-            ["all", "list", "all_tasks"],
-            ["undated", "calendar", "no_due_date"],
-            ["archives", "archive", "task_archives"],
-          ] as const
-        ).map(([view, icon, label]) => (
-          <button
-            key={view}
-            className={`application-nav-item ${locationView === view ? "is-active" : ""}`}
-            aria-current={locationView === view ? "page" : undefined}
-            onClick={() => navigate(view)}
-          >
-            <Icon name={icon} />
-            <span>{tr(label)}</span>
-          </button>
-        ))}
+        <TaskNavigationMore current={locationView} onNavigate={navigate} />
         <div className="sidebar-divider" />
         <div className="sidebar-label">
           <span>{tr("my_workspaces")}</span>
@@ -616,18 +602,24 @@ function TasksPage() {
                   </button>
                 </div>
                 <div className="toolbar-actions">
-                  <div className="task-search-field">
-                    <Icon name="search" size={16} />
-                    <input
-                      id="task-search"
-                      disabled={loading}
-                      aria-label={tr("search_tasks")}
-                      value={search}
-                      onChange={(event) => setSearch(event.target.value)}
-                      placeholder={tr("search_placeholder")}
-                      maxLength={500}
-                    />
-                  </div>
+                  <TaskFilterDisclosure
+                    key={workspaceId}
+                    label={tr("filter_workspace")}
+                    active={search ? 1 : 0}
+                  >
+                    <div className="task-search-field">
+                      <Icon name="search" size={16} />
+                      <input
+                        id="task-search"
+                        disabled={loading}
+                        aria-label={tr("search_tasks")}
+                        value={search}
+                        onChange={(event) => setSearch(event.target.value)}
+                        placeholder={tr("search_placeholder")}
+                        maxLength={500}
+                      />
+                    </div>
+                  </TaskFilterDisclosure>
                   <button
                     className={`toolbar-button ${showFilters || hasFilters ? "is-selected" : ""}`}
                     aria-expanded={showFilters}

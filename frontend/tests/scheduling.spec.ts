@@ -99,7 +99,7 @@ test("récurrence naturelle, résolution, annulation et persistance", async ({
   await page
     .getByRole("checkbox", { name: "Terminer : Courir", exact: true })
     .click();
-  await expect(page.locator(".notice")).toContainText("Prochaine");
+  await expect(page.locator(".task-feedback-toast")).toContainText("Prochaine");
   let result = (await (
     await page.request.get(`/api/v1/tasks/${task.id}`)
   ).json()) as Task;

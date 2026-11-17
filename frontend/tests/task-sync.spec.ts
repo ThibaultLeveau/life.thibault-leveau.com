@@ -409,7 +409,7 @@ test("récurrence calculée par le serveur, autre validation et annulation", asy
   const release = gate();
   await hold(page, `**/api/v1/tasks/${tasks[1].id}/complete`, release);
   await row(page, recurring).getByRole("checkbox").click();
-  await expect(page.locator(".notice")).toContainText("Prochaine");
+  await expect(page.locator(".task-feedback-toast")).toContainText("Prochaine");
   try {
     await row(page, tasks[1]).getByRole("checkbox").click();
     await expect(row(page, tasks[1]).getByRole("checkbox")).toBeChecked();

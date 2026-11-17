@@ -109,9 +109,11 @@ test("recherche tous espaces, archives, filtres et navigation précédent", asyn
     .selectOption("open");
   await menu(page, tasks[0], "Archiver");
   await confirm(page, "Archiver");
+  await page.getByRole("button", { name: "Autres vues des tâches" }).click();
   await page
     .getByRole("button", { name: "Archives des tâches", exact: true })
     .click();
+  await page.getByRole("button", { name: "Rechercher et filtrer" }).click();
   await page
     .getByRole("combobox", { name: "Espace", exact: true })
     .selectOption(space.id);
@@ -421,6 +423,7 @@ test("agenda : filtres enregistrés et création dans le bon espace", async ({
     "PUT",
   );
   await page.goto("/tasks?view=agenda");
+  await page.getByRole("button", { name: "Rechercher et filtrer" }).click();
   await page
     .locator(".agenda-filters")
     .getByRole("combobox", { name: "Espace", exact: true })
@@ -587,4 +590,152 @@ test("création d’espace : erreur récupérable et contexte stable pendant la 
     .click();
   await expect(dialog.getByLabel("Titre", { exact: true })).toBeVisible();
   await expect(dialog.locator(".dialog-context")).toContainText(name);
+});
+
+test("agenda épuré : lignes centrées, métadonnées proches et notification compacte", async ({
+  page,
+}) => {
+  const { space, tasks, write } = await seed(page, 3);
+  const today = new Date().toLocaleDateString("en-CA");
+  await write(
+    `/workspaces/${space.id}`,
+    { name: "Professionnel / Pro LifeOS / Organisation quotidienne" },
+    "PATCH",
+  );
+  for (let index = 0; index < tasks.length; index++) {
+    await write(
+      `/tasks/${tasks[index].id}`,
+      {
+        expected_version: tasks[index].version,
+        due_date: today,
+        description: "",
+        recurrence:
+          index === 0
+            ? {
+                rrule: "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA,SU",
+                start_date: today,
+                timezone: "Europe/Paris",
+                mode: "scheduled",
+                end_date: null,
+                max_occurrences: null,
+                excluded_dates: [],
+              }
+            : null,
+      },
+      "PATCH",
+    );
+  }
+  await write(
+    "/agenda/view",
+    {
+      period: "today",
+      workspace_id: space.id,
+      search: "",
+      priority: null,
+      label_id: null,
+      include_overdue: false,
+      show_completed: false,
+    },
+    "PUT",
+  );
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto("/tasks?view=agenda");
+  await expect(
+    row(page, tasks[0]).locator(".agenda-context-path"),
+  ).toContainText("Organisation quotidienne");
+  await expect(page.locator(".agenda-filters input")).toBeHidden();
+  const filter = page.getByRole("button", { name: /Rechercher et filtrer/ });
+  await expect(filter).toHaveAttribute("aria-expanded", "false");
+  const view = (await page.locator(".agenda-view").boundingBox())!;
+  const content = (await page.locator(".task-page-content").boundingBox())!;
+  expect(view.width).toBeLessThanOrEqual(960);
+  expect(
+    Math.abs(view.x + view.width / 2 - content.x - content.width / 2),
+  ).toBeLessThan(2);
+  const heights: number[] = [];
+  for (const task of tasks) {
+    const item = row(page, task);
+    const bounds = (await item.boundingBox())!;
+    const title = (await item.locator(".task-title").boundingBox())!;
+    const meta = (await item.locator(".task-meta").boundingBox())!;
+    heights.push(bounds.height);
+    expect(Math.abs(title.x - meta.x)).toBeLessThan(2);
+    expect(meta.y - title.y - title.height).toBeGreaterThanOrEqual(-1);
+    expect(meta.y - title.y - title.height).toBeLessThan(8);
+  }
+  expect(Math.max(...heights) - Math.min(...heights)).toBeLessThan(2);
+  await page.screenshot({ path: test.info().outputPath("agenda-desktop.png") });
+  await filter.click();
+  await expect(page.locator(".agenda-filters input")).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(filter).toBeFocused();
+  await expect(page.locator(".agenda-filters input")).toBeHidden();
+  for (const width of [1920, 320]) {
+    await page.setViewportSize({ width, height: 900 });
+    await row(page, tasks[0]).getByRole("checkbox").click();
+    const toast = page.locator(".task-feedback-toast");
+    await expect(toast).toContainText("Occurrence terminée");
+    await expect(page.locator(".task-sync-status")).toBeEmpty();
+    const bounds = (await toast.boundingBox())!;
+    expect(bounds.height).toBeLessThan(width === 320 ? 170 : 100);
+    expect(bounds.x).toBeGreaterThanOrEqual(0);
+    expect(bounds.x + bounds.width).toBeLessThanOrEqual(width);
+    const close = (await toast
+      .getByRole("button", { name: "Fermer le message" })
+      .boundingBox())!;
+    expect(close.width).toBeGreaterThanOrEqual(44);
+    expect(close.y + close.height).toBeLessThanOrEqual(
+      bounds.y + bounds.height,
+    );
+    await page.screenshot({
+      path: test.info().outputPath(`notification-${width}.png`),
+    });
+    await toast.getByRole("button", { name: "Annuler la résolution" }).click();
+    await expect(toast).toHaveCount(0);
+    await idle(page);
+    await expect(row(page, tasks[0])).toBeVisible();
+  }
+});
+
+test("navigation allégée : trois destinations dans le menu, recherche locale repliée", async ({
+  page,
+}) => {
+  const { space } = await seed(page);
+  const field = page.locator("#task-search");
+  await expect(field).toBeHidden();
+  await page.getByRole("button", { name: "Filtrer cet espace" }).click();
+  await expect(field).toBeFocused();
+  await field.fill("Parcours");
+  await page.keyboard.press("Escape");
+  await expect(field).toBeHidden();
+  await expect(
+    page.getByRole("button", { name: /Filtrer cet espace/ }),
+  ).toContainText("1");
+  await idle(page);
+  for (const width of [1440, 320]) {
+    await page.setViewportSize({ width, height: 900 });
+    if (width === 320)
+      await page.getByRole("button", { name: "Ouvrir la navigation" }).click();
+    const more = page.getByRole("button", { name: "Autres vues des tâches" });
+    await expect(more).toHaveText("");
+    await expect(
+      page.getByRole("button", { name: "Toutes les tâches", exact: true }),
+    ).toBeHidden();
+    await more.click();
+    await expect(
+      page.getByRole("button", { name: "Sans échéance", exact: true }),
+    ).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(more).toBeFocused();
+    await expect(more).toHaveAttribute("aria-expanded", "false");
+    if (width === 320)
+      await expect(page.locator(".application-sidebar")).toHaveClass(/is-open/);
+    await more.click();
+    await page
+      .getByRole("button", { name: "Toutes les tâches", exact: true })
+      .click();
+    await expect(page).toHaveURL(/view=all/);
+    await expect(page.locator("#global-task-search")).toBeHidden();
+    await page.goto(`/tasks?space=${space.id}`);
+  }
 });

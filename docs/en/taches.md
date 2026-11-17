@@ -101,3 +101,9 @@ See [language preferences](index.md), the [French detailed task guide](../taches
 ## Progress and quests
 
 The top-right badge shows your level, title and streak. Open it for nearby quests; the full wall and journal are in Tracking → Achievements. [Points, 60 quests and streak rules](progression.md).
+
+## Simplified layout
+
+Upcoming uses a centered reading column, with metadata below each task title and consistent minimum row heights. Long workspace paths are visually shortened and remain accessible through their links. “Search and filter” reveals fields hidden by default; a count identifies active filters, which remain applied when the panel is closed. “Filter this workspace” reveals local search. Global search opens its field directly after Search or Ctrl/⌘K.
+
+Navigation keeps Add, Upcoming and Search visible. The icon-only “More task views” button opens All tasks, No due date and Task archives. Escape closes the panel or menu and returns focus. Completion notifications keep the message, Undo and dismissal compact without shifting the list.

@@ -478,5 +478,7 @@
   "bulk_title_labels_other": "Edit labels for {{count}} tasks",
   "bulk_labels_other": "{{count}} tasks updated.",
   "archive_task_confirmation": "Archive this task? You can restore it from the archives.",
-  "keep_first_500": "Keep the first 500"
+  "keep_first_500": "Keep the first 500",
+  "search_and_filter": "Search and filter",
+  "more_task_views": "More task views"
 }

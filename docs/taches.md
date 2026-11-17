@@ -253,3 +253,9 @@ Les titres, espaces, sections, étiquettes et statuts enregistrés ne sont jamai
 ## Progression et quêtes
 
 Le badge en haut à droite affiche votre niveau, titre et série. Ouvrez-le pour consulter les quêtes les plus proches ; le mur complet et le journal sont dans Suivi → Réussites. [Barèmes, 60 quêtes et règles de séries](progression.md).
+
+## Présentation épurée
+
+La vue À venir utilise une colonne centrée : les métadonnées restent sous le titre de chaque tâche, avec des lignes de hauteur minimale homogène. Les chemins longs sont abrégés visuellement et restent accessibles par leur lien. « Rechercher et filtrer » ouvre les champs masqués par défaut ; un compteur indique les filtres actifs, conservés même si le panneau est fermé. Dans un espace, « Filtrer cet espace » révèle la recherche locale. La recherche globale affiche directement son champ après la commande Rechercher ou Ctrl/⌘K.
+
+La navigation conserve Ajouter, À venir et Rechercher. Le bouton à trois points « Autres vues des tâches » donne accès à Toutes les tâches, Sans échéance et Archives des tâches. Échap referme le panneau ou le menu avec retour du focus. Les confirmations de clôture restent compactes et proposent Annuler ainsi qu’une fermeture, sans déplacer la liste.

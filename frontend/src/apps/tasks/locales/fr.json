@@ -478,5 +478,7 @@
   "bulk_title_labels_other": "Modifier les étiquettes de {{count}} tâches",
   "bulk_labels_other": "{{count}} tâches mises à jour.",
   "archive_task_confirmation": "Archiver cette tâche ? Vous pourrez la restaurer depuis les archives.",
-  "keep_first_500": "Limiter aux 500 premières"
+  "keep_first_500": "Limiter aux 500 premières",
+  "search_and_filter": "Rechercher et filtrer",
+  "more_task_views": "Autres vues des tâches"
 }
