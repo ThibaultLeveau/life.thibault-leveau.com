@@ -1,4 +1,13 @@
 import { tr } from "../i18n";
+import { formatLocale } from "../../../shared/i18n";
+import { progressionApi } from "../../../platform/progression/api";
+import { useSportSettings } from "../preferences";
+import {
+  pageOffset,
+  queryString,
+  useSportQuery,
+  type SportNavigate,
+} from "../navigation";
 import { useEffect, useRef, useState } from "react";
 import { Dialog, ErrorMessage } from "../../../shared/ui/Dialog";
 import { Icon } from "../../../shared/ui/Icon";
@@ -6,8 +15,13 @@ import { sportApi } from "../api";
 import { ScoreExplanation } from "./ScoreExplanation";
 import { isHyrox } from "../hyrox";
 import { HyroxBrand, HyroxMark } from "./HyroxBrand";
-import type { KindDefinition, Training, Values } from "../types";
+import type { KindDefinition, Training, Values, SportSettings } from "../types";
 import {
+  ConflictPanel,
+  day,
+  Pagination,
+  useDebounced,
+  useDraftGuard,
   Empty,
   LoadState,
   moment,
@@ -21,11 +35,17 @@ import {
 export function RestTimer({
   training,
   onSkip,
+  onAdjust,
+  onResume,
+  away,
   busy,
   error,
 }: {
   training: Training;
   onSkip: () => void;
+  onAdjust: (seconds: -15 | 15) => void;
+  onResume: () => void;
+  away: boolean;
   busy: boolean;
   error: string;
 }) {
@@ -71,9 +91,9 @@ export function RestTimer({
   return (
     <div
       ref={bar}
-      className={`sport-rest ${left ? "is-running" : ""} ${isHyrox(training.name) ? "sport-hyrox" : ""}`}
+      className={`sport-rest ${left ? "is-running" : "is-ready"} ${isHyrox(training.name, training.context) ? "sport-hyrox" : ""}`}
     >
-      {isHyrox(training.name) && (
+      {isHyrox(training.name, training.context) && (
         <span className="sport-hyrox-stamp">
           <HyroxMark />
         </span>
@@ -89,8 +109,37 @@ export function RestTimer({
         </span>
       </div>
       {left > 0 && (
-        <button className="secondary-button" disabled={busy} onClick={onSkip}>
-          {tr("skip_rest")}
+        <div className="sport-rest-controls">
+          <button
+            type="button"
+            className="secondary-button"
+            aria-label={tr("shorten_rest")}
+            aria-disabled={busy}
+            onClick={() => onAdjust(-15)}
+          >
+            −15 s
+          </button>
+          <button
+            type="button"
+            className="secondary-button"
+            aria-label={tr("extend_rest")}
+            aria-disabled={busy}
+            onClick={() => onAdjust(15)}
+          >
+            +15 s
+          </button>
+          <button
+            className="secondary-button"
+            aria-disabled={busy}
+            onClick={onSkip}
+          >
+            {tr("skip_rest")}
+          </button>
+        </div>
+      )}
+      {away && (
+        <button className="text-button" onClick={onResume}>
+          {tr("resume_training")}
         </button>
       )}
       <ErrorMessage message={error} />
@@ -106,28 +155,85 @@ export function TrainingDetail({
 }) {
   return (
     <>
+      {isHyrox(training.name, training.context) && (
+        <HyroxBrand date={training.competition_date} compact />
+      )}
+      <p className="sport-tag">
+        {training.status === "completed"
+          ? tr("session_completed")
+          : training.status === "cancelled"
+            ? tr("cancelled")
+            : tr("in_progress")}
+      </p>
+      <dl className="sport-session-dates">
+        <div>
+          <dt>{tr("start")}</dt>
+          <dd>
+            <time dateTime={training.started_at}>
+              {moment(training.started_at)}
+            </time>
+          </dd>
+        </div>
+        {training.finished_at && (
+          <div>
+            <dt>{tr("finished_at")}</dt>
+            <dd>
+              <time dateTime={training.finished_at}>
+                {moment(training.finished_at)}
+              </time>
+            </dd>
+          </div>
+        )}
+        {training.competition_date && (
+          <div>
+            <dt>{tr("hyrox_competition_date")}</dt>
+            <dd>
+              <time dateTime={training.competition_date}>
+                {day(training.competition_date)}
+              </time>
+            </dd>
+          </div>
+        )}
+      </dl>
       <div className="sport-summary">
-        <div>
-          <span>{tr("start")}</span>
-          <strong>{moment(training.started_at)}</strong>
-        </div>
-        <div>
-          <span>{tr("completed_sets")}</span>
-          <strong>{training.sets.filter((s) => !s.skipped).length}</strong>
-        </div>
         <div>
           <span>{tr("training_score")}</span>
           <strong>
             {training.score == null ? "—" : number(training.score)}
           </strong>
         </div>
+        <div>
+          <span>{tr("completed_sets")}</span>
+          <strong>{training.sets.filter((s) => !s.skipped).length}</strong>
+        </div>
+        {training.finished_at && (
+          <div>
+            <span>{tr("duration_metric")}</span>
+            <strong>
+              {number(
+                Math.max(
+                  0,
+                  Date.parse(training.finished_at) -
+                    Date.parse(training.started_at),
+                ) / 60000,
+              )}{" "}
+              min
+            </strong>
+          </div>
+        )}
       </div>
       {training.score_details ? (
         <>
-          <div className="sport-summary" role="group" aria-label={tr("score_breakdown")}>
+          <div
+            className="sport-summary"
+            role="group"
+            aria-label={tr("score_breakdown")}
+          >
             <div>
               <span>{tr("score_completion")}</span>
-              <strong>{number(training.score_details.completion_percent)} %</strong>
+              <strong>
+                {number(training.score_details.completion_percent)} %
+              </strong>
             </div>
             <div>
               <span>{tr("score_difficulty")}</span>
@@ -140,7 +246,8 @@ export function TrainingDetail({
             <div>
               <span>{tr("score_completed_planned")}</span>
               <strong>
-                {training.score_details.completed_sets} / {training.score_details.planned_sets}
+                {training.score_details.completed_sets} /{" "}
+                {training.score_details.planned_sets}
               </strong>
             </div>
           </div>
@@ -151,6 +258,12 @@ export function TrainingDetail({
       ) : training.status === "completed" ? (
         <p className="muted">{tr("score_needs_positive_baseline")}</p>
       ) : null}
+      {training.preparation_notes && (
+        <details className="sport-preparation">
+          <summary>{tr("preparation_notes")}</summary>
+          <p>{training.preparation_notes}</p>
+        </details>
+      )}
       {training.entries.map((entry, i) => (
         <section className="sport-plan-entry" key={i}>
           <h3>{entry.name}</h3>
@@ -160,11 +273,17 @@ export function TrainingDetail({
               <ul>
                 {training.metrics[i].scoring!.references.map((reference, j) => (
                   <li key={j}>
-                    {tr("set")} {j + 1} · {kinds.find((k) => k.id === entry.kind)!.fields
-                      .filter((field) => reference.values[field.key] != null)
+                    {tr("set")} {j + 1} ·{" "}
+                    {kinds
+                      .find((k) => k.id === entry.kind)!
+                      .fields.filter(
+                        (field) => reference.values[field.key] != null,
+                      )
                       .map((field) => {
                         const value = number(reference.values[field.key]!);
-                        const source = tr(`score_source_${reference.sources[field.key]!}`);
+                        const source = tr(
+                          `score_source_${reference.sources[field.key]!}`,
+                        );
                         return `${field.label} : ${value} ${field.unit} (${source})`;
                       })
                       .join(" · ") || tr("score_reference_pending")}
@@ -184,7 +303,12 @@ export function TrainingDetail({
             ))}
         </section>
       ))}
-      {training.notes && <p>{training.notes}</p>}
+      {training.notes && (
+        <section>
+          <h3>{tr("how_it_felt_and_notes")}</h3>
+          <p className="sport-preparation-notes">{training.notes}</p>
+        </section>
+      )}
     </>
   );
 }
@@ -197,42 +321,27 @@ export function ActiveTraining({
   action,
   scope,
   setScope,
+  navigate,
 }: {
   training: Training | null | undefined;
   kinds: KindDefinition[];
   onChanged: (t: Training) => void;
-  onFinished: () => void;
+  onFinished: (training: Training) => void;
   registerGuard: (guard: (() => boolean) | null) => void;
   action: ReturnType<typeof useAction>;
   scope: string;
   setScope: (scope: string) => void;
+  navigate: SportNavigate;
 }) {
   const [drafts, setDrafts] = useState<Record<string, Values>>({});
   const [ending, setEnding] = useState<"completed" | "cancelled" | null>(null);
   const [notes, setNotes] = useState("");
   const dirty = Object.keys(drafts).length > 0;
-  useEffect(() => {
-    registerGuard(
-      () =>
-        !action.busy &&
-        (!dirty ||
-          window.confirm(
-            tr(
-              "leave_the_training_session_without_saving_your_current_entries",
-            ),
-          )),
-    );
-    const unload = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = "";
-    };
-    if (dirty || action.busy) window.addEventListener("beforeunload", unload);
-    return () => {
-      registerGuard(null);
-      window.removeEventListener("beforeunload", unload);
-    };
-  }, [dirty, action.busy, registerGuard]);
+  const origins = useRef<Record<string, Values>>({});
+  const [collapsed, setCollapsed] = useState<Set<number>>(new Set());
+  useDraftGuard(dirty || (!!ending && !!notes), action.busy, registerGuard);
   function clearDraft(key: string) {
+    delete origins.current[key];
     setDrafts((current) => {
       const next = { ...current };
       delete next[key];
@@ -241,17 +350,56 @@ export function ActiveTraining({
   }
   if (!training)
     return (
-      <Empty title={tr("no_training_session_in_progress")}>
+      <Empty
+        title={tr("no_training_session_in_progress")}
+        action={
+          <button
+            className="primary-button"
+            onClick={() => navigate("workouts")}
+          >
+            {tr("choose_a_program")}
+          </button>
+        }
+      >
         {tr("start_a_training_session_from_the_programs_tab")}
       </Empty>
     );
   const total = training.entries.reduce((sum, e) => sum + e.sets, 0);
+  const nextSet = training.entries
+    .flatMap((entry, i) =>
+      Array.from({ length: entry.sets }, (_, j) => ({ i, j })),
+    )
+    .find(
+      ({ i, j }) =>
+        !training.sets.some(
+          (set) => set.entry_index === i && set.set_index === j,
+        ),
+    );
+  function jump(i: number, j = 0) {
+    setCollapsed((previous) => {
+      const next = new Set(previous);
+      next.delete(i);
+      return next;
+    });
+    requestAnimationFrame(() => {
+      const element = document.getElementById(`sport-set-${i}-${j}`);
+      element?.scrollIntoView({
+        block: "center",
+        behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "instant"
+          : "smooth",
+      });
+      element
+        ?.querySelector<HTMLInputElement>("input")
+        ?.focus({ preventScroll: true });
+    });
+  }
   return (
     <div
-      className={`sport-training ${isHyrox(training.name) ? "sport-hyrox" : ""}`}
+      className={`sport-training ${isHyrox(training.name, training.context) ? "sport-hyrox" : ""}`}
     >
-      {isHyrox(training.name) && (
-        <HyroxBrand date={training.competition_date} />
+      {isHyrox(training.name, training.context) && (
+        <HyroxBrand date={training.competition_date} compact />
       )}
       <div className="sport-toolbar">
         <div>
@@ -267,6 +415,47 @@ export function ActiveTraining({
           })}
         </span>
       </div>
+      <div className="sport-training-tools">
+        {nextSet && (
+          <button
+            className="secondary-button"
+            onClick={() => jump(nextSet.i, nextSet.j)}
+          >
+            {tr("next_set", {
+              number: nextSet.j + 1,
+              name: training.entries[nextSet.i].name,
+            })}
+          </button>
+        )}
+        <RestPresets />
+      </div>
+      <details className="sport-training-index">
+        <summary>{tr("session_outline")}</summary>
+        <ol>
+          {training.entries.map((entry, index) => (
+            <li key={index}>
+              <button
+                type="button"
+                className="text-button"
+                onClick={() => jump(index)}
+              >
+                {entry.name} ·{" "}
+                {
+                  training.sets.filter((set) => set.entry_index === index)
+                    .length
+                }
+                /{entry.sets}
+              </button>
+            </li>
+          ))}
+        </ol>
+      </details>
+      {training.preparation_notes && (
+        <details className="sport-preparation">
+          <summary>{tr("preparation_notes")}</summary>
+          <p>{training.preparation_notes}</p>
+        </details>
+      )}
       <p className="muted small-text">
         {tr("enter_your_results_then_complete_each_set_saved_values_will")}
       </p>
@@ -283,9 +472,22 @@ export function ActiveTraining({
               </span>
               {entry.name}
             </h2>
-            <span className="muted small-text">
-              {kinds.find((k) => k.id === entry.kind)?.name}
-            </span>
+            <button
+              type="button"
+              className="text-button"
+              aria-expanded={!collapsed.has(i)}
+              aria-controls={`sport-entry-sets-${i}`}
+              onClick={() =>
+                setCollapsed((previous) => {
+                  const next = new Set(previous);
+                  if (next.has(i)) next.delete(i);
+                  else next.add(i);
+                  return next;
+                })
+              }
+            >
+              {tr(collapsed.has(i) ? "expand_exercise" : "collapse_exercise")}
+            </button>
           </div>
           {entry.kind.startsWith("weight") && (
             <p className="muted small-text">
@@ -294,7 +496,11 @@ export function ActiveTraining({
               )}
             </p>
           )}
-          <div className="sport-set-list">
+          <div
+            className="sport-set-list"
+            id={`sport-entry-sets-${i}`}
+            hidden={collapsed.has(i)}
+          >
             {Array.from({ length: entry.sets }, (_, j) => {
               const record = training.sets.find(
                 (s) => s.entry_index === i && s.set_index === j,
@@ -305,16 +511,15 @@ export function ActiveTraining({
                 .filter((s) => s.entry_index === i && s.set_index < j)
                 .at(-1);
               const suggested = entry.suggested_values[j];
-              const values =
-                drafts[key] ??
-                record?.values ??
-                suggested ??
-                previous?.values ??
-                entry.target;
+              const base =
+                record?.values ?? suggested ?? previous?.values ?? entry.target;
+              const values = drafts[key] ?? base;
               return (
                 <form
                   className={`sport-set ${record ? "is-complete" : ""}`}
                   key={j}
+                  id={`sport-set-${i}-${j}`}
+                  aria-busy={action.busy && scope === key}
                   aria-label={tr("named_set", {
                     name: entry.name,
                     number: j + 1,
@@ -336,7 +541,7 @@ export function ActiveTraining({
                     );
                   }}
                 >
-                  <fieldset className="sport-set-fields" disabled={action.busy}>
+                  <fieldset className="sport-set-fields">
                     <legend className="sr-only">
                       {tr("set")} {j + 1}
                     </legend>
@@ -347,13 +552,27 @@ export function ActiveTraining({
                       <ValuesFields
                         kind={kind}
                         value={values}
-                        onChange={(v) =>
-                          setDrafts((old) => ({ ...old, [key]: v }))
-                        }
+                        readOnly={action.busy}
+                        onChange={(value) => {
+                          const origin = origins.current[key] ?? base;
+                          if (
+                            kind.fields.every(
+                              (field) =>
+                                (value[field.key] ?? null) ===
+                                (origin[field.key] ?? null),
+                            )
+                          )
+                            clearDraft(key);
+                          else {
+                            origins.current[key] = origin;
+                            setDrafts((old) => ({ ...old, [key]: value }));
+                          }
+                        }}
                         required
                         compact
                       />
                       <button
+                        aria-disabled={action.busy}
                         className={
                           record ? "secondary-button" : "primary-button"
                         }
@@ -379,7 +598,10 @@ export function ActiveTraining({
                         <button
                           type="button"
                           className="text-button"
-                          onClick={() =>
+                          aria-disabled={action.busy}
+                          onClick={(event) => {
+                            const container =
+                              event.currentTarget.closest("form");
                             void action.run(
                               () => {
                                 setScope(key);
@@ -391,10 +613,18 @@ export function ActiveTraining({
                               },
                               (t) => {
                                 onChanged(t);
+                                origins.current[key] = base;
                                 setDrafts((old) => ({ ...old, [key]: values }));
+                                requestAnimationFrame(() =>
+                                  container
+                                    ?.querySelector<HTMLButtonElement>(
+                                      ".sport-set-row button",
+                                    )
+                                    ?.focus({ preventScroll: true }),
+                                );
                               },
-                            )
-                          }
+                            );
+                          }}
                         >
                           {tr("undo_completion")}
                         </button>
@@ -403,13 +633,58 @@ export function ActiveTraining({
                         <button
                           type="button"
                           className="text-button"
-                          onClick={() => clearDraft(key)}
+                          aria-disabled={action.busy}
+                          onClick={(event) => {
+                            if (action.busy) return;
+                            const container =
+                              event.currentTarget.closest("form");
+                            clearDraft(key);
+                            requestAnimationFrame(() =>
+                              container
+                                ?.querySelector<HTMLInputElement>("input")
+                                ?.focus({ preventScroll: true }),
+                            );
+                          }}
                         >
                           {tr("discard_entry")}
                         </button>
                       )}
                     </div>
                     <ErrorMessage message={scope === key ? action.error : ""} />
+                    {scope === key && (
+                      <ConflictPanel
+                        failure={action.failure}
+                        draft={[
+                          {
+                            label: tr("your_results"),
+                            value: valuesText(kind, values),
+                          },
+                        ]}
+                        load={() => sportApi.session(training.id)}
+                        describe={(current) => [
+                          {
+                            label: tr("your_results"),
+                            value: valuesText(
+                              kind,
+                              current.sets.find(
+                                (set) =>
+                                  set.entry_index === i && set.set_index === j,
+                              )?.values ?? {},
+                            ),
+                          },
+                        ]}
+                        onReload={(current) => {
+                          onChanged(current);
+                          clearDraft(key);
+                          action.clear();
+                        }}
+                        onKeep={(current) => {
+                          onChanged(current);
+                          setDrafts((old) => ({ ...old, [key]: values }));
+                          action.clear();
+                        }}
+                      />
+                    )}
                   </fieldset>
                 </form>
               );
@@ -455,7 +730,15 @@ export function ActiveTraining({
               ? tr("finish_training_session")
               : tr("cancel_training_session")
           }
-          onClose={() => setEnding(null)}
+          onClose={() => {
+            if (
+              !action.busy &&
+              (!notes || window.confirm(tr("discard_draft")))
+            ) {
+              setEnding(null);
+              setNotes("");
+            }
+          }}
         >
           <form
             className="dialog-body stack-form"
@@ -473,10 +756,10 @@ export function ActiveTraining({
                     },
                   );
                 },
-                () => {
+                (result) => {
                   setEnding(null);
                   registerGuard(null);
-                  onFinished();
+                  onFinished(result);
                 },
               );
             }}
@@ -496,6 +779,7 @@ export function ActiveTraining({
               <textarea
                 maxLength={4000}
                 value={notes}
+                readOnly={action.busy}
                 onChange={(e) => setNotes(e.target.value)}
               />
             </label>
@@ -511,78 +795,466 @@ export function ActiveTraining({
     </div>
   );
 }
-export function History({ kinds }: { kinds: KindDefinition[] }) {
-  const [offset, setOffset] = useState(0);
-  const [selected, setSelected] = useState<Training | null>(null);
-  const resource = useResource(
-    (signal) => sportApi.sessions(offset, signal),
-    [offset],
+
+function RestPresets() {
+  const { settings, accept } = useSportSettings();
+  const action = useAction();
+  return (
+    <details className="sport-training-rest-settings">
+      <summary>
+        {tr("rest_current", { seconds: settings.rest_seconds })}
+      </summary>
+      <div
+        className="sport-presets"
+        role="group"
+        aria-label={tr("rest_presets")}
+      >
+        {[0, 60, 90, 120].map((seconds) => (
+          <button
+            type="button"
+            key={seconds}
+            className="secondary-button"
+            aria-pressed={settings.rest_seconds === seconds}
+            disabled={action.busy}
+            onClick={() =>
+              void action.run(
+                () =>
+                  sportApi.write<SportSettings>("/settings", {
+                    rest_seconds: seconds,
+                    expected_version: settings.version,
+                  }),
+                accept,
+              )
+            }
+          >
+            {seconds ? `${seconds} s` : tr("no_rest")}
+          </button>
+        ))}
+      </div>
+      <p className="muted small-text">{tr("rest_next_set_help")}</p>
+      <ErrorMessage message={action.error} />
+    </details>
   );
+}
+
+function SessionSummary({
+  training,
+  onDetail,
+  onPrograms,
+}: {
+  training: Training;
+  onDetail: () => void;
+  onPrograms: () => void;
+}) {
+  const progression = useResource(
+    (signal) => progressionApi.summary("sport", signal),
+    [training.id],
+  );
+  const completed = training.sets.filter((set) => !set.skipped).length;
+  const skipped = training.sets.filter((set) => set.skipped).length;
+  return (
+    <section className="sport-session-summary">
+      <p className="eyebrow" role="status">
+        {training.status === "completed"
+          ? tr("training_completed")
+          : tr("training_cancelled_saved")}
+      </p>
+      <h2>{training.name}</h2>
+      <div className="sport-summary">
+        <div>
+          <span>{tr("completed_sets")}</span>
+          <strong>{completed}</strong>
+        </div>
+        <div>
+          <span>{tr("unperformed_sets")}</span>
+          <strong>{skipped}</strong>
+        </div>
+        <div>
+          <span>{tr("duration_metric")}</span>
+          <strong>
+            {number(
+              Math.max(
+                0,
+                Date.parse(training.finished_at ?? training.started_at) -
+                  Date.parse(training.started_at),
+              ) / 60000,
+            )}{" "}
+            min
+          </strong>
+        </div>
+        <div>
+          <span>{tr("training_score")}</span>
+          <strong>
+            {training.score == null ? "—" : number(training.score)}
+          </strong>
+        </div>
+        {training.metrics.some((metric) => metric.volume_kg > 0) && (
+          <div>
+            <span>{tr("weight_lifted")}</span>
+            <strong>
+              {number(
+                training.metrics.reduce(
+                  (sum, metric) => sum + metric.volume_kg,
+                  0,
+                ),
+              )}{" "}
+              kg
+            </strong>
+          </div>
+        )}
+        {training.metrics.some((metric) => metric.distance_m > 0) && (
+          <div>
+            <span>{tr("total_distance")}</span>
+            <strong>
+              {number(
+                training.metrics.reduce(
+                  (sum, metric) => sum + metric.distance_m,
+                  0,
+                ),
+              )}{" "}
+              m
+            </strong>
+          </div>
+        )}
+      </div>
+      {training.awarded_xp != null && (
+        <p className="sport-earned">
+          {tr("session_awarded_xp", { xp: training.awarded_xp })}
+        </p>
+      )}
+      <LoadState {...progression} />
+      {progression.data && (
+        <p className="muted">
+          {tr("current_progression", {
+            xp: progression.data.xp,
+            level: progression.data.level,
+            title: progression.data.title,
+          })}
+        </p>
+      )}
+      {training.notes && (
+        <p className="sport-preparation-notes">{training.notes}</p>
+      )}
+      <div className="sport-inline">
+        <button className="primary-button" onClick={onDetail}>
+          {tr("view_session_details")}
+        </button>
+        <button className="secondary-button" onClick={onPrograms}>
+          {tr("back_to_programs")}
+        </button>
+      </div>
+    </section>
+  );
+}
+
+export function History({
+  kinds,
+  navigate,
+  completed,
+}: {
+  kinds: KindDefinition[];
+  navigate: SportNavigate;
+  completed?: Training | null;
+}) {
+  const [query, update] = useSportQuery({
+    history_q: "",
+    history_workout: "",
+    history_status: "",
+    history_since: "",
+    history_until: "",
+    history_offset: "0",
+    session: "",
+    summary: "",
+  });
+  const search = useDebounced(query.history_q);
+  const status = ["active", "completed", "cancelled"].includes(
+    query.history_status,
+  )
+    ? query.history_status
+    : "";
+  const offset = pageOffset(query.history_offset);
+  const filters = queryString({
+    q: search,
+    workout_id: query.history_workout,
+    status,
+    since: query.history_since,
+    until: query.history_until,
+  });
+  const resource = useResource(
+    (signal) => sportApi.sessions(offset, signal, filters),
+    [offset, filters, completed?.id],
+  );
+  const programs = useResource(
+    (signal) =>
+      Promise.all([
+        sportApi.workouts(false, signal),
+        sportApi.workouts(true, signal),
+      ]).then((values) => values.flat()),
+    [],
+  );
+  const detail = useResource(
+    (signal) =>
+      query.session
+        ? completed?.id === query.session
+          ? Promise.resolve(completed)
+          : sportApi.session(query.session, signal)
+        : Promise.resolve(null),
+    [query.session, completed?.id],
+    { keepPrevious: false },
+  );
+  const adjacent = useResource(
+    (signal) =>
+      query.session
+        ? sportApi.sessionNavigation(query.session, filters, signal)
+        : Promise.resolve(null),
+    [query.session, filters],
+    { keepPrevious: false },
+  );
+  const hasFilters = !!(
+    query.history_q ||
+    query.history_workout ||
+    status ||
+    query.history_since ||
+    query.history_until
+  );
+  function clear() {
+    update({
+      history_q: "",
+      history_workout: "",
+      history_status: "",
+      history_since: "",
+      history_until: "",
+      history_offset: "0",
+    });
+  }
+  function open(id: string) {
+    update({ session: id, summary: "" }, true);
+    history.replaceState({ ...history.state, sportDetail: true }, "");
+  }
+  function close() {
+    if (history.state?.sportDetail) history.back();
+    else update({ session: "", summary: "" });
+  }
+  const groups = new Map<string, Training[]>();
+  for (const training of resource.data?.items ?? []) {
+    const month = new Date(training.started_at).toLocaleDateString(
+      formatLocale(),
+      { month: "long", year: "numeric" },
+    );
+    groups.set(month, [...(groups.get(month) ?? []), training]);
+  }
   return (
     <>
+      {query.summary && query.session && (
+        <>
+          <LoadState {...detail} />
+          {detail.data && (
+            <SessionSummary
+              training={detail.data}
+              onDetail={() => update({ summary: "" })}
+              onPrograms={() => navigate("workouts")}
+            />
+          )}
+        </>
+      )}
+      <div className="sport-filters">
+        <label>
+          {tr("search_history")}
+          <input
+            type="search"
+            maxLength={160}
+            value={query.history_q}
+            onChange={(event) =>
+              update({ history_q: event.target.value, history_offset: "0" })
+            }
+          />
+        </label>
+        <label>
+          {tr("program")}
+          <select
+            value={query.history_workout}
+            onChange={(event) =>
+              update({
+                history_workout: event.target.value,
+                history_offset: "0",
+              })
+            }
+          >
+            <option value="">{tr("all_programs")}</option>
+            {programs.data?.map((program) => (
+              <option key={program.id} value={program.id}>
+                {program.name}
+                {program.archived_at ? ` · ${tr("archived_state")}` : ""}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          {tr("session_status")}
+          <select
+            value={status}
+            onChange={(event) =>
+              update({
+                history_status: event.target.value,
+                history_offset: "0",
+              })
+            }
+          >
+            <option value="">{tr("all_statuses")}</option>
+            <option value="completed">{tr("session_completed")}</option>
+            <option value="cancelled">{tr("cancelled")}</option>
+            <option value="active">{tr("in_progress")}</option>
+          </select>
+        </label>
+      </div>
+      <details className="sport-extra-filters">
+        <summary>{tr("history_dates")}</summary>
+        <div className="sport-filters">
+          <label>
+            {tr("from")}
+            <input
+              type="date"
+              value={query.history_since}
+              onChange={(event) =>
+                update({
+                  history_since: event.target.value,
+                  history_offset: "0",
+                })
+              }
+            />
+          </label>
+          <label>
+            {tr("period_end")}
+            <input
+              type="date"
+              value={query.history_until}
+              onChange={(event) =>
+                update({
+                  history_until: event.target.value,
+                  history_offset: "0",
+                })
+              }
+            />
+          </label>
+        </div>
+      </details>
+      {hasFilters && (
+        <button className="text-button" onClick={clear}>
+          {tr("clear_filters")}
+        </button>
+      )}
       <LoadState {...resource} />
+      <LoadState {...programs} />
       {resource.data?.total === 0 && (
-        <Empty title={tr("your_history_starts_here")}>
+        <Empty
+          title={
+            hasFilters
+              ? tr("no_matching_sessions")
+              : tr("your_history_starts_here")
+          }
+          action={
+            <button
+              className="primary-button"
+              onClick={() => (hasFilters ? clear() : navigate("workouts"))}
+            >
+              {hasFilters ? tr("clear_filters") : tr("choose_a_program")}
+            </button>
+          }
+        >
           {tr(
             "your_completed_and_cancelled_training_sessions_are_kept_with_every",
           )}
         </Empty>
       )}
       <div className="sport-history">
-        {resource.data?.items.map((t) => (
-          <button
-            className="sport-history-row"
-            key={t.id}
-            onClick={() => setSelected(t)}
-          >
-            <span>
-              <strong>{t.name}</strong>
-              <small>
-                {moment(t.started_at)} ·{" "}
-                {tr("set_count", {
-                  count: t.sets.filter((s) => !s.skipped).length,
-                })}{" "}
-                ·{" "}
-                {t.status === "completed"
-                  ? tr("session_completed")
-                  : t.status === "cancelled"
-                    ? tr("cancelled")
-                    : tr("in_progress")}
-              </small>
-            </span>
-            <span className="sport-score">
-              {t.score === null ? "—" : number(t.score)}
-              <small>{tr("score")}</small>
-            </span>
-          </button>
+        {[...groups.entries()].map(([month, trainings]) => (
+          <section key={month}>
+            <h2 className="sport-history-month">{month}</h2>
+            {trainings.map((training) => (
+              <button
+                className="sport-history-row"
+                key={training.id}
+                onClick={() => open(training.id)}
+              >
+                <span>
+                  <strong>{training.name}</strong>
+                  <small>
+                    {moment(training.started_at)} ·{" "}
+                    {tr("set_count", {
+                      count: training.sets.filter((set) => !set.skipped).length,
+                    })}{" "}
+                    ·{" "}
+                    {training.status === "completed"
+                      ? tr("session_completed")
+                      : training.status === "cancelled"
+                        ? tr("cancelled")
+                        : tr("in_progress")}
+                  </small>
+                </span>
+                <span className="sport-score">
+                  {training.score === null ? "—" : number(training.score)}
+                  <small>{tr("score")}</small>
+                </span>
+              </button>
+            ))}
+          </section>
         ))}
       </div>
-      {resource.data && resource.data.total > 30 && (
-        <div className="sport-pagination">
-          <button
-            className="secondary-button"
-            disabled={!offset}
-            onClick={() => setOffset(offset - 30)}
-          >
-            {tr("previous")}
-          </button>
-          <span>
-            {offset + 1}–{Math.min(offset + 30, resource.data.total)} {tr("of")}{" "}
-            {resource.data.total}
-          </span>
-          <button
-            className="secondary-button"
-            disabled={offset + 30 >= resource.data.total}
-            onClick={() => setOffset(offset + 30)}
-          >
-            {tr("next")}
-          </button>
-        </div>
+      {resource.data && (
+        <Pagination
+          offset={offset}
+          limit={30}
+          total={resource.data.total}
+          onChange={(value) => update({ history_offset: String(value) })}
+        />
       )}
-      {selected && (
-        <Dialog title={selected.name} wide onClose={() => setSelected(null)}>
+      {query.session && !query.summary && (
+        <Dialog
+          title={detail.data?.name ?? tr("loading")}
+          wide
+          onClose={close}
+          initialFocus="close"
+        >
           <div className="dialog-body">
-            <TrainingDetail training={selected} kinds={kinds} />
+            <div className="sport-pagination">
+              <button
+                className="secondary-button"
+                aria-disabled={
+                  !adjacent.data?.newer_id || adjacent.loading || detail.loading
+                }
+                onClick={() => {
+                  if (
+                    !adjacent.loading &&
+                    !detail.loading &&
+                    adjacent.data?.newer_id
+                  )
+                    update({ session: adjacent.data.newer_id });
+                }}
+              >
+                {tr("newer_session")}
+              </button>
+              <button
+                className="secondary-button"
+                aria-disabled={
+                  !adjacent.data?.older_id || adjacent.loading || detail.loading
+                }
+                onClick={() => {
+                  if (
+                    !adjacent.loading &&
+                    !detail.loading &&
+                    adjacent.data?.older_id
+                  )
+                    update({ session: adjacent.data.older_id });
+                }}
+              >
+                {tr("older_session")}
+              </button>
+            </div>
+            <LoadState {...detail} />
+            <LoadState {...adjacent} />
+            {detail.data && (
+              <TrainingDetail training={detail.data} kinds={kinds} />
+            )}
           </div>
         </Dialog>
       )}

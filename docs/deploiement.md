@@ -265,6 +265,13 @@ Publier le `main` validé avec la procédure habituelle de sauvegarde, construct
 
 Publier le `main` validé avec `scripts/deploy.sh` et sa sauvegarde habituelle. Aucune migration SQL, dépendance, variable ou modification Caddy/DNS. Vérifier le SHA exécuté, les sondes, `/settings`, `/settings?application=sport`, les anciens liens `?tab=settings`, OpenAPI et les guides réglages FR/EN en HTTPS. Sur compte synthétique : menu du nom, chaque section et sauvegarde API, brouillons, expiration, désactivation/réactivation, langues/thèmes et mobile 320 px. Consigner sauvegarde, SHA et preuves dans l’issue #76.
 
+
+## Livraison de la finition Sport
+
+Publier le `main` validé avec `scripts/deploy.sh`, sauvegarde puis migration additive `0014_sport_ux`. Aucun service, secret ou dépendance supplémentaire. Les préférences liste/grille, le contexte explicite et les notes figées imposent les [contraintes de retour arrière](sauvegardes.md#migration-0014-finition-sport) ; une ancienne image ne reconnaît pas la nouvelle révision.
+
+Sur un compte synthétique isolé : vérifier les vues liste/grille par format, recherche et retour, copie de programme, ajout d’exercices, saisie et reprise d’une série, repos ±15 secondes, bilan, historique, relevés et graphiques, puis les préréglages dans `/settings?application=sport`. Vérifier brouillons, conflits, langue/thème et mobile 320 px ; désactiver/réactiver Sport et contrôler la conservation. Comparer le SHA réellement exécuté, la révision, les sondes, les routes HTTPS Sport/réglages et les guides FR/EN. Consigner sauvegarde, SHA et résultats dans l’issue #74 sans utiliser les données personnelles.
+
 ## Livraison du score Sport v2
 
 Après validations, auto-revue, CI et fusion, publier avec `scripts/deploy.sh` et sa sauvegarde habituelle. Aucune migration SQL, dépendance ni variable nouvelle (`0013_recipe_units`). Respecter la [compatibilité des images](sauvegardes.md#score-sport-v2). Sur le compte concerné, exécuter `POST /api/v1/sport/scores/backfill` après publication, noter le nombre de scores réparés et vérifier qu’une deuxième exécution renvoie zéro. Les autres comptes ne doivent pas être modifiés par cette reprise ciblée.

@@ -187,9 +187,11 @@ test("Sport : bibliothèque, séance mixte, repos, mensurations et statistiques 
     const picker = dialog.locator(".sport-picker");
     await picker.getByLabel("Rechercher un exercice").fill(query);
     await picker
-      .getByRole("combobox", { name: "Type", exact: true })
+      .getByRole("combobox", { name: "Type d’exercice", exact: true })
       .selectOption(kind);
-    await expect(picker.getByRole("status")).toHaveCount(0);
+    await expect(
+      picker.locator(".sport-refreshing, .sport-empty[role=status]"),
+    ).toHaveCount(0);
     await picker
       .locator(".sport-picker-item")
       .filter({ hasText: query })
@@ -281,12 +283,15 @@ test("Sport : bibliothèque, séance mixte, repos, mensurations et statistiques 
   expect(completed.ok()).toBeTruthy();
   expect((await completed.json()).score).toBe(117.39);
   await page.reload();
-  await expect(page.locator(".sport-history-row").first()).toContainText("117,39");
+  await expect(page.locator(".sport-history-row").first()).toContainText(
+    "117,39",
+  );
 
   await tab(page, "Mensurations");
   await page.getByRole("button", { name: "Nouveau relevé" }).click();
   await page.getByLabel("Date du relevé").fill("2026-01-15");
   await page.getByLabel("Poids (kg)", { exact: true }).fill("80");
+  await page.getByText("Autres mensurations", { exact: true }).click();
   await page.getByLabel("Taille (cm)", { exact: true }).fill("90");
   await page
     .getByRole("button", { name: "Enregistrer les mensurations" })
@@ -295,6 +300,7 @@ test("Sport : bibliothèque, séance mixte, repos, mensurations et statistiques 
   await page.getByRole("button", { name: "Nouveau relevé" }).click();
   await page.getByLabel("Date du relevé").fill("2026-02-15");
   await page.getByLabel("Poids (kg)", { exact: true }).fill("78");
+  await page.getByText("Autres mensurations", { exact: true }).click();
   await page.getByLabel("Taille (cm)", { exact: true }).fill("88");
   await page
     .getByRole("button", { name: "Enregistrer les mensurations" })
@@ -303,8 +309,9 @@ test("Sport : bibliothèque, séance mixte, repos, mensurations et statistiques 
   await tab(page, "Statistiques");
   await page.getByLabel("Du", { exact: true }).fill("2026-01-01");
   await page.getByLabel("Au", { exact: true }).fill("2026-12-31");
+  await page.getByRole("button", { name: "Appliquer la période" }).click();
   await expect(
-    page.getByRole("img", { name: /Poids : 2 relevés/ }),
+    page.getByRole("group", { name: /Poids : 2 relevés/ }),
   ).toBeVisible();
   await page
     .locator(".sport-chart")
@@ -574,7 +581,9 @@ test("Sport : saisie directe, brouillons, conflit, correction et séance suivant
   await second.getByRole("button", { name: "Annuler la validation" }).click();
   await expect(second).not.toHaveClass(/is-complete/);
   await expect(weight(second)).toHaveValue("42.5");
-  await expect(page.getByRole("timer")).toHaveText("00:00");
+  await expect(page.locator(".sport-rest.is-ready")).toContainText(
+    "Prêt pour la prochaine série",
+  );
   await second
     .getByRole("button", { name: "Valider la série", exact: true })
     .click();
@@ -600,7 +609,9 @@ test("Sport : saisie directe, brouillons, conflit, correction et séance suivant
   await expect(weight(second)).toHaveValue("42.5");
   await expect(reps(second)).toHaveValue("8");
   await expect(page.locator(".sport-set.is-complete")).toHaveCount(0);
-  await expect(page.getByRole("timer")).toHaveText("00:00");
+  await expect(page.locator(".sport-rest.is-ready")).toContainText(
+    "Prêt pour la prochaine série",
+  );
   const next: Training = await (
     await page.request.get("/api/v1/sport/sessions/active")
   ).json();
@@ -618,7 +629,9 @@ test("Sport : saisie directe, brouillons, conflit, correction et séance suivant
   await expect(page.getByRole("timer")).toBeInViewport();
   await expect(page.getByRole("timer")).not.toHaveText("00:00");
   await page.getByRole("button", { name: "Passer le repos" }).click();
-  await expect(page.getByRole("timer")).toHaveText("00:00");
+  await expect(page.locator(".sport-rest.is-ready")).toContainText(
+    "Prêt pour la prochaine série",
+  );
   await tab(page, "Entraînement");
   await expect(first).toHaveClass(/is-complete/);
   expect(
@@ -844,7 +857,9 @@ test("Sport : blocs d’exercice et lignes de séries compactes pour les dix typ
                 ),
                 separate: rects.every(
                   (rect, index) =>
-                    !index || rect.left >= rects[index - 1].right + 4,
+                    !index ||
+                    rect.left >= rects[index - 1].right + 4 ||
+                    rect.top >= rects[index - 1].bottom + 4,
                 ),
                 touch: rects.every(
                   (rect) => rect.height >= 44 && rect.width >= 44,
@@ -857,13 +872,13 @@ test("Sport : blocs d’exercice et lignes de séries compactes pour les dix typ
         expect(geometry.border).toBeGreaterThan(0);
         expect(geometry.titleInside).toBe(true);
         for (const row of geometry.rows) {
-          expect(row.aligned).toBe(true);
+          expect(row.aligned).toBe(width > 560);
           expect(row.inside).toBe(true);
           expect(row.separate).toBe(true);
           expect(row.touch).toBe(true);
         }
         // An untouched series remains compact, including its labels and status.
-        expect(geometry.rows[1].height).toBeLessThan(110);
+        expect(geometry.rows[1].height).toBeLessThan(width <= 560 ? 165 : 115);
         for (const field of kinds[i].fields)
           await expect(
             card.getByLabel(`${field.label} (${field.unit})`, { exact: true }),
@@ -982,7 +997,10 @@ for (const locale of ["fr", "en"] as const) {
       ).json();
       expect(saved.status).toBe("completed");
       expect(saved.score).toBe(33.33);
-      expect(saved.score_details).toMatchObject({ completion_percent: 33.33, difficulty_percent: 100 });
+      expect(saved.score_details).toMatchObject({
+        completion_percent: 33.33,
+        difficulty_percent: 100,
+      });
       expect(saved.sets[0]).toEqual(before.sets[0]);
       expect(saved.sets.map((s) => s.skipped)).toEqual([false, true, true]);
       expect(saved.sets.map((s) => s.values.reps)).toEqual([10, 0, 0]);
@@ -994,26 +1012,48 @@ for (const locale of ["fr", "en"] as const) {
         .filter({ hasText: workout.name })
         .click();
       const detail = page.getByRole("dialog", { name: workout.name });
-      await expect(detail.locator(".sport-summary").first().locator("strong").nth(2))
-        .toHaveText(locale === "fr" ? "33,33" : "33.33");
+      await expect(
+        detail
+          .locator(".sport-summary > div")
+          .filter({
+            hasText:
+              locale === "fr" ? "Score de l’entraînement" : "Training score",
+          })
+          .locator("strong"),
+      ).toHaveText(locale === "fr" ? "33,33" : "33.33");
       const breakdown = detail.locator(".sport-summary[aria-label]");
-      await expect(breakdown.locator("strong").nth(0)).toHaveText(locale === "fr" ? "33,33 %" : "33.33 %");
+      await expect(breakdown.locator("strong").nth(0)).toHaveText(
+        locale === "fr" ? "33,33 %" : "33.33 %",
+      );
       await expect(breakdown.locator("strong").nth(1)).toHaveText("100 %");
-      await detail.screenshot({ path: test.info().outputPath(`score-summary-${locale}.png`) });
+      await detail.screenshot({
+        path: test.info().outputPath(`score-summary-${locale}.png`),
+      });
       const explanation = detail.locator(".sport-score-explained summary");
       await explanation.focus();
       await page.keyboard.press("Enter");
-      await expect(detail.locator(".sport-score-explained")).toHaveAttribute("open", "");
+      await expect(detail.locator(".sport-score-explained")).toHaveAttribute(
+        "open",
+        "",
+      );
       await detail.locator(".sport-score-references summary").click();
       await expect(detail.locator(".sport-score-references li")).toHaveCount(3);
-      await page.screenshot({ path: test.info().outputPath(`score-partiel-${locale}.png`), fullPage: true });
+      await page.screenshot({
+        path: test.info().outputPath(`score-partiel-${locale}.png`),
+        fullPage: true,
+      });
       await expect(
         detail
           .locator(".sport-plan-entry p")
           .filter({ hasText: labels.skipped }),
       ).toHaveCount(2);
       await expect(
-        detail.locator(".sport-summary > div").nth(1).locator("strong"),
+        detail
+          .locator(".sport-summary > div")
+          .filter({
+            hasText: locale === "fr" ? "Séries validées" : "Completed sets",
+          })
+          .locator("strong"),
       ).toHaveText("1");
       await expect(detail.locator(".sport-plan-entry p").nth(1)).toContainText(
         "0",
@@ -1065,7 +1105,13 @@ for (const locale of ["fr", "en"] as const) {
         name: unperformed.workout.name,
       });
       await expect(
-        emptyDetail.locator(".sport-summary > div").nth(2).locator("strong"),
+        emptyDetail
+          .locator(".sport-summary > div")
+          .filter({
+            hasText:
+              locale === "fr" ? "Score de l’entraînement" : "Training score",
+          })
+          .locator("strong"),
       ).toHaveText("0");
       await page.keyboard.press("Escape");
       await page.goto("/sport?tab=statistics");
@@ -1081,11 +1127,21 @@ for (const locale of ["fr", "en"] as const) {
           .locator("option")
           .filter({ hasText: unperformed.workout.name }),
       ).toHaveCount(1);
-      const emptyOption = baselines.locator("option").filter({ hasText: unperformed.workout.name });
+      const emptyOption = baselines
+        .locator("option")
+        .filter({ hasText: unperformed.workout.name });
       await baselines.selectOption((await emptyOption.getAttribute("value"))!);
-      await expect(page.locator(".sport-chart").filter({ has: page.getByRole("heading", {
-        name: locale === "fr" ? "Score de l’entraînement" : "Training score",
-      }) }).locator(".sport-tag")).toHaveText("0 points");
+      await expect(
+        page
+          .locator(".sport-chart")
+          .filter({
+            has: page.getByRole("heading", {
+              name:
+                locale === "fr" ? "Score de l’entraînement" : "Training score",
+            }),
+          })
+          .locator(".sport-tag"),
+      ).toHaveText("0 points");
     } finally {
       await page.request.put("/api/v1/preferences", {
         headers,
@@ -1095,7 +1151,9 @@ for (const locale of ["fr", "en"] as const) {
   });
 }
 
-test("Sport : premier score avec un exercice entièrement omis", async ({ page }) => {
+test("Sport : premier score avec un exercice entièrement omis", async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 320, height: 740 });
   const entries = [];
   for (const kind of ["weight_reps", "distance_duration"]) {
@@ -1103,34 +1161,54 @@ test("Sport : premier score avec un exercice entièrement omis", async ({ page }
       await page.request.get(`/api/v1/sport/exercises?kind=${kind}&limit=1`)
     ).json();
     entries.push({
-      exercise_id: catalog.items[0].id, sets: 1,
-      target: kind === "weight_reps"
-        ? { weight_kg: 49, reps: 10 }
-        : { distance_m: 1000, duration_seconds: 300 },
+      exercise_id: catalog.items[0].id,
+      sets: 1,
+      target:
+        kind === "weight_reps"
+          ? { weight_kg: 49, reps: 10 }
+          : { distance_m: 1000, duration_seconds: 300 },
     });
   }
   const response = await page.request.post("/api/v1/sport/workouts", {
-    headers, data: { name: `Score exercice omis ${Date.now()}`, entries },
+    headers,
+    data: { name: `Score exercice omis ${Date.now()}`, entries },
   });
   expect(response.ok()).toBeTruthy();
   const program: Workout = await response.json();
-  let session: Training = await (await page.request.post("/api/v1/sport/sessions", {
-    headers, data: { workout_id: program.id, expected_version: program.version },
-  })).json();
-  session = await (await page.request.put(`/api/v1/sport/sessions/${session.id}/sets/0/0`, {
-    headers, data: { expected_version: session.version, values: { weight_kg: 59, reps: 10 } },
-  })).json();
+  let session: Training = await (
+    await page.request.post("/api/v1/sport/sessions", {
+      headers,
+      data: { workout_id: program.id, expected_version: program.version },
+    })
+  ).json();
+  session = await (
+    await page.request.put(`/api/v1/sport/sessions/${session.id}/sets/0/0`, {
+      headers,
+      data: {
+        expected_version: session.version,
+        values: { weight_kg: 59, reps: 10 },
+      },
+    })
+  ).json();
   await page.goto("/sport?tab=training");
-  await page.getByRole("button", { name: "Terminer l’entraînement", exact: true }).click();
-  await page.getByRole("button", { name: "Enregistrer les résultats", exact: true }).click();
-  const row = page.locator(".sport-history-row").filter({ hasText: program.name });
+  await page
+    .getByRole("button", { name: "Terminer l’entraînement", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Enregistrer les résultats", exact: true })
+    .click();
+  const row = page
+    .locator(".sport-history-row")
+    .filter({ hasText: program.name });
   await expect(row.locator(".sport-score")).toContainText("60");
   await row.click();
   const detail = page.getByRole("dialog", { name: program.name });
   const breakdown = detail.locator(".sport-summary[aria-label]");
   await expect(breakdown.locator("strong").nth(0)).toHaveText("50 %");
   await expect(breakdown.locator("strong").nth(1)).toHaveText("120 %");
-  await expect(detail.locator(".sport-plan-entry").nth(1)).toContainText("Non effectuée");
+  await expect(detail.locator(".sport-plan-entry").nth(1)).toContainText(
+    "Non effectuée",
+  );
   const saved: Training = await (
     await page.request.get(`/api/v1/sport/sessions/${session.id}`)
   ).json();

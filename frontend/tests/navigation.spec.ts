@@ -123,9 +123,12 @@ async function singleLineTopbar(page: Page) {
   expect(
     (await page.locator(".progression-level-number").boundingBox())!.width,
   ).toBeLessThanOrEqual(24);
-  expect(
-    (await page.locator(".progression-badge-streak svg").boundingBox())!.width,
-  ).toBeLessThanOrEqual(12);
+  const streak = page.locator(".progression-badge-streak");
+  if (page.viewportSize()!.width <= 420) await expect(streak).toBeHidden();
+  else
+    expect(
+      (await streak.locator("svg").boundingBox())!.width,
+    ).toBeLessThanOrEqual(12);
   if (page.viewportSize()!.width <= 800) {
     const menu = (await topbar
       .locator(".application-nav-mobile")
@@ -134,6 +137,9 @@ async function singleLineTopbar(page: Page) {
     expect(menu.height).toBeGreaterThanOrEqual(44);
     expect(menu.x + menu.width).toBeLessThanOrEqual(breadcrumb.x);
     expect(Math.abs(menu.y - badge.y)).toBeLessThan(1);
+  } else {
+    await expect(topbar.locator(".application-nav-mobile")).toBeHidden();
+    await expect(page.locator(".application-nav-close")).toBeHidden();
   }
 }
 

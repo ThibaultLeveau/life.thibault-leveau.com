@@ -130,6 +130,7 @@ extra:
           pages:
             - {file: evolution.md, fr: Faire évoluer LifeOS, en: Evolving LifeOS}
             - {file: revue-sport-2026-11-17.md, fr: Revue Sport du 17 novembre 2026, en: Sport review — 17 November 2026}
+            - {file: sport-ux-livraison.md, fr: Finition Sport, en: Sport UX delivery}
             - {file: taches-specification.md, fr: Spécification des tâches, en: Tasks specification}
             - {file: decisions/001-architecture-initiale.md, fr: ADR 001 · Socle initial, en: ADR 001 · Initial architecture}
             - {file: decisions/002-gestion-taches.md, fr: ADR 002 · Tâches et persistance, en: ADR 002 · Tasks and persistence}

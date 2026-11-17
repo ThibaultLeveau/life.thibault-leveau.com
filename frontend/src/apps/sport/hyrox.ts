@@ -1,5 +1,10 @@
-export function isHyrox(name: string): boolean {
-  return name.toLowerCase().includes("hyrox");
+import type { SportContext } from "./types";
+
+export function isHyrox(name: string, context: SportContext = "auto"): boolean {
+  return (
+    context === "hyrox" ||
+    (context === "auto" && name.toLowerCase().includes("hyrox"))
+  );
 }
 
 export function localDay(now = new Date()): string {

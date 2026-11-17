@@ -1,80 +1,141 @@
 import { documentationPath } from "../../../shared/i18n";
 import { tr } from "../i18n";
-import type { SettingsPanelProps } from "../../../platform/applications/definition";
-import { useSettingsDraft } from "../../../platform/applications/useSettingsDraft";
 import { useState } from "react";
 import { ErrorMessage } from "../../../shared/ui/Dialog";
 import { sportApi } from "../api";
-import { LoadState, useAction, useResource } from "./common";
+import type { SettingsPanelProps } from "../../../platform/applications/definition";
+import { useSettingsDraft } from "../../../platform/applications/useSettingsDraft";
+import type { SportSettings } from "../types";
+import {
+  ConflictPanel,
+  useAction,
+  LoadState,
+  useResource,
+  useFormValidation,
+} from "./common";
+
 function SettingsForm({
-  initial,
+  settings,
   ...guard
-}: { initial: number } & SettingsPanelProps) {
-  const [rest, setRest] = useState(String(initial));
-  const [baseline, setBaseline] = useState(String(initial));
+}: { settings: SportSettings } & SettingsPanelProps) {
+  const [base, setBase] = useState(settings);
+  const [rest, setRest] = useState(String(settings.rest_seconds));
   const [saved, setSaved] = useState(false);
   const action = useAction();
-  useSettingsDraft(guard, rest !== baseline, action.busy);
+  const validation = useFormValidation(action.failure);
+  useSettingsDraft(guard, rest !== String(base.rest_seconds), action.busy);
+  const describe = (value: SportSettings) => [
+    {
+      label: tr("rest_time_between_sets_seconds"),
+      value: String(value.rest_seconds),
+    },
+  ];
+  function load(value: SportSettings) {
+    setBase(value);
+    setRest(String(value.rest_seconds));
+    action.clear();
+  }
   return (
     <form
-      className="settings-form"
-      onSubmit={(e) => {
-        e.preventDefault();
+      ref={validation.form}
+      noValidate
+      className="settings-form sport-settings"
+      aria-busy={action.busy}
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (!validation.validate()) return;
         setSaved(false);
         void action.run(
           () =>
-            sportApi.write<{ rest_seconds: number }>("/settings", {
+            sportApi.write<SportSettings>("/settings", {
               rest_seconds: Number(rest),
+              expected_version: base.version,
             }),
-          (result) => {
-            setRest(String(result.rest_seconds));
-            setBaseline(String(result.rest_seconds));
+          (value) => {
+            load(value);
             setSaved(true);
           },
         );
       }}
     >
-      <fieldset disabled={action.busy}>
-        <h2>{tr("your_training_rhythm")}</h2>
-        <label>
-          {tr("rest_time_between_sets_seconds")}
-          <input
-            type="number"
-            inputMode="numeric"
-            required
-            min={0}
-            max={3600}
-            step={1}
-            value={rest}
-            onChange={(e) => {
-              setRest(e.target.value);
+      <h2>{tr("your_training_rhythm")}</h2>
+      <label>
+        {tr("rest_time_between_sets_seconds")}
+        <input
+          {...validation.attrs("rest_seconds")}
+          type="number"
+          inputMode="numeric"
+          required
+          min={0}
+          max={3600}
+          step={1}
+          value={rest}
+          readOnly={action.busy}
+          onChange={(event) => {
+            setRest(event.target.value);
+            setSaved(false);
+          }}
+        />
+      </label>
+      {validation.error("rest_seconds")}
+      <div
+        className="sport-presets"
+        role="group"
+        aria-label={tr("rest_presets")}
+      >
+        {[0, 60, 90, 120].map((seconds) => (
+          <button
+            type="button"
+            key={seconds}
+            className="secondary-button"
+            aria-pressed={rest === String(seconds)}
+            disabled={action.busy}
+            onClick={() => {
+              setRest(String(seconds));
               setSaved(false);
             }}
-          />
-        </label>
-        <p className="muted">
-          {tr("the_countdown_starts_when_you_complete_a_set_and_resumes")}
+          >
+            {seconds ? `${seconds} s` : tr("no_rest")}
+          </button>
+        ))}
+      </div>
+      <p className="muted">{tr("rest_zero_help")}</p>
+      <p className="muted">
+        {tr("the_countdown_starts_when_you_complete_a_set_and_resumes")}
+      </p>
+      <button className="primary-button" aria-disabled={action.busy}>
+        {action.busy ? tr("saving") : tr("save_settings")}
+      </button>
+      <ErrorMessage message={action.error} />
+      <ConflictPanel
+        failure={action.failure}
+        draft={[{ label: tr("rest_time_between_sets_seconds"), value: rest }]}
+        load={sportApi.settings}
+        describe={describe}
+        onReload={load}
+        onKeep={(value) => {
+          setBase(value);
+          action.clear();
+        }}
+      />
+      {saved && (
+        <p role="status" className="sport-success">
+          {tr("settings_saved")}
         </p>
-        <button className="primary-button" disabled={action.busy}>
-          {tr("save_settings")}
-        </button>
-        <ErrorMessage message={action.error} />
-        {saved && <p role="status">{tr("settings_saved")}</p>}
-        <a className="text-button" href={documentationPath("sport")}>
-          {tr("sport_application_guide")}
-        </a>
-      </fieldset>
+      )}
+      <a className="text-button" href={documentationPath("sport")}>
+        {tr("sport_application_guide")}
+      </a>
     </form>
   );
 }
+
 export function Settings(guard: SettingsPanelProps) {
   const resource = useResource(sportApi.settings, []);
   return (
     <>
       <LoadState {...resource} />
-      {resource.data && (
-        <SettingsForm initial={resource.data.rest_seconds} {...guard} />
-      )}
+      {resource.data && <SettingsForm settings={resource.data} {...guard} />}
     </>
   );
 }

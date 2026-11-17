@@ -1,37 +1,41 @@
 # API Sport
 
-Les programmes sont les modèles réutilisables (`Workout`), et les entraînements sont leurs exécutions (`Training`). Les identifiants techniques `/workouts`, `workout_id` et les contrats JSON restent stables. La création et la modification en page utilisent les mêmes POST/PUT ; aucune migration ni conversion de données n’est nécessaire.
+Les programmes sont les modèles réutilisables (`Workout`), et les entraînements sont leurs exécutions (`Training`). Les identifiants techniques `/workouts`, `workout_id` et les contrats JSON restent stables. La création et la modification en page utilisent les mêmes POST/PUT. La migration additive `0014_sport_ux` ajoute les préférences et le contexte de préparation sans convertir les résultats existants.
 
 Toutes les routes sont sous `/api/v1/sport`, avec session, propriétaire et activation Sport obligatoires. Les mutations utilisent l’origine autorisée et `X-CSRF-Token`, comme les [autres API](api.md). OpenAPI décrit les champs, bornes et réponses à `/api/docs`.
 
 | Méthode | Route | Opération |
 | --- | --- | --- |
 | GET | `/kinds` | Types, champs, unités, limites et formules |
-| GET | `/exercises` | Catalogue + personnels ; `q`, `kind`, `muscle`, `equipment`, `archived`, `offset`, `limit` (1–1000) |
+| GET | `/exercises` | Catalogue + personnels ; `q`, `kind`, `muscle`, `equipment`, `origin=all/personal/builtin`, `archived`, `offset`, `limit` (1–1000) |
+| GET | `/exercises/filters` | Facettes complètes `muscles` / `equipment` (`{value,label}`), indépendantes de la pagination ; `origin`, `archived` |
 | GET | `/exercises/{id}` | Exercice fourni ou personnel, même archivé |
 | POST | `/exercises` | Créer un exercice personnel |
 | PUT | `/exercises/{uuid}` | Remplacer l’exercice personnel avec `expected_version` |
 | PUT | `/exercises/{uuid}/archive` | `{expected_version, archived}` ; restauration avec `false` |
-| GET / PUT | `/settings` | `{rest_seconds}` (0–3600, défaut 90) |
-| GET | `/workouts` | Programmes actifs, ou `archived=true` |
+| GET / PUT | `/settings` | Repos, préférences de vue et version ; écriture partielle décrite ci-dessous |
+| GET | `/workouts` | `archived`, recherche `q`, `sort=updated/name/recent`, `exercise_id` |
 | GET | `/workouts/{uuid}` | Programme, même archivé |
 | POST | `/workouts` | Créer nom, notes et liste ordonnée `entries` |
 | PUT | `/workouts/{uuid}` | Remplacer le programme et son ordre, avec `expected_version` |
 | PUT | `/workouts/{uuid}/archive` | Archiver/restaurer sans changer les sessions |
+| POST | `/workouts/{uuid}/duplicate` | `{expected_version, name}` ; nouvelle copie active, version 1, sans séances |
 | POST | `/sessions` | Démarrer `{workout_id, expected_version}` (version du programme), avec propositions issues des résultats antérieurs |
-| GET | `/sessions` | Historique paginé (`offset`, `limit` 1–100) |
+| GET | `/sessions` | Historique paginé (`offset`, `limit` 1–100), `q`, `workout_id`, `status=active/completed/cancelled`, `since`, `until` |
 | GET | `/sessions/active` | Session active ou `null` |
 | GET | `/sessions/{uuid}` | Instantané, séries, dates, score et référence |
+| GET | `/sessions/{uuid}/navigation` | `{newer_id, older_id}`, voisins du même propriétaire respectant les filtres d’historique |
 | PUT | `/sessions/{uuid}/sets/{entry}/{set}` | Valider/corriger `{expected_version, values}` |
 | DELETE | `/sessions/{uuid}/sets/{entry}/{set}` | Annuler une série avec corps `{expected_version}` |
-| PUT | `/sessions/{uuid}/rest` | Passer le repos avec `{expected_version}` |
+| PUT | `/sessions/{uuid}/rest` | Passer avec `{expected_version}` ; ajuster avec `adjustment_seconds: -15` ou `15` |
 | PUT | `/sessions/{uuid}/finish` | `{expected_version, outcome: completed/cancelled, notes}` |
 | GET | `/measurements` | Relevés actifs, ou `archived=true` |
+| GET | `/measurements/{uuid}` | Relevé du propriétaire, même archivé |
 | POST | `/measurements` | Relevé daté, au moins une mesure |
 | PUT | `/measurements/{uuid}` | Remplacer le relevé avec `expected_version` |
 | PUT | `/measurements/{uuid}/archive` | Archiver/restaurer |
 | POST | `/scores/backfill` | Réparer uniquement les scores manquants du compte, sans corps ; idempotent |
-| GET | `/statistics` | `since` / `until` inclusifs, un an par défaut et dix ans maximum |
+| GET | `/statistics` | `since` / `until` inclusifs, un an par défaut et dix ans maximum ; `exercise_id`, `workout_id`, `baseline_id` |
 
 Les entrées de programme sont `{exercise_id, sets, target}`. Les objectifs sont facultatifs, mais les mesures d’une série validée doivent toutes être présentes et conformes au type de `/kinds`. Les indices des exercices et séries commencent à **0**. Les identifiants des exercices fournis sont des chaînes stables, ceux des objets privés sont des UUID. L’ordre des `entries` est l’ordre du programme ; conserver les noms/types retournés uniquement pour affichage, les entrées d’écriture n’acceptent que les trois champs ci-dessus.
 
@@ -133,13 +137,71 @@ Les compteurs et graphiques excluent les abandons et les relevés archivés. Les
 
 Résoudre l’identifiant de l’exercice par `GET /exercises?q=course%20sur%20tapis` avant d’envoyer cet exemple. Pour modifier, envoyer le même corps avec `expected_version` ; pour effacer la date, remplacer `competition_date` par `null`. Les protections session, activation, propriétaire, CSRF et conflit **409** restent celles des programmes.
 
-Les réponses des programmes et des séances (actives, historique, statistiques) exposent `competition_date`. Le serveur copie la date au démarrage, sans modifier les séances précédentes. Une ancienne séance renvoie `null`. La date reste indépendante du titre en stockage ; le client affiche l’habillage seulement si le titre contient `hyrox` sans distinction de casse. Le compte à rebours se calcule dans le fuseau local du client à partir de cette date, sans stockage supplémentaire ni nouveau paramètre de session. Un client API peut donc gérer entièrement la même fonctionnalité.
+Les réponses des programmes et des séances (actives, historique, statistiques) exposent `competition_date`. Le serveur copie la date au démarrage, sans modifier les séances précédentes. Une ancienne séance renvoie `null`. La date reste indépendante du titre en stockage ; le client affiche l’habillage selon `context` : `hyrox` le force, `standard` le masque et `auto` le détecte dans le titre sans distinction de casse. Le compte à rebours se calcule dans le fuseau local du client à partir de cette date, sans stockage supplémentaire ni nouveau paramètre de session. Un client API peut donc gérer entièrement la même fonctionnalité.
 
 ## Catalogue bilingue
 
 `builtin: true` identifie un exercice par défaut ; `false` un exercice personnel. Les réponses exposent aussi `muscle_id` et `equipment_id` (codes stables pour les exercices fournis, `null` pour les personnels), distincts de `muscle_group` et `equipment` destinés à l’affichage. Ces champs de réponse ne s’envoient pas lors d’une création personnelle.
 
 La langue du compte localise les noms, notes, alias, facettes et `/kinds`, ainsi que les noms des exercices fournis dans programmes, entraînements, métriques et statistiques. `q` cherche dans les libellés de cette langue ; les filtres `muscle`/`equipment` acceptent les codes stables, les libellés courants et les anciens libellés français. Les textes personnels, résultats, dates, versions, signatures et scores restent inchangés. Les instantanés ne sont pas réécrits à la lecture. Voir [langue de compte et exemples HTTP](internationalisation.md#api-independante-de-linterface).
+
+## Préférences d’affichage et concurrence
+
+`GET /settings` renvoie les défauts ci-dessous, sans créer de ligne :
+
+```json
+{
+  "rest_seconds": 90,
+  "workouts_view": "grid", "workouts_mobile_view": "list",
+  "exercises_view": "list", "exercises_mobile_view": "list",
+  "measurements_view": "grid", "measurements_mobile_view": "list",
+  "version": 1, "server_today": "2026-11-17"
+}
+```
+
+`server_today` est le jour UTC réel lors de la réponse, pas une préférence modifiable. L’interface utilise les clés `_mobile_view` à 800 px et moins, les autres au-delà. Chacun des six champs n’accepte que `list` ou `grid`. `PUT /settings` est **partiel** : les champs absents sont conservés ; `null` est refusé pour les valeurs. Un changement réel incrémente la version ; une écriture identique la conserve. `expected_version` protège les clients modernes ; il reste facultatif pour les anciens clients qui n’écrivent que `rest_seconds`. Une requête de vue ne réinitialise jamais le repos.
+
+```python
+settings = request('GET', '/sport/settings')
+settings = request('PUT', '/sport/settings', json={
+    'expected_version': settings['version'], 'workouts_view': 'list',
+})
+```
+
+Sur 409, conserver le brouillon, relire et comparer avant de reprendre la nouvelle version. La même règle s’applique aux exercices, programmes, relevés et séances. `detail` d’une erreur de schéma 422 contient les localisations `loc` des champs ; une erreur métier peut conserver un message global.
+
+## Préparation, copie et historique
+
+Un programme reçoit `context: auto/standard/hyrox` (défaut `auto`). Une ancienne écriture qui omet ce champ conserve le contexte existant. `last_used_at` est calculé depuis le dernier démarrage de séance du programme, états terminé/annulé/actif inclus ; il vaut `null` sans séance et ne modifie pas sa version. Le tri `recent` place les programmes jamais utilisés après les autres. La recherche de programmes normalise accents et casse ; tous les termes doivent correspondre au nom.
+
+```python
+copy = request('POST', f"/sport/workouts/{workout['id']}/duplicate", json={
+    'expected_version': workout['version'], 'name': 'Mon prochain cycle',
+})
+```
+
+La copie reprend les entrées instantanées, notes, date et contexte ; elle possède un nouvel identifiant, des dates propres, une version 1 et aucun historique. La source peut être archivée ; les exercices archivés restent à restaurer/remplacer avant un démarrage. Les propriétaires restent isolés.
+
+Au démarrage, `preparation_notes` et `context` sont copiés dans la séance et restent indépendants des modifications du programme. Ils n’altèrent ni signature ni score. Les séances anciennes ont des notes de préparation vides : aucune note actuelle n’est présentée comme historique.
+
+Les filtres de séances se combinent. `q` cherche littéralement dans le nom (casse ignorée, `%` et `_` non interprétés). Les dates incluent les deux jours UTC via `started_at` ; une période inversée ou la borne `9999-12-31` est refusée. Les voisins sont ordonnés par démarrage puis identifiant, avec `null` en fin de parcours.
+
+```python
+page = request('GET', '/sport/sessions', params={
+    'workout_id': workout['id'], 'status': 'completed', 'limit': 30, 'offset': 0,
+})
+if page['items']:
+    neighbors = request('GET', f"/sport/sessions/{page['items'][0]['id']}/navigation",
+                        params={'workout_id': workout['id'], 'status': 'completed'})
+```
+
+## Repos, bilan et références statistiques
+
+`PUT /sessions/{id}/rest` avec `adjustment_seconds: ±15` déplace l’échéance existante ; il ne touche ni séries ni dates de validation. Un repos déjà terminé retourne 409. L’échéance est bornée à une heure après l’instant serveur ; une réduction à zéro arrête le repos. Omettre l’ajustement (ou envoyer `null`) conserve l’opération historique « passer le repos ». La version attendue est obligatoire.
+
+La réponse de clôture expose `awarded_xp`, les XP de séance réellement enregistrés dans sa transaction, **hors bonus de quêtes**. Une séance annulée/vide rapporte 0. Ce champ vaut `null` lors des lectures ultérieures ; le journal et le total restent disponibles via l’API commune de progression. Il ne s’agit ni d’un score ni d’une estimation de différence de total.
+
+Les statistiques filtrent les séances par exercice, programme ou référence, en plus de la période. Leurs compteurs portent sur les séances ainsi sélectionnées ; les mensurations restent celles de la période. `baselines` donne `{id,name,started_at,exercise_count}` pour les références des séances retenues, même si la référence est hors période. Les occurrences répétées restent des métriques distinctes dans l’ordre des entrées. Aucun regroupement implicite de mesures hétérogènes n’est effectué.
 
 ## Réparer les scores manquants
 

@@ -28,7 +28,7 @@
   align-items: center;
   gap: 9px;
   color: var(--ui-muted);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 650;
   letter-spacing: 0.13em;
   text-transform: uppercase;
@@ -62,7 +62,8 @@
   background: var(--ui-hover);
   color: var(--ui-text);
 }
-:is(.application-sidebar, .settings-navigation) .application-nav-item.is-active {
+:is(.application-sidebar, .settings-navigation)
+  .application-nav-item.is-active {
   background: var(--ui-accent-bg);
   color: var(--ui-accent);
   font-weight: 600;
@@ -133,6 +134,10 @@
   flex-shrink: 0;
 }
 .application-breadcrumb > a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  min-width: 44px;
   color: inherit;
   text-decoration: none;
 }
@@ -143,7 +148,7 @@
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-.application-nav-mobile,
+.icon-button.application-nav-mobile,
 .application-nav-scrim {
   display: none;
 }
@@ -159,7 +164,8 @@
 .application-skip:focus {
   top: 10px;
 }
-@media (max-width: 800px) {
+@media (max-width: 800px),
+  (max-width: 1024px) and (max-height: 500px) and (pointer: coarse) {
   .application-sidebar {
     position: fixed;
     z-index: 40;
@@ -176,9 +182,10 @@
   .application-sidebar.is-open {
     visibility: visible;
     transform: translateX(0);
+    transition-property: transform;
     transition-delay: 0s;
   }
-  .application-nav-mobile {
+  .icon-button.application-nav-mobile {
     display: inline-flex;
   }
   .application-nav-scrim {
@@ -200,8 +207,10 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .application-sidebar {
-    transition: none;
+  .application-sidebar,
+  .application-sidebar * {
+    /* Avoid inherited visibility transitions introduced by the global duration rule. */
+    transition: none !important;
   }
 }
 
@@ -243,4 +252,21 @@
   border-radius: 9px;
   background: var(--ui-paper);
   box-shadow: 0 3px 10px #0001;
+}
+
+@media (max-width: 420px) {
+  .application-breadcrumb-name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .application-breadcrumb-name + span {
+    display: none;
+  }
+  .application-breadcrumb > strong {
+    font-size: 13px;
+  }
 }

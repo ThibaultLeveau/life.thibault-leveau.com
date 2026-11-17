@@ -4,7 +4,9 @@ export function ScoreExplanation({ legacy = false }: { legacy?: boolean }) {
   return (
     <details className="sport-score-explained">
       <summary>{tr("how_is_the_score_calculated")}</summary>
-      {legacy ? <p>{tr("score_legacy")}</p> : (
+      {legacy ? (
+        <p>{tr("score_legacy")}</p>
+      ) : (
         <>
           <p>{tr("score_formula")}</p>
           <p>{tr("score_reference_policy")}</p>

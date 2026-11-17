@@ -125,5 +125,6 @@
   "metric_body_calf_left_cm": "Left calf",
   "metric_body_calf_right_cm": "Right calf",
   "metric_body_description": "Present, unarchived measurements in the period; change requires two observations.",
-  "integration_incomparable": "These scores come from different programs or versions. Choose a comparable program and date range."
+  "integration_incomparable": "These scores come from different programs or versions. Choose a comparable program and date range.",
+  "rest_already_finished": "Rest has already ended. Complete another set to start a new rest."
 }

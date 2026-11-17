@@ -2,11 +2,13 @@
 
 import hashlib
 import json
+from copy import deepcopy
 from datetime import UTC, date, datetime, time, timedelta
 from uuid import UUID
 
 from fastapi import HTTPException
-from sqlalchemy import func, select, tuple_
+from sqlalchemy import func, or_, select, tuple_
+from sqlalchemy.orm import object_session
 
 from life_app.apps.sport import models as m
 from life_app.apps.sport import schemas as s
@@ -67,7 +69,7 @@ def exercise(db, user, id, *, active=True):
     return result
 
 
-def exercises(db, user, query, kind, muscle, equipment, archived, offset, limit):
+def exercises(db, user, query, kind, muscle, equipment, archived, offset, limit, origin="all"):
     personal = db.scalars(
         select(m.Exercise).where(
             m.Exercise.owner_id == user.id,
@@ -79,7 +81,8 @@ def exercises(db, user, query, kind, muscle, equipment, archived, offset, limit)
     items = [
         e
         for e in items
-        if (not kind or e.kind == kind)
+        if (origin == "all" or e.builtin == (origin == "builtin"))
+        and (not kind or e.kind == kind)
         and (
             not muscle
             or muscle in {e.muscle_id, e.muscle_group}
@@ -117,13 +120,37 @@ def snapshot(db, user, entries):
 
 
 def settings(db, user):
-    return db.get(m.SportSettings, user.id) or s.Settings()
+    item = db.get(m.SportSettings, user.id)
+    return (
+        s.Settings(rest_seconds=item.rest_seconds, version=item.version, **item.views)
+        if item
+        else s.Settings()
+    )
+
+
+def update_settings(db, user, payload):
+    current = settings(db, user)
+    if payload.expected_version is not None:
+        version(current, payload.expected_version)
+    changes = payload.model_dump(exclude_unset=True, exclude={"expected_version"})
+    if not any(getattr(current, key) != value for key, value in changes.items()):
+        return current
+    item = db.get(m.SportSettings, user.id)
+    if item is None:
+        item = m.SportSettings(owner_id=user.id, rest_seconds=90, version=1, views={})
+        db.add(item)
+    if "rest_seconds" in changes:
+        item.rest_seconds = changes.pop("rest_seconds")
+    item.views = {**item.views, **changes}
+    touch(item)
+    db.flush()
+    return settings(db, user)
 
 
 def training_output(item):
     output = s.TrainingOutput(
         **{
-            key: getattr(item, key)
+            key: getattr(item, key, None)
             for key in s.TrainingOutput.model_fields
             if key not in {"server_now", "score_details"}
         },
@@ -142,8 +169,20 @@ def training_output(item):
     return output
 
 
-def workout_output(item):
+def workout_output(item, last_used_at=...):
+    if last_used_at is ...:
+        db = object_session(item)
+        last_used_at = (
+            db.scalar(
+                select(func.max(m.Training.started_at)).where(
+                    m.Training.owner_id == item.owner_id, m.Training.workout_id == item.id
+                )
+            )
+            if db
+            else None
+        )
     output = s.WorkoutOutput.model_validate(item)
+    output.last_used_at = last_used_at
     output.entries = [
         s.SnapshotEntry(**localized_snapshot(entry.model_dump())) for entry in output.entries
     ]
@@ -224,6 +263,8 @@ def start(db, user, payload):
         workout_id=workout.id,
         name=workout.name,
         competition_date=workout.competition_date,
+        context=workout.context,
+        preparation_notes=workout.notes,
         entries=entries,
         signature=signature,
     )
@@ -329,7 +370,7 @@ def finish(db, user, id, payload):
     touch(item)
     from life_app.apps.sport.progression import record_completion
 
-    record_completion(db, user, item)
+    item.awarded_xp = record_completion(db, user, item)
     return item
 
 
@@ -430,30 +471,70 @@ def archive(db, user, model, id, payload):
     return item
 
 
-def history(db, user, offset, limit):
+def history_query(db, user, q="", workout_id=None, status=None, since=None, until=None):
+    if (since and until and since > until) or until == date.max:
+        raise HTTPException(422, tr("choose_a_date_range_in_chronological_order_up_to_ten_years"))
     query = select(m.Training).where(m.Training.owner_id == user.id)
+    if q.strip():
+        query = query.where(
+            func.lower(m.Training.name).contains(q.strip().lower(), autoescape=True)
+        )
+    if workout_id:
+        query = query.where(m.Training.workout_id == workout_id)
+    if status:
+        query = query.where(m.Training.status == status)
+    if since:
+        query = query.where(m.Training.started_at >= datetime.combine(since, time.min, UTC))
+    if until:
+        query = query.where(
+            m.Training.started_at < datetime.combine(until + timedelta(days=1), time.min, UTC)
+        )
+    return query
+
+
+def history(db, user, offset, limit, **filters):
+    query = history_query(db, user, **filters)
     total = db.scalar(select(func.count()).select_from(query.subquery()))
     items = db.scalars(
-        query.order_by(m.Training.started_at.desc(), m.Training.id).offset(offset).limit(limit)
+        query.order_by(m.Training.started_at.desc(), m.Training.id.desc())
+        .offset(offset)
+        .limit(limit)
     )
     return s.SessionPage(
         items=[training_output(i) for i in items], total=total, offset=offset, limit=limit
     )
 
 
-def statistics(db, user, since, until):
+def session_navigation(db, user, id, **filters):
+    item = owned(db, m.Training, user, id)
+    query = history_query(db, user, **filters).with_only_columns(m.Training.id)
+    position = tuple_(m.Training.started_at, m.Training.id)
+    key = (item.started_at, item.id)
+    return s.SessionNavigation(
+        newer_id=db.scalar(
+            query.where(position > key).order_by(m.Training.started_at, m.Training.id).limit(1)
+        ),
+        older_id=db.scalar(
+            query.where(position < key)
+            .order_by(m.Training.started_at.desc(), m.Training.id.desc())
+            .limit(1)
+        ),
+    )
+
+
+def statistics(db, user, since, until, exercise_id=None, workout_id=None, baseline_id=None):
     if since > until or (until - since).days > 3660 or until == date.max:
         raise HTTPException(422, tr("choose_a_date_range_in_chronological_order_up_to_ten_years"))
-    trainings = db.scalars(
-        select(m.Training)
-        .where(
-            m.Training.owner_id == user.id,
-            m.Training.status == "completed",
-            m.Training.started_at >= datetime.combine(since, time.min, UTC),
-            m.Training.started_at < datetime.combine(until + timedelta(days=1), time.min, UTC),
+    query = history_query(
+        db, user, workout_id=workout_id, status="completed", since=since, until=until
+    )
+    if exercise_id:
+        query = query.where(m.Training.entries.contains([{"exercise_id": exercise_id}]))
+    if baseline_id:
+        query = query.where(
+            or_(m.Training.baseline_id == baseline_id, m.Training.id == baseline_id)
         )
-        .order_by(m.Training.started_at, m.Training.id)
-    ).all()
+    trainings = db.scalars(query.order_by(m.Training.started_at, m.Training.id)).all()
     measures = db.scalars(
         select(m.Measurement)
         .where(
@@ -464,13 +545,105 @@ def statistics(db, user, since, until):
         )
         .order_by(m.Measurement.measured_on)
     ).all()
+    baseline_ids = {t.baseline_id or t.id for t in trainings if t.score is not None}
+    baselines = db.scalars(
+        select(m.Training)
+        .where(m.Training.owner_id == user.id, m.Training.id.in_(baseline_ids))
+        .order_by(m.Training.started_at, m.Training.id)
+    ).all()
     return s.Statistics(
         completed_sessions=len(trainings),
         total_sets=sum(not s.get("skipped", False) for t in trainings for s in t.sets),
         total_volume_kg=sum(v["volume_kg"] for t in trainings for v in t.metrics),
         total_distance_m=sum(v["distance_m"] for t in trainings for v in t.metrics),
         sessions=[training_output(t) for t in trainings],
+        baselines=[
+            s.BaselineSummary(
+                id=t.id, name=t.name, started_at=t.started_at, exercise_count=len(t.entries)
+            )
+            for t in baselines
+        ],
         measurements=[measurement_output(m) for m in measures],
         since=since,
         until=until,
     )
+
+
+def exercise_filters(db, user, archived=False, origin="all"):
+    items = exercises(db, user, "", None, "", "", archived, 0, 2**31, origin).items
+
+    def options(label, identifier):
+        values = {getattr(e, identifier) or getattr(e, label): getattr(e, label) for e in items}
+        return [
+            s.FilterOption(value=value, label=name)
+            for value, name in sorted(
+                values.items(), key=lambda pair: (searchable(pair[1]), pair[0])
+            )
+        ]
+
+    return s.ExerciseFilters(
+        muscles=options("muscle_group", "muscle_id"), equipment=options("equipment", "equipment_id")
+    )
+
+
+def workouts(db, user, archived=False, q="", sort="updated", exercise_id=None):
+    query = select(m.Workout).where(
+        m.Workout.owner_id == user.id,
+        m.Workout.archived_at.is_not(None) if archived else m.Workout.archived_at.is_(None),
+    )
+    if exercise_id:
+        query = query.where(m.Workout.entries.contains([{"exercise_id": exercise_id}]))
+    items = db.scalars(query.order_by(m.Workout.updated_at.desc(), m.Workout.id)).all()
+    tokens = searchable(q).split()
+    items = [item for item in items if all(token in searchable(item.name) for token in tokens)]
+    usage = dict(
+        db.execute(
+            select(m.Training.workout_id, func.max(m.Training.started_at))
+            .where(m.Training.owner_id == user.id)
+            .group_by(m.Training.workout_id)
+        ).all()
+    )
+    if sort == "name":
+        items.sort(key=lambda item: (searchable(item.name), str(item.id)))
+    elif sort == "recent":
+        items.sort(
+            key=lambda item: (
+                usage.get(item.id) or datetime.min.replace(tzinfo=UTC),
+                item.updated_at,
+                str(item.id),
+            ),
+            reverse=True,
+        )
+    return [workout_output(item, usage.get(item.id)) for item in items]
+
+
+def duplicate_workout(db, user, id, payload):
+    source = owned(db, m.Workout, user, id)
+    version(source, payload.expected_version)
+    item = m.Workout(
+        owner_id=user.id,
+        name=payload.name,
+        context=source.context,
+        competition_date=source.competition_date,
+        notes=source.notes,
+        entries=deepcopy(source.entries),
+    )
+    db.add(item)
+    return item
+
+
+def update_rest(db, user, id, payload):
+    item = active_session(db, user, id, payload.expected_version)
+    if payload.adjustment_seconds is None:
+        item.rest_until = None
+    else:
+        now = utcnow()
+        if item.rest_until is None or item.rest_until <= now:
+            raise HTTPException(409, tr("rest_already_finished"))
+        deadline = min(
+            item.rest_until + timedelta(seconds=payload.adjustment_seconds),
+            now + timedelta(seconds=3600),
+        )
+        item.rest_until = deadline if deadline > now else None
+    touch(item)
+    return item

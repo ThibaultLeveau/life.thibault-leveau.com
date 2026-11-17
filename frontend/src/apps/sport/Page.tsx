@@ -15,16 +15,18 @@ import { Statistics } from "./components/Statistics";
 import { ActiveTraining, History, RestTimer } from "./components/Training";
 import { ProgramEditor } from "./components/ProgramEditor";
 import { Workouts } from "./components/Workouts";
-import type { Training } from "./types";
+import type { Training, Workout } from "./types";
+import { SportPreferences } from "./preferences";
+import type { SportNavigate } from "./navigation";
 import "./styles.css";
 
 const tabs = () =>
   [
     ["workouts", tr("programs"), "grid"],
-    ["training", tr("training"), "flag"],
+    ["training", tr("training"), "dumbbell"],
     ["exercises", tr("exercises"), "list"],
-    ["measurements", tr("body_measurements"), "edit"],
-    ["statistics", tr("statistics"), "board"],
+    ["measurements", tr("body_measurements"), "ruler"],
+    ["statistics", tr("statistics"), "activity"],
     ["history", tr("history"), "calendar"],
     ["settings", tr("settings"), "settings"],
   ] as const satisfies readonly (readonly [string, string, IconName])[];
@@ -40,8 +42,25 @@ function readView() {
   };
 }
 export function Page() {
+  return (
+    <SportPreferences>
+      <SportPage />
+    </SportPreferences>
+  );
+}
+function SportPage() {
   const [view, setView] = useState(readView);
   const { tab, program, archived } = view;
+  const [completed, setCompleted] = useState<Training | null>(null);
+  const [archivedProgram, setArchivedProgram] = useState<Workout | null>(null);
+  const positions = useRef(new Map<string, number>());
+  const viewKey = `${tab}-${program ?? "list"}-${archived}`;
+  const currentKey = useRef(viewKey);
+  const savePosition = () =>
+    positions.current.set(
+      currentKey.current,
+      Math.max(window.scrollY, shell.current?.scrollTop ?? 0),
+    );
   const guard = useRef<() => boolean>(() => true);
   const index = useRef(0);
   const restoring = useRef(false);
@@ -82,12 +101,23 @@ export function Page() {
         history.go(index.current - nextIndex);
         return;
       }
+      savePosition();
       index.current = nextIndex;
       setView(readView());
       setNavigation(false);
     };
+    const sync = () => {
+      index.current = history.state?.sportIndex ?? index.current;
+    };
     window.addEventListener("popstate", pop);
-    return () => window.removeEventListener("popstate", pop);
+    window.addEventListener("sport-query-change", sync);
+    const previousRestoration = history.scrollRestoration;
+    history.scrollRestoration = "manual";
+    return () => {
+      window.removeEventListener("popstate", pop);
+      window.removeEventListener("sport-query-change", sync);
+      history.scrollRestoration = previousRestoration;
+    };
   }, []);
   const title = program
     ? program === "new"
@@ -97,32 +127,73 @@ export function Page() {
   useEffect(() => {
     document.title = `${title} · Sport · LifeOS`;
     heading.current?.focus({ preventScroll: true });
-    window.scrollTo({ top: 0, behavior: "instant" });
-    shell.current?.scrollTo({ top: 0, behavior: "instant" });
-  }, [tab, program, title]);
+    currentKey.current = viewKey;
+    const top = positions.current.get(viewKey) ?? 0;
+    let cancelled = false;
+    const restore = () => {
+      if (cancelled) return;
+      window.scrollTo({ top, behavior: "instant" });
+      shell.current?.scrollTo({ top, behavior: "instant" });
+    };
+    // Lists arrive asynchronously; restore their previous position once laid out.
+    const observer = new ResizeObserver(restore);
+    const content = shell.current?.querySelector(".sport-content");
+    if (content) observer.observe(content);
+    restore();
+    const stop = () => {
+      cancelled = true;
+      observer.disconnect();
+    };
+    const timer = window.setTimeout(stop, 4000);
+    window.addEventListener("wheel", stop, { passive: true });
+    window.addEventListener("pointerdown", stop, { passive: true });
+    window.addEventListener("keydown", stop);
+    document.addEventListener("focusin", stop);
+    return () => {
+      stop();
+      window.clearTimeout(timer);
+      window.removeEventListener("wheel", stop);
+      window.removeEventListener("pointerdown", stop);
+      window.removeEventListener("keydown", stop);
+      document.removeEventListener("focusin", stop);
+    };
+  }, [viewKey, title]);
   function choose(
     next: Tab,
     nextProgram: string | null = null,
-    nextArchived = false,
+    nextArchived = archived,
     saved = false,
+    extra: Record<string, string> = {},
   ) {
     if (!saved && !guard.current()) return;
     if (next === "settings") {
       window.location.assign("/settings?application=sport");
       return;
     }
-    const params = new URLSearchParams({ tab: next });
+    savePosition();
+    const params = new URLSearchParams(location.search);
+    params.set("tab", next);
+    params.delete("program");
+    params.delete("add_exercise");
     if (nextProgram) params.set("program", nextProgram);
     if (nextArchived) params.set("archived", "true");
+    else params.delete("archived");
+    for (const [key, value] of Object.entries(extra)) {
+      if (value) params.set(key, value);
+      else params.delete(key);
+    }
     if (!saved) index.current += 1;
     history[saved ? "replaceState" : "pushState"](
       { sportIndex: index.current },
       "",
       `?${params}`,
     );
-    setView({ tab: next, program: nextProgram, archived: nextArchived });
+    setView(readView());
+    window.dispatchEvent(new Event("sport-query-change"));
     setNavigation(false);
   }
+  const navigate: SportNavigate = (next, params = {}) =>
+    choose(next, params.program ?? null, archived, false, params);
   const nav = (
     <nav aria-label={tr("sport")}>
       {tabs().map(([id, label, icon]) => (
@@ -149,7 +220,7 @@ export function Page() {
     >
       <ApplicationSidebar
         name={tr("sport")}
-        icon="flag"
+        icon="dumbbell"
         label={tr("sport_navigation")}
         mainId="sport-main"
         open={navigation}
@@ -224,26 +295,33 @@ export function Page() {
                   kinds={kinds.data}
                   registerGuard={registerGuard}
                   onClose={() => choose("workouts", null, archived)}
-                  onSaved={() =>
+                  addedExercise={new URLSearchParams(location.search).get(
+                    "add_exercise",
+                  )}
+                  onSaved={(workout) => {
+                    if (workout?.archived_at) setArchivedProgram(workout);
                     choose(
                       "workouts",
                       null,
                       program !== "new" && archived,
                       true,
-                    )
-                  }
+                    );
+                  }}
                 />
               )}
               {tab === "workouts" && !program && (
                 <Workouts
                   kinds={kinds.data}
                   archived={archived}
+                  registerGuard={registerGuard}
+                  archivedProgram={archivedProgram}
+                  onDismissArchive={() => setArchivedProgram(null)}
                   onArchivedChange={(value) => choose("workouts", null, value)}
                   onEdit={(id) => choose("workouts", id, archived)}
                   active={active}
                   onStarted={(t) => {
                     if (t) changeActive(t);
-                    choose("training");
+                    choose("training", null, archived, !!t);
                   }}
                 />
               )}
@@ -257,17 +335,57 @@ export function Page() {
                   setScope={setTrainingScope}
                   kinds={kinds.data}
                   onChanged={changeActive}
-                  onFinished={() => {
+                  navigate={navigate}
+                  onFinished={(result) => {
+                    setCompleted(result);
                     changeActive(null);
                     activeResource.reload();
-                    choose("history");
+                    choose("history", null, archived, true, {
+                      session: result.id,
+                      summary: "1",
+                      history_q: "",
+                      history_status: "",
+                      history_workout: "",
+                      history_since: "",
+                      history_until: "",
+                      history_offset: "0",
+                    });
                   }}
                 />
               )}
-              {tab === "exercises" && <Exercises kinds={kinds.data} />}{" "}
-              {tab === "measurements" && <Measurements />}
-              {tab === "statistics" && <Statistics kinds={kinds.data} />}{" "}
-              {tab === "history" && <History kinds={kinds.data} />}{" "}
+              {tab === "exercises" && (
+                <Exercises
+                  kinds={kinds.data}
+                  registerGuard={registerGuard}
+                  onAddToProgram={(program, exercise) =>
+                    choose("workouts", program, false, false, {
+                      add_exercise: exercise,
+                    })
+                  }
+                  onPrograms={(exercise) =>
+                    choose("workouts", null, false, false, {
+                      program_exercise: exercise,
+                      program_q: "",
+                    })
+                  }
+                />
+              )}
+              {tab === "measurements" && (
+                <Measurements
+                  registerGuard={registerGuard}
+                  navigate={navigate}
+                />
+              )}
+              {tab === "statistics" && (
+                <Statistics kinds={kinds.data} navigate={navigate} />
+              )}{" "}
+              {tab === "history" && (
+                <History
+                  kinds={kinds.data}
+                  navigate={navigate}
+                  completed={completed}
+                />
+              )}{" "}
             </div>
           )}
         </div>
@@ -278,6 +396,17 @@ export function Page() {
           training={active}
           busy={trainingAction.busy}
           error={trainingScope === "rest" ? trainingAction.error : ""}
+          away={tab !== "training"}
+          onResume={() => choose("training")}
+          onAdjust={(seconds) =>
+            void trainingAction.run(() => {
+              setTrainingScope("rest");
+              return sportApi.write<Training>(`/sessions/${active.id}/rest`, {
+                expected_version: active.version,
+                adjustment_seconds: seconds,
+              });
+            }, changeActive)
+          }
           onSkip={() =>
             void trainingAction.run(() => {
               setTrainingScope("rest");

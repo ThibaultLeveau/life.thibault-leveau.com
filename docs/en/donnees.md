@@ -120,7 +120,7 @@ No business tables/events change. Disable/re-enable preserves task dates, versio
 
 ## Sport {#sport}
 
-Additive 0006_sport follows 0005_applications. sport_exercises holds personal name/type/muscle/equipment/notes; 680 supplied exercises remain versioned code resources without private copies. sport_workouts stores ordered JSONB entries with exercise ID, snapshot name/type, sets/targets. sport_settings stores per-owner rest. sport_measurements stores calendar date, optional JSONB values, notes/archives.
+Additive 0006_sport follows 0005_applications. sport_exercises holds personal name/type/muscle/equipment/notes; 680 supplied exercises remain versioned code resources without private copies. sport_workouts stores ordered JSONB entries with exercise ID, snapshot name/type, sets/targets. sport_settings stores per-owner rest, version and view preferences. sport_measurements stores calendar date, optional JSONB values, notes/archives.
 
 Private objects reference users, have positive versions, creation/update dates and reversible archives (settings have no history). A partial unique index permits one active measurement per owner/date. Services validate names/types/units/bounds/JSON/set counts/exercise ownership; direct SQL is not a business API. Supplied stable IDs cannot be globally modified.
 
@@ -200,3 +200,12 @@ Recipes/lists have owner, positive version, creation/update/archive dates. Lists
 Shared owner lock/expected_version protects writes; imports also require recipe version. Calculation/writes are atomic, leaving no partial list or XP after errors. Completion requires a nonempty fully purchased list. Copy retains quantities/ingredients and clears purchases/completion/archive. Disabling leaves business tables untouched.
 
 Events preserve UTC time/full snapshot and block UPDATE/DELETE. Composite references prevent foreign owners. First-reward keys are owner-unique for recipe, completed list, nonempty template and list/recipe import pair; other event keys are null. Metrics/progression use these facts without other-domain table reads. Corrections/reopen retain first successes. Snapshots preserve event language; current reads localize catalogue. [Contracts](recipes-api.md), [backup](sauvegardes.md#migration-0012-recettes-et-courses).
+
+
+## Migration 0014: Sport UX {#migration-0014-finition-sport}
+
+`0014_sport_ux` follows `0013_recipe_units`. It adds positive `sport_settings.version` (default 1), `views` (JSONB object, default `{}`), and `context` to sport_workouts/sport_sessions (auto/standard/hyrox constraint, default auto). The API validates six view keys; absent keys inherit documented defaults. Existing sport_sessions receive empty preparation_notes. New sessions freeze real preparation notes and context at start, preserving signature, targets, sets, dates and scores.
+
+Lists compute last_used_at from sessions without extra storage. Duplication creates a program without moving/copying history. Completion-only awarded_xp derives from the progression journal write, not another column or counter. The progression API remains the permanent source of XP. Archiving/disabling preserves all new preferences and data.
+
+PostgreSQL tests cover existing data, preservation, lossless downgrade without new data and refusal of data loss. See [backup and rollback](sauvegardes.md#migration-0014-finition-sport).

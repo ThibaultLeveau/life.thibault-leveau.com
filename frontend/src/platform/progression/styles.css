@@ -893,3 +893,15 @@
     font-size: 11px;
   }
 }
+
+@media (max-width: 420px) {
+  .progression-badge .progression-badge-title,
+  .progression-badge .progression-badge-streak {
+    display: none;
+  }
+  .progression-badge {
+    min-height: 44px;
+    min-width: 44px;
+    gap: 5px;
+  }
+}

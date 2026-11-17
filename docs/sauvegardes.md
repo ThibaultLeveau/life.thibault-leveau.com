@@ -171,6 +171,12 @@ Les anciennes écritures g/l/u restent compatibles pendant la migration, mais la
 
 La livraison UX de Tâches conserve la révision `0013_recipe_units` et les tables existantes. Les filtres `search`, `workspace_id`, `priority`, `label_id` étendent le JSON des préférences d’agenda ; les anciennes préférences reçoivent les défauts à la lecture. Le dump/restauration PostgreSQL habituel conserve filtres, tâches, récurrences et événements. Une ancienne image ne reconnaît pas ces quatre clés (validation stricte) : avant un retour à une version antérieure, sauvegarder puis retirer uniquement ces clés des préférences d’agenda concernées, ou restaurer la sauvegarde préalable avec son image. Ne pas déduire la compatibilité du seul numéro Alembic. Les actions groupées n’introduisent pas de nouveau type de donnée ni d’effacement d’historique.
 
+## Migration 0014 — finition Sport
+
+Sauvegarder avant `0014_sport_ux`. Elle ajoute les préférences de vue/version et les instantanés de préparation sans réécrire les résultats existants. Le dump complet conserve les cinq tables Sport et le journal commun de progression ; la recette de restauration compare tous leurs champs, y compris les nouvelles colonnes. Aucun service, volume ou secret supplémentaire.
+
+Le downgrade vers `0013_recipe_units` refuse toute préférence de vue enregistrée, tout contexte explicite ou toute note de préparation figée non vide. Sans ces données nouvelles, il retire les colonnes sans toucher aux séries, dates, scores ou au repos. La nouvelle révision rend la sonde de l’ancienne image incompatible : préférer une correction en avant ; sinon restaurer une sauvegarde compatible avec son image en suivant la procédure transactionnelle de ce guide. Ne pas supprimer des préférences ou des notes pour contourner le refus de perte. Une restauration révoque les sessions de connexion, conserve les séances métier et leurs échéances, puis se vérifie par relecture API après connexion.
+
 ## Score Sport v2
 
 La révision SQL reste `0013_recipe_units`. Le calcul ajoute `scoring` dans les métriques JSONB existantes, sans modifier les mesures brutes. Le dump PostgreSQL et la restauration transactionnelle conservent références, provenance, compteurs, scores et racines ; la recette conteneur compare intégralement les tables Sport après création de séances v2 partielles et vides. Les anciens scores numériques v1 sont conservés.

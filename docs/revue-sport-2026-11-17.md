@@ -6,6 +6,8 @@
 
 Ce document livre **39 améliorations proposées**, leur justification et leurs critères de validation. Il constitue une revue : **aucune de ces évolutions produit n’est implémentée par cette livraison documentaire**. Les comportements actuellement disponibles restent décrits dans le [guide Sport](sport.md) et l’[API Sport](sport-api.md).
 
+La [livraison UX Sport](sport-ux-livraison.md) documente les suites de cette revue ; les constats et mesures ci-dessous restent ceux de la version auditée.
+
 ## Périmètre et méthode
 
 Les sept rubriques et leurs interfaces secondaires ont été examinées : Programmes, éditeur, catalogue d’ajout, Exercices et formulaire, Entraînement, repos, confirmation de fin/abandon, Historique et détail, Mensurations et formulaire, Statistiques et tableaux, Réglages. La revue inclut le cadre LifeOS, la bibliothèque, le compte, le badge de progression et les variantes HYROX.
