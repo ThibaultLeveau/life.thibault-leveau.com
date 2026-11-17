@@ -139,6 +139,10 @@ La progression est couverte par `test_progression.py` (barèmes, niveaux, 180 qu
 
 `test_recipes.py` couvre le catalogue FR/EN, ingrédients privés, décimaux/portions, cumul par unité, achats partiels, modèles, copie, archives, conflits, métriques/XP, contraintes SQL et garde de migration. `recipes.spec.ts` exerce les parcours interface/API, les erreurs réseau, les brouillons et le mode magasin sur ordinateur/mobile. Les parcours `navigation.spec.ts` incluent la parité du cadre partagé FR/EN et thèmes. Le test conteneur compare les six tables après restauration et vérifie le journal immuable ; le smoke test couvre routes HTML, API privée, documentation et OpenAPI.
 
+### Score Sport v2
+
+`test_sport_scores.py` couvre les dix types dès la première séance vide/partielle, effort charge/assistance/distance/durée, volume et allure plafonnée, cibles partielles, références figées et champs inconnus, doublons, valeurs extrêmes et réparation propriétaire/CSRF/idempotente sans changement de dates/résultats/récompenses. Les tests Sport existants contrôlent les nouveaux scores et la conservation des propositions. Le parcours navigateur de fin partielle vérifie en FR/EN et bureau/320 px score, complétion, difficulté, références et présence du zéro dans les statistiques ; la restauration conteneur conserve les métriques JSONB complètes.
+
 ## Documentation et captures
 
 Chaque page française possède son équivalent anglais et appartient à un seul guide. La compilation stricte valide les liens ; le hook refuse les pages sans guide ni traduction. Les tests navigateur vérifient la navigation et la recherche limitées au guide et à la langue, les liens de traduction, les captures locales, le clavier/mobile et les anciennes URL.

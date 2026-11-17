@@ -156,7 +156,7 @@ def test_finish_unperformed_and_partial_sessions_for_each_type(client, kind, val
     )
     done = finish(client, empty)
     assert done["status"] == "completed" and done["version"] == empty["version"] + 1
-    assert done["score"] is None and done["baseline_id"] is None
+    assert done["score"] == 0 and done["baseline_id"] is None
     assert done["metrics"][0]["value"] == 0 and done["rest_until"] is None
     assert len(done["sets"]) == 2
     for result in done["sets"]:
@@ -170,7 +170,7 @@ def test_finish_unperformed_and_partial_sessions_for_each_type(client, kind, val
     assert full["entries"][0]["suggested_values"] == [None, None]
     full = record(client, record(client, full, values), values, index=1)
     full = finish(client, full)
-    assert full["score"] == 100 and full["baseline_id"] is None
+    assert full["score"] == 100 and full["baseline_id"] == done["id"]
     assert all(not s["skipped"] for s in full["sets"])
 
     partial = record(client, start(client, w), values, index=1)
@@ -178,11 +178,9 @@ def test_finish_unperformed_and_partial_sessions_for_each_type(client, kind, val
     result = finish(client, partial)
     assert result["sets"][1] == partial["sets"][0]  # Values and original timestamp are intact.
     assert result["sets"][0]["skipped"] and result["sets"][0]["values"] == done["sets"][0]["values"]
-    assert result["rest_until"] is None and result["baseline_id"] == full["id"]
-    # Speed/rate metrics stay unchanged; additive metrics halve when one of two sets is skipped.
-    assert result["score"] == (
-        100 if kind in {"distance_duration", "reps_duration", "calories_duration"} else 50
-    )
+    assert result["rest_until"] is None and result["baseline_id"] == done["id"]
+    # All types count the unperformed set, including speed/rate exercises.
+    assert result["score"] == 50
     assert call(client, "GET", "/sessions/active") is None
     assert call(client, "GET", f"/sessions/{result['id']}")["sets"] == result["sets"]
     stats = call(client, "GET", "/statistics")
@@ -218,11 +216,12 @@ def test_partial_finish_preserves_history_suggestions_and_zero_score_baselines(c
     early = record(client, start(client, w), {"weight_kg": 20, "reps": 10})
     early = finish(client, early)
     assert [m["value"] for m in early["metrics"]] == [210, 0]
-    assert early["score"] is None
+    assert early["score"] == 33.33
     full = record(client, start(client, w), {"weight_kg": 30, "reps": 10})
     full = record(client, full, {"weight_kg": 40, "reps": 8}, index=1)
     full = finish(client, record(client, full, {"duration_seconds": 60}, entry=1))
-    assert full["score"] == 100 and full["baseline_id"] is None
+    assert full["score"] == round(100 * (638 / 210 + 1) / 3, 2)
+    assert full["baseline_id"] == early["id"]
     partial = record(client, start(client, w), {"weight_kg": 50, "reps": 6}, index=1)
     # Undoing a validation before finishing also makes this set unperformed.
     partial = record(client, partial, {"duration_seconds": 90}, entry=1)
@@ -234,11 +233,11 @@ def test_partial_finish_preserves_history_suggestions_and_zero_score_baselines(c
     )
     partial = finish(client, partial)
     assert [s["skipped"] for s in partial["sets"]] == [True, False, True]
-    assert partial["score"] == round(100 * (306 / 638) / 2, 2)
-    assert partial["baseline_id"] == full["id"]
+    assert partial["score"] == round(100 * (306 / 210) / 3, 2)
+    assert partial["baseline_id"] == early["id"]
     empty = finish(client, start(client, w))
-    assert empty["score"] == 0 and empty["baseline_id"] == full["id"]
-    assert call(client, "GET", f"/sessions/{early['id']}")["score"] is None
+    assert empty["score"] == 0 and empty["baseline_id"] == early["id"]
+    assert call(client, "GET", f"/sessions/{early['id']}")["score"] == 33.33
     expected = [full["sets"][0]["values"], partial["sets"][1]["values"]]
     client.put("/api/v1/applications/sport", json={"enabled": False})
     assert client.get(f"/api/v1/sport/sessions/{partial['id']}").status_code == 403
@@ -499,7 +498,8 @@ def test_score_references_comparable_sessions_and_ignores_cancelled(client):
     )
     t = record(client, start(client, changed), {"weight_kg": 10, "reps": 5})
     t = finish(client, record(client, t, {"weight_kg": 10, "reps": 5}, index=1))
-    assert t["score"] == 100 and t["baseline_id"] is None
+    # A new comparison family may still use recorded suggestions to calibrate missing targets.
+    assert t["score"] == 51.38 and t["baseline_id"] is None
 
 
 def test_measurements_dates_changes_archive_restore_and_stats(client):

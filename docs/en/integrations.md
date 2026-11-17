@@ -50,7 +50,7 @@ Completed-session metrics use finished_at. Started counts all starts; completion
 
 Set values come from completed snapshots. Skipped zero sets are excluded from performed counts/measure aggregations; the finished session still counts. A session with no performed sets has zero sets and no average load. Elapsed_seconds is start-to-finish including rest; duration_seconds is entered effort duration. Volume is weight × reps; no bodyweight load is invented. Speed uses distance/duration for entries supplying both, per session, then aggregates session speeds. Exercises without the required measure are ignored.
 
-Scores aggregate only for one program/comparison signature; incompatible results are unavailable and ask for narrower filters/periods. Archived programs/sessions remain analyzable; archived body measurements are excluded from new calculations. Change is last minus first in the window, never replacing missing points with zero.
+Scores aggregate only for one program, comparison signature and score-reference root (v1/v2 families stay separate); incompatible results are unavailable and ask for narrower filters/periods. Archived programs/sessions remain analyzable; archived body measurements are excluded from new calculations. Change is last minus first in the window, never replacing missing points with zero.
 
 ## Delivered catalogue {#catalogue-livre}
 

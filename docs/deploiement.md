@@ -264,3 +264,9 @@ Publier le `main` validé avec la procédure habituelle de sauvegarde, construct
 ## Livraison des réglages généraux
 
 Publier le `main` validé avec `scripts/deploy.sh` et sa sauvegarde habituelle. Aucune migration SQL, dépendance, variable ou modification Caddy/DNS. Vérifier le SHA exécuté, les sondes, `/settings`, `/settings?application=sport`, les anciens liens `?tab=settings`, OpenAPI et les guides réglages FR/EN en HTTPS. Sur compte synthétique : menu du nom, chaque section et sauvegarde API, brouillons, expiration, désactivation/réactivation, langues/thèmes et mobile 320 px. Consigner sauvegarde, SHA et preuves dans l’issue #76.
+
+## Livraison du score Sport v2
+
+Après validations, auto-revue, CI et fusion, publier avec `scripts/deploy.sh` et sa sauvegarde habituelle. Aucune migration SQL, dépendance ni variable nouvelle (`0013_recipe_units`). Respecter la [compatibilité des images](sauvegardes.md#score-sport-v2). Sur le compte concerné, exécuter `POST /api/v1/sport/scores/backfill` après publication, noter le nombre de scores réparés et vérifier qu’une deuxième exécution renvoie zéro. Les autres comptes ne doivent pas être modifiés par cette reprise ciblée.
+
+Sur un compte synthétique, vérifier première séance partielle, exercice entièrement omis, séance vide (0), difficulté relative charge/distance/allure, références, historique/statistiques, FR/EN, mobile 320 px et clavier. Vérifier l’API `score_details`, les références figées, les propositions suivantes et la conservation des résultats. Contrôler SHA réellement exécuté, sondes, OpenAPI, `/sport` et guides FR/EN en HTTPS ; consigner sauvegarde, reprise et résultats dans l’issue.

@@ -260,3 +260,9 @@ Publish the validated main using the same backup/build/migration/deployment scri
 ## Deploying general settings
 
 Publish validated main through `scripts/deploy.sh` with its normal backup. No SQL migration, dependency, environment variable or Caddy/DNS change. Verify running SHA, probes, `/settings`, `/settings?application=sport`, legacy `?tab=settings` links, OpenAPI and both settings guides over HTTPS. On an isolated synthetic account, verify the account-name menu, each section/API save, drafts, expiry, disable/reactivate, languages/themes and 320 px. Record backup, SHA and evidence in issue #76.
+
+## Deploying Sport score v2 {#livraison-du-score-sport-v2}
+
+After checks, self-review, CI and merge, publish with `scripts/deploy.sh` and its normal backup. No new SQL migration, dependency or variable (`0013_recipe_units`). Respect [image compatibility](sauvegardes.md#score-sport-v2). For the affected account, run `POST /api/v1/sport/scores/backfill` after deployment, record the repaired count and confirm a second call returns zero. This targeted repair must not modify other accounts.
+
+On a synthetic account, verify first partial session, entirely omitted exercise, empty session (0), relative difficulty for weight/distance/pace, references, history/statistics, FR/EN, 320 px and keyboard. Check API `score_details`, frozen references, next-session suggestions and preserved results. Verify actual SHA, probes, OpenAPI, `/sport` and FR/EN guides over HTTPS; record backup, repair and results in the issue.

@@ -264,7 +264,17 @@ class SportMetrics:
                     observed_at=utcnow(),
                     sample_count=len(matched),
                 )
-            if metric == "score" and len({(r.workout_id, r.signature) for r in matched}) > 1:
+            if (
+                metric == "score"
+                and len(
+                    {
+                        (r.workout_id, r.signature, r.baseline_id or r.id)
+                        for r in matched
+                        if r.score is not None
+                    }
+                )
+                > 1
+            ):
                 return MetricValue(
                     value=None,
                     state="unavailable",

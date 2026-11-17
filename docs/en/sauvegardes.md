@@ -162,3 +162,9 @@ Old g/l/u writes stay compatible during migration, but old probes reject the rev
 ## Tasks agenda filters and bulk actions {#filtres-dagenda-et-actions-groupees-taches}
 
 The Tasks UX delivery retains 0013_recipe_units and existing tables. Search/workspace/priority/label extend agenda JSON; older preferences use defaults. Normal backup preserves filters/tasks/recurrence/events. Older strict contracts reject the four keys: before returning to earlier code, back up then remove only these keys from affected agenda preferences, or restore the earlier backup with its image. Alembic alone does not prove compatibility. Bulk actions add neither a data type nor historical erasure.
+
+## Sport score v2 {#score-sport-v2}
+
+SQL revision stays `0013_recipe_units`. The calculation adds `scoring` to existing metrics JSONB without changing raw measurements. PostgreSQL dump/transactional restore retains references, provenance, counts, scores and roots; container acceptance compares all Sport tables after creating partial/empty v2 sessions. Existing numeric v1 scores remain unchanged.
+
+Back up before deployment and targeted missing-score repair. Repair preserves sets, dates, notes, versions and rewards; repeating it has no effect. Returning to the previous image is **incompatible** despite the unchanged SQL schema: it rejects unknown JSON fields and could use an empty v2 session as a reference denominator. Prefer a forward fix; restoration needs a compatible dump/image, stopped writes and consideration of data created since backup. Do not delete calculation details to bypass this restriction.

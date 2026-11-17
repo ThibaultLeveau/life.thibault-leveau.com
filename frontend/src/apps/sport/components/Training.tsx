@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Dialog, ErrorMessage } from "../../../shared/ui/Dialog";
 import { Icon } from "../../../shared/ui/Icon";
 import { sportApi } from "../api";
+import { ScoreExplanation } from "./ScoreExplanation";
 import { isHyrox } from "../hyrox";
 import { HyroxBrand, HyroxMark } from "./HyroxBrand";
 import type { KindDefinition, Training, Values } from "../types";
@@ -121,23 +122,57 @@ export function TrainingDetail({
           </strong>
         </div>
       </div>
-      {training.score != null && (
-        <p className="muted">
-          {training.baseline_id
-            ? tr(
-                "100_your_first_completed_training_session_with_these_exercises_and",
-              )
-            : tr(
-                "first_comparable_training_session_it_becomes_your_baseline_at_100",
-              )}
-        </p>
-      )}
-      {training.status === "completed" && training.score == null && (
+      {training.score_details ? (
+        <>
+          <div className="sport-summary" role="group" aria-label={tr("score_breakdown")}>
+            <div>
+              <span>{tr("score_completion")}</span>
+              <strong>{number(training.score_details.completion_percent)} %</strong>
+            </div>
+            <div>
+              <span>{tr("score_difficulty")}</span>
+              <strong>
+                {training.score_details.difficulty_percent == null
+                  ? "—"
+                  : `${number(training.score_details.difficulty_percent)} %`}
+              </strong>
+            </div>
+            <div>
+              <span>{tr("score_completed_planned")}</span>
+              <strong>
+                {training.score_details.completed_sets} / {training.score_details.planned_sets}
+              </strong>
+            </div>
+          </div>
+          <ScoreExplanation />
+        </>
+      ) : training.score != null ? (
+        <p className="muted">{tr("score_legacy")}</p>
+      ) : training.status === "completed" ? (
         <p className="muted">{tr("score_needs_positive_baseline")}</p>
-      )}
+      ) : null}
       {training.entries.map((entry, i) => (
         <section className="sport-plan-entry" key={i}>
           <h3>{entry.name}</h3>
+          {training.metrics[i]?.scoring && (
+            <details className="sport-score-references">
+              <summary>{tr("score_references")}</summary>
+              <ul>
+                {training.metrics[i].scoring!.references.map((reference, j) => (
+                  <li key={j}>
+                    {tr("set")} {j + 1} · {kinds.find((k) => k.id === entry.kind)!.fields
+                      .filter((field) => reference.values[field.key] != null)
+                      .map((field) => {
+                        const value = number(reference.values[field.key]!);
+                        const source = tr(`score_source_${reference.sources[field.key]!}`);
+                        return `${field.label} : ${value} ${field.unit} (${source})`;
+                      })
+                      .join(" · ") || tr("score_reference_pending")}
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
           {training.sets
             .filter((s) => s.entry_index === i)
             .map((s) => (
