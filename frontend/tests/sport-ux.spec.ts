@@ -496,6 +496,7 @@ test("Sport UX : mensurations rapides, valeurs repliées, écarts neutres et gra
     .getByRole("button", { name: "Voir le graphique : Poids" })
     .click();
   const chart = page.locator(".sport-chart").first();
+  await expect(chart.locator(".sport-chart-dot")).toHaveCount(3);
   const xs = await chart
     .locator(".sport-chart-dot")
     .evaluateAll((points) =>

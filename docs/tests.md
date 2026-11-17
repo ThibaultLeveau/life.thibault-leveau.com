@@ -151,3 +151,5 @@ Chaque page française possède son équivalent anglais et appartient à un seul
 ## Finition Sport (issue 74)
 
 `test_sport_ux.py` couvre les préférences partielles et versionnées, leur isolation/conservation, les filtres complets, la duplication, les notes/contextes figés, la navigation d’historique, les références statistiques, les XP réels de clôture, le calendrier UTC et la migration 0014 avec refus de perte. `sport-ux.spec.ts` exerce les préférences par format, le débit des recherches, les listes sous latence, la continuité de navigation, les brouillons, la fermeture en cours d’écriture, les conflits et copies, la sélection entre pages, le déplacement direct, le focus des séries, le brouillon normalisé, le repos ajustable et le bilan, les mensurations repliées, les écarts et l’axe temporel au clavier. Ces tests utilisent l’API réelle ; les délais/erreurs sont injectés seulement aux endroits précisés par les scénarios.
+
+Les mesures géométriques des graphiques Sport attendent explicitement le rendu des points après navigation. Une lecture immédiate de la liste SVG peut précéder la réponse API sur le domaine HTTPS, même si le graphique se charge correctement.
