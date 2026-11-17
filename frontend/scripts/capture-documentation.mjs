@@ -137,6 +137,9 @@ try {
     await capture('recipes-detail', `/recipes?tab=recipes&id=${data.recipe.id}`);
     await capture('recipes-list', `/recipes?tab=lists&id=${data.list.id}`);
     await capture('recipes-template', `/recipes?tab=templates&id=${data.template.id}`);
+    await page.setViewportSize({ width: 390, height: 664 });
+    await capture('sport-programs-mobile', '/sport');
+    await capture('sport-training-mobile', '/sport?tab=training');
     await page.setViewportSize({ width: 390, height: 844 });
     await capture('recipes-shopping-mobile', `/recipes?tab=lists&id=${data.list.id}&shop=1`);
     await capture('general-navigation-mobile', '/sport', async () => {

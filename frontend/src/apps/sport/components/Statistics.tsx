@@ -11,6 +11,7 @@ import {
   type Metric,
 } from "../types";
 import { day, LoadState, moment, number, useResource } from "./common";
+import { CompactOptions } from "./compact";
 import { Chart } from "./Chart";
 
 type MetricKey =
@@ -222,7 +223,7 @@ export function Statistics({
   return (
     <>
       <div
-        className="sport-presets"
+        className="sport-presets sport-desktop-only"
         role="group"
         aria-label={tr("statistics_period")}
       >
@@ -244,44 +245,69 @@ export function Statistics({
           </button>
         ))}
       </div>
-      <form
-        className="sport-filters sport-period-form"
-        noValidate
-        onSubmit={(event) => {
-          event.preventDefault();
-          setSubmitted(true);
-          if (!invalid)
-            update({
-              stat_since: since,
-              stat_until: until,
-              stat_period: "custom",
-            });
-        }}
-      >
-        <label>
-          {tr("from")}
-          <input
-            type="date"
-            required
-            value={since}
-            aria-invalid={invalid}
-            aria-describedby={invalid ? "sport-period-error" : undefined}
-            onChange={(event) => setSince(event.target.value)}
-          />
+      <div className="sport-stat-period-controls">
+        <label className="sport-mobile-only sport-chart-select">
+          <span className="sr-only">{tr("statistics_period")}</span>
+          <select
+            aria-label={tr("statistics_period")}
+            value={
+              ["month", "quarter", "year"].includes(query.stat_period)
+                ? query.stat_period
+                : "custom"
+            }
+            onChange={(event) => {
+              if (event.target.value !== "custom") preset(event.target.value);
+            }}
+          >
+            <option value="custom" disabled>
+              {tr("period_short")}
+            </option>
+            <option value="month">{tr("last_30_days")}</option>
+            <option value="quarter">{tr("last_3_months")}</option>
+            <option value="year">{tr("this_year")}</option>
+          </select>
         </label>
-        <label>
-          {tr("period_end")}
-          <input
-            type="date"
-            required
-            value={until}
-            aria-invalid={invalid}
-            aria-describedby={invalid ? "sport-period-error" : undefined}
-            onChange={(event) => setUntil(event.target.value)}
-          />
-        </label>
-        <button className="secondary-button">{tr("apply_period")}</button>
-      </form>
+        <CompactOptions label={tr("dates_short")}>
+          <form
+            className="sport-filters sport-period-form"
+            noValidate
+            onSubmit={(event) => {
+              event.preventDefault();
+              setSubmitted(true);
+              if (!invalid)
+                update({
+                  stat_since: since,
+                  stat_until: until,
+                  stat_period: "custom",
+                });
+            }}
+          >
+            <label>
+              {tr("from")}
+              <input
+                type="date"
+                required
+                value={since}
+                aria-invalid={invalid}
+                aria-describedby={invalid ? "sport-period-error" : undefined}
+                onChange={(event) => setSince(event.target.value)}
+              />
+            </label>
+            <label>
+              {tr("period_end")}
+              <input
+                type="date"
+                required
+                value={until}
+                aria-invalid={invalid}
+                aria-describedby={invalid ? "sport-period-error" : undefined}
+                onChange={(event) => setUntil(event.target.value)}
+              />
+            </label>
+            <button className="secondary-button">{tr("apply_period")}</button>
+          </form>
+        </CompactOptions>
+      </div>
       {(invalid || !validQuery) && (
         <p
           id="sport-period-error"
@@ -294,7 +320,7 @@ export function Statistics({
       <LoadState {...resource} />
       {stats && (
         <>
-          <p className="muted">
+          <p className="muted sport-period-caption">
             {tr("displayed_period", {
               since: day(stats.since),
               until: day(stats.until),

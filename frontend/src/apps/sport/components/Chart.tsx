@@ -89,16 +89,6 @@ export function Chart({
           {number(last.value)} {unit}
         </span>
       </div>
-      {points.length > 1 && (
-        <p className="muted">
-          {last.value - first.value > 0 ? "+" : ""}
-          {number(last.value - first.value)} {unit}{" "}
-          {tr("between_the_first_and_last_records")}
-        </p>
-      )}
-      <p className="muted small-text" id={`${id}-help`}>
-        {tr("chart_time_help")}
-      </p>
       <svg
         ref={svg}
         viewBox={`0 0 ${width} 215`}
@@ -225,11 +215,22 @@ export function Chart({
           </text>
         )}
       </svg>
+      {points.length > 1 && (
+        <p className="muted">
+          {last.value - first.value > 0 ? "+" : ""}
+          {number(last.value - first.value)} {unit}{" "}
+          {tr("between_the_first_and_last_records")}
+        </p>
+      )}
       <div className="sport-chart-value" role="status">
         {showValue ? valueLabel(active) : tr("chart_select_point")}
       </div>
       <details>
         <summary>{tr("view_values")}</summary>
+        <p className="muted small-text" id={`${id}-help`}>
+          {tr("chart_time_help")}
+        </p>
+
         <div className="sport-table-wrap">
           <table>
             <thead>

@@ -247,10 +247,11 @@ function SportPage() {
           {program && (
             <button
               className="text-button sport-back"
+              aria-label={tr("all_programs")}
               onClick={() => choose("workouts", null, archived)}
             >
               <span aria-hidden="true">←</span>
-              {tr("all_programs")}
+              <span className="sport-desktop-label">{tr("all_programs")}</span>
             </button>
           )}
           <div className="sport-page-heading">

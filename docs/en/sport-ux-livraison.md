@@ -55,3 +55,23 @@ Automated checks use synthetic accounts and databases. Touch emulation, reduced 
 ## Data and operations
 
 Additive migration `0014_sport_ux` preserves existing data. Sport settings store six view preferences; context and preparation notes follow the session lifecycle. Filters are read parameters; drafts stay in memory. See the [data model](donnees.md#migration-0014-finition-sport) and [backup/restore constraints](sauvegardes.md#migration-0014-finition-sport).
+
+## Mobile density correction
+
+A second review following the report that controls obscured the lists measured actual initial content visibility, in addition to overflow. The comparison uses the same synthetic account, programs with 1–12 exercises, records with 12 measurements and a **390 × 664 px** viewport. The baseline is commit `db50d4f`.
+
+| First useful content | Before position | After position |
+| --- | ---: | ---: |
+| Program row | 495 px | 237 px |
+| Catalogue exercise | 596 px | 259 px |
+| Measurement record | 436 px | 231 px |
+| History session | 451 px | 201 px |
+| First chart card | 809 px | 370 px |
+| First editor exercise | 730 px | 362 px |
+| First set input | 723 px | 267 px |
+
+The initial lists show four complete programs, four exercises or three measurement records at this size; program rows shrink from about 281 to 83 px. At 320 × 568, scenarios require at least two complete rows. Controls retain 44 px targets and touch inputs retain 16 px text. Full detail remains available through titles or dates, and secondary controls through Actions or Filters. Mobile preferences also cover touch landscape up to 1024 × 500 px.
+
+Captures and scenarios cover lists/grids, expanded filters, action menus, creation/editing, the picker, empty/active training, history/detail, records/forms, statistics and settings. Measurements use synthetic data and emulated viewports; actual usable device height also depends on browser bars and keyboards. See [test criteria](tests.md#sport-mobile-density) and [phone workflows](sport.md#reading-and-acting-on-a-phone).
+
+This correction changes no tables, schema versions or API rules. Deployment keeps migration `0014_sport_ux` and the usual backup procedure.

@@ -40,6 +40,7 @@ export function SettingsPage({ modules }: { modules: ApplicationModule[] }) {
   const index = useRef(0),
     restoring = useRef(false);
   const heading = useRef<HTMLHeadingElement>(null);
+  const navigation = useRef<HTMLElement>(null);
   const [busy, setBusy] = useState(false);
   const guards = useMemo(
     () =>
@@ -111,6 +112,24 @@ export function SettingsPage({ modules }: { modules: ApplicationModule[] }) {
     document.title = `${title} · ${tr("settings")} · LifeOS`;
     heading.current?.focus({ preventScroll: true });
   }, [section, title]);
+  useEffect(() => {
+    const nav = navigation.current;
+    if (!nav) return;
+    const reveal = () => {
+      const active = nav.querySelector<HTMLElement>('[aria-current="page"]');
+      if (!active || nav.scrollWidth <= nav.clientWidth) return;
+      const box = active.getBoundingClientRect(),
+        container = nav.getBoundingClientRect();
+      if (box.left < container.left)
+        nav.scrollLeft += box.left - container.left;
+      else if (box.right > container.right)
+        nav.scrollLeft += box.right - container.right;
+    };
+    const observer = new ResizeObserver(reveal);
+    observer.observe(nav);
+    reveal();
+    return () => observer.disconnect();
+  }, [section, title, items]);
   return (
     <AppLayout account={{ disabled: busy, beforeSessionChange: permit }}>
       <header className="settings-heading">
@@ -120,6 +139,7 @@ export function SettingsPage({ modules }: { modules: ApplicationModule[] }) {
       </header>
       <div className="settings-layout">
         <nav
+          ref={navigation}
           className="settings-navigation"
           aria-label={tr("settings_sections")}
         >

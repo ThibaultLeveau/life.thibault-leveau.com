@@ -131,3 +131,9 @@ Sport chart geometry checks explicitly wait for the points to render after navig
 ### Sport score v2 {#score-sport-v2}
 
 `test_sport_scores.py` covers all ten types from the first empty/partial session, weight/assistance/distance/duration effort, volume and capped pace, partial targets, frozen/unknown references, duplicates, extreme values and owner/CSRF/idempotent repair preserving dates/results/rewards. Existing Sport tests check new scores and suggestions. Browser acceptance verifies FR/EN and desktop/320 px score, completion, difficulty, references and zero chart points, including an entirely omitted exercise. Container restoration retains full metrics JSONB.
+
+### Sport mobile density
+
+`sport-mobile.spec.ts` measures initial content at 320 × 568, 390 × 664 and 430 × 780 in French/light and English/dark: at least two complete rows on the smallest phone and three on larger formats, search/filter access, list/grid switching, the first plot, first exercise inputs, first sets and visible settings input. It verifies a picker that does not summon the keyboard on opening, focus restoration, copy/archive/undo and positioning actions, complete measurement details after compact previews, preserved collapsed values and saving with a 360 px reduced viewport. Touch landscape at 844 × 390 keeps mobile preferences.
+
+Existing Sport scenarios explicitly open compact menus and options while retaining persistence, conflict, validation and preservation assertions. Shared navigation/settings tests cover the other applications. Screenshots finish animations before capture; browser emulation does not constitute physical-device testing.

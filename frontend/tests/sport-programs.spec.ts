@@ -1,3 +1,9 @@
+import {
+  openSportFilters,
+  openSportActions,
+  openProgramOptions,
+  expectPickerFocus,
+} from "./sport-mobile-helpers";
 import { test, expect, type BrowserContext, type Page } from "@playwright/test";
 import type { ExercisePage, Training, Workout } from "../src/apps/sport/types";
 
@@ -86,7 +92,7 @@ async function add(page: Page, query: string) {
     .getByRole("button", { name: "Ajouter un exercice", exact: true })
     .click();
   const search = page.getByLabel("Rechercher un exercice");
-  await expect(search).toBeFocused();
+  await expectPickerFocus(page);
   await search.fill(query);
   await page
     .locator(".sport-picker-item")
@@ -103,7 +109,10 @@ for (const width of [320, 375, 768, 1440]) {
     test.setTimeout(90_000);
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/sport");
-    if (width === 320) await page.getByLabel("Programmes archivés").check();
+    if (width === 320) {
+      await openSportFilters(page);
+      await page.getByLabel("Programmes archivés").check();
+    }
     await page
       .getByRole("button", { name: "Nouveau programme", exact: true })
       .click();
@@ -118,7 +127,7 @@ for (const width of [320, 375, 768, 1440]) {
     await expect(page).toHaveTitle("Nouveau programme · Sport · LifeOS");
     const name = `Programme ${width} ${Date.now()}`;
     await page.getByLabel("Nom du programme").fill(name);
-    await page.getByText("Préparation et notes", { exact: true }).click();
+    await openProgramOptions(page);
     await page
       .getByLabel("Notes de préparation")
       .fill("Échauffement et charge totale.");
@@ -146,6 +155,11 @@ for (const width of [320, 375, 768, 1440]) {
       .getByLabel("Répétitions (rép.)", { exact: true })
       .last()
       .fill("12");
+    await openSportActions(
+      page
+        .locator(".sport-plan-entry")
+        .filter({ has: page.getByRole("heading", { name: /Burpees/ }) }),
+    );
     await page
       .getByRole("button", { name: "Monter Burpees", exact: true })
       .click();
@@ -157,6 +171,7 @@ for (const width of [320, 375, 768, 1440]) {
       page.getByLabel("Charge totale (kg)", { exact: true }),
     ).toHaveValue("42.5");
     await add(page, "Planche sur les avant-bras");
+    await openSportActions(page.locator(".sport-plan-entry").last());
     await page
       .locator(".sport-plan-entry")
       .last()
@@ -194,6 +209,11 @@ for (const width of [320, 375, 768, 1440]) {
     expect(stored.entries.map((entry) => entry.sets)).toEqual([1, 2]);
     expect(stored.entries[0].target.reps).toBe(12);
     expect(stored.entries[1].target.weight_kg).toBe(42.5);
+    await openSportActions(
+      page
+        .locator(".sport-workout")
+        .filter({ has: page.getByRole("heading", { name, exact: true }) }),
+    );
     await page
       .getByRole("button", { name: `Modifier ${name}`, exact: true })
       .click();
@@ -355,7 +375,9 @@ test("Toutes les pages Sport : mobile, tablette, ordinateur, thèmes et formulai
       await page.goto(`/sport?tab=${tab}`);
       if (tab === "settings") {
         await expect(page).toHaveURL(/\/settings\?application=sport$/);
-        await expect(page.locator("#settings-section-title")).toHaveText("Sport");
+        await expect(page.locator("#settings-section-title")).toHaveText(
+          "Sport",
+        );
         await expect(
           page.getByLabel("Temps de repos entre les séries (secondes)"),
         ).toBeVisible();
@@ -504,6 +526,10 @@ test.describe("programme tactile", () => {
         new CustomEvent("test-viewport", { detail: { height: 812 } }),
       ),
     );
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Fermer", exact: true })
+      .click();
     page.once("dialog", (dialog) => dialog.accept());
     await page.getByRole("button", { name: "Tous les programmes" }).click();
     await page.getByRole("button", { name: "Ouvrir la navigation" }).click();
@@ -612,13 +638,22 @@ test("Cartes de programme compactes : ordinateur, mobile, thèmes et langues", a
             await expect(
               card.locator(".sport-workout-more:visible"),
             ).toHaveCount(
-              view === "list" || program.entries.length > 3 ? 1 : 0,
+              width <= 800 && view === "list"
+                ? 0
+                : view === "list" || program.entries.length > 3
+                  ? 1
+                  : 0,
             );
-            await expect(
-              card.getByRole("button", {
-                name: new RegExp(`^(Archiver|Archive)`),
-              }),
-            ).toHaveCount(1);
+            if (width <= 800) {
+              await openSportActions(card);
+              await expect(
+                card.getByRole("button", { name: /^(Archiver|Archive)/ }),
+              ).toBeVisible();
+              await page.keyboard.press("Escape");
+            } else
+              await expect(
+                card.getByRole("button", { name: /^(Archiver|Archive)/ }),
+              ).toHaveCount(1);
             const height = (await card.boundingBox())!.height;
             expect(height).toBeLessThan(view === "list" ? 400 : 650);
             for (const button of await card.getByRole("button").all()) {
@@ -669,6 +704,13 @@ test("Cartes de programme compactes : ordinateur, mobile, thèmes et langues", a
   await write(page, "/preferences", { locale: "fr" }, "PUT");
   await page.setViewportSize({ width: 320, height: 900 });
   await page.goto("/sport");
+  await openSportActions(
+    page
+      .locator(".sport-workout")
+      .filter({
+        has: page.getByRole("heading", { name: regular.name, exact: true }),
+      }),
+  );
   const edit = page.getByRole("button", {
     name: `Modifier ${regular.name}`,
     exact: true,
@@ -782,12 +824,14 @@ for (const locale of ["fr", "en"]) {
     expect(archived.notes).toBe("Modifié ailleurs");
     expect(archived.competition_date).toBe(program.competition_date);
     expect(archived.created_at).toBe(program.created_at);
+    await openSportFilters(page);
     await page
       .getByLabel(locale === "fr" ? "Programmes archivés" : "Archived programs")
       .check();
     const card = page.locator(".sport-workout").filter({
       has: page.getByRole("heading", { name: program.name, exact: true }),
     });
+    await openSportActions(card);
     await card
       .getByRole("button", {
         name: `${locale === "fr" ? "Modifier" : "Edit"} ${program.name}`,

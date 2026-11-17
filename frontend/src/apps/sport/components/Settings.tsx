@@ -99,10 +99,6 @@ function SettingsForm({
           </button>
         ))}
       </div>
-      <p className="muted">{tr("rest_zero_help")}</p>
-      <p className="muted">
-        {tr("the_countdown_starts_when_you_complete_a_set_and_resumes")}
-      </p>
       <button className="primary-button" aria-disabled={action.busy}>
         {action.busy ? tr("saving") : tr("save_settings")}
       </button>
@@ -123,6 +119,13 @@ function SettingsForm({
           {tr("settings_saved")}
         </p>
       )}
+      <details>
+        <summary>{tr("options")}</summary>
+        <p className="muted">{tr("rest_zero_help")}</p>
+        <p className="muted">
+          {tr("the_countdown_starts_when_you_complete_a_set_and_resumes")}
+        </p>
+      </details>
       <a className="text-button" href={documentationPath("sport")}>
         {tr("sport_application_guide")}
       </a>

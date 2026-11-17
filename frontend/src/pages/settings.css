@@ -131,3 +131,56 @@
     font-size: 12px;
   }
 }
+
+/* The shared settings navigation stays reachable without pushing every panel
+   below the first phone screen. */
+@media (max-width: 800px) {
+  .main-content:has(> .settings-heading) {
+    padding-block: 16px;
+  }
+  .settings-heading {
+    margin-bottom: 12px;
+  }
+  .settings-heading > p {
+    display: none;
+  }
+  .settings-heading h1 {
+    font-size: 26px;
+    margin: 0;
+  }
+  .settings-layout {
+    gap: 16px;
+    min-width: 0;
+  }
+  .settings-navigation {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    min-width: 0;
+    padding-bottom: 4px;
+  }
+  .settings-navigation .application-nav-item {
+    flex: 0 0 auto;
+    width: auto;
+    white-space: nowrap;
+    min-height: 44px;
+  }
+  .settings-section-heading {
+    margin-bottom: 12px;
+    gap: 8px;
+  }
+  .settings-section-heading h2 {
+    font-size: 20px;
+  }
+  .settings-card {
+    padding: 12px;
+  }
+  .settings-form,
+  .settings-form fieldset {
+    gap: 12px;
+  }
+  .settings-form h2 {
+    font-size: 18px;
+    margin: 0;
+  }
+}

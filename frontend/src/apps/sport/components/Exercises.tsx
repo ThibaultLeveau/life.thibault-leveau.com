@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { tr } from "../i18n";
+import { CompactActions, CompactOptions, useSportMobile } from "./compact";
 import { Dialog, ErrorMessage } from "../../../shared/ui/Dialog";
 import { Icon, type IconName } from "../../../shared/ui/Icon";
 import { sportApi } from "../api";
@@ -60,22 +61,32 @@ function FilterFields({
   search?: React.RefObject<HTMLInputElement | null>;
 }) {
   return (
-    <>
-      <div className="sport-filters">
-        <label>
-          {picker ? tr("search_for_an_exercise") : tr("search")}
-          <input
-            ref={search}
-            type="search"
-            maxLength={160}
-            placeholder={tr("name_muscle_or_equipment")}
-            value={filters.q}
-            onChange={(event) => onChange({ q: event.target.value })}
-            onKeyDown={(event) => {
-              if (picker && event.key === "Enter") event.preventDefault();
-            }}
-          />
-        </label>
+    <div className="sport-filters sport-list-controls">
+      <label className="sport-search">
+        <span>{picker ? tr("search_for_an_exercise") : tr("search")}</span>
+        <input
+          ref={search}
+          aria-label={picker ? tr("search_for_an_exercise") : tr("search")}
+          type="search"
+          maxLength={160}
+          placeholder={tr("name_muscle_or_equipment")}
+          value={filters.q}
+          onChange={(event) => onChange({ q: event.target.value })}
+          onKeyDown={(event) => {
+            if (picker && event.key === "Enter") event.preventDefault();
+          }}
+        />
+      </label>
+      <CompactOptions
+        count={
+          [
+            filters.kind,
+            filters.muscle,
+            filters.equipment,
+            filters.show !== "false",
+          ].filter(Boolean).length
+        }
+      >
         <label>
           {tr("exercise_type")}
           <select
@@ -107,87 +118,75 @@ function FilterFields({
             )}
           </select>
         </label>
-      </div>
-      <details className="sport-extra-filters">
-        <summary>
-          {tr("muscle_equipment_filters")}
-          {(filters.muscle || filters.equipment) && (
-            <span className="sport-tag">
-              {[filters.muscle, filters.equipment].filter(Boolean).length}
-            </span>
-          )}
-        </summary>
-        <div className="sport-filters">
-          <label>
-            {tr("muscle_group")}
-            <select
-              value={filters.muscle}
-              onChange={(event) => onChange({ muscle: event.target.value })}
-            >
-              <option value="">{tr("all_muscles")}</option>
-              {options?.muscles.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            {tr("equipment")}
-            <select
-              value={filters.equipment}
-              onChange={(event) => onChange({ equipment: event.target.value })}
-            >
-              <option value="">{tr("all_equipment")}</option>
-              {options?.equipment.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-      </details>
-      {(filters.q ||
-        filters.kind ||
-        filters.muscle ||
-        filters.equipment ||
-        filters.show !== "false") && (
-        <button
-          type="button"
-          className="text-button"
-          onClick={() =>
-            onChange({
-              q: "",
-              kind: "",
-              show: "false",
-              muscle: "",
-              equipment: "",
-            })
-          }
-        >
-          {tr("clear_filters")}
-        </button>
-      )}
-    </>
+        <details className="sport-extra-filters">
+          <summary>
+            {tr("muscle_equipment_filters")}
+            {(filters.muscle || filters.equipment) && (
+              <span className="sport-tag">
+                {[filters.muscle, filters.equipment].filter(Boolean).length}
+              </span>
+            )}
+          </summary>
+          <div className="sport-filters">
+            <label>
+              {tr("muscle_group")}
+              <select
+                value={filters.muscle}
+                onChange={(event) => onChange({ muscle: event.target.value })}
+              >
+                <option value="">{tr("all_muscles")}</option>
+                {options?.muscles.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              {tr("equipment")}
+              <select
+                value={filters.equipment}
+                onChange={(event) =>
+                  onChange({ equipment: event.target.value })
+                }
+              >
+                <option value="">{tr("all_equipment")}</option>
+                {options?.equipment.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        </details>
+        {(filters.q ||
+          filters.kind ||
+          filters.muscle ||
+          filters.equipment ||
+          filters.show !== "false") && (
+          <button
+            type="button"
+            className="text-button"
+            onClick={() =>
+              onChange({
+                q: "",
+                kind: "",
+                show: "false",
+                muscle: "",
+                equipment: "",
+              })
+            }
+          >
+            {tr("clear_filters")}
+          </button>
+        )}
+      </CompactOptions>
+    </div>
   );
 }
 
-export function ExercisePicker({
-  onPick,
-  kinds,
-  active = true,
-  capacity = 50,
-}: {
-  onPick: (exercises: Exercise[], individual: boolean) => void;
-  kinds: KindDefinition[];
-  active?: boolean;
-  capacity?: number;
-}) {
-  const search = useRef<HTMLInputElement>(null);
-  useEffect(() => {
-    if (active) search.current?.focus();
-  }, [active]);
+export function useExercisePickerState() {
   const [filters, setFilters] = useState<Filters>({
     q: "",
     kind: "",
@@ -198,6 +197,46 @@ export function ExercisePicker({
   const [offset, setOffset] = useState(0);
   const [selected, setSelected] = useState<Record<string, Exercise>>({});
   const [added, setAdded] = useState<Set<string>>(new Set());
+  return {
+    filters,
+    setFilters,
+    offset,
+    setOffset,
+    selected,
+    setSelected,
+    added,
+    setAdded,
+  };
+}
+
+export function ExercisePicker({
+  onPick,
+  kinds,
+  active = true,
+  capacity = 50,
+  state,
+}: {
+  state: ReturnType<typeof useExercisePickerState>;
+  onPick: (exercises: Exercise[], individual: boolean) => void;
+  kinds: KindDefinition[];
+  active?: boolean;
+  capacity?: number;
+}) {
+  const search = useRef<HTMLInputElement>(null);
+  const mobile = useSportMobile();
+  useEffect(() => {
+    if (active && !mobile) search.current?.focus();
+  }, [active, mobile]);
+  const {
+    filters,
+    setFilters,
+    offset,
+    setOffset,
+    selected,
+    setSelected,
+    added,
+    setAdded,
+  } = state;
   const query = useDebounced(filters.q);
   const params = queryString({
     ...filterQuery({ ...filters, q: query }),
@@ -243,43 +282,29 @@ export function ExercisePicker({
       />
       <LoadState {...resource} />
       <LoadState {...options} />
-      <div className="sport-picker-selection">
-        <span role="status">
-          {tr("selected_exercises", { count: Object.keys(selected).length })}
-        </span>
-        <button
-          type="button"
-          className="primary-button"
-          disabled={
-            !Object.keys(selected).length ||
-            Object.keys(selected).length > capacity
-          }
-          onClick={() => add(Object.values(selected))}
-        >
-          {tr("add_selected")}
-        </button>
-      </div>
       <div className="sport-picker-results">
         {resource.data?.items.map((exercise) => (
           <div className="sport-picker-row" key={exercise.id}>
-            <input
-              type="checkbox"
-              aria-label={tr("select_exercise", { name: exercise.name })}
-              checked={!!selected[exercise.id]}
-              disabled={
-                added.has(exercise.id) ||
-                (!selected[exercise.id] &&
-                  Object.keys(selected).length >= capacity)
-              }
-              onChange={(event) =>
-                setSelected((previous) => {
-                  const next = { ...previous };
-                  if (event.target.checked) next[exercise.id] = exercise;
-                  else delete next[exercise.id];
-                  return next;
-                })
-              }
-            />
+            <label className="sport-picker-check">
+              <input
+                type="checkbox"
+                aria-label={tr("select_exercise", { name: exercise.name })}
+                checked={!!selected[exercise.id]}
+                disabled={
+                  added.has(exercise.id) ||
+                  (!selected[exercise.id] &&
+                    Object.keys(selected).length >= capacity)
+                }
+                onChange={(event) =>
+                  setSelected((previous) => {
+                    const next = { ...previous };
+                    if (event.target.checked) next[exercise.id] = exercise;
+                    else delete next[exercise.id];
+                    return next;
+                  })
+                }
+              />
+            </label>
             <button
               type="button"
               className="sport-picker-item"
@@ -298,6 +323,24 @@ export function ExercisePicker({
           </div>
         ))}
       </div>
+      {!!Object.keys(selected).length && (
+        <div className="sport-picker-selection">
+          <span role="status">
+            {tr("selected_exercises", { count: Object.keys(selected).length })}
+          </span>
+          <button
+            type="button"
+            className="primary-button"
+            disabled={
+              !Object.keys(selected).length ||
+              Object.keys(selected).length > capacity
+            }
+            onClick={() => add(Object.values(selected))}
+          >
+            {tr("add_selected")}
+          </button>
+        </div>
+      )}
       {resource.data?.total === 0 && (
         <p>{tr("no_exercises_found_create_one_in_the_exercises_tab")}</p>
       )}
@@ -736,16 +779,17 @@ export function Exercises({
   }
   return (
     <>
-      <div className="sport-toolbar">
-        <p className="muted">
-          {resource.data
-            ? tr("catalogue_count", { count: resource.data.total })
-            : tr("loading")}
-        </p>
-        <button className="primary-button" onClick={() => setForm("new")}>
+      <div className="sport-toolbar sport-list-toolbar">
+        <button
+          className="primary-button"
+          aria-label={tr("new_exercise")}
+          onClick={() => setForm("new")}
+        >
           <Icon name="plus" />
-          {tr("new_exercise")}
+          <span className="sport-desktop-label">{tr("new_exercise")}</span>
+          <span className="sport-mobile-label">{tr("new_exercise_short")}</span>
         </button>
+        {presentation.controls}
       </div>
       <FilterFields
         filters={filters}
@@ -753,7 +797,11 @@ export function Exercises({
         options={options.data}
         onChange={changeFilters}
       />
-      <div className="sport-toolbar">{presentation.controls}</div>
+      <p className="muted small-text sport-result-count" role="status">
+        {resource.data
+          ? tr("catalogue_count", { count: resource.data.total })
+          : tr("loading")}
+      </p>
       <LoadState {...resource} />
       <LoadState {...options} />
       <ErrorMessage message={action.error} />
@@ -816,7 +864,9 @@ export function Exercises({
                   {exercise.name}
                 </button>
               </h2>
-              <p>{kinds.find((kind) => kind.id === exercise.kind)?.name}</p>
+              <p className="sport-exercise-kind">
+                {kinds.find((kind) => kind.id === exercise.kind)?.name}
+              </p>
               <small>
                 {exercise.muscle_group} · {exercise.equipment} ·{" "}
                 {exercise.builtin
@@ -828,21 +878,23 @@ export function Exercises({
               )}
             </div>
             <div className="sport-row-actions">
-              <button
-                className="secondary-button small-button"
-                onClick={() => setForm(exercise)}
-              >
-                {exercise.builtin ? tr("create_personal_copy") : tr("edit")}
-              </button>
-              {!exercise.builtin && (
+              <CompactActions name={exercise.name}>
                 <button
-                  className="text-button"
-                  disabled={action.busy}
-                  onClick={() => requestArchive(exercise)}
+                  className="secondary-button small-button"
+                  onClick={() => setForm(exercise)}
                 >
-                  {archived ? tr("restore") : tr("archive")}
+                  {exercise.builtin ? tr("create_personal_copy") : tr("edit")}
                 </button>
-              )}
+                {!exercise.builtin && (
+                  <button
+                    className="text-button"
+                    disabled={action.busy}
+                    onClick={() => requestArchive(exercise)}
+                  >
+                    {archived ? tr("restore") : tr("archive")}
+                  </button>
+                )}
+              </CompactActions>
             </div>
           </article>
         ))}

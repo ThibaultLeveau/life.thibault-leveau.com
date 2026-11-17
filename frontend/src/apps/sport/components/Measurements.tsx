@@ -1,4 +1,6 @@
 import { tr } from "../i18n";
+import { Icon } from "../../../shared/ui/Icon";
+import { CompactActions, CompactOptions, useSportMobile } from "./compact";
 import { useEffect, useRef, useState } from "react";
 import { Dialog, ErrorMessage } from "../../../shared/ui/Dialog";
 import { sportApi } from "../api";
@@ -114,7 +116,7 @@ function MeasurementForm({
       <form
         ref={validation.form}
         noValidate
-        className="dialog-body stack-form"
+        className="dialog-body stack-form sport-measurement-form"
         aria-busy={action.busy}
         onSubmit={(event) => {
           event.preventDefault();
@@ -232,6 +234,8 @@ export function Measurements({
     measure_new: "",
   });
   const archived = query.measurement_archived === "true";
+  const mobile = useSportMobile();
+  const [detail, setDetail] = useState<Measurement | null>(null);
   const [form, setForm] = useState<Measurement | "new" | null>(null);
   const [notice, setNotice] = useState<Measurement | null>(null);
   const resource = useResource(
@@ -269,31 +273,102 @@ export function Measurements({
         }),
       (result) => {
         setNotice(value ? result : null);
+        setDetail(null);
         if (!value) restoreFocus.current = result.id;
         resource.reload();
       },
     );
   }
+  function renderValues(
+    measurement: Measurement,
+    index: number,
+    limit?: number,
+  ) {
+    return (
+      <dl>
+        {measureFields()
+          .filter(([key]) => measurement[key] != null)
+          .slice(0, limit)
+          .map(([key, label, unit]) => {
+            const previous =
+              !archived &&
+              resource.data
+                ?.slice(index + 1)
+                .find((older) => older[key] != null);
+            const delta = previous ? measurement[key]! - previous[key]! : null;
+            return (
+              <div key={key}>
+                <dt>
+                  {!archived && limit === undefined ? (
+                    <button
+                      className="sport-title-button"
+                      onClick={() =>
+                        navigate("statistics", { stat_measure: key })
+                      }
+                      aria-label={tr("view_measurement_chart", {
+                        name: label,
+                      })}
+                    >
+                      {label}
+                    </button>
+                  ) : (
+                    label
+                  )}
+                </dt>
+                <dd>
+                  {number(measurement[key]!)} <small>{unit}</small>
+                  {delta != null && (
+                    <span
+                      className="sport-measure-delta"
+                      aria-label={tr("measurement_delta", {
+                        value: `${delta > 0 ? "+" : ""}${number(delta)} ${unit}`,
+                        date: day(
+                          previous
+                            ? previous.measured_on
+                            : measurement.measured_on,
+                        ),
+                      })}
+                    >
+                      {delta > 0 ? "+" : ""}
+                      {number(delta)} {unit}
+                    </span>
+                  )}
+                </dd>
+              </div>
+            );
+          })}
+      </dl>
+    );
+  }
   return (
     <>
-      <div className="sport-toolbar">
-        <label className="sport-toggle">
-          <input
-            type="checkbox"
-            checked={archived}
-            onChange={(event) =>
-              update({ measurement_archived: String(event.target.checked) })
-            }
-          />
-          {tr("archived_records")}
-        </label>
-        <button className="primary-button" onClick={() => setForm("new")}>
-          {tr("new_record")}
+      <div className="sport-toolbar sport-list-toolbar">
+        <button
+          className="primary-button"
+          aria-label={tr("new_record")}
+          onClick={() => setForm("new")}
+        >
+          <Icon name="plus" />
+          <span className="sport-desktop-label">{tr("new_record")}</span>
+          <span className="sport-mobile-label">{tr("new_record_short")}</span>
         </button>
-      </div>
-      <div className="sport-toolbar">
         {presentation.controls}
-        <p className="muted small-text">{tr("measurement_delta_help")}</p>
+      </div>
+      <div className="sport-filters sport-measure-options">
+        <CompactOptions count={Number(archived)}>
+          <label className="sport-toggle">
+            <input
+              type="checkbox"
+              checked={archived}
+              onChange={(event) =>
+                update({ measurement_archived: String(event.target.checked) })
+              }
+            />
+            {tr("archived_records")}
+          </label>
+          <p className="muted small-text">{tr("measurement_delta_help")}</p>
+          <p className="muted small-text">{tr("measurement_details_help")}</p>
+        </CompactOptions>
       </div>
       <LoadState {...resource} />
       <ErrorMessage message={action.error} />
@@ -340,83 +415,98 @@ export function Measurements({
             data-record={measurement.id}
           >
             <div className="sport-section-heading">
-              <h2>{day(measurement.measured_on)}</h2>
-              <div className="sport-inline">
-                {!archived && (
-                  <button
-                    className="secondary-button small-button"
-                    onClick={() => setForm(measurement)}
-                  >
-                    {tr("edit")}
-                  </button>
-                )}
+              <h2>
                 <button
-                  className="text-button"
-                  disabled={action.busy}
-                  onClick={() => archive(measurement, !archived)}
+                  className="sport-title-button"
+                  aria-label={tr("measurement_details", {
+                    date: day(measurement.measured_on),
+                  })}
+                  onClick={() => setDetail(measurement)}
                 >
-                  {archived ? tr("restore") : tr("archive")}
+                  {day(measurement.measured_on)}
                 </button>
+              </h2>
+              <div className="sport-inline">
+                <CompactActions name={day(measurement.measured_on)}>
+                  {!archived && (
+                    <button
+                      className="secondary-button small-button"
+                      onClick={() => setForm(measurement)}
+                    >
+                      {tr("edit")}
+                    </button>
+                  )}
+                  <button
+                    className="text-button"
+                    disabled={action.busy}
+                    onClick={() => archive(measurement, !archived)}
+                  >
+                    {archived ? tr("restore") : tr("archive")}
+                  </button>
+                </CompactActions>
               </div>
             </div>
-            <dl>
-              {measureFields()
-                .filter(([key]) => measurement[key] != null)
-                .map(([key, label, unit]) => {
-                  const previous =
-                    !archived &&
-                    resource.data
-                      ?.slice(index + 1)
-                      .find((older) => older[key] != null);
-                  const delta = previous
-                    ? measurement[key]! - previous[key]!
-                    : null;
-                  return (
-                    <div key={key}>
-                      <dt>
-                        {!archived ? (
-                          <button
-                            className="sport-title-button"
-                            onClick={() =>
-                              navigate("statistics", { stat_measure: key })
-                            }
-                            aria-label={tr("view_measurement_chart", {
-                              name: label,
-                            })}
-                          >
-                            {label}
-                          </button>
-                        ) : (
-                          label
-                        )}
-                      </dt>
-                      <dd>
-                        {number(measurement[key]!)} <small>{unit}</small>
-                        {delta != null && (
-                          <span
-                            className="sport-measure-delta"
-                            aria-label={tr("measurement_delta", {
-                              value: `${delta > 0 ? "+" : ""}${number(delta)} ${unit}`,
-                              date: day(
-                                previous
-                                  ? previous.measured_on
-                                  : measurement.measured_on,
-                              ),
-                            })}
-                          >
-                            {delta > 0 ? "+" : ""}
-                            {number(delta)} {unit}
-                          </span>
-                        )}
-                      </dd>
-                    </div>
-                  );
-                })}
-            </dl>
-            {measurement.notes && <p className="muted">{measurement.notes}</p>}
+            {renderValues(
+              measurement,
+              index,
+              mobile ? (presentation.view === "list" ? 2 : 4) : undefined,
+            )}
+            {mobile &&
+              measureFields().filter(([key]) => measurement[key] != null)
+                .length > (presentation.view === "list" ? 2 : 4) && (
+                <span className="muted small-text sport-measure-more">
+                  {tr("more_measurements", {
+                    count:
+                      measureFields().filter(
+                        ([key]) => measurement[key] != null,
+                      ).length - (presentation.view === "list" ? 2 : 4),
+                  })}
+                </span>
+              )}
+            {measurement.notes && (
+              <p className="muted sport-measure-notes">{measurement.notes}</p>
+            )}
           </article>
         ))}
       </div>
+      {detail && (
+        <Dialog
+          title={tr("measurement_details", { date: day(detail.measured_on) })}
+          initialFocus="close"
+          onClose={() => setDetail(null)}
+        >
+          <div className="dialog-body sport-measurement-detail">
+            {renderValues(
+              detail,
+              resource.data?.findIndex((item) => item.id === detail.id) ?? -1,
+            )}
+            {detail.notes && (
+              <p className="sport-preparation-notes">{detail.notes}</p>
+            )}
+            <div className="dialog-actions">
+              {!archived && (
+                <button
+                  className="secondary-button"
+                  onClick={() => {
+                    setForm(detail);
+                    setDetail(null);
+                  }}
+                >
+                  {tr("edit")}
+                </button>
+              )}
+              <button
+                className="text-button"
+                disabled={action.busy}
+                onClick={() => archive(detail, !archived)}
+              >
+                {archived ? tr("restore") : tr("archive")}
+              </button>
+            </div>
+            <ErrorMessage message={action.error} />
+          </div>
+        </Dialog>
+      )}
       {form && (
         <MeasurementEditor
           measurement={form === "new" ? undefined : form}

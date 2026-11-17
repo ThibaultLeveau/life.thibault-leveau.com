@@ -55,3 +55,23 @@ Les essais automatiques utilisent des comptes et bases synthétiques. L’émula
 ## Données et exploitation
 
 La migration additive `0014_sport_ux` conserve les données antérieures. Les six préférences sont stockées dans les réglages Sport ; contexte et notes de préparation suivent le cycle de vie des séances. Les filtres restent des paramètres de lecture, les brouillons restent en mémoire. Voir [modèle de données](donnees.md#migration-0014-finition-sport) et [sauvegarde/restauration](sauvegardes.md#migration-0014-finition-sport).
+
+## Correction de densité mobile
+
+Une seconde vérification après le signalement « trop d’éléments avant la liste » a mesuré le contenu réellement visible, au-delà des seuls débordements. La comparaison utilise le même compte fictif, des programmes de 1 à 12 exercices, des relevés de 12 mesures et un écran de **390 × 664 px**. La référence est le commit `db50d4f`.
+
+| Premier contenu utile | Position avant | Position après |
+| --- | ---: | ---: |
+| Ligne de programme | 495 px | 237 px |
+| Exercice du catalogue | 596 px | 259 px |
+| Relevé | 436 px | 231 px |
+| Séance de l’historique | 451 px | 201 px |
+| Carte du premier graphique | 809 px | 370 px |
+| Premier exercice de l’éditeur | 730 px | 362 px |
+| Première série à saisir | 723 px | 267 px |
+
+Les listes initiales montrent quatre programmes, quatre exercices ou trois relevés complets sur ce format ; les lignes de programme passent d’environ 281 à 83 px. À 320 × 568, les parcours exigent au moins deux lignes complètes. Les contrôles de 44 px et champs de 16 px sont conservés. Le détail complet reste accessible depuis le titre ou la date, et les commandes secondaires depuis Actions ou Filtres. Les préférences mobiles couvrent également le paysage tactile jusqu’à 1 024 × 500 px.
+
+Les captures et scénarios couvrent listes/grilles, filtres ouverts, menus d’actions, création/édition, catalogue d’ajout, séance vide/active, historique/détail, relevés/formulaire, statistiques et réglages. Les mesures portent sur des données synthétiques et des viewports émulés ; la hauteur effective sur un appareil dépend aussi des barres du navigateur et du clavier. Voir les [critères de tests](tests.md#densite-mobile-sport) et les [parcours mobiles](sport.md#lire-et-agir-sur-telephone).
+
+Cette correction ne modifie ni les tables, ni les versions de schéma, ni les règles API. Le déploiement conserve la migration `0014_sport_ux` et suit les sauvegardes habituelles.

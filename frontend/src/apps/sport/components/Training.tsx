@@ -1,4 +1,5 @@
 import { tr } from "../i18n";
+import { CompactOptions } from "./compact";
 import { formatLocale } from "../../../shared/i18n";
 import { progressionApi } from "../../../platform/progression/api";
 import { useSportSettings } from "../preferences";
@@ -404,7 +405,7 @@ export function ActiveTraining({
       <div className="sport-toolbar">
         <div>
           <h2>{training.name}</h2>
-          <p className="muted">
+          <p className="muted sport-desktop-only">
             {tr("started_on")} {moment(training.started_at)}
           </p>
         </div>
@@ -418,47 +419,63 @@ export function ActiveTraining({
       <div className="sport-training-tools">
         {nextSet && (
           <button
-            className="secondary-button"
-            onClick={() => jump(nextSet.i, nextSet.j)}
-          >
-            {tr("next_set", {
+            className="secondary-button sport-next-set"
+            aria-label={tr("next_set", {
               number: nextSet.j + 1,
               name: training.entries[nextSet.i].name,
             })}
+            onClick={() => jump(nextSet.i, nextSet.j)}
+          >
+            <span className="sport-desktop-label">
+              {tr("next_set", {
+                number: nextSet.j + 1,
+                name: training.entries[nextSet.i].name,
+              })}
+            </span>
+            <span className="sport-mobile-label">{tr("next_set_short")}</span>
+            <Icon name="arrow" size={16} />
           </button>
         )}
-        <RestPresets />
+        <CompactOptions label={tr("options")}>
+          <p className="muted small-text sport-mobile-only">
+            {tr("started_on")} {moment(training.started_at)}
+          </p>
+          <RestPresets />
+          <details className="sport-training-index">
+            <summary>{tr("session_outline")}</summary>
+            <ol>
+              {training.entries.map((entry, index) => (
+                <li key={index}>
+                  <button
+                    type="button"
+                    className="text-button"
+                    onClick={() => jump(index)}
+                  >
+                    {entry.name} ·{" "}
+                    {
+                      training.sets.filter((set) => set.entry_index === index)
+                        .length
+                    }
+                    /{entry.sets}
+                  </button>
+                </li>
+              ))}
+            </ol>
+          </details>
+          {training.preparation_notes && (
+            <details className="sport-preparation">
+              <summary>{tr("preparation_notes")}</summary>
+              <p>{training.preparation_notes}</p>
+            </details>
+          )}
+          <p className="muted small-text">
+            {tr("enter_your_results_then_complete_each_set_saved_values_will")}
+          </p>
+          <p className="muted small-text sport-mobile-only">
+            {tr("total_weight_include_the_bar_and_add_both_dumbbells_together")}
+          </p>
+        </CompactOptions>
       </div>
-      <details className="sport-training-index">
-        <summary>{tr("session_outline")}</summary>
-        <ol>
-          {training.entries.map((entry, index) => (
-            <li key={index}>
-              <button
-                type="button"
-                className="text-button"
-                onClick={() => jump(index)}
-              >
-                {entry.name} ·{" "}
-                {
-                  training.sets.filter((set) => set.entry_index === index)
-                    .length
-                }
-                /{entry.sets}
-              </button>
-            </li>
-          ))}
-        </ol>
-      </details>
-      {training.preparation_notes && (
-        <details className="sport-preparation">
-          <summary>{tr("preparation_notes")}</summary>
-          <p>{training.preparation_notes}</p>
-        </details>
-      )}
-      <p className="muted small-text">
-        {tr("enter_your_results_then_complete_each_set_saved_values_will")}
-      </p>
       {training.entries.map((entry, i) => (
         <section
           className="sport-session-exercise"
@@ -474,7 +491,10 @@ export function ActiveTraining({
             </h2>
             <button
               type="button"
-              className="text-button"
+              className="text-button sport-collapse-exercise"
+              aria-label={tr(
+                collapsed.has(i) ? "expand_exercise" : "collapse_exercise",
+              )}
               aria-expanded={!collapsed.has(i)}
               aria-controls={`sport-entry-sets-${i}`}
               onClick={() =>
@@ -486,11 +506,14 @@ export function ActiveTraining({
                 })
               }
             >
-              {tr(collapsed.has(i) ? "expand_exercise" : "collapse_exercise")}
+              <span className="sport-desktop-label">
+                {tr(collapsed.has(i) ? "expand_exercise" : "collapse_exercise")}
+              </span>
+              <Icon name={collapsed.has(i) ? "down" : "up"} />
             </button>
           </div>
           {entry.kind.startsWith("weight") && (
-            <p className="muted small-text">
+            <p className="muted small-text sport-desktop-only">
               {tr(
                 "total_weight_include_the_bar_and_add_both_dumbbells_together",
               )}
@@ -580,7 +603,12 @@ export function ActiveTraining({
                           record ? tr("correct_set") : tr("complete_set")
                         }
                       >
-                        {record ? tr("correct") : tr("confirm")}
+                        <span className="sport-desktop-label">
+                          {record ? tr("correct") : tr("confirm")}
+                        </span>
+                        <span className="sport-mobile-label">
+                          <Icon name={record ? "edit" : "check"} />
+                        </span>
                       </button>
                     </div>
                     <div className="sport-set-actions">
@@ -1057,11 +1085,13 @@ export function History({
           )}
         </>
       )}
-      <div className="sport-filters">
-        <label>
-          {tr("search_history")}
+      <div className="sport-filters sport-list-controls">
+        <label className="sport-search">
+          <span>{tr("search_history")}</span>
           <input
             type="search"
+            aria-label={tr("search_history")}
+            placeholder={tr("search_history")}
             maxLength={160}
             value={query.history_q}
             onChange={(event) =>
@@ -1069,80 +1099,91 @@ export function History({
             }
           />
         </label>
-        <label>
-          {tr("program")}
-          <select
-            value={query.history_workout}
-            onChange={(event) =>
-              update({
-                history_workout: event.target.value,
-                history_offset: "0",
-              })
-            }
-          >
-            <option value="">{tr("all_programs")}</option>
-            {programs.data?.map((program) => (
-              <option key={program.id} value={program.id}>
-                {program.name}
-                {program.archived_at ? ` · ${tr("archived_state")}` : ""}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          {tr("session_status")}
-          <select
-            value={status}
-            onChange={(event) =>
-              update({
-                history_status: event.target.value,
-                history_offset: "0",
-              })
-            }
-          >
-            <option value="">{tr("all_statuses")}</option>
-            <option value="completed">{tr("session_completed")}</option>
-            <option value="cancelled">{tr("cancelled")}</option>
-            <option value="active">{tr("in_progress")}</option>
-          </select>
-        </label>
+        <CompactOptions
+          count={
+            [
+              query.history_workout,
+              status,
+              query.history_since,
+              query.history_until,
+            ].filter(Boolean).length
+          }
+        >
+          <label>
+            {tr("program")}
+            <select
+              value={query.history_workout}
+              onChange={(event) =>
+                update({
+                  history_workout: event.target.value,
+                  history_offset: "0",
+                })
+              }
+            >
+              <option value="">{tr("all_programs")}</option>
+              {programs.data?.map((program) => (
+                <option key={program.id} value={program.id}>
+                  {program.name}
+                  {program.archived_at ? ` · ${tr("archived_state")}` : ""}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            {tr("session_status")}
+            <select
+              value={status}
+              onChange={(event) =>
+                update({
+                  history_status: event.target.value,
+                  history_offset: "0",
+                })
+              }
+            >
+              <option value="">{tr("all_statuses")}</option>
+              <option value="completed">{tr("session_completed")}</option>
+              <option value="cancelled">{tr("cancelled")}</option>
+              <option value="active">{tr("in_progress")}</option>
+            </select>
+          </label>
+          <details className="sport-extra-filters">
+            <summary>{tr("history_dates")}</summary>
+            <div className="sport-filters">
+              <label>
+                {tr("from")}
+                <input
+                  type="date"
+                  value={query.history_since}
+                  onChange={(event) =>
+                    update({
+                      history_since: event.target.value,
+                      history_offset: "0",
+                    })
+                  }
+                />
+              </label>
+              <label>
+                {tr("period_end")}
+                <input
+                  type="date"
+                  value={query.history_until}
+                  onChange={(event) =>
+                    update({
+                      history_until: event.target.value,
+                      history_offset: "0",
+                    })
+                  }
+                />
+              </label>
+            </div>
+          </details>
+          {hasFilters && (
+            <button className="text-button" onClick={clear}>
+              {tr("clear_filters")}
+            </button>
+          )}
+        </CompactOptions>
       </div>
-      <details className="sport-extra-filters">
-        <summary>{tr("history_dates")}</summary>
-        <div className="sport-filters">
-          <label>
-            {tr("from")}
-            <input
-              type="date"
-              value={query.history_since}
-              onChange={(event) =>
-                update({
-                  history_since: event.target.value,
-                  history_offset: "0",
-                })
-              }
-            />
-          </label>
-          <label>
-            {tr("period_end")}
-            <input
-              type="date"
-              value={query.history_until}
-              onChange={(event) =>
-                update({
-                  history_until: event.target.value,
-                  history_offset: "0",
-                })
-              }
-            />
-          </label>
-        </div>
-      </details>
-      {hasFilters && (
-        <button className="text-button" onClick={clear}>
-          {tr("clear_filters")}
-        </button>
-      )}
       <LoadState {...resource} />
       <LoadState {...programs} />
       {resource.data?.total === 0 && (
