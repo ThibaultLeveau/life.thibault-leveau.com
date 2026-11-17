@@ -349,6 +349,9 @@ test.describe("commandes compactes", () => {
       has: page.getByRole("heading", { name: programs[0].name, exact: true }),
     });
     await openSportActions(row);
+    // Measure the settled menu: an opening translation can report 43.99999 px
+    // for a 44 px target. Keep the actual 44 px requirement unchanged.
+    await expect(page.getByRole("dialog")).toHaveCSS("transform", "none");
     const menu = page.getByRole("dialog").locator(".sport-compact-actions");
     const menuWidth = (await menu.boundingBox())!.width;
     let bottom = 0;
