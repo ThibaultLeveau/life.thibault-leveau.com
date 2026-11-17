@@ -211,3 +211,48 @@ test("list drop to an unvisited workspace preserves an open task and its labels"
   await link.click();
   await expect(page.locator('[data-drop-section="none"] .task-title').filter({ hasText: tasks[0].title })).toBeVisible();
 });
+
+test("quick entry keeps the next draft protected when a frame is delayed", async ({
+  page,
+}) => {
+  await seed(page, "fr", "list");
+  await page.locator(".quick-add").first().click();
+  const input = page.locator('.quick-add-form input[name="title"]');
+  await page.evaluate(() => {
+    const original = window.requestAnimationFrame;
+    const frames: FrameRequestCallback[] = [];
+    window.requestAnimationFrame = (callback) => {
+      frames.push(callback);
+      return 1000000 + frames.length;
+    };
+    (
+      window as unknown as { releaseDraftFrames: () => void }
+    ).releaseDraftFrames = () => {
+      window.requestAnimationFrame = original;
+      frames.forEach((callback) => callback(performance.now()));
+    };
+  });
+  try {
+    await input.fill("First saved task");
+    await input.press("Enter");
+    await expect(input).toHaveValue("");
+    await input.fill("Next unsaved task");
+  } finally {
+    await page.evaluate(() =>
+      (
+        window as unknown as { releaseDraftFrames: () => void }
+      ).releaseDraftFrames(),
+    );
+  }
+  let confirmations = 0;
+  page.once("dialog", async (dialog) => {
+    confirmations++;
+    await dialog.dismiss();
+  });
+  await input.press("Escape");
+  await expect(input).toHaveValue("Next unsaved task");
+  expect(confirmations).toBe(1);
+  page.once("dialog", (dialog) => dialog.accept());
+  await input.press("Escape");
+  await expect(input).toHaveCount(0);
+});

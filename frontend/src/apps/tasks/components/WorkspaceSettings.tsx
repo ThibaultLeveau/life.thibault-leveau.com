@@ -53,7 +53,7 @@ function EntityForm({
       form.reset();
       setColor("#748b79");
     }
-    requestAnimationFrame(draft.clean);
+    draft.cleanOnCommit();
   }
   const section =
     kind === "sections" ? (item as Section | undefined) : undefined;

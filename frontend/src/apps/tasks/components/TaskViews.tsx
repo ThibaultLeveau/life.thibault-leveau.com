@@ -154,7 +154,7 @@ function QuickAdd({
         parsed?.matched_text ? parsed : undefined,
       );
       setTitle("");
-      requestAnimationFrame(draft.clean);
+      draft.cleanOnCommit();
       if (!keepOpen) setOpen(false);
     } catch (error) {
       setError((error as Error).message);

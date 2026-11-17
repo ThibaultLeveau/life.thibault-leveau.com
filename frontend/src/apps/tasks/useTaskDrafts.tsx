@@ -3,7 +3,9 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useRef,
+  useState,
   type ReactNode,
 } from "react";
 import { tr } from "./i18n";
@@ -94,6 +96,7 @@ export function useDraftForm(extra?: unknown) {
   const current = useRef(extra);
   current.current = extra;
   const element = useRef<HTMLFormElement | null>(null);
+  const [cleanRevision, setCleanRevision] = useState(0);
   const ref = useCallback(
     (form: HTMLFormElement | null) => {
       if (element.current) drafts.entries.delete(element.current);
@@ -115,9 +118,14 @@ export function useDraftForm(extra?: unknown) {
       entry.extra = entry.current();
     }
   };
+  useLayoutEffect(() => {
+    if (cleanRevision) clean();
+  }, [cleanRevision]);
   return {
     ref,
     clean,
+    // Capture the reset form after React commits, before the next input event.
+    cleanOnCommit: () => setCleanRevision((value) => value + 1),
     leave: (action: () => void) => {
       if (drafts.confirm(element.current)) action();
     },
