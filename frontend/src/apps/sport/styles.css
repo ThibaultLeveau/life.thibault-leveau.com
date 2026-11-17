@@ -100,7 +100,7 @@
 .sport-workout-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
-  grid-auto-rows: 1fr;
+  grid-auto-rows: auto;
   gap: 16px;
   align-items: stretch;
 }
@@ -129,7 +129,7 @@
   padding: 4px 8px;
   background: var(--ui-sidebar);
   color: var(--ui-muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 .sport-workout h2 {
   margin: 8px 0 0;
@@ -145,7 +145,9 @@
   margin: 8px 0 0;
 }
 .sport-workout-more {
-  display: none;
+  display: inline-flex;
+  align-self: flex-start;
+  margin-bottom: 8px;
 }
 .sport-workout ol {
   padding-left: 20px;
@@ -160,12 +162,12 @@
 }
 .sport-workout li::marker {
   color: var(--ui-muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 .sport-workout li small {
   display: block;
   color: var(--ui-muted);
-  font-size: 11px;
+  font-size: 12px;
   margin-top: 3px;
 }
 .sport-workout-actions {
@@ -238,7 +240,7 @@
   place-items: center;
   background: var(--ui-sidebar);
   color: var(--ui-muted);
-  font-size: 11px;
+  font-size: 12px;
   width: 25px;
   height: 25px;
   border-radius: 7px;
@@ -284,7 +286,7 @@
 .sport-picker-item small {
   display: block;
   color: var(--ui-muted);
-  font-size: 11px;
+  font-size: 12px;
   margin-top: 3px;
 }
 .sport-empty {
@@ -318,7 +320,7 @@
   margin: 4px 0;
 }
 .sport-exercise small {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--ui-muted);
 }
 .sport-exercise-mark {
@@ -457,7 +459,7 @@
   align-items: center;
   gap: 4px;
   color: var(--ui-muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 .sport-set .sport-value-fields {
   grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
@@ -469,7 +471,7 @@
   flex-direction: column;
   gap: 3px;
   color: var(--ui-muted);
-  font-size: 11px;
+  font-size: 12px;
   min-width: 0;
 }
 .sport-set .sport-value-fields input {
@@ -486,7 +488,7 @@
   margin: 4px 0 0 36px;
 }
 .sport-set-actions .text-button {
-  font-size: 11px;
+  font-size: 12px;
 }
 .sport-set-number {
   display: grid;
@@ -547,7 +549,7 @@
 .sport-summary span {
   display: block;
   color: var(--ui-muted);
-  font-size: 11px;
+  font-size: 12px;
   margin-bottom: 10px;
 }
 .sport-summary strong {
@@ -648,7 +650,7 @@
 }
 .sport-measurement dt {
   color: var(--ui-muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 .sport-measurement dd {
   margin: 5px 0 0;
@@ -656,7 +658,7 @@
 }
 .sport-measurement dd small {
   color: var(--ui-muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 .sport-settings {
   max-width: 530px;
@@ -782,7 +784,8 @@
     grid-template-columns: 1fr;
   }
 }
-@media (max-width: 800px) {
+@media (max-width: 800px),
+  (max-width: 1024px) and (max-height: 500px) and (pointer: coarse) {
   .sport-rest {
     left: 0;
     padding-inline: 16px;
@@ -822,21 +825,19 @@
   .sport-workout li {
     margin-bottom: 4px;
   }
-  .sport-workout li:nth-child(n + 3),
-  .sport-workout li small,
-  .sport-workout-notes {
-    display: none;
+  .sport-workout li small {
+    font-size: 12px;
   }
   .sport-workout-more {
     display: block;
     margin: -4px 0 10px;
-    font-size: 11px;
+    font-size: 12px;
   }
   .sport-workout-actions {
     padding-top: 10px;
   }
-  .sport-workout-actions > button {
-    width: 100%;
+  .sport-workout-actions > .primary-button {
+    flex: 1;
     justify-content: center;
   }
   .sport-program-info,
@@ -849,13 +850,15 @@
   .sport-program-form .sport-plan-entry .sport-section-heading h3 {
     flex-basis: 100%;
   }
-  .sport-program-actions .sport-inline,
-  .sport-program-actions .primary-button {
-    width: 100%;
-  }
   .sport-program-actions .sport-inline {
-    flex-direction: column-reverse;
-    align-items: stretch;
+    flex: 1;
+    flex-wrap: nowrap;
+  }
+  .sport-program-actions .primary-button {
+    flex: 1;
+  }
+  .sport-program-actions > p {
+    display: none;
   }
   .sport-shell .app-dialog .dialog-body {
     padding: 20px 16px;
@@ -936,7 +939,7 @@
     line-height: 1.2;
   }
   .sport-rest [role="status"] {
-    font-size: 11px;
+    font-size: 12px;
   }
   .sport-rest .secondary-button {
     padding-inline: 10px;
@@ -963,7 +966,13 @@
 
 /* Only bounded surfaces inherit HYROX colors; page layouts keep the LifeOS theme. */
 .sport-hyrox:where(:not(.sport-training, .sport-program-form)),
-.sport-hyrox :where(.sport-program-info, .sport-plan-entry, .sport-picker, .sport-session-exercise) {
+.sport-hyrox
+  :where(
+    .sport-program-info,
+    .sport-plan-entry,
+    .sport-picker,
+    .sport-session-exercise
+  ) {
   --ui-accent: #171717;
   --ui-accent-bg: #f0f0f0;
   --ui-button-text: #fff;
@@ -976,8 +985,16 @@
   color: var(--ui-text);
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .sport-hyrox:where(:not(.sport-training, .sport-program-form)),
-  :root:not([data-theme="light"]) .sport-hyrox :where(.sport-program-info, .sport-plan-entry, .sport-picker, .sport-session-exercise) {
+  :root:not([data-theme="light"])
+    .sport-hyrox:where(:not(.sport-training, .sport-program-form)),
+  :root:not([data-theme="light"])
+    .sport-hyrox
+    :where(
+      .sport-program-info,
+      .sport-plan-entry,
+      .sport-picker,
+      .sport-session-exercise
+    ) {
     --ui-accent: #f5f5f5;
     --ui-accent-bg: #252525;
     --ui-button-text: #111;
@@ -989,8 +1006,16 @@
     --ui-muted: #b4b4b4;
   }
 }
-:root[data-theme="dark"] .sport-hyrox:where(:not(.sport-training, .sport-program-form)),
-:root[data-theme="dark"] .sport-hyrox :where(.sport-program-info, .sport-plan-entry, .sport-picker, .sport-session-exercise) {
+:root[data-theme="dark"]
+  .sport-hyrox:where(:not(.sport-training, .sport-program-form)),
+:root[data-theme="dark"]
+  .sport-hyrox
+  :where(
+    .sport-program-info,
+    .sport-plan-entry,
+    .sport-picker,
+    .sport-session-exercise
+  ) {
   --ui-accent: #f5f5f5;
   --ui-accent-bg: #252525;
   --ui-button-text: #111;
@@ -1020,7 +1045,8 @@
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: linear-gradient(120deg, #ffffff0c, transparent 55%),
+  background:
+    linear-gradient(120deg, #ffffff0c, transparent 55%),
     repeating-linear-gradient(0deg, transparent 0 27px, #ffffff05 27px 28px),
     repeating-linear-gradient(90deg, transparent 0 27px, #ffffff05 27px 28px);
   pointer-events: none;
@@ -1035,7 +1061,7 @@
   font-size: 9px;
   line-height: 1.5;
   font-weight: 650;
-  letter-spacing: .16em;
+  letter-spacing: 0.16em;
   color: #c4c4c4;
 }
 .sport-hyrox-logo {
@@ -1060,7 +1086,7 @@
   font-size: clamp(28px, 4vw, 54px);
   font-weight: 800;
   line-height: 1.2;
-  letter-spacing: -.055em;
+  letter-spacing: -0.055em;
   font-variant-numeric: tabular-nums;
 }
 .sport-hyrox-countdown > span:not(.sport-hyrox-kicker) {
@@ -1068,7 +1094,7 @@
 }
 .sport-hyrox-countdown time {
   color: #bdbdbd;
-  font-size: 11px;
+  font-size: 12px;
   margin-top: 4px;
 }
 .sport-hyrox-track {
@@ -1079,7 +1105,7 @@
   left: 25%;
   top: 30%;
   transform: rotate(-35deg);
-  opacity: .16;
+  opacity: 0.16;
   pointer-events: none;
 }
 .sport-hyrox-track i {
@@ -1088,10 +1114,18 @@
   border: 1px solid #fff;
   border-radius: 80px;
 }
-.sport-hyrox-track i:nth-child(2) { inset: 12px; }
-.sport-hyrox-track i:nth-child(3) { inset: 24px; }
-.sport-hyrox-track i:nth-child(4) { inset: 36px; }
-.sport-hyrox-track i:nth-child(5) { inset: 48px; }
+.sport-hyrox-track i:nth-child(2) {
+  inset: 12px;
+}
+.sport-hyrox-track i:nth-child(3) {
+  inset: 24px;
+}
+.sport-hyrox-track i:nth-child(4) {
+  inset: 36px;
+}
+.sport-hyrox-track i:nth-child(5) {
+  inset: 48px;
+}
 .sport-workout.sport-hyrox {
   background: var(--ui-paper);
   border-color: var(--ui-border);
@@ -1193,8 +1227,12 @@
     padding: 22px;
     gap: 24px;
   }
-  .sport-hyrox-identity { gap: 18px; }
-  .sport-hyrox-logo { width: 210px; }
+  .sport-hyrox-identity {
+    gap: 18px;
+  }
+  .sport-hyrox-logo {
+    width: 210px;
+  }
   .sport-hyrox-countdown {
     border-left: 0;
     border-top: 1px solid #ffffff40;
@@ -1202,12 +1240,16 @@
     width: 100%;
     max-width: none;
   }
-  .sport-hyrox-countdown strong { font-size: 40px; }
+  .sport-hyrox-countdown strong {
+    font-size: 40px;
+  }
   .sport-rest .sport-hyrox-stamp {
     width: 75px;
     padding: 8px;
   }
-  .sport-rest.sport-hyrox > div { flex-basis: 130px; }
+  .sport-rest.sport-hyrox > div {
+    flex-basis: 130px;
+  }
 }
 
 @media (max-width: 560px) {
@@ -1235,5 +1277,763 @@
   }
   .is-compact .sport-hyrox-countdown time {
     margin-top: 0;
+  }
+}
+
+/* Sport content: compact collections, readable controls and feedback. */
+.sport-shell [hidden] {
+  display: none !important;
+}
+.sport-shell :is(button, input, select, textarea) {
+  touch-action: manipulation;
+}
+.sport-shell button[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: default;
+}
+.sport-shell
+  :is(
+    .sport-toggle,
+    .sport-filters label,
+    .sport-chart-select,
+    .sport-set .sport-value-fields label,
+    .sport-set-state,
+    .sport-set-actions .text-button,
+    .sport-score-explained
+  ) {
+  font-size: 13px;
+}
+.sport-shell summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-weight: 550;
+}
+.sport-shell summary::before {
+  content: "+";
+  width: 16px;
+  flex: 0 0 16px;
+  text-align: center;
+  color: var(--ui-muted);
+}
+.sport-shell details[open] > summary::before {
+  content: "−";
+}
+.sport-shell summary::-webkit-details-marker {
+  display: none;
+}
+.sport-title-button {
+  border: 0;
+  padding: 4px 0;
+  min-height: 44px;
+  font: inherit;
+  font-weight: inherit;
+  text-align: left;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+.sport-title-button:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.sport-view-controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.sport-view-switch {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid var(--ui-border);
+  border-radius: 9px;
+  background: var(--ui-sidebar);
+}
+.sport-view-switch button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ui-muted);
+  font: inherit;
+  font-size: 13px;
+}
+.sport-view-switch [aria-pressed="true"] {
+  background: var(--ui-paper);
+  border-color: var(--ui-border);
+  color: var(--ui-accent);
+  box-shadow: 0 1px 3px #0000000d;
+}
+.sport-filters > .sport-view-controls {
+  align-self: flex-end;
+}
+.sport-refreshing {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+  margin: 6px 0;
+  font-size: 13px;
+  color: var(--ui-muted);
+}
+.sport-extra-filters {
+  margin: -8px 0 16px;
+}
+.sport-extra-filters .sport-filters {
+  margin: 8px 0;
+}
+.sport-workout {
+  background: var(--ui-paper);
+}
+.sport-workout h2 .sport-title-button {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.sport-workout li > span {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.sport-workout-actions {
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+.sport-workout-actions > .primary-button {
+  flex: 1;
+}
+.sport-workout-actions > .icon-button {
+  flex: 0 0 44px;
+}
+.sport-workout-grid.sport-view-list {
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+.sport-view-list .sport-workout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 18px;
+}
+.sport-view-list .sport-workout > .sport-hyrox-brand {
+  grid-column: 1 / -1;
+}
+.sport-view-list .sport-workout ol {
+  display: none;
+}
+.sport-view-list .sport-workout-actions {
+  grid-column: 2;
+  grid-row: 2 / 6;
+  border-top: 0;
+  padding: 0;
+  margin: auto 0;
+}
+.sport-view-list .sport-workout-top {
+  grid-column: 1 / -1;
+}
+.sport-view-list .sport-workout-notes {
+  grid-column: 1;
+  margin: 0;
+}
+.sport-view-list .sport-workout-more {
+  grid-column: 1;
+  margin: 0;
+}
+.sport-preview-entries {
+  padding-left: 24px;
+  margin: 0;
+}
+.sport-preview-entries li {
+  padding: 10px 0 10px 4px;
+  border-bottom: 1px solid var(--ui-border);
+}
+.sport-preview-entries span {
+  display: block;
+  margin-top: 5px;
+  color: var(--ui-muted);
+  font-size: 13px;
+}
+.sport-exercise h2 {
+  font-size: 16px;
+  margin: 0;
+}
+.sport-exercise p,
+.sport-exercise small {
+  font-size: 13px;
+}
+.sport-exercise-notes {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.sport-exercise-list.sport-view-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr));
+  gap: 16px;
+}
+.sport-view-grid .sport-exercise {
+  border: 1px solid var(--ui-border);
+  border-radius: 12px;
+  padding: 18px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  background: var(--ui-paper);
+}
+.sport-view-grid .sport-exercise .sport-grow {
+  flex: 1 1 150px;
+}
+.sport-view-grid .sport-row-actions {
+  width: 100%;
+  flex-direction: row;
+  justify-content: flex-end;
+  margin-top: auto;
+}
+.sport-exercise-details {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+}
+.sport-exercise-details dt {
+  color: var(--ui-muted);
+  font-size: 13px;
+}
+.sport-exercise-details dd {
+  margin: 4px 0 0;
+}
+.sport-program-actions {
+  position: sticky;
+  z-index: 10;
+  top: 0;
+  background: var(--ui-paper);
+  padding: 10px 0;
+  margin: 0;
+  border-top: 0;
+  border-bottom: 1px solid var(--ui-border);
+}
+.sport-program-info {
+  padding: 20px;
+  gap: 14px;
+}
+.sport-program-info h2 {
+  margin: 0;
+  font-size: 18px;
+}
+.sport-program-options label {
+  margin-top: 14px;
+}
+.sport-move-select {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 6px !important;
+}
+.sport-move-select span {
+  font-size: 13px;
+  color: var(--ui-muted);
+}
+.sport-move-select select {
+  width: 70px;
+}
+.sport-plan-entry {
+  scroll-margin-block: 90px;
+}
+.sport-picker-selection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+  font-size: 13px;
+}
+.sport-picker-row {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  background: var(--ui-paper);
+  border-bottom: 1px solid var(--ui-border);
+}
+.sport-picker-row > input {
+  width: 22px;
+  height: 22px;
+  margin: 11px;
+  flex: 0 0 22px;
+  accent-color: var(--ui-accent);
+}
+.sport-picker-item {
+  flex: 1;
+  width: auto;
+  min-height: 64px;
+  border: 0;
+}
+.sport-picker-item > span:last-child {
+  color: var(--ui-accent);
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.sport-picker-item small {
+  font-size: 13px;
+}
+.sport-picker-results {
+  max-height: 360px;
+}
+.sport-picker .sport-pagination {
+  margin-top: 14px;
+}
+.sport-empty .sport-inline {
+  justify-content: center;
+}
+.sport-empty > :last-child:not(p) {
+  margin-top: 20px;
+}
+.sport-presets,
+.sport-training-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0;
+}
+.sport-presets [aria-pressed="true"] {
+  color: var(--ui-accent);
+  border-color: var(--ui-accent);
+  background: var(--ui-accent-bg);
+}
+.sport-training-tools {
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.sport-training-rest-settings {
+  font-size: 13px;
+}
+.sport-training-index ol {
+  padding-left: 24px;
+}
+.sport-training-index .text-button {
+  text-align: left;
+}
+.sport-preparation,
+.sport-training-index {
+  border-block: 1px solid var(--ui-border);
+  padding: 4px 0;
+  margin: 12px 0;
+}
+.sport-preparation p,
+.sport-preparation-notes {
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+.sport-rest .sport-rest-controls {
+  display: flex;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.sport-rest.is-ready {
+  padding-block: 6px max(6px, env(safe-area-inset-bottom));
+  gap: 6px 14px;
+}
+.sport-rest.is-ready .eyebrow,
+.sport-rest.is-ready .sport-hyrox-stamp,
+.sport-rest.is-ready strong {
+  display: none;
+}
+.sport-rest.is-ready [role="status"] {
+  font-size: 13px;
+}
+.sport-rest.is-ready > div {
+  min-height: 32px;
+}
+.sport-rest.is-ready .text-button {
+  min-height: 44px;
+}
+.sport-session-exercise .sport-section-heading h2 {
+  flex: 1;
+}
+.sport-session-exercise .sport-section-heading {
+  flex-wrap: nowrap;
+}
+.sport-set {
+  scroll-margin-block: 100px;
+}
+.sport-session-summary {
+  border: 1px solid var(--ui-accent);
+  border-radius: 14px;
+  background: var(--ui-accent-bg);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.sport-session-summary h2 {
+  margin: 8px 0;
+}
+.sport-session-summary .sport-summary > div {
+  background: var(--ui-paper);
+}
+.sport-earned {
+  color: var(--ui-accent);
+  font-weight: 650;
+}
+.sport-history-month {
+  font-size: 15px;
+  color: var(--ui-muted);
+  text-transform: capitalize;
+  margin: 28px 0 0;
+}
+.sport-history-row strong {
+  font-size: 16px;
+}
+.sport-measurements {
+  display: grid;
+  gap: 16px;
+}
+.sport-measurements.sport-view-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+}
+.sport-measurement {
+  margin: 0;
+  background: var(--ui-paper);
+}
+.sport-measurement h2 {
+  font-size: 17px;
+}
+.sport-measurement dl {
+  grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
+}
+.sport-measurement dt {
+  font-size: 13px;
+}
+.sport-measurement dt button {
+  font-weight: 400;
+}
+.sport-measure-delta {
+  display: block;
+  margin-top: 6px;
+  color: var(--ui-muted);
+  font-size: 13px;
+}
+.sport-view-list .sport-measurement dl {
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 10px 18px;
+}
+.sport-view-list .sport-measurement dd {
+  font-size: 20px;
+}
+.sport-other-measures {
+  border-block: 1px solid var(--ui-border);
+  padding-block: 4px;
+}
+.sport-other-measures .form-grid {
+  margin-block: 16px;
+}
+.sport-sticky-actions {
+  position: sticky;
+  bottom: -24px;
+  background: var(--ui-paper);
+  padding-block: 12px;
+  border-top: 1px solid var(--ui-border);
+}
+.sport-chart-hit {
+  fill: transparent;
+}
+.sport-chart-point {
+  cursor: pointer;
+  outline: 0;
+}
+.sport-chart-point:focus-visible .sport-chart-hit {
+  stroke: var(--ui-accent);
+  stroke-width: 2;
+}
+.sport-chart-point[aria-pressed="true"] .sport-chart-hit {
+  fill: var(--ui-accent-bg);
+}
+.sport-chart-value {
+  display: flex;
+  align-items: center;
+  min-height: 52px;
+  padding: 10px;
+  margin-top: 12px;
+  border-radius: 6px;
+  background: var(--ui-sidebar);
+  color: var(--ui-text);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.sport-chart svg text {
+  font-size: 12px;
+}
+.sport-chart h2 {
+  font-size: 17px;
+}
+.sport-chart summary,
+.sport-score-explained summary,
+.sport-chart table {
+  font-size: 13px;
+}
+.sport-period-form {
+  align-items: flex-end;
+}
+.form-field-error {
+  color: var(--ui-danger);
+  font-size: 13px;
+  margin: 4px 0 0;
+}
+.sport-shell [aria-invalid="true"] {
+  border-color: var(--ui-danger);
+}
+.sport-conflict {
+  padding: 16px;
+  border: 1px solid var(--ui-accent);
+  border-radius: 8px;
+  background: var(--ui-paper);
+}
+.sport-comparison {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin: 16px 0;
+}
+.sport-comparison h3 {
+  margin: 0;
+  font-size: 15px;
+}
+.sport-comparison dl {
+  margin: 10px 0;
+}
+.sport-comparison dl > div {
+  padding: 8px;
+  border-bottom: 1px solid var(--ui-border);
+}
+.sport-comparison dt {
+  font-size: 12px;
+  color: var(--ui-muted);
+}
+.sport-comparison dd {
+  margin: 4px 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.sport-comparison .is-different {
+  border-left: 3px solid var(--ui-accent);
+  background: var(--ui-accent-bg);
+}
+.sport-notice {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding: 10px 14px;
+  margin: 14px 0;
+  border: 1px solid var(--ui-border);
+  border-radius: 8px;
+  background: var(--ui-sidebar);
+}
+.sport-notice > span {
+  flex: 1;
+  min-width: 120px;
+}
+.sport-hyrox-brand.is-compact {
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 14px 18px;
+  gap: 16px;
+}
+.is-compact .sport-hyrox-kicker,
+.is-compact .sport-hyrox-countdown > span {
+  display: none;
+}
+.is-compact .sport-hyrox-logo {
+  width: min(100%, 140px);
+}
+.is-compact .sport-hyrox-countdown {
+  border-top: 0;
+  border-left: 1px solid #ffffff40;
+  padding: 0 0 0 16px;
+  max-width: 200px;
+}
+.is-compact .sport-hyrox-countdown strong {
+  font-size: 24px;
+}
+.is-compact .sport-hyrox-countdown time {
+  font-size: 12px;
+}
+@media (max-width: 560px) {
+  .sport-page-heading {
+    margin-bottom: 20px;
+  }
+  .sport-view-list .sport-workout {
+    display: flex;
+    gap: 6px;
+  }
+  .sport-view-list .sport-workout-actions {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--ui-border);
+  }
+  .sport-view-list .sport-workout h2 {
+    margin-top: 4px;
+  }
+  .sport-view-list .sport-workout-notes {
+    -webkit-line-clamp: 1;
+  }
+  .sport-exercise .sport-row-actions {
+    flex-direction: row;
+    width: 100%;
+    justify-content: flex-end;
+  }
+  .sport-row-actions .secondary-button {
+    font-size: 13px;
+  }
+  .sport-program-actions {
+    gap: 8px;
+  }
+  .sport-program-form .sport-section-heading .sport-inline {
+    gap: 2px;
+  }
+  .sport-move-select span {
+    display: none;
+  }
+  .sport-session-exercise .sport-section-heading {
+    flex-direction: row;
+    align-items: center;
+  }
+  .sport-session-exercise h2 {
+    font-size: 16px;
+  }
+  .sport-set-row {
+    grid-template-columns: 20px minmax(0, 1fr);
+  }
+  .sport-set-row > button {
+    grid-column: 2;
+    justify-self: end;
+    min-width: 110px;
+  }
+  .sport-set .sport-value-fields input {
+    min-height: 48px;
+  }
+  .sport-rest > div {
+    flex: 0 1 auto;
+    grid-template-columns: auto auto;
+  }
+  .sport-rest .eyebrow {
+    display: none;
+  }
+  .sport-rest strong {
+    font-size: 25px;
+  }
+  .sport-rest [role="status"] {
+    grid-column: auto;
+    max-width: 180px;
+    font-size: 12px;
+  }
+  .sport-rest .sport-rest-controls {
+    flex: 1 1 100%;
+    justify-content: flex-end;
+  }
+  .sport-rest .sport-hyrox-stamp {
+    display: none;
+  }
+  .sport-rest.is-ready > div {
+    flex: 1;
+  }
+  .sport-rest.is-ready [role="status"] {
+    max-width: none;
+  }
+  .sport-session-summary {
+    padding: 16px;
+  }
+  .sport-comparison {
+    grid-template-columns: 1fr;
+  }
+  .sport-hyrox-brand.is-compact {
+    padding: 12px 14px;
+    gap: 12px;
+  }
+  .is-compact .sport-hyrox-logo {
+    width: min(100%, 110px);
+  }
+  .is-compact .sport-hyrox-countdown {
+    padding-left: 12px;
+  }
+  .sport-sticky-actions {
+    bottom: -20px;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .sport-shell :is(button, input, select, textarea) {
+    transition:
+      background-color 140ms ease,
+      border-color 140ms ease,
+      color 140ms ease;
+  }
+  .sport-notice,
+  .sport-session-summary {
+    animation: sport-appear 180ms ease-out;
+  }
+  .sport-set.is-complete .sport-set-state svg {
+    animation: sport-confirm 180ms ease-out;
+  }
+  .sport-chart-dot {
+    transition: r 140ms ease;
+  }
+  @keyframes sport-appear {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes sport-confirm {
+    from {
+      transform: scale(0.8);
+      opacity: 0.5;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sport-shell *,
+  .sport-shell *::before,
+  .sport-shell *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .sport-shell .app-dialog[open],
+  .sport-plan-entry {
+    animation: sport-appear 160ms ease-out;
+  }
+}
+@media (max-width: 560px) {
+  .sport-filters:has(.sport-view-controls) > label:first-child {
+    flex-basis: 100%;
+  }
+  .sport-filters:has(.sport-view-controls) > label:nth-child(2) {
+    min-width: 0;
+    flex: 1 1 100px;
+  }
+  .sport-filters > .sport-view-controls {
+    flex: 0 0 auto;
+  }
+  .sport-view-switch button {
+    padding-inline: 8px;
+    font-size: 12px;
+  }
+  .sport-program-form .sport-program-info > p {
+    display: none;
   }
 }

@@ -1,104 +1,343 @@
-import { tr } from "../i18n";
 import { useEffect, useRef, useState } from "react";
+import { tr } from "../i18n";
 import { Dialog, ErrorMessage } from "../../../shared/ui/Dialog";
-import { Icon } from "../../../shared/ui/Icon";
+import { Icon, type IconName } from "../../../shared/ui/Icon";
 import { sportApi } from "../api";
-import type { Exercise, KindDefinition } from "../types";
-import { Empty, LoadState, useAction, useResource } from "./common";
+import { useView } from "../preferences";
+import { pageOffset, queryString, useSportQuery } from "../navigation";
+import type {
+  Exercise,
+  ExerciseFilters,
+  KindDefinition,
+  Workout,
+} from "../types";
+import {
+  ConflictPanel,
+  Empty,
+  LoadState,
+  Pagination,
+  UndoNotice,
+  useAction,
+  useDebounced,
+  useDraftGuard,
+  useFormValidation,
+  useResource,
+  type RegisterGuard,
+} from "./common";
 
-export function ExercisePicker({
-  onPick,
+type Filters = {
+  q: string;
+  kind: string;
+  show: string;
+  muscle: string;
+  equipment: string;
+};
+const filterQuery = (filters: Filters) => ({
+  q: filters.q,
+  kind: filters.kind,
+  archived: String(filters.show === "true"),
+  origin:
+    filters.show === "personal" || filters.show === "builtin"
+      ? filters.show
+      : "all",
+  muscle: filters.muscle,
+  equipment: filters.equipment,
+});
+
+function FilterFields({
+  filters,
+  onChange,
   kinds,
+  options,
+  picker = false,
+  search,
 }: {
-  onPick: (ex: Exercise) => void;
+  filters: Filters;
+  onChange: (values: Partial<Filters>) => void;
   kinds: KindDefinition[];
+  options?: ExerciseFilters;
+  picker?: boolean;
+  search?: React.RefObject<HTMLInputElement | null>;
 }) {
-  const search = useRef<HTMLInputElement>(null);
-  useEffect(() => {
-    search.current?.focus();
-  }, []);
-  const [query, setQuery] = useState("");
-  const [kind, setKind] = useState("");
-  const resource = useResource(
-    (signal) =>
-      sportApi.exercises(
-        new URLSearchParams({ q: query, kind, limit: "20" })
-          .toString()
-          .replace("kind=&", ""),
-        signal,
-      ),
-    [query, kind],
-  );
   return (
-    <section className="sport-picker">
+    <>
       <div className="sport-filters">
         <label>
-          {tr("search_for_an_exercise")}
+          {picker ? tr("search_for_an_exercise") : tr("search")}
           <input
             ref={search}
             type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") e.preventDefault();
+            maxLength={160}
+            placeholder={tr("name_muscle_or_equipment")}
+            value={filters.q}
+            onChange={(event) => onChange({ q: event.target.value })}
+            onKeyDown={(event) => {
+              if (picker && event.key === "Enter") event.preventDefault();
             }}
-            placeholder={tr("bench_press_running_farmer_carry")}
           />
         </label>
         <label>
-          {tr("type")}
-          <select value={kind} onChange={(e) => setKind(e.target.value)}>
+          {tr("exercise_type")}
+          <select
+            value={filters.kind}
+            onChange={(event) => onChange({ kind: event.target.value })}
+          >
             <option value="">{tr("all_types")}</option>
-            {kinds.map((k) => (
-              <option value={k.id} key={k.id}>
-                {k.name}
+            {kinds.map((kind) => (
+              <option key={kind.id} value={kind.id}>
+                {kind.name}
               </option>
             ))}
           </select>
         </label>
-      </div>
-      <LoadState {...resource} />
-      <div className="sport-picker-results">
-        {resource.data?.items.map((ex) => (
-          <button
-            type="button"
-            className="sport-picker-item"
-            key={ex.id}
-            onClick={() => onPick(ex)}
+        <label>
+          {tr("show")}
+          <select
+            aria-label={tr("show")}
+            value={filters.show}
+            onChange={(event) =>
+              onChange({ show: event.target.value, muscle: "", equipment: "" })
+            }
           >
-            <span>
-              <strong>{ex.name}</strong>
-              <small>
-                {kinds.find((k) => k.id === ex.kind)?.name} · {ex.equipment}
-              </small>
+            <option value="false">{tr("catalogue_and_my_exercises")}</option>
+            <option value="personal">{tr("personal_exercises_only")}</option>
+            <option value="builtin">{tr("provided_exercises_only")}</option>
+            {!picker && (
+              <option value="true">{tr("my_archived_exercises")}</option>
+            )}
+          </select>
+        </label>
+      </div>
+      <details className="sport-extra-filters">
+        <summary>
+          {tr("muscle_equipment_filters")}
+          {(filters.muscle || filters.equipment) && (
+            <span className="sport-tag">
+              {[filters.muscle, filters.equipment].filter(Boolean).length}
             </span>
-            <span aria-hidden="true">＋</span>
-          </button>
+          )}
+        </summary>
+        <div className="sport-filters">
+          <label>
+            {tr("muscle_group")}
+            <select
+              value={filters.muscle}
+              onChange={(event) => onChange({ muscle: event.target.value })}
+            >
+              <option value="">{tr("all_muscles")}</option>
+              {options?.muscles.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            {tr("equipment")}
+            <select
+              value={filters.equipment}
+              onChange={(event) => onChange({ equipment: event.target.value })}
+            >
+              <option value="">{tr("all_equipment")}</option>
+              {options?.equipment.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      </details>
+      {(filters.q ||
+        filters.kind ||
+        filters.muscle ||
+        filters.equipment ||
+        filters.show !== "false") && (
+        <button
+          type="button"
+          className="text-button"
+          onClick={() =>
+            onChange({
+              q: "",
+              kind: "",
+              show: "false",
+              muscle: "",
+              equipment: "",
+            })
+          }
+        >
+          {tr("clear_filters")}
+        </button>
+      )}
+    </>
+  );
+}
+
+export function ExercisePicker({
+  onPick,
+  kinds,
+  active = true,
+  capacity = 50,
+}: {
+  onPick: (exercises: Exercise[], individual: boolean) => void;
+  kinds: KindDefinition[];
+  active?: boolean;
+  capacity?: number;
+}) {
+  const search = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (active) search.current?.focus();
+  }, [active]);
+  const [filters, setFilters] = useState<Filters>({
+    q: "",
+    kind: "",
+    show: "false",
+    muscle: "",
+    equipment: "",
+  });
+  const [offset, setOffset] = useState(0);
+  const [selected, setSelected] = useState<Record<string, Exercise>>({});
+  const [added, setAdded] = useState<Set<string>>(new Set());
+  const query = useDebounced(filters.q);
+  const params = queryString({
+    ...filterQuery({ ...filters, q: query }),
+    offset: String(offset),
+    limit: "20",
+  });
+  const resource = useResource(
+    (signal) => sportApi.exercises(params, signal),
+    [params],
+  );
+  const options = useResource(
+    (signal) =>
+      sportApi.exerciseFilters(
+        queryString({ origin: filterQuery(filters).origin }),
+        signal,
+      ),
+    [filters.show],
+  );
+  function add(choices: Exercise[], individual = false) {
+    const values = choices
+      .filter((exercise) => !added.has(exercise.id))
+      .slice(0, capacity);
+    if (!values.length) return;
+    onPick(values, individual);
+    setAdded(
+      (previous) =>
+        new Set([...previous, ...values.map((exercise) => exercise.id)]),
+    );
+    setSelected({});
+  }
+  return (
+    <section className="sport-picker">
+      <FilterFields
+        filters={filters}
+        kinds={kinds}
+        options={options.data}
+        picker
+        search={search}
+        onChange={(changes) => {
+          setFilters((previous) => ({ ...previous, ...changes }));
+          setOffset(0);
+        }}
+      />
+      <LoadState {...resource} />
+      <LoadState {...options} />
+      <div className="sport-picker-selection">
+        <span role="status">
+          {tr("selected_exercises", { count: Object.keys(selected).length })}
+        </span>
+        <button
+          type="button"
+          className="primary-button"
+          disabled={
+            !Object.keys(selected).length ||
+            Object.keys(selected).length > capacity
+          }
+          onClick={() => add(Object.values(selected))}
+        >
+          {tr("add_selected")}
+        </button>
+      </div>
+      <div className="sport-picker-results">
+        {resource.data?.items.map((exercise) => (
+          <div className="sport-picker-row" key={exercise.id}>
+            <input
+              type="checkbox"
+              aria-label={tr("select_exercise", { name: exercise.name })}
+              checked={!!selected[exercise.id]}
+              disabled={
+                added.has(exercise.id) ||
+                (!selected[exercise.id] &&
+                  Object.keys(selected).length >= capacity)
+              }
+              onChange={(event) =>
+                setSelected((previous) => {
+                  const next = { ...previous };
+                  if (event.target.checked) next[exercise.id] = exercise;
+                  else delete next[exercise.id];
+                  return next;
+                })
+              }
+            />
+            <button
+              type="button"
+              className="sport-picker-item"
+              aria-disabled={added.has(exercise.id) || capacity <= 0}
+              onClick={() => add([exercise], true)}
+            >
+              <span>
+                <strong>{exercise.name}</strong>
+                <small>
+                  {kinds.find((kind) => kind.id === exercise.kind)?.name} ·{" "}
+                  {exercise.equipment}
+                </small>
+              </span>
+              <span>{added.has(exercise.id) ? tr("added") : tr("add")}</span>
+            </button>
+          </div>
         ))}
       </div>
       {resource.data?.total === 0 && (
         <p>{tr("no_exercises_found_create_one_in_the_exercises_tab")}</p>
       )}
-      {resource.data && resource.data.total > 20 && (
-        <p className="muted small-text">
-          {tr("search_limit", { total: resource.data.total })}
-        </p>
+      {resource.data && (
+        <Pagination
+          offset={offset}
+          limit={20}
+          total={resource.data.total}
+          onChange={setOffset}
+        />
       )}
+      {!!added.size && (
+        <button
+          type="button"
+          className="text-button"
+          onClick={() => setAdded(new Set())}
+        >
+          {tr("allow_another_occurrence")}
+        </button>
+      )}
+      {capacity <= 0 && <p role="status">{tr("program_capacity_reached")}</p>}
     </section>
   );
 }
+
 function ExerciseForm({
   exercise,
   kinds,
   onClose,
   onSaved,
+  registerGuard,
 }: {
   exercise?: Exercise;
   kinds: KindDefinition[];
   onClose: () => void;
-  onSaved: () => void;
+  onSaved: (exercise: Exercise) => void;
+  registerGuard: RegisterGuard;
 }) {
-  const editing = exercise && !exercise.builtin;
+  const [copyMode, setCopyMode] = useState(false);
+  const editing = exercise && !exercise.builtin && !copyMode;
   const [name, setName] = useState(exercise?.name ?? "");
   const [kind, setKind] = useState(exercise?.kind ?? "weight_reps");
   const [muscle, setMuscle] = useState(exercise?.muscle_group ?? tr("general"));
@@ -106,27 +345,70 @@ function ExerciseForm({
     exercise?.equipment ?? tr("no_equipment"),
   );
   const [notes, setNotes] = useState(exercise?.notes ?? "");
+  const [version, setVersion] = useState(exercise?.version);
+  const payload = { name, kind, muscle_group: muscle, equipment, notes };
+  const original = useRef(JSON.stringify(payload));
   const action = useAction();
+  const validation = useFormValidation(action.failure);
+  const canLeave = useDraftGuard(
+    original.current !== JSON.stringify(payload),
+    action.busy,
+    registerGuard,
+  );
+  const describe = (value: typeof payload) => [
+    { label: tr("exercise_name"), value: value.name },
+    {
+      label: tr("input_type"),
+      value: kinds.find((kind) => kind.id === value.kind)?.name ?? value.kind,
+    },
+    { label: tr("muscle_group"), value: value.muscle_group },
+    { label: tr("equipment"), value: value.equipment },
+    { label: tr("notes"), value: value.notes },
+  ];
+  function load(value: Exercise) {
+    setName(value.name);
+    setKind(value.kind);
+    setMuscle(value.muscle_group);
+    setEquipment(value.equipment);
+    setNotes(value.notes);
+    setVersion(value.version);
+    original.current = JSON.stringify({
+      name: value.name,
+      kind: value.kind,
+      muscle_group: value.muscle_group,
+      equipment: value.equipment,
+      notes: value.notes,
+    });
+    action.clear();
+  }
   return (
     <Dialog
-      title={editing ? tr("edit_exercise") : tr("new_exercise")}
-      onClose={onClose}
+      title={
+        editing
+          ? tr("edit_exercise")
+          : exercise
+            ? tr("create_personal_copy")
+            : tr("new_exercise")
+      }
+      onClose={() => {
+        if (canLeave()) onClose();
+      }}
     >
       <form
+        ref={validation.form}
+        noValidate
         className="dialog-body stack-form"
-        onSubmit={(e) => {
-          e.preventDefault();
+        aria-busy={action.busy}
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (!validation.validate()) return;
           void action.run(
             () =>
-              sportApi.write(
+              sportApi.write<Exercise>(
                 `/exercises${editing ? `/${exercise.id}` : ""}`,
                 {
-                  name,
-                  kind,
-                  muscle_group: muscle,
-                  equipment,
-                  notes,
-                  ...(editing ? { expected_version: exercise.version } : {}),
+                  ...payload,
+                  ...(editing ? { expected_version: version } : {}),
                 },
                 editing ? "PUT" : "POST",
               ),
@@ -134,92 +416,324 @@ function ExerciseForm({
           );
         }}
       >
+        {exercise?.builtin && (
+          <p className="muted">{tr("personal_copy_help")}</p>
+        )}
         <fieldset disabled={action.busy} className="sport-fieldset">
           <label>
             {tr("exercise_name")}
             <input
+              {...validation.attrs("name")}
               required
               maxLength={160}
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(event) => setName(event.target.value)}
             />
           </label>
+          {validation.error("name")}
           <label>
             {tr("input_type")}
             <select
+              {...validation.attrs("kind")}
               value={kind}
-              onChange={(e) => setKind(e.target.value as Exercise["kind"])}
+              onChange={(event) =>
+                setKind(event.target.value as Exercise["kind"])
+              }
             >
-              {kinds.map((k) => (
-                <option value={k.id} key={k.id}>
-                  {k.name}
+              {kinds.map((kind) => (
+                <option key={kind.id} value={kind.id}>
+                  {kind.name}
                 </option>
               ))}
             </select>
           </label>
+          {validation.error("kind")}
           <p className="muted small-text">
             {kinds
-              .find((k) => k.id === kind)
-              ?.fields.map((f) => `${f.label} (${f.unit})`)
+              .find((definition) => definition.id === kind)
+              ?.fields.map((field) => `${field.label} (${field.unit})`)
               .join(" · ")}
           </p>
           <div className="form-grid">
             <label>
               {tr("muscle_group")}
               <input
+                {...validation.attrs("muscle_group")}
                 required
                 maxLength={80}
                 value={muscle}
-                onChange={(e) => setMuscle(e.target.value)}
+                onChange={(event) => setMuscle(event.target.value)}
               />
+              {validation.error("muscle_group")}
             </label>
             <label>
               {tr("equipment")}
               <input
+                {...validation.attrs("equipment")}
                 required
                 maxLength={80}
                 value={equipment}
-                onChange={(e) => setEquipment(e.target.value)}
+                onChange={(event) => setEquipment(event.target.value)}
               />
+              {validation.error("equipment")}
             </label>
           </div>
           <label>
             {tr("notes")}
             <textarea
+              {...validation.attrs("notes")}
               maxLength={4000}
               value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+              onChange={(event) => setNotes(event.target.value)}
             />
           </label>
+          {validation.error("notes")}
           <ErrorMessage message={action.error} />
+          {editing && (
+            <ConflictPanel
+              failure={action.failure}
+              draft={describe(payload)}
+              load={() => sportApi.exercise(exercise.id)}
+              describe={describe}
+              onReload={load}
+              onKeep={(value) => {
+                setVersion(value.version);
+                action.clear();
+              }}
+              onCopy={() => {
+                setCopyMode(true);
+                action.clear();
+              }}
+            />
+          )}
           <div className="dialog-actions">
-            <button className="primary-button">{tr("save_exercise")}</button>
+            <button className="primary-button">
+              {action.busy ? tr("saving") : tr("save_exercise")}
+            </button>
           </div>
         </fieldset>
       </form>
     </Dialog>
   );
 }
-export function Exercises({ kinds }: { kinds: KindDefinition[] }) {
-  const [query, setQuery] = useState("");
-  const [kind, setKind] = useState("");
-  const [archived, setArchived] = useState(false);
-  const [offset, setOffset] = useState(0);
-  const [form, setForm] = useState<Exercise | "new" | null>(null);
-  const resource = useResource(
-    (signal) => {
-      const params = new URLSearchParams({
-        q: query,
-        archived: String(archived),
-        offset: String(offset),
-        limit: "40",
-      });
-      if (kind) params.set("kind", kind);
-      return sportApi.exercises(params.toString(), signal);
-    },
-    [query, kind, archived, offset],
+
+function ExerciseDetail({
+  exercise,
+  kinds,
+  onClose,
+  onEdit,
+  onAdd,
+}: {
+  exercise: Exercise;
+  kinds: KindDefinition[];
+  onClose: () => void;
+  onEdit: () => void;
+  onAdd: (program: string, exercise: string) => void;
+}) {
+  const programs = useResource(
+    (signal) => sportApi.workouts(false, signal),
+    [],
   );
+  const [program, setProgram] = useState("new");
+  const kind = kinds.find((kind) => kind.id === exercise.kind)!;
+  return (
+    <Dialog title={exercise.name} onClose={onClose} initialFocus="close">
+      <div className="dialog-body stack-form">
+        <dl className="sport-exercise-details">
+          <div>
+            <dt>{tr("exercise_type")}</dt>
+            <dd>{kind.name}</dd>
+          </div>
+          <div>
+            <dt>{tr("muscle_group")}</dt>
+            <dd>{exercise.muscle_group}</dd>
+          </div>
+          <div>
+            <dt>{tr("equipment")}</dt>
+            <dd>{exercise.equipment}</dd>
+          </div>
+        </dl>
+        <p>
+          {kind.fields
+            .map((field) => `${field.label} (${field.unit})`)
+            .join(" · ")}
+        </p>
+        {exercise.notes && (
+          <p className="sport-preparation-notes">{exercise.notes}</p>
+        )}
+        <button className="secondary-button" onClick={onEdit}>
+          {exercise.builtin ? tr("create_personal_copy") : tr("edit_exercise")}
+        </button>
+        {!exercise.archived_at && (
+          <>
+            <LoadState {...programs} />
+            <label>
+              {tr("add_to_program")}
+              <select
+                value={program}
+                onChange={(event) => setProgram(event.target.value)}
+              >
+                <option value="new">{tr("new_program")}</option>
+                {programs.data?.map((program) => (
+                  <option key={program.id} value={program.id}>
+                    {program.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button
+              className="primary-button"
+              onClick={() => onAdd(program, exercise.id)}
+            >
+              {tr("add_to_program")}
+            </button>
+            <p className="muted">{tr("add_to_program_help")}</p>
+          </>
+        )}
+      </div>
+    </Dialog>
+  );
+}
+
+const exerciseIcon = (exercise: Exercise): IconName =>
+  exercise.kind.startsWith("weight") || exercise.kind === "assisted_reps"
+    ? "dumbbell"
+    : exercise.kind.includes("distance")
+      ? "route"
+      : exercise.kind.includes("duration")
+        ? "timer"
+        : "activity";
+
+export function Exercises({
+  kinds,
+  registerGuard,
+  onAddToProgram,
+  onPrograms,
+}: {
+  kinds: KindDefinition[];
+  registerGuard: RegisterGuard;
+  onAddToProgram: (program: string, exercise: string) => void;
+  onPrograms: (exercise: string) => void;
+}) {
+  const [query, update] = useSportQuery({
+    ex_q: "",
+    ex_kind: "",
+    ex_show: "false",
+    ex_muscle: "",
+    ex_equipment: "",
+    ex_offset: "0",
+  });
+  const filters: Filters = {
+    q: query.ex_q,
+    kind: kinds.some((kind) => kind.id === query.ex_kind) ? query.ex_kind : "",
+    show: ["false", "true", "personal", "builtin"].includes(query.ex_show)
+      ? query.ex_show
+      : "false",
+    muscle: query.ex_muscle,
+    equipment: query.ex_equipment,
+  };
+  const search = useDebounced(filters.q);
+  const offset = pageOffset(query.ex_offset);
+  const params = queryString({
+    ...filterQuery({ ...filters, q: search }),
+    offset: String(offset),
+    limit: "40",
+  });
+  const resource = useResource(
+    (signal) => sportApi.exercises(params, signal),
+    [params],
+  );
+  const options = useResource(
+    (signal) =>
+      sportApi.exerciseFilters(
+        queryString({
+          archived: String(filters.show === "true"),
+          origin: filterQuery(filters).origin,
+        }),
+        signal,
+      ),
+    [filters.show],
+  );
+  const presentation = useView("exercises");
+  const [form, setForm] = useState<Exercise | "new" | null>(null);
+  const [detail, setDetail] = useState<Exercise | null>(null);
+  const [notice, setNotice] = useState<Exercise | null>(null);
+  const [affected, setAffected] = useState<{
+    exercise: Exercise;
+    programs: Workout[];
+  } | null>(null);
   const action = useAction();
+  const archived = filters.show === "true";
+  const restoreFocus = useRef<string | null>(null);
+  useEffect(() => {
+    if (
+      restoreFocus.current &&
+      resource.data?.items.some((item) => item.id === restoreFocus.current)
+    ) {
+      presentation.list.current
+        ?.querySelector<HTMLElement>(
+          `[data-record="${restoreFocus.current}"] button`,
+        )
+        ?.focus();
+      restoreFocus.current = null;
+    }
+  }, [resource.data]);
+  function changeFilters(changes: Partial<Filters>) {
+    update({
+      ...Object.fromEntries(
+        Object.entries(changes).map(([key, value]) => [`ex_${key}`, value]),
+      ),
+      ex_offset: "0",
+    });
+  }
+  function acceptArchive(value: Exercise) {
+    setAffected(null);
+    if (value.archived_at) setNotice(value);
+    else {
+      setNotice(null);
+      restoreFocus.current = value.id;
+    }
+    resource.reload();
+    options.reload();
+  }
+  function archive(exercise: Exercise, value: boolean) {
+    void action.run(
+      () =>
+        sportApi.write<Exercise>(`/exercises/${exercise.id}/archive`, {
+          expected_version: exercise.version,
+          archived: value,
+        }),
+      acceptArchive,
+    );
+  }
+  function requestArchive(exercise: Exercise) {
+    if (exercise.archived_at) {
+      archive(exercise, false);
+      return;
+    }
+    void action.run(
+      async () => {
+        const programs = await sportApi.workouts(
+          false,
+          undefined,
+          queryString({ exercise_id: exercise.id }),
+        );
+        return programs.length
+          ? { programs, updated: null }
+          : {
+              programs,
+              updated: await sportApi.write<Exercise>(
+                `/exercises/${exercise.id}/archive`,
+                { expected_version: exercise.version, archived: true },
+              ),
+            };
+      },
+      (value) => {
+        if (value.updated) acceptArchive(value.updated);
+        else setAffected({ exercise, programs: value.programs });
+      },
+    );
+  }
   return (
     <>
       <div className="sport-toolbar">
@@ -229,106 +743,102 @@ export function Exercises({ kinds }: { kinds: KindDefinition[] }) {
             : tr("loading")}
         </p>
         <button className="primary-button" onClick={() => setForm("new")}>
+          <Icon name="plus" />
           {tr("new_exercise")}
         </button>
       </div>
-      <div className="sport-filters">
-        <label>
-          {tr("search")}
-          <input
-            type="search"
-            value={query}
-            placeholder={tr("name_muscle_or_equipment")}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              setOffset(0);
-            }}
-          />
-        </label>
-        <label>
-          {tr("exercise_type")}
-          <select
-            value={kind}
-            onChange={(e) => {
-              setKind(e.target.value);
-              setOffset(0);
-            }}
-          >
-            <option value="">{tr("all_types")}</option>
-            {kinds.map((k) => (
-              <option value={k.id} key={k.id}>
-                {k.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          {tr("show")}
-          <select
-            aria-label={tr("show")}
-            value={String(archived)}
-            onChange={(e) => {
-              setArchived(e.target.value === "true");
-              setOffset(0);
-            }}
-          >
-            <option value="false">{tr("catalogue_and_my_exercises")}</option>
-            <option value="true">{tr("my_archived_exercises")}</option>
-          </select>
-        </label>
-      </div>
+      <FilterFields
+        filters={filters}
+        kinds={kinds}
+        options={options.data}
+        onChange={changeFilters}
+      />
+      <div className="sport-toolbar">{presentation.controls}</div>
       <LoadState {...resource} />
+      <LoadState {...options} />
       <ErrorMessage message={action.error} />
+      {notice && (
+        <UndoNotice
+          message={tr("archived_named", { name: notice.name })}
+          busy={action.busy}
+          onUndo={() => archive(notice, false)}
+          onDismiss={() => setNotice(null)}
+        />
+      )}
       {resource.data?.total === 0 && (
-        <Empty title={tr("no_exercises")}>
+        <Empty
+          title={tr("no_exercises")}
+          action={
+            <div className="sport-inline">
+              <button
+                className="secondary-button"
+                onClick={() =>
+                  changeFilters({
+                    q: "",
+                    kind: "",
+                    show: "false",
+                    muscle: "",
+                    equipment: "",
+                  })
+                }
+              >
+                {tr("clear_filters")}
+              </button>
+              <button className="primary-button" onClick={() => setForm("new")}>
+                {tr("first_exercise")}
+              </button>
+            </div>
+          }
+        >
           {tr("try_another_search_or_create_your_own_exercise")}
         </Empty>
       )}
-      <div className="sport-exercise-list">
-        {resource.data?.items.map((ex) => (
-          <article key={ex.id} className="sport-exercise">
+      <div
+        ref={presentation.list}
+        className={`sport-exercise-list sport-view-${presentation.view}`}
+        data-view={presentation.view}
+      >
+        {resource.data?.items.map((exercise) => (
+          <article
+            key={exercise.id}
+            className="sport-exercise"
+            data-record={exercise.id}
+          >
             <div className="sport-exercise-mark" aria-hidden="true">
-              <Icon
-                name={
-                  ex.kind === "distance_duration"
-                    ? "arrow"
-                    : ex.kind.includes("duration")
-                      ? "repeat"
-                      : "flag"
-                }
-                size={22}
-              />
+              <Icon name={exerciseIcon(exercise)} size={22} />
             </div>
             <div className="sport-grow">
-              <h2>{ex.name}</h2>
-              <p>{kinds.find((k) => k.id === ex.kind)?.name}</p>
+              <h2>
+                <button
+                  className="sport-title-button"
+                  onClick={() => setDetail(exercise)}
+                >
+                  {exercise.name}
+                </button>
+              </h2>
+              <p>{kinds.find((kind) => kind.id === exercise.kind)?.name}</p>
               <small>
-                {ex.muscle_group} · {ex.equipment}
-                {ex.builtin ? ` · ${tr("default_exercise")}` : tr("personal")}
+                {exercise.muscle_group} · {exercise.equipment} ·{" "}
+                {exercise.builtin
+                  ? tr("default_exercise")
+                  : tr("personal_exercise")}
               </small>
-              {ex.notes && <p>{ex.notes}</p>}
+              {exercise.notes && (
+                <p className="sport-exercise-notes">{exercise.notes}</p>
+              )}
             </div>
             <div className="sport-row-actions">
               <button
                 className="secondary-button small-button"
-                onClick={() => setForm(ex)}
+                onClick={() => setForm(exercise)}
               >
-                {ex.builtin ? tr("customize") : tr("edit")}
+                {exercise.builtin ? tr("create_personal_copy") : tr("edit")}
               </button>
-              {!ex.builtin && (
+              {!exercise.builtin && (
                 <button
-                  disabled={action.busy}
                   className="text-button"
-                  onClick={() =>
-                    void action.run(
-                      () =>
-                        sportApi.write(`/exercises/${ex.id}/archive`, {
-                          expected_version: ex.version,
-                          archived: !archived,
-                        }),
-                      resource.reload,
-                    )
-                  }
+                  disabled={action.busy}
+                  onClick={() => requestArchive(exercise)}
                 >
                   {archived ? tr("restore") : tr("archive")}
                 </button>
@@ -337,39 +847,70 @@ export function Exercises({ kinds }: { kinds: KindDefinition[] }) {
           </article>
         ))}
       </div>
-      {resource.data && resource.data.total > 40 && (
-        <div className="sport-pagination">
-          <button
-            className="secondary-button"
-            disabled={offset === 0}
-            onClick={() => setOffset(Math.max(0, offset - 40))}
-          >
-            {tr("previous")}
-          </button>
-          <span>
-            {tr("page_range", {
-              first: offset + 1,
-              last: Math.min(offset + 40, resource.data.total),
-              total: resource.data.total,
-            })}
-          </span>
-          <button
-            className="secondary-button"
-            disabled={offset + 40 >= resource.data.total}
-            onClick={() => setOffset(offset + 40)}
-          >
-            {tr("next")}
-          </button>
-        </div>
+      {resource.data && (
+        <Pagination
+          offset={offset}
+          limit={40}
+          total={resource.data.total}
+          onChange={(value) => update({ ex_offset: String(value) })}
+        />
+      )}
+      {detail && (
+        <ExerciseDetail
+          exercise={detail}
+          kinds={kinds}
+          onClose={() => setDetail(null)}
+          onEdit={() => {
+            setForm(detail);
+            setDetail(null);
+          }}
+          onAdd={onAddToProgram}
+        />
+      )}
+      {affected && (
+        <Dialog
+          title={tr("archive_used_exercise")}
+          onClose={() => {
+            if (!action.busy) setAffected(null);
+          }}
+        >
+          <div className="dialog-body stack-form">
+            <p>
+              {tr("archive_used_help", { count: affected.programs.length })}
+            </p>
+            <ul>
+              {affected.programs.slice(0, 5).map((program) => (
+                <li key={program.id}>{program.name}</li>
+              ))}
+            </ul>
+            <button
+              className="secondary-button"
+              onClick={() => onPrograms(affected.exercise.id)}
+            >
+              {tr("open_affected_programs")}
+            </button>
+            <ErrorMessage message={action.error} />
+            <button
+              className="primary-button"
+              disabled={action.busy}
+              onClick={() => archive(affected.exercise, true)}
+            >
+              {tr("archive")}
+            </button>
+          </div>
+        </Dialog>
       )}
       {form && (
         <ExerciseForm
           exercise={form === "new" ? undefined : form}
           kinds={kinds}
+          registerGuard={registerGuard}
           onClose={() => setForm(null)}
-          onSaved={() => {
+          onSaved={(exercise) => {
             setForm(null);
             resource.reload();
+            options.reload();
+            restoreFocus.current = exercise.id;
           }}
         />
       )}

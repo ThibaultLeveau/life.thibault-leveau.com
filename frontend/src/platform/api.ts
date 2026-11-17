@@ -13,10 +13,17 @@ export function setApiSession(session: Session | null) {
   csrf = token;
 }
 
+export interface ApiFieldError {
+  loc?: (string | number)[];
+  msg: string;
+  type?: string;
+}
+
 export class ApiError extends Error {
   constructor(
     message: string,
     public status: number,
+    public fields: ApiFieldError[] = [],
   ) {
     super(message);
   }
@@ -80,7 +87,11 @@ export async function api<T>(
       window.dispatchEvent(
         new CustomEvent("life-application-disabled", { detail: disabled }),
       );
-    throw new ApiError(message, response.status);
+    throw new ApiError(
+      message,
+      response.status,
+      Array.isArray(data.detail) ? data.detail : [],
+    );
   }
   const result = response.status === 204 ? undefined : await response.json();
   ensureCurrent();

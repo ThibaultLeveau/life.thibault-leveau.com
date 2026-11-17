@@ -122,7 +122,7 @@ Le diagramme ci-dessus présente les relations du métier Tâches ; la biblioth�
 
 ## Sport
 
-Migration additive `0006_sport` après `0005_applications`. `sport_exercises` conserve les exercices personnels (nom, type, muscle, matériel, notes) ; les 680 exercices fournis sont un catalogue versionné dans le code, sans copies privées. `sport_workouts` conserve des entrées ordonnées JSONB, avec identifiant d’exercice, nom/type instantanés, séries et cibles. `sport_settings` conserve le repos par propriétaire. `sport_measurements` conserve date, valeurs JSONB facultatives, notes et archives.
+Migration additive `0006_sport` après `0005_applications`. `sport_exercises` conserve les exercices personnels (nom, type, muscle, matériel, notes) ; les 680 exercices fournis sont un catalogue versionné dans le code, sans copies privées. `sport_workouts` conserve des entrées ordonnées JSONB, avec identifiant d’exercice, nom/type instantanés, séries et cibles. `sport_settings` conserve le repos et les préférences de vue versionnées par propriétaire. `sport_measurements` conserve date, valeurs JSONB facultatives, notes et archives.
 
 Ces objets privés référencent `users`, avec version positive, dates de création/modification et archivage réversible (sauf réglages sans historique). Un index unique partiel impose un relevé actif par compte/date. Le service valide noms, types, unités, bornes, structure JSON, compte des séries et références d’exercices ; les écritures SQL directes ne constituent pas une API métier. Les exercices fournis utilisent des identifiants stables et ne sont pas modifiables globalement.
 
@@ -200,3 +200,11 @@ Les recettes et listes portent propriétaire, version positive, dates de créati
 Le verrou propriétaire commun et `expected_version` protègent les mutations concurrentes. La recette source exige aussi sa version lors de l’import. Le calcul et les écritures sont atomiques ; une erreur ne laisse ni liste partielle ni XP. La fin requiert une liste non vide entièrement achetée. Une copie conserve quantités/ingrédients et réinitialise dates de fin, archive et acheté. Une désactivation ne touche aucune table métier.
 
 Les événements conservent instant UTC et instantané complet ; un trigger interdit UPDATE/DELETE. Les références composites interdisent un parent d’un autre propriétaire. Les clés de première récompense sont uniques par propriétaire : recette, liste terminée, modèle non vide ou couple liste/recette importé. Les autres événements ont une clé nulle. Métriques et progression utilisent ces faits sans lire un autre métier ; corrections/réouvertures conservent les premiers succès. Les instantanés gardent la langue du moment, les lectures courantes localisent le catalogue. [Contrats et limites](recipes-api.md), [sauvegarde](sauvegardes.md#migration-0012-recettes-et-courses).
+
+## Migration 0014 — finition Sport
+
+`0014_sport_ux`, après `0013_recipe_units`, ajoute `sport_settings.version` (entier positif, défaut 1), `views` (objet JSONB, défaut `{}`), et `context` à `sport_workouts`/`sport_sessions` (contrainte `auto/standard/hyrox`, défaut `auto`). Les six clés de vue sont validées par le contrat API ; les absences héritent des défauts documentés. `sport_sessions.preparation_notes` est un texte vide pour l’histoire existante. Les nouvelles séances figent les notes réelles et le contexte au démarrage, sans changer signature, cibles, séries, dates ni scores.
+
+Les listes calculent `last_used_at` depuis les séances, sans stockage supplémentaire. La duplication crée un nouveau programme, sans déplacer ni copier d’historique. Le bilan `awarded_xp` est une information de la réponse de clôture dérivée de l’écriture du journal de progression, pas une colonne ni un second compteur. L’API de progression reste la source durable des points. Les archives/désactivations conservent toutes les nouvelles préférences et données.
+
+La migration et ses contraintes sont testées sur PostgreSQL avec données antérieures, conservation, downgrade sans données nouvelles et refus de perte. Voir [sauvegarde et retour arrière](sauvegardes.md#migration-0014-finition-sport).

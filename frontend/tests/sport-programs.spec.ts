@@ -118,6 +118,7 @@ for (const width of [320, 375, 768, 1440]) {
     await expect(page).toHaveTitle("Nouveau programme · Sport · LifeOS");
     const name = `Programme ${width} ${Date.now()}`;
     await page.getByLabel("Nom du programme").fill(name);
+    await page.getByText("Préparation et notes", { exact: true }).click();
     await page
       .getByLabel("Notes de préparation")
       .fill("Échauffement et charge totale.");
@@ -542,7 +543,7 @@ test("Cartes de programme compactes : ordinateur, mobile, thèmes et langues", a
   const regular = await write<Workout>(page, "/sport/workouts", {
     name: "Programme haut du corps",
     notes: "Échauffement puis progression régulière. ".repeat(15),
-    entries,
+    entries: Array.from({ length: 12 }, (_, i) => entries[i % entries.length]),
   });
   const hyrox = await write<Workout>(page, "/sport/workouts", {
     name: "HYROX — Cardio",
@@ -551,24 +552,27 @@ test("Cartes de programme compactes : ordinateur, mobile, thèmes et langues", a
   });
   const shoulders = await write<Workout>(page, "/sport/workouts", {
     name: "Programme B — Épaules + Dos",
-    entries,
+    entries: entries.slice(0, 1),
   });
   const legs = await write<Workout>(page, "/sport/workouts", {
     name: "Programme jambes",
-    entries,
+    entries: Array.from({ length: 50 }, (_, i) => entries[i % entries.length]),
   });
   const programsUnderTest = [regular, hyrox, shoulders, legs];
   // Isolate real API fixtures so captures do not depend on previous scenarios.
-  await page.route("**/api/v1/sport/workouts?archived=false", async (route) => {
-    const response = await route.fetch();
-    const programs: Workout[] = await response.json();
-    await route.fulfill({
-      response,
-      json: programs.filter((program) =>
-        programsUnderTest.some((fixture) => fixture.id === program.id),
-      ),
-    });
-  });
+  await page.route(
+    "**/api/v1/sport/workouts?archived=false**",
+    async (route) => {
+      const response = await route.fetch();
+      const programs: Workout[] = await response.json();
+      await route.fulfill({
+        response,
+        json: programs.filter((program) =>
+          programsUnderTest.some((fixture) => fixture.id === program.id),
+        ),
+      });
+    },
+  );
   for (const locale of ["fr", "en"])
     for (const theme of ["light", "dark"]) {
       await write(page, "/preferences", { theme, locale }, "PUT");
@@ -577,64 +581,78 @@ test("Cartes de programme compactes : ordinateur, mobile, thèmes et langues", a
         await page.goto("/sport");
         const cards = page.locator(".sport-workout");
         await expect(cards).toHaveCount(programsUnderTest.length);
-        await expect(
-          page.getByRole("button", { name: /^(Archiver|Archive)$/ }),
-        ).toHaveCount(0);
-        for (const program of programsUnderTest) {
-          const card = cards.filter({
-            has: page.getByRole("heading", { name: program.name, exact: true }),
-          });
-          const mobile = width < 560;
-          await expect(card.locator("li:visible")).toHaveCount(mobile ? 2 : 4);
-          await expect(card.locator("li small:visible")).toHaveCount(
-            mobile ? 0 : 4,
+        for (const view of ["list", "grid"] as const) {
+          await page
+            .getByRole("button", {
+              name:
+                view === "list"
+                  ? locale === "fr"
+                    ? "Liste"
+                    : "List"
+                  : locale === "fr"
+                    ? "Grille"
+                    : "Grid",
+              exact: true,
+            })
+            .click();
+          await expect(page.locator(".sport-workout-grid")).toHaveAttribute(
+            "data-view",
+            view,
           );
-          await expect(card.locator(".sport-workout-more:visible")).toHaveCount(
-            mobile ? 1 : 0,
-          );
-          if (mobile)
-            await expect(card).toContainText(
-              locale === "fr" ? "+ 2 autres exercices" : "+ 2 more exercises",
+          for (const program of programsUnderTest) {
+            const card = cards.filter({
+              has: page.getByRole("heading", {
+                name: program.name,
+                exact: true,
+              }),
+            });
+            await expect(card.locator("li:visible")).toHaveCount(
+              view === "grid" ? Math.min(3, program.entries.length) : 0,
             );
-          const height = (await card.boundingBox())!.height;
-          expect(height).toBeLessThan(mobile ? 350 : 600);
-          for (const button of await card.getByRole("button").all()) {
-            const box = (await button.boundingBox())!;
-            expect(box.height).toBeGreaterThanOrEqual(44);
-            expect(box.width).toBeGreaterThanOrEqual(44);
-            expect(box.x).toBeGreaterThanOrEqual(0);
-            expect(box.x + box.width).toBeLessThanOrEqual(width);
+            await expect(
+              card.locator(".sport-workout-more:visible"),
+            ).toHaveCount(
+              view === "list" || program.entries.length > 3 ? 1 : 0,
+            );
+            await expect(
+              card.getByRole("button", {
+                name: new RegExp(`^(Archiver|Archive)`),
+              }),
+            ).toHaveCount(1);
+            const height = (await card.boundingBox())!.height;
+            expect(height).toBeLessThan(view === "list" ? 400 : 650);
+            for (const button of await card.getByRole("button").all()) {
+              const box = (await button.boundingBox())!;
+              expect(box.height).toBeGreaterThanOrEqual(44);
+              expect(box.width).toBeGreaterThanOrEqual(44);
+              expect(box.x).toBeGreaterThanOrEqual(0);
+              expect(box.x + box.width).toBeLessThanOrEqual(width);
+            }
           }
-        }
-        const layout = await cards.evaluateAll((elements) =>
-          elements.map((element) => {
-            const card = element.getBoundingClientRect();
-            const actions = element
-              .querySelector(".sport-workout-actions")!
-              .getBoundingClientRect();
-            return {
-              width: card.width,
-              height: card.height,
-              top: card.top,
-              actionsTop: actions.top - card.top,
-            };
-          }),
-        );
-        const heights = layout.map((card) => card.height);
-        if (width === 1440) {
-          // Equal sizing also applies to a shorter card on the next row.
-          expect(new Set(layout.map((card) => Math.round(card.top))).size).toBe(
-            2,
-          );
-          for (const dimension of ["width", "height", "actionsTop"] as const) {
-            const values = layout.map((card) => card[dimension]);
-            expect(Math.max(...values) - Math.min(...values)).toBeLessThan(1);
+          if (width === 1440 && view === "grid") {
+            const rows = await cards.evaluateAll((elements) =>
+              elements.map((element) => ({
+                top: Math.round(element.getBoundingClientRect().top),
+                height: element.getBoundingClientRect().height,
+                actionBottom: element
+                  .querySelector(".sport-workout-actions")!
+                  .getBoundingClientRect().bottom,
+              })),
+            );
+            expect(new Set(rows.map((row) => row.top)).size).toBe(2);
+            for (const top of new Set(rows.map((row) => row.top))) {
+              const bottoms = rows
+                .filter((row) => row.top === top)
+                .map((row) => row.actionBottom);
+              expect(Math.max(...bottoms) - Math.min(...bottoms)).toBeLessThan(
+                1,
+              );
+            }
+            // Independent rows: the short final card is not expanded by the others.
+            expect(
+              new Set(rows.map((row) => Math.round(row.height))).size,
+            ).toBeGreaterThan(1);
           }
-        } else {
-          // Single-column phone cards keep their compact, natural heights.
-          expect(Math.max(...heights) - Math.min(...heights)).toBeGreaterThan(
-            40,
-          );
         }
         await expect(cards.getByAltText("HYROX")).toBeVisible();
         await expect(cards.locator("time")).toHaveAttribute(
@@ -657,7 +675,7 @@ test("Cartes de programme compactes : ordinateur, mobile, thèmes et langues", a
   });
   await edit.focus();
   await edit.press("Enter");
-  await expect(page.locator(".sport-plan-entry")).toHaveCount(4);
+  await expect(page.locator(".sport-plan-entry")).toHaveCount(12);
   await expect(page.getByLabel("Notes de préparation")).toHaveValue(
     regular.notes,
   );

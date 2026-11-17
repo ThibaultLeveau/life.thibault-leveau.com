@@ -125,5 +125,6 @@
   "metric_body_calf_left_cm": "Mollet gauche",
   "metric_body_calf_right_cm": "Mollet droit",
   "metric_body_description": "Mesures présentes et non archivées dans la période ; la variation nécessite deux relevés.",
-  "integration_incomparable": "Ces scores proviennent de programmes ou versions différents. Choisissez un programme et une période comparables."
+  "integration_incomparable": "Ces scores proviennent de programmes ou versions différents. Choisissez un programme et une période comparables.",
+  "rest_already_finished": "Le repos est déjà terminé. Validez une nouvelle série pour en démarrer un."
 }

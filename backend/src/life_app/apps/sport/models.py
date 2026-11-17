@@ -42,6 +42,7 @@ class Workout(Owned, Base):
     __tablename__ = "sport_workouts"
     __table_args__ = (
         UniqueConstraint("id", "owner_id"),
+        CheckConstraint("context IN ('auto', 'standard', 'hyrox')"),
         CheckConstraint("version > 0"),
         CheckConstraint("length(trim(name)) > 0"),
         CheckConstraint(
@@ -50,6 +51,7 @@ class Workout(Owned, Base):
     )
     name: Mapped[str] = mapped_column(String(160))
     competition_date: Mapped[date | None] = mapped_column(Date)
+    context: Mapped[str] = mapped_column(String(8), default="auto")
     notes: Mapped[str] = mapped_column(Text, default="")
     entries: Mapped[list] = mapped_column(JSONB)
 
@@ -61,6 +63,7 @@ class Training(Base):
             ["workout_id", "owner_id"], ["sport_workouts.id", "sport_workouts.owner_id"]
         ),
         CheckConstraint("status IN ('active', 'completed', 'cancelled')"),
+        CheckConstraint("context IN ('auto', 'standard', 'hyrox')"),
         CheckConstraint("version > 0"),
         CheckConstraint(
             "(status = 'active' AND finished_at IS NULL) OR "
@@ -82,6 +85,8 @@ class Training(Base):
     workout_id: Mapped[UUID] = mapped_column()
     name: Mapped[str] = mapped_column(String(160))
     competition_date: Mapped[date | None] = mapped_column(Date)
+    context: Mapped[str] = mapped_column(String(8), default="auto")
+    preparation_notes: Mapped[str] = mapped_column(Text, default="")
     entries: Mapped[list] = mapped_column(JSONB)
     sets: Mapped[list] = mapped_column(JSONB, default=list)
     status: Mapped[str] = mapped_column(String(12), default="active")
@@ -98,9 +103,15 @@ class Training(Base):
 
 class SportSettings(Base):
     __tablename__ = "sport_settings"
-    __table_args__ = (CheckConstraint("rest_seconds BETWEEN 0 AND 3600"),)
+    __table_args__ = (
+        CheckConstraint("rest_seconds BETWEEN 0 AND 3600"),
+        CheckConstraint("version > 0"),
+        CheckConstraint("jsonb_typeof(views) = 'object'"),
+    )
     owner_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), primary_key=True)
     rest_seconds: Mapped[int] = mapped_column(default=90)
+    version: Mapped[int] = mapped_column(default=1)
+    views: Mapped[dict] = mapped_column(JSONB, default=dict)
 
 
 class Measurement(Owned, Base):

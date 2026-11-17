@@ -62,10 +62,30 @@ export interface Entry {
   sets: number;
   target: Values;
 }
+export type SportContext = "auto" | "standard" | "hyrox";
+export type ViewMode = "list" | "grid";
+export type ViewSection = "workouts" | "exercises" | "measurements";
+export interface SportSettings {
+  rest_seconds: number;
+  version: number;
+  server_today: string;
+  workouts_view: ViewMode;
+  workouts_mobile_view: ViewMode;
+  exercises_view: ViewMode;
+  exercises_mobile_view: ViewMode;
+  measurements_view: ViewMode;
+  measurements_mobile_view: ViewMode;
+}
+export interface ExerciseFilters {
+  muscles: { value: string; label: string }[];
+  equipment: { value: string; label: string }[];
+}
 export interface Workout {
   id: string;
+  last_used_at: string | null;
   name: string;
   competition_date: string | null;
+  context: SportContext;
   notes: string;
   entries: Entry[];
   version: number;
@@ -93,9 +113,11 @@ export interface Metric {
 }
 export interface Training {
   id: string;
+  preparation_notes: string;
   workout_id: string;
   name: string;
   competition_date: string | null;
+  context: SportContext;
   entries: (Entry & { suggested_values: (Values | null)[] })[];
   sets: SetRecord[];
   status: "active" | "completed" | "cancelled";
@@ -108,6 +130,7 @@ export interface Training {
   baseline_id: string | null;
   metrics: Metric[];
   server_now: string;
+  awarded_xp: number | null;
 }
 export interface SessionPage {
   items: Training[];
@@ -148,6 +171,12 @@ export interface Statistics {
   total_volume_kg: number;
   total_distance_m: number;
   sessions: Training[];
+  baselines: {
+    id: string;
+    name: string;
+    started_at: string;
+    exercise_count: number;
+  }[];
   measurements: Measurement[];
   since: string;
   until: string;

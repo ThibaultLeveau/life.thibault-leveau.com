@@ -5,6 +5,7 @@ from uuid import UUID, uuid4
 
 import pytest
 from alembic import command
+from alembic.script import ScriptDirectory
 from fastapi.testclient import TestClient
 from sqlalchemy import select, text
 from sqlalchemy.exc import DBAPIError, IntegrityError
@@ -541,7 +542,10 @@ def test_unit_migration_refuses_loss(client, engine, location):
         config.attributes["connection"] = conn
         command.downgrade(config, "0012_recipes")
     with engine.connect() as conn:
-        assert conn.scalar(text("SELECT version_num FROM alembic_version")) == "0013_recipe_units"
+        assert (
+            conn.scalar(text("SELECT version_num FROM alembic_version"))
+            == ScriptDirectory.from_config(migration_config()).get_current_head()
+        )
 
 
 def test_unit_migration_preserves_old_data_and_constraints(client, engine):

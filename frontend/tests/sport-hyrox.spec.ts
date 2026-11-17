@@ -33,7 +33,7 @@ async function readable(page: Page) {
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(page.viewportSize()!.width);
   // Unframed space must blend into the page, including between exercise cards.
   const pagePaper = await page.locator(".sport-shell").evaluate((shell) => getComputedStyle(shell).backgroundColor);
-  for (const layout of await page.locator(".sport-training, .sport-program-form, .sport-program-actions").all()) {
+  for (const layout of await page.locator(".sport-training, .sport-program-form").all()) {
     await expect(layout).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
     const inheritedPaper = await layout.evaluate((el) => {
       const sample = document.createElement("span");
@@ -138,7 +138,8 @@ for (const width of [320, 1440]) for (const theme of ["light", "dark"]) {
     workout = await (await saved).json();
     await card.getByRole("button", { name: "Démarrer l’entraînement" }).click();
     await expect(page.locator(".sport-training").getByRole("region", { name: "Préparation HYROX" })).toContainText("J−4");
-    await expect(page.locator(".sport-rest").getByAltText("HYROX")).toBeVisible();
+    await expect(page.locator(".sport-rest")).toHaveClass(/is-ready/);
+    await expect(page.locator(".sport-rest").getByAltText("HYROX")).toBeHidden();
     const series = page.getByRole("form", { name: "Développé couché à la barre, série 1", exact: true });
     await series.getByLabel("Charge totale (kg)", { exact: true }).fill("42");
     await series.getByLabel("Répétitions (rép.)", { exact: true }).press("Enter");
@@ -188,7 +189,7 @@ test("HYROX : jours civils, jour J, date passée, effacement et titre", async ({
   await expect(brand).not.toContainText("J−-");
   await page.getByLabel("Nom du programme").fill("Force");
   await expect(brand).toHaveCount(0);
-  await expect(date).toHaveCount(0);
+  await expect(date).toHaveValue("2028-03-26"); // Existing date stays editable even after a rename.
   await page.getByLabel("Nom du programme").fill("HYROX / Force");
   await expect(date).toHaveValue("2028-03-26");
   await page.getByRole("button", { name: "Effacer la date de compétition" }).click();

@@ -5,6 +5,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from life_app.apps.sport.messages import tr
+from life_app.core.database import utcnow
 
 Kind = Literal[
     "weight_reps",
@@ -19,6 +20,11 @@ Kind = Literal[
     "calories_duration",
 ]
 Name = Annotated[str, Field(min_length=1, max_length=160)]
+ViewMode = Literal["list", "grid"]
+SportContext = Literal["auto", "standard", "hyrox"]
+ExerciseOrigin = Literal["all", "personal", "builtin"]
+WorkoutSort = Literal["updated", "name", "recent"]
+SessionStatus = Literal["active", "completed", "cancelled"]
 
 
 class Contract(BaseModel):
@@ -75,6 +81,16 @@ class ExercisePage(Contract):
     limit: int
 
 
+class FilterOption(Contract):
+    value: str
+    label: str
+
+
+class ExerciseFilters(Contract):
+    muscles: list[FilterOption]
+    equipment: list[FilterOption]
+
+
 class FieldDefinition(Contract):
     key: str
     label: str
@@ -117,6 +133,9 @@ class TrainingEntry(SnapshotEntry):
 
 class WorkoutInput(Contract):
     name: Name
+    context: SportContext = Field(
+        "auto", description="auto détecte Hyrox dans le nom ; standard/hyrox sont explicites."
+    )
     competition_date: date | None = Field(
         None,
         description=(
@@ -154,10 +173,16 @@ class WorkoutUpdate(WorkoutInput, Version):
     pass
 
 
+class WorkoutDuplicate(Version):
+    name: Name
+
+
 class WorkoutOutput(Contract):
     id: UUID
     name: str
     competition_date: date | None
+    context: SportContext
+    last_used_at: datetime | None = None
     notes: str
     entries: list[SnapshotEntry]
     version: int
@@ -166,8 +191,23 @@ class WorkoutOutput(Contract):
     archived_at: datetime | None
 
 
-class Settings(Contract):
+class SettingsValues(Contract):
     rest_seconds: int = Field(90, ge=0, le=3600, strict=True)
+    workouts_view: ViewMode = "grid"
+    workouts_mobile_view: ViewMode = "list"
+    exercises_view: ViewMode = "list"
+    exercises_mobile_view: ViewMode = "list"
+    measurements_view: ViewMode = "grid"
+    measurements_mobile_view: ViewMode = "list"
+
+
+class SettingsUpdate(SettingsValues):
+    expected_version: int | None = Field(None, ge=1)
+
+
+class Settings(SettingsValues):
+    version: int = 1
+    server_today: date = Field(default_factory=lambda: utcnow().date())
 
 
 class SessionStart(Contract):
@@ -177,6 +217,12 @@ class SessionStart(Contract):
 
 class SetInput(Version):
     values: Values
+
+
+class RestUpdate(Version):
+    adjustment_seconds: Literal[-15, 15] | None = Field(
+        None, description="Omis/null arrête le repos ; −15/+15 ajuste un repos encore actif."
+    )
 
 
 class SetResultValues(Values):
@@ -233,6 +279,8 @@ class TrainingOutput(Contract):
     competition_date: date | None = Field(
         description="Date de compétition figée au démarrage ; null pour les anciens entraînements."
     )
+    context: SportContext
+    preparation_notes: str
     entries: list[TrainingEntry]
     sets: list[SetOutput]
     status: Literal["active", "completed", "cancelled"]
@@ -245,6 +293,9 @@ class TrainingOutput(Contract):
     baseline_id: UUID | None
     metrics: list[Metric]
     server_now: datetime
+    awarded_xp: int | None = Field(
+        None, description="XP de cette séance, hors quêtes, uniquement dans la réponse de clôture."
+    )
 
 
 class SessionPage(Contract):
@@ -252,6 +303,11 @@ class SessionPage(Contract):
     total: int
     offset: int
     limit: int
+
+
+class SessionNavigation(Contract):
+    newer_id: UUID | None
+    older_id: UUID | None
 
 
 class MeasurementInput(Contract):
@@ -271,10 +327,15 @@ class MeasurementInput(Contract):
     calf_right_cm: float | None = Field(None, gt=0, le=500, allow_inf_nan=False)
     notes: str = Field("", max_length=2000)
 
+    @field_validator("measured_on")
+    @classmethod
+    def not_future(cls, value):
+        if value > utcnow().date():
+            raise ValueError(tr("a_body_measurement_cannot_have_a_future_date"))
+        return value
+
     @model_validator(mode="after")
     def has_measurement(self):
-        if self.measured_on > date.today():
-            raise ValueError(tr("a_body_measurement_cannot_have_a_future_date"))
         if not any(
             v is not None
             for k, v in self.model_dump().items()
@@ -306,12 +367,20 @@ class MeasurementOutput(MeasurementInput):
     archived_at: datetime | None
 
 
+class BaselineSummary(Contract):
+    id: UUID
+    name: str
+    started_at: datetime
+    exercise_count: int
+
+
 class Statistics(Contract):
     completed_sessions: int
     total_sets: int
     total_volume_kg: float
     total_distance_m: float
     sessions: list[TrainingOutput]
+    baselines: list[BaselineSummary]
     measurements: list[MeasurementOutput]
     since: date
     until: date

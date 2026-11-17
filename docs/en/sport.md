@@ -1,6 +1,6 @@
 # Sport
 
-Navigation shares its design with Tasks. The top bar contains the breadcrumb and mobile menu button; the global reload button and username have been removed. The footer contains the library, Sport documentation, theme, language and user/sign-out controls, including on mobile. See [shared navigation](applications.md#shared-navigation).
+Navigation shares its design with Tasks. The top bar contains the breadcrumb, mobile menu button and shared progression badge. The footer contains the library, Sport documentation, theme, language and user/sign-out controls, including on mobile. See [shared navigation](applications.md#shared-navigation).
 
 Enable **Sport** in the [LifeOS library](applications.md), then open it. Sport shares your session, language and appearance. Its sidebar contains programs, training, exercises, body measurements, statistics, history and settings. On mobile, **Open navigation** exposes the same destinations; focus starts on **Close navigation**, and closing the menu returns focus to its trigger.
 
@@ -10,7 +10,7 @@ The catalogue supplies **680 default exercises**, available in English and Frenc
 
 Supplied exercises are marked **Default**. Their names, notes, aliases, muscles and equipment follow your language, including when shown inside programs and training history. Their stable identities never change.
 
-**New exercise** creates a **Personal** exercise. **Customize** copies a default exercise into a personal one in the language currently displayed. You can edit its name, type, equipment and notes without changing the shared catalogue. Personal text is never translated automatically, even when a name matches a default exercise. Personal exercises can be archived and restored.
+**New exercise** creates a **Personal** exercise. **Create a personal copy** copies a default exercise into a personal one in the language currently displayed. You can edit its name, type, equipment and notes without changing the shared catalogue. Personal text is never translated automatically, even when a name matches a default exercise. Personal exercises can be archived and restored.
 
 | Input type | Measurements per set | Examples |
 | --- | --- | --- |
@@ -35,9 +35,7 @@ Types describe measurements, not a closed list of sports. A movement can have va
 
 In **Programs**, choose **New program**, name it and add exercises. Each exercise accepts 1–30 sets; a program accepts at most 50 exercises and 300 sets. Targets per set are optional. Arrow buttons reorder entries and the remove button removes an entry from the draft.
 
-On desktop, HYROX and regular cards all have the same height, with buttons aligned at the bottom of each row. On phones, they show the name, total exercise and set counts, the first two exercises and the number of remaining exercises. The smaller HYROX banner keeps its logo, countdown and date. The pencil button opens the full editor with notes, every set and its targets.
-
-To archive a program, open its **edit page** and choose **Archive** at the bottom. The button does not appear on cards or during creation. If there are unsaved changes, confirmation lets you discard them before archiving; errors preserve the draft. Archiving uses the saved version and keeps exercises, notes, the competition date and history. Enable **Archived programs**, then choose **Restore** on the card to bring it back.
+Grid cards preview up to three exercises and align actions within each row; a long program does not expand every row. List view is more compact. Click a name for a full preview or the pencil to edit. Archive is available on cards and in the editor. An editor draft requires confirmation before it is discarded. Errors preserve the draft; archiving keeps exercises, notes, style, competition date and history. Undo the archive message or use **Archived programs → Restore** later.
 
 Creation and editing open a dedicated page. **All programs** or **Cancel** returns to the list; leaving a modified draft requires confirmation, including changing language. Browser back/forward navigation is supported. `/sport?tab=workouts&program=new` opens creation, `program=<uuid>` opens an existing program and `archived=true` preserves the return to archived programs.
 
@@ -81,7 +79,7 @@ Add a dated record with weight, body fat, neck, shoulders, chest, waist, hips, l
 
 ## Statistics and score
 
-**Statistics** shows completed sessions, including incomplete ones, actually performed sets (excluding unperformed sets), actual lifted volume (kg × reps) and total distance. Choose a period, body measurement, exercise and program baseline. Charts include an accessible data table. The horizontal axis follows observations in chronological order; spacing does not represent elapsed time. The period includes both endpoint dates, uses UTC training dates, defaults to one year and is limited to ten years.
+**Statistics** shows completed sessions, including incomplete ones, actually performed sets (excluding unperformed sets), actual lifted volume (kg × reps) and total distance. Choose a period, body measurement, exercise and program baseline. Charts include an accessible data table. The horizontal axis follows observations in chronological order; spacing represents elapsed time. Tap points or use Tab and arrow/Home/End keys to inspect values; Escape dismisses the reading. The period includes both endpoint dates, uses UTC training dates, defaults to one year and is limited to ten years.
 
 The first completed session of a program with a positive performance for every exercise scores **100** and becomes the baseline. Later sessions compare each exercise’s current performance with that baseline and average the ratios × 100, giving every exercise equal weight. Scores of 120 or 80 represent an average increase or decrease of 20% according to those measurements. The score does not assess health, technique or perceived difficulty.
 
@@ -118,7 +116,7 @@ The supplied catalogue is a versioned editorial selection based on common moveme
 
 ## Preparing for HYROX
 
-A program title containing **Hyrox**, regardless of case, activates the monochrome logo, track pattern and competition countdown in the program list, editor, exercise picker and active training, including the recovery bar. Black and white styling stays within cards and bounded surfaces; the page background and spaces between cards retain the usual theme. Other LifeOS controls remain the same.
+With the automatic program style, a title containing **Hyrox**, regardless of case, activates the monochrome logo, track pattern and competition countdown in the program list, editor, exercise picker and active training, including the recovery bar. Black and white styling stays within cards and bounded surfaces; the page background and spaces between cards retain the usual theme. Other LifeOS controls remain the same.
 
 **Date of your next HYROX** is optional. Before the date the banner shows **D−…**, on the date **RACE DAY**, and afterwards **AFTER THE RACE**. Without a date it shows **ON THE WAY**. Use **Clear competition date** and save to remove it. Past dates are accepted. The countdown compares civil dates in your browser’s timezone, refreshes every 30 seconds and when the tab returns to the foreground, and has no alarm.
 
@@ -128,6 +126,22 @@ Removing “Hyrox” from the title hides the branding but preserves the date. A
 ## Progress and quests
 
 The top-right badge shows your level, title and streak. Open it for nearby quests; the full wall and journal are in Tracking → Achievements. [Points, 60 quests and streak rules](progression.md).
+
+## Views, navigation and quick actions
+
+Programs, Exercises and Body measurements offer **List / Grid**. Preferences are stored through the API per account and section, separately for screens up to 800 px and wider screens. Narrow screens start with lists; wide screens use cards for programs and measurements and a list for exercises. Switching views keeps filters and the visible record. Search, filters, pagination and chart choices stay in the URL; returning to a section restores its scroll position.
+
+Program cards preview at most three exercises. Their title opens a full preview; the pencil edits. Search by name, sort by name/update/last session, duplicate or archive from the list. Duplicates preserve targets and preparation, without copying sessions or scores. **Undo archive** restores an item immediately; archive views also support later restoration. Archiving an exercise used by active programs shows those programs first.
+
+The exercise catalogue supports personal/supplied/archived, muscle and equipment filters. Search waits for a short typing pause while retaining previous results. An exercise detail can add it to a program draft. The editor offers direct position selection, a compact preparation section and save actions that remain available while scrolling. Its paginated picker supports a selection across pages; individual additions focus the new set count, while batch additions keep the picker open. Repeated additions require an explicit action.
+
+**Next set**, the session outline and collapsible exercises help navigate long sessions. Preparation notes and program style are frozen at session start. Rest presets (0/60/90/120 seconds) affect the next completed set; −15/+15 adjusts an active rest deadline. The idle rest bar becomes compact and offers **Resume session** outside training. An empty setting is distinct from zero. Durations remain explicit seconds; no implicit minutes:seconds conversion, sound, vibration or background alarm is provided. Real-device validation is required before introducing those options.
+
+After finishing, the summary shows performed/skipped sets, duration, volume, distance, score and session XP actually recorded by the server, excluding quest bonuses. Current total XP and level come from the progression API. History groups by month and filters by search, program, status and dates. Session details have an address and newer/older navigation within the active filters.
+
+Measurement entry starts with weight and body fat. Other measurements remain stored when their section is collapsed. The server supplies today’s UTC date. Neutral differences compare each value with its previous available record; clicking a metric opens its chart. Statistics offers 30-day, three-month and current-year presets plus an applied custom period; invalid input retains previous results. Units, exercise occurrences and baseline dates are explicit.
+
+Exercise, program, measurement, finish and settings drafts are protected on close, navigation, language changes and sign-out. Closing is blocked during a save. Field errors identify the input. Version conflicts offer a comparison, explicit reload or draft preservation; programs and exercises can become a copy. No drafts are stored in the browser. **Program style** selects automatic, standard or HYROX, independently of the name. Motion reduction disables the short confirmation and opening animations. The shared menu also covers coarse-pointer landscape screens up to 1024 × 500 px.
 
 Preferences are grouped in [General settings](settings.md). An application’s Settings control opens its section; the progression timezone and vacations are under General, and usage days are in each application section.
 

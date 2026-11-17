@@ -3,6 +3,9 @@ import { tr } from "../i18n";
 import { Icon, type IconName } from "./Icon";
 import "../styles/navigation.css";
 
+export const applicationMobileQuery =
+  "(max-width: 800px), (max-width: 1024px) and (max-height: 500px) and (pointer: coarse)";
+
 interface NavigationState {
   mainId: string;
   open: boolean;
@@ -27,14 +30,25 @@ export function ApplicationSidebar({
 }) {
   const sidebarRef = useRef<HTMLElement>(null);
   useEffect(() => {
-    if (!open || !matchMedia("(max-width: 800px)").matches) return;
+    if (!open || !matchMedia(applicationMobileQuery).matches) return;
     const sidebar = sidebarRef.current;
     const main = document.getElementById(mainId);
     if (!sidebar || !main) return;
     const overflow = document.body.style.overflow;
-    const inert = main.inert;
+    const background = [
+      ...new Set([main, ...Array.from(sidebar.parentElement?.children ?? [])]),
+    ]
+      .filter(
+        (element): element is HTMLElement =>
+          element instanceof HTMLElement &&
+          element !== sidebar &&
+          !element.classList.contains("application-nav-scrim"),
+      )
+      .map((element) => ({ element, inert: element.inert }));
     document.body.style.overflow = "hidden";
-    main.inert = true;
+    background.forEach(({ element }) => {
+      element.inert = true;
+    });
     sidebar.setAttribute("role", "dialog");
     sidebar.setAttribute("aria-modal", "true");
     sidebar.querySelector<HTMLButtonElement>(".application-nav-close")?.focus();
@@ -60,13 +74,15 @@ export function ApplicationSidebar({
       }
     };
     const resize = () => {
-      if (innerWidth > 800) onOpenChange(false);
+      if (!matchMedia(applicationMobileQuery).matches) onOpenChange(false);
     };
     window.addEventListener("keydown", keyboard);
     window.addEventListener("resize", resize);
     return () => {
       document.body.style.overflow = overflow;
-      main.inert = inert;
+      background.forEach(({ element, inert }) => {
+        element.inert = inert;
+      });
       sidebar.removeAttribute("role");
       sidebar.removeAttribute("aria-modal");
       window.removeEventListener("keydown", keyboard);
@@ -160,7 +176,9 @@ export function ApplicationTopbar({
       <nav className="application-breadcrumb" aria-label={tr("breadcrumb")}>
         <a href="/">LifeOS</a>
         <span aria-hidden="true">/</span>
-        <span title={name}>{name}</span>
+        <span className="application-breadcrumb-name" title={name}>
+          {name}
+        </span>
         <span aria-hidden="true">/</span>
         <strong aria-current="page" title={current}>
           {current}

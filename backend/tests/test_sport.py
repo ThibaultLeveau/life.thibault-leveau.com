@@ -350,14 +350,15 @@ def test_suggestions_keep_latest_recorded_values_per_set_and_preserve_history(cl
     assert current["entries"][0]["target"] == w["entries"][0]["target"]
     assert current["sets"] == [] and current["rest_until"] is None
     assert current["score"] is None and current["metrics"] == []
-    assert call(client, "GET", f"/workouts/{w['id']}") == w
+    current_workout = call(client, "GET", f"/workouts/{w['id']}")
+    assert current_workout == {**w, "last_used_at": current_workout["last_used_at"]}
     client.put("/api/v1/applications/sport", json={"enabled": False})
     client.put("/api/v1/applications/sport", json={"enabled": True})
     assert call(client, "GET", "/sessions/active")["entries"] == current["entries"]
     for old in [first, second]:
         reloaded = call(client, "GET", f"/sessions/{old['id']}")
-        assert {k: v for k, v in reloaded.items() if k != "server_now"} == {
-            k: v for k, v in old.items() if k != "server_now"
+        assert {k: v for k, v in reloaded.items() if k not in {"server_now", "awarded_xp"}} == {
+            k: v for k, v in old.items() if k not in {"server_now", "awarded_xp"}
         }
 
 
@@ -892,10 +893,11 @@ def test_hyrox_migration_preserves_existing_data_and_refuses_date_loss(client, e
         command.downgrade(config, "0006_sport")
         assert conn.scalar(text("SELECT name FROM sport_workouts")) == w["name"]
         command.upgrade(config, "head")
-    assert call(client, "GET", f"/workouts/{w['id']}") == w
+    current_workout = call(client, "GET", f"/workouts/{w['id']}")
+    assert current_workout == {**w, "last_used_at": current_workout["last_used_at"]}
     restored = call(client, "GET", f"/sessions/{t['id']}")
-    assert {k: v for k, v in restored.items() if k != "server_now"} == {
-        k: v for k, v in t.items() if k != "server_now"
+    assert {k: v for k, v in restored.items() if k not in {"server_now", "awarded_xp"}} == {
+        k: v for k, v in t.items() if k not in {"server_now", "awarded_xp"}
     }
     # Each column independently prevents a destructive downgrade, including historical sessions.
     for table in ("sport_workouts", "sport_sessions"):

@@ -3,8 +3,16 @@ import { useEffect, useRef, useState } from "react";
 import { ErrorMessage } from "../../../shared/ui/Dialog";
 import { Icon } from "../../../shared/ui/Icon";
 import { sportApi } from "../api";
-import type { Entry, KindDefinition, Workout } from "../types";
-import { LoadState, useAction, useResource, ValuesFields } from "./common";
+import type { Entry, KindDefinition, Workout, SportContext } from "../types";
+import {
+  ConflictPanel,
+  LoadState,
+  useAction,
+  useResource,
+  useFormValidation,
+  ValuesFields,
+  valuesText,
+} from "./common";
 import { ExercisePicker } from "./Exercises";
 import { isHyrox } from "../hyrox";
 import { HyroxBrand, HyroxMark } from "./HyroxBrand";
@@ -12,8 +20,9 @@ import { HyroxBrand, HyroxMark } from "./HyroxBrand";
 type EditorProps = {
   kinds: KindDefinition[];
   onClose: () => void;
-  onSaved: () => void;
+  onSaved: (workout?: Workout) => void;
   registerGuard: (guard: (() => boolean) | null) => void;
+  addedExercise?: string | null;
 };
 type DraftEntry = Entry & { key: string };
 
@@ -23,13 +32,19 @@ function ProgramForm({
   onClose,
   onSaved,
   registerGuard,
+  addedExercise,
 }: EditorProps & { workout?: Workout }) {
   const [name, setName] = useState(workout?.name ?? "");
   const [notes, setNotes] = useState(workout?.notes ?? "");
   const [competitionDate, setCompetitionDate] = useState(
     workout?.competition_date ?? "",
   );
-  const hyrox = isHyrox(name);
+  const [context, setContext] = useState<SportContext>(
+    workout?.context ?? "auto",
+  );
+  const [version, setVersion] = useState(workout?.version);
+  const [copyMode, setCopyMode] = useState(false);
+  const hyrox = isHyrox(name, context);
   const [entries, setEntries] = useState<DraftEntry[]>(() =>
     (workout?.entries ?? []).map((entry, i) => ({
       ...entry,
@@ -38,23 +53,32 @@ function ProgramForm({
   );
   const nextKey = useRef(entries.length);
   const [picking, setPicking] = useState(false);
-  const form = useRef<HTMLFormElement>(null);
+
   const addButton = useRef<HTMLButtonElement>(null);
   const focusEntry = useRef<string | null>(null);
   const action = useAction();
+  const validation = useFormValidation(action.failure);
+  const form = validation.form;
   const payloadEntries = entries.map(({ exercise_id, sets, target }) => ({
     exercise_id,
     sets,
     target,
   }));
   const original = useRef(
-    JSON.stringify({ name, notes, competitionDate, entries: payloadEntries }),
+    JSON.stringify({
+      name,
+      notes,
+      competitionDate,
+      context,
+      entries: payloadEntries,
+    }),
   );
   const dirty =
     JSON.stringify({
       name,
       notes,
       competitionDate,
+      context,
       entries: payloadEntries,
     }) !== original.current;
   const total = entries.reduce((sum, entry) => sum + entry.sets, 0);
@@ -104,36 +128,147 @@ function ProgramForm({
     focusEntry.current = entries[index].key;
     setEntries((old) => {
       const next = [...old];
-      [next[index], next[index + delta]] = [next[index + delta], next[index]];
+      const [entry] = next.splice(index, 1);
+      next.splice(index + delta, 0, entry);
       return next;
     });
   }
+  function loadLatest(value: Workout) {
+    setName(value.name);
+    setNotes(value.notes);
+    setCompetitionDate(value.competition_date ?? "");
+    setContext(value.context);
+    setVersion(value.version);
+    setCopyMode(false);
+    const next = value.entries.map((entry) => ({
+      ...entry,
+      key: `entry-${nextKey.current++}`,
+    }));
+    setEntries(next);
+    original.current = JSON.stringify({
+      name: value.name,
+      notes: value.notes,
+      competitionDate: value.competition_date ?? "",
+      context: value.context,
+      entries: next.map(({ exercise_id, sets, target }) => ({
+        exercise_id,
+        sets,
+        target,
+      })),
+    });
+    action.clear();
+  }
+  const describe = (value: {
+    name: string;
+    notes: string;
+    competition_date: string | null;
+    context: SportContext;
+    entries: Entry[];
+  }) => [
+    { label: tr("program_name"), value: value.name },
+    { label: tr("preparation_notes"), value: value.notes },
+    {
+      label: tr("program_context"),
+      value:
+        value.context === "auto"
+          ? tr("context_auto")
+          : value.context === "hyrox"
+            ? "HYROX"
+            : tr("context_standard"),
+    },
+    {
+      label: tr("hyrox_competition_date"),
+      value: value.competition_date ?? "",
+    },
+    {
+      label: tr("program_exercises"),
+      value: value.entries
+        .map(
+          (entry) =>
+            `${entry.name} · ${tr("set_count", { count: entry.sets })} · ${valuesText(kinds.find((kind) => kind.id === entry.kind)!, entry.target)}`,
+        )
+        .join("\n"),
+    },
+  ];
+  const seeded = useRef<string | null>(null);
+  const [seedError, setSeedError] = useState("");
+  const suggestion = useResource(
+    (signal) =>
+      addedExercise
+        ? sportApi.exercise(addedExercise, signal)
+        : Promise.resolve(null),
+    [addedExercise],
+    { keepPrevious: false },
+  );
+  useEffect(() => {
+    if (!suggestion.data || seeded.current === suggestion.data.id) return;
+    seeded.current = suggestion.data.id;
+    if (entries.length >= 50 || total >= 300) {
+      setSeedError(tr("program_capacity_reached"));
+      return;
+    }
+    const exercise = suggestion.data;
+    setEntries((previous) => [
+      ...previous,
+      {
+        key: `entry-${nextKey.current++}`,
+        exercise_id: exercise.id,
+        name: exercise.name,
+        kind: exercise.kind,
+        sets: Math.min(3, 300 - total),
+        target: {},
+      },
+    ]);
+  }, [suggestion.data]);
   return (
     <form
       ref={form}
+      noValidate
+      aria-busy={action.busy}
       className={`stack-form sport-program-form ${hyrox ? "sport-hyrox" : ""}`}
       aria-label={workout ? tr("edit_program") : tr("new_program")}
       onSubmit={(event) => {
         event.preventDefault();
-        if (!entries.length || limit) return;
+        if (!entries.length || limit || !validation.validate()) return;
         void action.run(
           () =>
-            sportApi.write(
-              `/workouts${workout ? `/${workout.id}` : ""}`,
+            sportApi.write<Workout>(
+              `/workouts${workout && !copyMode ? `/${workout.id}` : ""}`,
               {
                 name,
                 notes,
+                context,
                 competition_date: competitionDate || null,
                 entries: payloadEntries,
-                ...(workout ? { expected_version: workout.version } : {}),
+                ...(workout && !copyMode ? { expected_version: version } : {}),
               },
-              workout ? "PUT" : "POST",
+              workout && !copyMode ? "PUT" : "POST",
             ),
           onSaved,
         );
       }}
     >
-      {hyrox && <HyroxBrand date={competitionDate || null} />}
+      <div className="sport-program-actions">
+        <p className="muted small-text">
+          {entries.length
+            ? tr("your_changes_will_be_saved_in_this_program")
+            : tr("add_at_least_one_exercise_to_save")}
+        </p>
+        <div className="sport-inline">
+          <button type="button" className="secondary-button" onClick={onClose}>
+            {tr("cancel")}
+          </button>
+          <button
+            className="primary-button"
+            disabled={!entries.length || !!limit || action.busy}
+          >
+            {action.busy ? tr("saving") : tr("save_program")}
+          </button>
+        </div>
+      </div>
+      {hyrox && <HyroxBrand date={competitionDate || null} compact />}
+      <LoadState {...suggestion} />
+      <ErrorMessage message={seedError} />
       <fieldset className="sport-fieldset" disabled={action.busy}>
         <section
           className="sport-program-info"
@@ -146,6 +281,7 @@ function ProgramForm({
           <label>
             {tr("program_name")}
             <input
+              {...validation.attrs("name")}
               required
               maxLength={160}
               placeholder={tr("upper_body_saturday_run")}
@@ -153,44 +289,66 @@ function ProgramForm({
               onChange={(e) => setName(e.target.value)}
             />
           </label>
-          {hyrox && (
-            <div className="sport-hyrox-date">
-              <label>
-                {tr("hyrox_competition_date")}
-                <span className="muted">{tr("optional")}</span>
-                <input
-                  type="date"
-                  min="0001-01-01"
-                  max="9999-12-31"
-                  value={competitionDate}
-                  aria-describedby="competition-date-help"
-                  onChange={(e) => setCompetitionDate(e.target.value)}
-                />
-              </label>
-              <p id="competition-date-help" className="muted small-text">
-                {tr("hyrox_date_help")}
-              </p>
-              {competitionDate && (
-                <button
-                  type="button"
-                  className="text-button"
-                  onClick={() => setCompetitionDate("")}
-                >
-                  {tr("clear_competition_date")}
-                </button>
-              )}
-            </div>
-          )}
+          {validation.error("name")}
           <label>
-            {tr("preparation_notes")}{" "}
-            <span className="muted">{tr("optional")}</span>
-            <textarea
-              value={notes}
-              maxLength={4000}
-              placeholder={tr("warm_up_equipment_to_bring")}
-              onChange={(e) => setNotes(e.target.value)}
-            />
+            {tr("program_context")}
+            <select
+              value={context}
+              onChange={(event) =>
+                setContext(event.target.value as SportContext)
+              }
+            >
+              <option value="auto">{tr("context_auto")}</option>
+              <option value="standard">{tr("context_standard")}</option>
+              <option value="hyrox">HYROX</option>
+            </select>
           </label>
+          <details
+            className="sport-program-options"
+            open={hyrox || !!competitionDate}
+          >
+            <summary>{tr("preparation_options")}</summary>
+            {(hyrox || competitionDate) && (
+              <div className="sport-hyrox-date">
+                <label>
+                  {tr("hyrox_competition_date")}
+                  <span className="muted">{tr("optional")}</span>
+                  <input
+                    {...validation.attrs("competition_date")}
+                    type="date"
+                    min="0001-01-01"
+                    max="9999-12-31"
+                    value={competitionDate}
+                    aria-describedby="competition-date-help"
+                    onChange={(e) => setCompetitionDate(e.target.value)}
+                  />
+                </label>
+                <p id="competition-date-help" className="muted small-text">
+                  {tr("hyrox_date_help")}
+                </p>
+                {competitionDate && (
+                  <button
+                    type="button"
+                    className="text-button"
+                    onClick={() => setCompetitionDate("")}
+                  >
+                    {tr("clear_competition_date")}
+                  </button>
+                )}
+              </div>
+            )}
+            <label>
+              {tr("preparation_notes")}{" "}
+              <span className="muted">{tr("optional")}</span>
+              <textarea
+                value={notes}
+                maxLength={4000}
+                placeholder={tr("warm_up_equipment_to_bring")}
+                onChange={(e) => setNotes(e.target.value)}
+              />
+            </label>
+            {validation.error("competition_date")}
+          </details>
         </section>
         <section aria-labelledby="program-exercises-title">
           <div className="sport-section-heading">
@@ -230,6 +388,22 @@ function ProgramForm({
                   {entry.name}
                 </h3>
                 <div className="sport-inline">
+                  <label className="sport-move-select">
+                    <span>{tr("position")}</span>
+                    <select
+                      aria-label={tr("move_to_position", { name: entry.name })}
+                      value={index}
+                      onChange={(event) =>
+                        move(index, Number(event.target.value) - index)
+                      }
+                    >
+                      {entries.map((_, position) => (
+                        <option key={position} value={position}>
+                          {position + 1}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
                   <button
                     type="button"
                     className="icon-button"
@@ -268,6 +442,7 @@ function ProgramForm({
               <label>
                 {tr("number_of_sets")}
                 <input
+                  {...validation.attrs(`entries.${index}.sets`)}
                   type="number"
                   inputMode="numeric"
                   min={1}
@@ -279,10 +454,13 @@ function ProgramForm({
                   }
                 />
               </label>
+              {validation.error(`entries.${index}.sets`)}
               <p className="muted small-text">
                 {tr("target_per_set_optional")}
               </p>
               <ValuesFields
+                validation={validation}
+                prefix={`entries.${index}.target.`}
                 kind={kinds.find((k) => k.id === entry.kind)!}
                 value={entry.target}
                 onChange={(target) => edit(index, { target })}
@@ -301,35 +479,45 @@ function ProgramForm({
             <Icon name={picking ? "x" : "plus"} />
             {picking ? tr("close_catalogue") : tr("add_an_exercise")}
           </button>
-          {picking && (
-            <div id="program-picker">
-              {hyrox && (
-                <div className="sport-hyrox-picker-heading">
-                  <HyroxMark />
-                  <span>{tr("build_next_session")}</span>
-                </div>
-              )}
-              <ExercisePicker
-                kinds={kinds}
-                onPick={(exercise) => {
-                  const key = `entry-${nextKey.current++}`;
-                  focusEntry.current = key;
-                  setEntries((old) => [
-                    ...old,
-                    {
-                      key,
-                      exercise_id: exercise.id,
-                      name: exercise.name,
-                      kind: exercise.kind,
-                      sets: 3,
-                      target: {},
-                    },
-                  ]);
+          <div id="program-picker" hidden={!picking}>
+            {hyrox && (
+              <div className="sport-hyrox-picker-heading">
+                <HyroxMark />
+                <span>{tr("build_next_session")}</span>
+              </div>
+            )}
+            <ExercisePicker
+              kinds={kinds}
+              active={picking}
+              capacity={Math.min(50 - entries.length, 300 - total)}
+              onPick={(selected, individual) => {
+                const choices = selected.slice(
+                  0,
+                  Math.min(50 - entries.length, 300 - total),
+                );
+                if (!choices.length) return;
+                const sets = Math.min(
+                  3,
+                  Math.floor((300 - total) / choices.length),
+                );
+                if (individual) {
+                  focusEntry.current = `entry-${nextKey.current}`;
                   setPicking(false);
-                }}
-              />
-            </div>
-          )}
+                }
+                setEntries((old) => [
+                  ...old,
+                  ...choices.map((exercise) => ({
+                    key: `entry-${nextKey.current++}`,
+                    exercise_id: exercise.id,
+                    name: exercise.name,
+                    kind: exercise.kind,
+                    sets,
+                    target: {},
+                  })),
+                ]);
+              }}
+            />
+          </div>
           {entries.length >= 50 && (
             <p className="muted">
               {tr("limit_of_50_exercises_reached_remove_an_exercise_to_add")}
@@ -337,28 +525,31 @@ function ProgramForm({
           )}
         </section>
         <ErrorMessage message={limit || action.error} />
-        <div className="sport-program-actions">
-          <p className="muted small-text">
-            {entries.length
-              ? tr("your_changes_will_be_saved_in_this_program")
-              : tr("add_at_least_one_exercise_to_save")}
-          </p>
-          <div className="sport-inline">
-            <button
-              type="button"
-              className="secondary-button"
-              onClick={onClose}
-            >
-              {tr("cancel")}
-            </button>
-            <button
-              className="primary-button"
-              disabled={!entries.length || !!limit}
-            >
-              {action.busy ? tr("saving") : tr("save_program")}
-            </button>
-          </div>
-        </div>
+        {workout && !copyMode && (
+          <ConflictPanel
+            failure={action.failure}
+            draft={describe({
+              name,
+              notes,
+              competition_date: competitionDate || null,
+              context,
+              entries,
+            })}
+            load={() => sportApi.workout(workout.id)}
+            describe={describe}
+            onReload={loadLatest}
+            onKeep={(value) => {
+              setVersion(value.version);
+              action.clear();
+            }}
+            onCopy={() => {
+              setCopyMode(true);
+              setName(tr("copy_name", { name }).slice(0, 160));
+              action.clear();
+            }}
+          />
+        )}
+
         {workout && !workout.archived_at && (
           <button
             type="button"
@@ -371,8 +562,8 @@ function ProgramForm({
                 return;
               void action.run(
                 () =>
-                  sportApi.write(`/workouts/${workout.id}/archive`, {
-                    expected_version: workout.version,
+                  sportApi.write<Workout>(`/workouts/${workout.id}/archive`, {
+                    expected_version: version,
                     archived: true,
                   }),
                 onSaved,
@@ -392,6 +583,7 @@ export function ProgramEditor({ id, ...props }: EditorProps & { id: string }) {
     (signal) =>
       id === "new" ? Promise.resolve(null) : sportApi.workout(id, signal),
     [id],
+    { keepPrevious: false },
   );
   return (
     <>

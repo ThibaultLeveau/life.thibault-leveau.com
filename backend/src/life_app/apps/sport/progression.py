@@ -126,7 +126,9 @@ class SportProgression:
 
 
 def record_completion(db, user, item):
-    record(db, user, "sport", provider, provider.activity(item))
+    activity = provider.activity(item)
+    recorded = record(db, user, "sport", provider, activity)
+    return activity.xp if recorded and activity else 0
 
 
 provider = SportProgression()
