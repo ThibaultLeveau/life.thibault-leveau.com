@@ -22,6 +22,10 @@ Levels start at 1 and stop at **100**. Moving from level L to L+1 costs **100 + 
 
 Each application has six families of ten quests: Tasks rewards completions, on-time work, recurring occurrences, priorities 1/2, active days and streaks; Sport rewards sessions, sets, different exercises, different programs, active days and streaks; Tracking rewards confirmed periods, perfect scores, met goals, different trackers, active days and streaks. Each family’s ten milestones award **25, 40, 60, 90, 130, 180, 250, 350, 500 and 750 XP**, once each. Streak quests require **3, 7, 14, 21, 30, 45, 60, 90, 180 and 365 eligible days**. Quests unlock after an eligible action; changing settings alone awards no points.
 
+![Quest wall: choose an application, search and filter achievements.](../assets/screenshots/en/general-progress.png){ loading=lazy }
+
+*Quest wall: choose an application, search and filter achievements.*
+
 ## Rest days and vacation
 
 In **Tracking → Settings → Your pace, your rules**, choose the IANA timezone for new activities, choose the expected weekdays separately for each application (at least one day), and add inclusive vacation periods for all applications. Starting vacation today proposes one editable week. Save to apply it. Up to 100 non-overlapping periods are supported. Ending vacation today closes the interval yesterday so today becomes eligible again.
@@ -32,11 +36,15 @@ One first confirmation validates an application’s day; more actions do not add
 
 Changing timezone does not move previously recorded activity dates. Selected weekdays and vacation rules recalculate historical streaks without rewriting rewards. Disabling an application preserves its data but does not pause its calendar. Unsaved settings are protected during navigation, language changes and sign-out, and concurrent changes return a conflict.
 
+![Settings: choose your pace, usage days and vacations.](../assets/screenshots/en/general-settings.png){ loading=lazy }
+
+*Settings: choose your pace, usage days and vacations.*
+
 ## Existing data
 
 An explicit import for a named account can recover verifiable historical activity. Existing Tracking periods retain their former 10–30 XP; new confirmations use the new scale. Imported activities keep their original date; newly unlocked quests use the import date. Missing historical task priorities are not inferred. Repeating an import never duplicates rewards.
 
-All features use the [versioned progression API](../api.md#progression-par-application). The older `/tracking/achievements` remains a compatible historical calculation of current tracking entries and five badges. The new wall, titles and shared badge use `/progression`, whose rewards remain earned after corrections.
+All features use the [versioned progression API](api.md#progression-par-application). The older `/tracking/achievements` remains a compatible historical calculation of current tracking entries and five badges. The new wall, titles and shared badge use `/progression`, whose rewards remain earned after corrections.
 
 ## OKR quests
 

@@ -23,6 +23,10 @@ Une donnée peut être facultative. Pour les suivis quotidiens, cochez ses jours
 
 Vous pouvez fixer un objectif : au moins, au plus, entre deux bornes ou exactement. L’écart qui donne 0/10 contrôle la progression du score ; l’importance permet de pondérer chaque objectif. Exemple : au moins 2 litres, écart 2 litres → 0 litre = 0/10, 1 litre = 5/10, 2 litres ou plus = 10/10. Pour Oui/Non et Choix, réussir vaut 10, l’autre réponse vaut 0. Les notes n’ont pas de score.
 
+![Éditeur de suivi : choisir les données et les objectifs à mesurer.](assets/screenshots/fr/tracking-editor.png){ loading=lazy }
+
+*Éditeur de suivi : choisir les données et les objectifs à mesurer.*
+
 ## Relier Tâches ou Sport
 
 Choisissez **Depuis une application**, puis l’application et une mesure. La recherche porte sur les noms et descriptions. Choisissez la période du suivi ou une journée, semaine, mois ou année autour du jour de saisie. Ajoutez les filtres proposés, cherchez leurs valeurs et calculez un aperçu avant de sélectionner la mesure.
@@ -46,6 +50,10 @@ Les mesures automatiques sont calculées par le serveur lors de l’enregistreme
 
 Une erreur de sauvegarde conserve le formulaire et affiche le problème. Une modification concurrente provoque un conflit : rechargez la saisie et reportez votre correction. L’interface prévient avant de quitter une saisie modifiée. Aucun brouillon métier n’est stocké dans le navigateur ; déconnexion ou expiration retirent les données privées.
 
+![Aujourd’hui : commencer ou reprendre la saisie des périodes prévues.](assets/screenshots/fr/tracking-today.png){ loading=lazy }
+
+*Aujourd’hui : commencer ou reprendre la saisie des périodes prévues.*
+
 ## Lire le calendrier
 
 La vue **Mois** montre simultanément :
@@ -60,6 +68,10 @@ Les suivis hebdomadaires, mensuels et annuels apparaissent dans **Les objectifs 
 
 Le score est la moyenne pondérée des objectifs. Sans aucune réponse évaluée, il reste inconnu (`—`). Une réponse obligatoire manquante contribue provisoirement pour zéro ; les objectifs facultatifs sans réponse sont exclus. Un score 10 est réservé aux objectifs effectivement atteints. Le score moyen des statistiques est la moyenne des saisies ayant un score, toutes fréquences confondues ; la régularité rapporte les périodes terminées aux périodes attendues, même encore en cours.
 
+![Calendrier : les couleurs et scores distinguent les périodes renseignées.](assets/screenshots/fr/tracking-calendar.png){ loading=lazy }
+
+*Calendrier : les couleurs et scores distinguent les périodes renseignées.*
+
 ## Progresser et conserver l’historique
 
 Les statistiques montrent vos mesures dans le temps et une table des valeurs. Vous pouvez explorer une mesure de Tâches ou Sport sur la période choisie.
@@ -71,3 +83,7 @@ Les saisies existantes gardent leur définition et leurs objectifs. Les changeme
 **Archiver** retire un suivi des périodes à remplir, sans supprimer ses saisies. **Archives → Restaurer** le réactive. Le calendrier conserve les périodes passées et les périodes longues déjà commencées ; les nouvelles périodes respectent les dates d’archive/restauration. Les suivis actifs se réordonnent avec Monter/Descendre. Jusqu’à 50 suivis peuvent être actifs. Il n’y a pas de suppression définitive dans l’interface ou l’API.
 
 Toutes ces opérations sont accessibles par l’[API versionnée](tracking-api.md). Le calendrier et les tendances acceptent au plus 367 jours par requête ; les séries/entrées lues et les évaluations de métriques sont bornées à 20 000 éléments. Les données et leurs historiques sont inclus dans les [sauvegardes PostgreSQL](sauvegardes.md#migration-0009-suivi).
+
+![Statistiques : choisir un suivi pour lire ses tendances.](assets/screenshots/fr/tracking-statistics.png){ loading=lazy }
+
+*Statistiques : choisir un suivi pour lire ses tendances.*

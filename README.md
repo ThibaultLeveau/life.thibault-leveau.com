@@ -10,6 +10,12 @@ Les raccourcis se composent : « tous les mercredis toutes les trois semaines »
 
 **[Ouvrir Life](https://life.thibault-leveau.com/)** · **[Documentation](https://life.thibault-leveau.com/documentation/)** · **[Référence API](https://life.thibault-leveau.com/api/docs)**
 
+## Documentations séparées
+
+L’[annuaire FR](https://life.thibault-leveau.com/documentation/) et l’[annuaire EN](https://life.thibault-leveau.com/documentation/en/) donnent accès à sept guides indépendants : **Technique**, **Général**, **Tâches**, **Sport**, **Suivi**, **Objectifs OKR** et **Cook & Shop**. Chaque guide possède sa navigation et sa recherche, avec un lien vers la même page dans l’autre langue. Les guides utilisateur expliquent les fonctionnalités et présentent des captures réelles FR/EN sur des comptes fictifs. Les anciens liens restent valides.
+
+Les sources françaises restent dans `docs/`, leurs traductions dans `docs/en/`. `mkdocs.yml` déclare les guides ; `scripts/documentation.py` limite navigation et recherche à chacun, dans la même compilation et image existantes. `make docs-screenshots` régénère les captures sur une base jetable ; voir [Tests](docs/tests.md#documentation-et-captures). Toute nouvelle page doit être classée et traduite.
+
 ## Architecture
 
 FastAPI / Python 3.13 sert React / TypeScript, l'API et MkDocs depuis une image Docker commune. PostgreSQL 17 conserve les données privées et l'historique des résolutions. SQLAlchemy et Alembic gèrent les transactions et les migrations. Le compte personnel utilise un mot de passe Argon2 et une session sécurisée. Le service web rejoint le Caddy existant ; PostgreSQL reste sur un réseau privé.

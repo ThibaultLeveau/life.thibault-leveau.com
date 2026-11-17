@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+  {% if guide %}
+    <nav class="guide-toolbar" aria-label="{{ 'Documentation' if guide.locale == 'fr' else 'Documentation guides' }}" data-guide="{{ guide.id }}" data-guide-locale="{{ guide.locale }}">
+      <a href="{{ guide.directory | url }}">{{ 'Toutes les documentations' if guide.locale == 'fr' else 'All documentation' }}</a>
+      <span>{{ guide.title }}</span>
+      <a href="{{ guide.alternate | url }}" hreflang="{{ 'en' if guide.locale == 'fr' else 'fr' }}" lang="{{ 'en' if guide.locale == 'fr' else 'fr' }}">{{ 'English' if guide.locale == 'fr' else 'Français' }}</a>
+    </nav>
+  {% endif %}
+  {{ super() }}
+{% endblock %}

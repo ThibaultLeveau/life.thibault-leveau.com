@@ -1,37 +1,65 @@
-# Documentation de Life
+# Documentation LifeOS
 
-LifeOS propose un [accueil personnel et une bibliothèque d’applications](applications.md). Activez ou désactivez vos applications sans perdre leurs données. Tâches, [Sport](sport.md), [Suivi](tracking.md) et [Objectifs OKR](okr.md) sont disponibles ; ménage et plantes restent futurs.
+Choisissez votre documentation. Chaque guide possède son propre menu et sa propre recherche, en français et en anglais. Le lien **English / Français** conserve la page consultée.
 
-Life organise vos tâches dans des espaces et des sections, en liste à cocher ou en tableau kanban. Une section devient une liste ou une ligne du tableau selon sa visibilité ; les colonnes représentent les statuts. Les données restent privées derrière une connexion personnelle.
+## Documentation utilisateur
 
-[Ouvrir les tâches](https://life.thibault-leveau.com/tasks){ .md-button .md-button--primary }
-[Guide utilisateur](taches.md){ .md-button }
+<div class="guide-cards" markdown>
 
-## Ce que contient cette version
+<div markdown>
 
-- Espaces, sections, tâches, colonnes et étiquettes configurables, recherche, filtres et ordre manuel.
-- Thèmes clair, sombre ou système et préférences conservées en base.
-- API complète, accès contrôlés et historique immuable des résolutions/réouvertures.
-- PostgreSQL 17, migrations explicites, sauvegardes et restauration documentées.
-- Tests HTTP et navigateur sur l'image livrée ; déploiement manuel derrière Caddy.
+[Général](applications.md)
 
-Sport propose entraînements, repos, mensurations et statistiques. Tâches propose les récurrences. Les statistiques de tâches et la collaboration restent futurs. La disponibilité sur le domaine dépend du déploiement du commit et de la création du compte.
+Connexion, bibliothèque, langue, thème et progression.
 
-| Besoin | Guide |
-| --- | --- |
-| Organiser mes tâches | [Utiliser les tâches](taches.md) |
-| Démarrer le projet | [Démarrage](demarrage.md) |
-| Comprendre le code et les données | [Architecture](architecture.md), [Modèle de données](donnees.md) |
-| Utiliser un client indépendant | [API](api.md) |
-| Régler les variables | [Configuration](configuration.md) |
-| Vérifier une modification | [Tests](tests.md) |
-| Publier ou restaurer | [Déploiement](deploiement.md), [Sauvegardes](sauvegardes.md) |
-| Diagnostiquer et protéger | [Exploitation](exploitation.md), [Sécurité](securite.md) |
+</div>
 
-Les décisions initiales restent dans l'[ADR 001](decisions/001-architecture-initiale.md). L'[ADR 002](decisions/002-gestion-taches.md) consigne l'accord de Thibault pour la persistance et l'authentification.
+<div markdown>
 
-## Suivi personnel
+[Tâches](taches.md)
 
-[Suivi](tracking.md) rejoint Tâches et Sport : habitudes et objectifs sur quatre fréquences, calendrier mobile/ordinateur, intégrations de données, saisies guidées et récompenses. [API Suivi](tracking-api.md) · [Métriques disponibles](integrations.md).
+Espaces, listes, kanban, agenda et récurrences.
 
-[Recettes & Liste de courses](recipes.md) : 301 ingrédients bilingues, recettes à portions ajustables, listes et modèles réutilisables, mode magasin et 60 quêtes.
+</div>
+
+<div markdown>
+
+[Sport](sport.md)
+
+Exercices, programmes, séances et statistiques.
+
+</div>
+
+<div markdown>
+
+[Suivi](tracking.md)
+
+Habitudes, saisies, calendrier, sources et objectifs.
+
+</div>
+
+<div markdown>
+
+[Objectifs OKR](okr.md)
+
+Horizons, résultats clés, plan trimestriel et réalisations.
+
+</div>
+
+<div markdown>
+
+[Cook & Shop](recipes.md)
+
+Recettes, portions, listes, modèles et mode magasin.
+
+</div>
+
+</div>
+
+## Documentation technique
+
+[Développer, intégrer et exploiter LifeOS](technique.md){ .md-button }
+
+Architecture, API, configuration, tests, déploiement, sauvegardes et décisions.
+
+Les captures des guides montrent des données de démonstration. Les textes personnels de votre compte ne sont jamais traduits automatiquement.

@@ -91,3 +91,7 @@ Déclarer le fournisseur dans le manifeste ; le registre demeure l’unique asse
 ## Recettes disponible
 
 **Recettes & Liste de courses** est une application livrée (`recipes`, `/recipes`), désactivée par défaut. Son catalogue bilingue, ses recettes, listes et modèles, son mode magasin et ses fournisseurs Suivi/progression réutilisent les contrats existants. [Guide](recipes.md) et [API](recipes-api.md). Ménage et plantes restent futurs.
+
+## Faire évoluer les documentations
+
+Conserver les sept guides indépendants déclarés dans `mkdocs.yml` : Technique, Général, Tâches, Sport, Suivi, Objectifs OKR et Cook & Shop. Ajouter chaque page au bon guide et fournir son homologue dans `docs/en/`, au même chemin relatif. Le hook `scripts/documentation.py` conserve les URL publiques et isole navigation/recherche ; les liens explicites entre guides restent possibles. Actualiser les captures fictives FR/EN avec `make docs-screenshots`, leurs légendes, les contrats et les parcours navigateur. La compilation demeure MkDocs dans l’image existante ; aucun service ni stockage supplémentaire.

@@ -83,6 +83,10 @@ Les listes, le kanban et l’agenda partagent le même affichage : **Hier**, **A
 
 Les tâches terminées gardent une date neutre, sans alerte de retard. Les couleurs s’adaptent aux thèmes clair et sombre ; le sens ne repose pas uniquement sur la couleur.
 
+![Agenda : retrouver les échéances de tous ses espaces.](assets/screenshots/fr/tasks-agenda.png){ loading=lazy }
+
+*Agenda : retrouver les échéances de tous ses espaces.*
+
 ## Sections, listes et lignes
 
 **Ajouter une section** ouvre les réglages des sections. Choisir nom, couleur, description et visibilité :
@@ -101,6 +105,10 @@ La zone **Sans section** apparaît lorsqu’elle contient des tâches ou que l�
 Les **colonnes** sont les statuts : changer de ligne change la section ; changer de colonne change le statut. L'onglet Colonnes permet de créer, renommer, colorer et réordonner les statuts. Cocher « Les tâches de cette colonne sont terminées » définit le sens du statut, pas seulement son apparence.
 
 Un espace garde au moins une colonne ouverte et une terminée. Le type d'une colonne utilisée ne peut pas changer : créer la colonne voulue puis déplacer les tâches. Pour retirer une colonne utilisée, choisir un remplacement du même type ; cela préserve les résolutions existantes.
+
+![Liste : les sections regroupent les tâches et leurs échéances.](assets/screenshots/fr/tasks-list.png){ loading=lazy }
+
+*Liste : les sections regroupent les tâches et leurs échéances.*
 
 ## Créer et modifier une tâche
 
@@ -210,6 +218,10 @@ Déposer une tâche sur un **autre espace dans la navigation** la place à la fi
 L'action **Déplacer et réordonner** dans les détails propose les mêmes réglages sans glisser-déposer, y compris vers un autre espace. Choisir espace, section, statut et position. Les étiquettes sont reprises dans l'espace cible ; l'historique suit la tâche.
 
 Le clavier permet de parcourir les actions, de fermer un dialogue avec Échap et d'utiliser les flèches dans les onglets de réglages. Une poignée prend la tâche avec Espace, la déplace avec les flèches et la dépose avec Espace ; la commande de déplacement reste l'alternative précise, également sur mobile.
+
+![Tableau : les sections forment les lignes et les statuts les colonnes.](assets/screenshots/fr/tasks-board.png){ loading=lazy }
+
+*Tableau : les sections forment les lignes et les statuts les colonnes.*
 
 ## Affichage et filtres
 

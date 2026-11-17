@@ -1,6 +1,6 @@
 # Français et anglais
 
-LifeOS, Tâches et Sport sont disponibles en français et en anglais. Le sélecteur **Langue / Language**, dans le menu du compte, change la langue de toutes les applications. Sur mobile, ouvrir la navigation pour le retrouver. Le choix appartient au compte, reste après reconnexion et se retrouve sur les autres appareils au chargement de la session. Il est indépendant du thème. Les comptes existants restent en français.
+LifeOS et toutes ses applications livrées sont disponibles en français et en anglais. Le sélecteur **Langue / Language**, dans le menu du compte, change la langue de toutes les applications. Sur mobile, ouvrir la navigation pour le retrouver. Le choix appartient au compte, reste après reconnexion et se retrouve sur les autres appareils au chargement de la session. Il est indépendant du thème. Les comptes existants restent en français.
 
 Avant connexion, la langue du navigateur choisit français ou anglais, avec repli français si aucune n’est prise en charge. Le formulaire permet de la changer pour cette connexion ; une connexion réussie applique ensuite la préférence enregistrée du compte. La déconnexion revient à la langue du navigateur.
 
@@ -54,4 +54,4 @@ Une nouvelle chaîne doit être livrée dans les deux langues et dans le domaine
 
 `0008_locale`, après `0007_hyrox`, ajoute `users.locale`, non nul, défaut `fr`, avec CHECK `fr/en`. Aucun texte métier ni instantané existant n’est réécrit. La localisation des exercices est une projection de réponse à partir de leur identifiant ; les instantanés historiques restent intacts. Une désactivation/réactivation préserve langue et données.
 
-Le dump sauvegarde la préférence ; les catalogues restent dans l’image versionnée, à conserver avec le dump. Le downgrade refuse dès qu’un compte utilise `en`, pour éviter une perte silencieuse. Suivre les [sauvegardes](sauvegardes.md#migration-0008-langue-du-compte) et le [déploiement](deploiement.md#livraison-francaisanglais). Les guides utilisateur existent aussi en anglais ; la documentation technique et d’exploitation reste rédigée en français.
+Le dump sauvegarde la préférence ; les catalogues restent dans l’image versionnée, à conserver avec le dump. Le downgrade refuse dès qu’un compte utilise `en`, pour éviter une perte silencieuse. Suivre les [sauvegardes](sauvegardes.md#migration-0008-langue-du-compte) et le [déploiement](deploiement.md#livraison-francaisanglais). Les guides utilisateur, techniques et d’exploitation existent en français et en anglais, avec navigation et recherche propres à chaque documentation.

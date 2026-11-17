@@ -1,6 +1,6 @@
 # Recipes & Shopping Lists
 
-[Guide français](../recipes.md) · [API reference](../recipes-api.md)
+[Guide français](../recipes.md) · [API reference](recipes-api.md)
 
 Enable **Recipes & Shopping Lists** in the LifeOS library and open `/recipes`. It uses your shared session, language, theme and navigation. It starts disabled; disabling it preserves every record, date and reward.
 
@@ -11,6 +11,10 @@ Choose **My recipes → New recipe**. Enter a name, the original serving count, 
 Open a saved recipe and change **Servings** to scale its quantities without changing the original. For example, 125.1 g for two becomes 187.65 g for three. Shopping imports use the same server calculation. Item quantities may be fractional, such as half a lemon; pieces are not automatically rounded up.
 
 **Edit** changes the reference recipe. In the editor, the serving count describes the quantities you enter; use the detail view for proportional scaling. At least one ingredient is required. **Archive** preserves the recipe and its history; **Restore** makes it available again.
+
+![Recipe: adjust servings, then add ingredients to a list.](../assets/screenshots/en/recipes-detail.png){ loading=lazy }
+
+*Recipe: adjust servings, then add ingredients to a list.*
 
 ## Ingredients in both languages
 
@@ -28,6 +32,10 @@ Imports add quantities. Two imports of 200 g combine into one 400 g row. Only th
 
 You can rename a list, edit quantities, remove items, archive and restore. A completed list stays read-only until reopened. Removed items remain in its history.
 
+![Shopping list: add items and import recipe quantities.](../assets/screenshots/en/recipes-list.png){ loading=lazy }
+
+*Shopping list: add items and import recipe quantities.*
+
 ## At the shop
 
 **At the shop** shows large touch targets grouped by aisle, a basket counter and purchased items separately. Tap a row, or use Tab and Space, to check it. **Show only remaining items** hides purchases. Every change is saved through the API and survives reloads.
@@ -38,11 +46,19 @@ Quick additions remain available. If you bought 200 g and add another 50 g, the 
 
 A network connection is required. Failed saves are shown as errors, not successful purchases. If another device changes the list, use **Reload this item** to retrieve its latest version. Offline use and live synchronization are not provided.
 
+![Mobile shopping mode: check purchases and show only remaining items.](../assets/screenshots/en/recipes-shopping-mobile.png){ loading=lazy }
+
+*Mobile shopping mode: check purchases and show only remaining items.*
+
 ## Templates and previous lists
 
 Build a template manually from **My templates → New template**, or choose **Save as template** on an existing list. Ingredients and recipe imports work the same way. **Create a list** copies a template with no checked purchases.
 
 **Reuse this list** also works on previous or archived lists. Copies are independent and never change their source. Templates have no purchase state or completion date. Recipes, templates and lists use the same ingredient identities.
+
+![Template: prepare essentials and create a fresh independent list.](../assets/screenshots/en/recipes-template.png){ loading=lazy }
+
+*Template: prepare essentials and create a fresh independent list.*
 
 ## Tracking and rewards
 
@@ -56,4 +72,4 @@ Four historical metrics are available to Tracking: recipes saved, shopping lists
 
 Per account: 2,000 recipes, 2,000 lists/templates and 3,000 personal ingredients. A recipe accepts 200 lines and a list 300 distinct ingredient/unit pairs. Positive quantities have up to six decimals, capped at 1,000,000,000; servings are integers from 1 to 1,000. Out-of-range calculations are rejected without partial imports. Dates use UTC.
 
-Sharing, photos, prices, nutrition, meal planning and permanent recipe/list/template deletion are not included. Drafts are protected when leaving, changing language or signing out. All persistent actions have a versioned API. See [API examples](../recipes-api.md) and [backup/restore](../sauvegardes.md#migration-0012-recettes-et-courses).
+Sharing, photos, prices, nutrition, meal planning and permanent recipe/list/template deletion are not included. Drafts are protected when leaving, changing language or signing out. All persistent actions have a versioned API. See [API examples](recipes-api.md) and [backup/restore](sauvegardes.md#migration-0012-recettes-et-courses).

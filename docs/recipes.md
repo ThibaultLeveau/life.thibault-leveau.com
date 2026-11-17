@@ -12,6 +12,10 @@ Ouvrez une recette et changez **Nombre de personnes** : les quantités sont reca
 
 **Modifier** change les quantités de référence et la préparation. Dans cet éditeur, modifier le nombre de personnes indique à combien de personnes correspondent les quantités saisies ; utilisez la consultation pour obtenir une mise à l’échelle. Une recette doit contenir au moins un ingrédient. **Archiver** la range dans les archives ; **Restaurer** la rend à nouveau disponible. L’historique conserve les créations, modifications et changements d’archivage.
 
+![Recette : ajuster les portions puis ajouter les ingrédients à une liste.](assets/screenshots/fr/recipes-detail.png){ loading=lazy }
+
+*Recette : ajuster les portions puis ajouter les ingrédients à une liste.*
+
 ## Un catalogue commun, vos ingrédients privés
 
 Le catalogue livré contient **301 ingrédients et articles courants**, avec un nom français et anglais : fruits/légumes, frais, protéines, épicerie, condiments, boissons, surgelés et maison/hygiène. Le nom affiché suit la langue du compte. La recherche accepte les noms dans les deux langues et ignore casse et accents, y compris « oeuf » pour « œuf ».
@@ -28,6 +32,10 @@ Chaque import **ajoute** les quantités. Deux imports de 200 g du même ingrédi
 
 Les commandes de préparation permettent de corriger une quantité, retirer un article, renommer, archiver ou restaurer la liste. Une liste terminée est en lecture seule jusqu’à **Rouvrir la liste**. Les articles retirés restent présents dans l’historique de la liste.
 
+![Liste de courses : ajouter des articles et importer les quantités d’une recette.](assets/screenshots/fr/recipes-list.png){ loading=lazy }
+
+*Liste de courses : ajouter des articles et importer les quantités d’une recette.*
+
 ## Au magasin
 
 **Au magasin** ouvre une vue avec de grandes lignes tactiles, groupées par rayon, un compteur et les articles déjà achetés à part. Touchez une ligne pour la cocher ou utilisez Tab puis Espace. **Afficher seulement les articles restants** réduit la liste à ce qu’il reste à prendre. Les achats sont enregistrés immédiatement par API et survivent au rechargement.
@@ -38,11 +46,19 @@ L’ajout rapide reste disponible au magasin. Si vous avez déjà pris 200 g et 
 
 Une connexion réseau est nécessaire. Une erreur ne présente jamais un achat comme enregistré ; réessayez dans le contenu concerné. Si un autre appareil a changé la liste, **Recharger cet élément** récupère sa dernière version. Il n’y a pas de mode hors ligne ni de synchronisation en temps réel.
 
+![Mode magasin sur mobile : cocher les achats et afficher seulement le reste.](assets/screenshots/fr/recipes-shopping-mobile.png){ loading=lazy }
+
+*Mode magasin sur mobile : cocher les achats et afficher seulement le reste.*
+
 ## Modèles et anciennes listes
 
 Dans **Mes modèles → Nouveau modèle**, composez vos indispensables avec les mêmes ingrédients et imports. Depuis une liste, active ou passée, **Enregistrer comme modèle** crée un modèle indépendant. Depuis un modèle, **Créer une liste** reprend tous ses ingrédients et quantités, sans achats cochés.
 
 **Réutiliser cette liste** fonctionne également sur une ancienne liste, y compris archivée. La copie ne modifie jamais sa source et reste indépendante de ses futures modifications. Les modèles ne portent pas de cases achetées ni de date de fin. Le catalogue d’ingrédients reste commun à vos recettes, modèles et listes.
+
+![Modèle : préparer des essentiels et créer une nouvelle liste indépendante.](assets/screenshots/fr/recipes-template.png){ loading=lazy }
+
+*Modèle : préparer des essentiels et créer une nouvelle liste indépendante.*
 
 ## Suivi, quêtes et motivation
 

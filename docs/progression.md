@@ -38,6 +38,10 @@ Chaque application propose six familles de dix paliers. Chaque palier est une qu
 
 Les dix paliers de chaque famille rapportent respectivement **25, 40, 60, 90, 130, 180, 250, 350, 500 et 750 XP**. Les objectifs sont visibles dans chaque carte. Les quêtes de séries ciblent **3, 7, 14, 21, 30, 45, 60, 90, 180 et 365 jours éligibles**. Une quête accomplie reste acquise, même après changement des réglages de calendrier. Les quêtes sont validées lors d’une nouvelle activité éligible ; modifier les réglages seul ne distribue pas de points.
 
+![Mur des quêtes : choisir une application, rechercher et filtrer les réussites.](assets/screenshots/fr/general-progress.png){ loading=lazy }
+
+*Mur des quêtes : choisir une application, rechercher et filtrer les réussites.*
+
 ## Un rythme qui respecte vos pauses
 
 Dans **Suivi → Réglages → Votre rythme, vos règles** :
@@ -54,6 +58,10 @@ Un jour non choisi ou en vacances **n’incrémente ni ne casse la série**, mê
 Le changement de fuseau ne déplace pas les dates d’activité déjà enregistrées. Les jours choisis et les vacances s’appliquent au calcul de l’historique, sans modifier les événements ni les gains déjà acquis. La désactivation d’une application conserve ses données mais ne crée pas une pause de calendrier : planifiez des vacances si nécessaire. Chaque application suit son propre calendrier. Les anciennes préférences sont conservées : tous les jours, ou lundi–vendredi si les week-ends étaient exclus. Une série de trois dimanches validés vaut trois jours de série, même si trois semaines se sont écoulées. Une activité le samedi ne remplace pas le dimanche attendu : ce réglage porte sur des jours précis, pas sur un quota libre dans la semaine. Les échéances des suivis ne sont pas modifiées ; seule la série d’utilisation de l’application est concernée.
 
 Les brouillons de réglages sont protégés lors d’une navigation, d’un changement de langue ou d’une déconnexion. Une modification concurrente produit un conflit explicite.
+
+![Réglages : définir son rythme, les jours d’utilisation et les vacances.](assets/screenshots/fr/general-settings.png){ loading=lazy }
+
+*Réglages : définir son rythme, les jours d’utilisation et les vacances.*
 
 ## Historique antérieur et accès API
 

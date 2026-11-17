@@ -36,3 +36,13 @@
 @media screen and (max-width: 59.984375em) {
   .md-nav--primary .md-nav__title[for="__drawer"] { background: #214c3d; color: #fff; }
 }
+
+/* Each guide owns its menu; the directory is an explicit, keyboard-accessible link. */
+.guide-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem 1rem; margin-bottom: 1.6rem; padding-bottom: .65rem; border-bottom: 1px solid #dfe4db; font-size: .72rem; }
+.guide-toolbar a { display: inline-flex; align-items: center; min-height: 44px; }
+.guide-toolbar span { flex: 1; color: #59665e; }
+.guide-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: 1rem; margin: 1.2rem 0 2rem; }
+.guide-cards > div { border: 1px solid #dfe4db; border-radius: .6rem; padding: 1rem 1.2rem; background: #fff; }
+.guide-cards a { display: inline-flex; min-height: 44px; align-items: center; font-weight: 650; }
+.md-typeset img[src*="screenshots/"] { display: block; height: auto; border: 1px solid #dfe4db; border-radius: .5rem; margin: 1rem auto; }
+@media (max-width: 400px) { .guide-toolbar span { flex-basis: 100%; order: 3; } }
