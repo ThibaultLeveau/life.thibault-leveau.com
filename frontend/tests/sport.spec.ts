@@ -855,7 +855,9 @@ test("Sport : blocs d’exercice et lignes de séries compactes pour les dix typ
                 ),
                 separate: rects.every(
                   (rect, index) =>
-                    !index || rect.left >= rects[index - 1].right + 4,
+                    !index ||
+                    rect.left >= rects[index - 1].right + 4 ||
+                    rect.top >= rects[index - 1].bottom + 4,
                 ),
                 touch: rects.every(
                   (rect) => rect.height >= 44 && rect.width >= 44,
@@ -870,7 +872,7 @@ test("Sport : blocs d’exercice et lignes de séries compactes pour les dix typ
         for (const row of geometry.rows) {
           expect(row.aligned).toBe(width > 560);
           expect(row.inside).toBe(true);
-          if (width > 560) expect(row.separate).toBe(true);
+          expect(row.separate).toBe(true);
           expect(row.touch).toBe(true);
         }
         // An untouched series remains compact, including its labels and status.
@@ -1009,7 +1011,12 @@ for (const locale of ["fr", "en"] as const) {
           .filter({ hasText: labels.skipped }),
       ).toHaveCount(2);
       await expect(
-        detail.locator(".sport-summary > div").nth(1).locator("strong"),
+        detail
+          .locator(".sport-summary > div")
+          .filter({
+            hasText: locale === "fr" ? "Séries validées" : "Completed sets",
+          })
+          .locator("strong"),
       ).toHaveText("1");
       await expect(detail.locator(".sport-plan-entry p").nth(1)).toContainText(
         "0",

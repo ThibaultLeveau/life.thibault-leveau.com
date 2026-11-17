@@ -148,12 +148,14 @@ function SportPage() {
     window.addEventListener("wheel", stop, { passive: true });
     window.addEventListener("pointerdown", stop, { passive: true });
     window.addEventListener("keydown", stop);
+    document.addEventListener("focusin", stop);
     return () => {
       stop();
       window.clearTimeout(timer);
       window.removeEventListener("wheel", stop);
       window.removeEventListener("pointerdown", stop);
       window.removeEventListener("keydown", stop);
+      document.removeEventListener("focusin", stop);
     };
   }, [viewKey, title]);
   function choose(

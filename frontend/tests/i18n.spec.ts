@@ -417,6 +417,8 @@ test("language changes respect unsaved programs; mobile navigation and measureme
   }
   await page.getByRole("button", { name: "New record", exact: true }).click();
   await expect(page.getByLabel("Weight (kg)", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("Waist (cm)", { exact: true })).toBeHidden();
+  await page.getByText("Other measurements", { exact: true }).click();
   await expect(page.getByLabel("Waist (cm)", { exact: true })).toBeVisible();
   await page.keyboard.press("Escape");
 });
