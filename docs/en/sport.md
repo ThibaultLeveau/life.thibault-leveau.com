@@ -4,6 +4,22 @@ Navigation shares its design with Tasks. The top bar contains the breadcrumb, mo
 
 Enable **Sport** in the [LifeOS library](applications.md), then open it. Sport shares your session, language and appearance. Its sidebar contains programs, training, exercises, body measurements, statistics, history and settings. On mobile, **Open navigation** exposes the same destinations; focus starts on **Close navigation**, and closing the menu returns focus to its trigger.
 
+## Reading and acting on a phone
+
+Compact headings and controls leave room for the lists. **New / Create / Add** and the **List / Grid** icons stay visible. Search is immediately available; **Filters** expands sorting, archives and other criteria, with a count when secondary filters are active. Collapsing filters preserves their values. Each row’s **Actions** button opens named commands; Escape closes the dialog and returns focus to the trigger.
+
+Programs show their name and exercise/set count. Exercises show name, muscle, equipment and origin, with type and notes in their detail. Measurement lists preview the first two populated values, or four in grid view. Open the **record date** for all values, notes, differences and chart links. A count identifies additional measurements; the compact view never deletes values.
+
+The editor keeps the name and exercise fields first. **Options** contains program style, competition date and preparation notes. Entry Actions contains positioning and removal. The picker preserves search and selections between pages and openings, and keeps batch additions available at the bottom.
+
+Training exposes the first set and its confirmation immediately. **Options** groups the outline, preparation, rest presets and input help. A check confirms a set; a pencil corrects a completed set, with full accessible names. Statistics has a period selector and **Dates** for custom ranges; plots come before explanations and data tables.
+
+Shared settings use a horizontally scrollable section row on phones and keep the active section visible. Touch targets remain at least 44 px and touch input text stays at 16 px.
+
+![Sport on a phone: compact program rows and quick actions.](../assets/screenshots/en/sport-programs-mobile.png){ loading=lazy }
+
+![Training on a phone: results and confirmation immediately available.](../assets/screenshots/en/sport-training-mobile.png){ loading=lazy }
+
 ## Default and personal exercises
 
 The catalogue supplies **680 default exercises**, available in English and French, covering strength, bodyweight, cardio, gymnastics, carries, mobility, stretching and timed movements. Search by name, muscle or equipment, with or without accents, then filter by input type. Search uses the current language. There is nothing to import and no external account to connect.
@@ -35,11 +51,11 @@ Types describe measurements, not a closed list of sports. A movement can have va
 
 In **Programs**, choose **New program**, name it and add exercises. Each exercise accepts 1–30 sets; a program accepts at most 50 exercises and 300 sets. Targets per set are optional. Arrow buttons reorder entries and the remove button removes an entry from the draft.
 
-Grid cards preview up to three exercises and align actions within each row; a long program does not expand every row. List view is more compact. Click a name for a full preview or the pencil to edit. Archive is available on cards and in the editor. An editor draft requires confirmation before it is discarded. Errors preserve the draft; archiving keeps exercises, notes, style, competition date and history. Undo the archive message or use **Archived programs → Restore** later.
+Grid cards preview up to three exercises and align actions within each row; a long program does not expand every row. List view is more compact. Click a name for a full preview; edit through the pencil on wide screens or the Actions menu on phones. Archive is available on cards and in the editor. An editor draft requires confirmation before it is discarded. Errors preserve the draft; archiving keeps exercises, notes, style, competition date and history. Undo the archive message or use **Archived programs → Restore** later.
 
 Creation and editing open a dedicated page. **All programs** or **Cancel** returns to the list; leaving a modified draft requires confirmation, including changing language. Browser back/forward navigation is supported. `/sport?tab=workouts&program=new` opens creation, `program=<uuid>` opens an existing program and `archived=true` preserves the return to archived programs.
 
-**Add an exercise** opens the inline catalogue and focuses search. Choosing an exercise focuses its set count. Entries and values stay together during reordering. Limits are shown explicitly. **Save program** calls the API; network errors and conflicts leave the fields intact for correction. Drafts are temporary and are lost after confirmed reload or session expiry.
+**Add an exercise** opens the inline catalogue and focuses search on wide screens. On phones it opens a dedicated dialog with focus on Close, showing results before the keyboard opens. Choosing an exercise focuses its set count. Entries and values stay together during reordering. Limits are shown explicitly. **Save program** calls the API; network errors and conflicts leave the fields intact for correction. Drafts are temporary and are lost after confirmed reload or session expiry.
 
 **Start training session** creates a snapshot of exercises, types and targets. Only one session can be active per account. **Resume** or **Training** returns to it. Saved programs and active sessions survive reloads and language changes.
 
@@ -141,9 +157,9 @@ The top-right badge shows your level, title and streak. Open it for nearby quest
 
 ## Views, navigation and quick actions
 
-Programs, Exercises and Body measurements offer **List / Grid**. Preferences are stored through the API per account and section, separately for screens up to 800 px and wider screens. Narrow screens start with lists; wide screens use cards for programs and measurements and a list for exercises. Switching views keeps filters and the visible record. Search, filters, pagination and chart choices stay in the URL; returning to a section restores its scroll position.
+Programs, Exercises and Body measurements offer **List / Grid**. Preferences are stored through the API per account and section, separately for compact screens (up to 800 px, or coarse-pointer landscape up to 1024 × 500 px) and wider screens. Narrow screens start with lists; wide screens use cards for programs and measurements and a list for exercises. Switching views keeps filters and the visible record. Search, filters, pagination and chart choices stay in the URL; returning to a section restores its scroll position.
 
-Program cards preview at most three exercises. Their title opens a full preview; the pencil edits. Search by name, sort by name/update/last session, duplicate or archive from the list. Duplicates preserve targets and preparation, without copying sessions or scores. **Undo archive** restores an item immediately; archive views also support later restoration. Archiving an exercise used by active programs shows those programs first.
+Program cards preview at most three exercises. Their title opens a full preview; the pencil edits on wide screens. On phones, **Actions** (three dots) contains edit, duplicate and archive; the arrow starts or resumes training. Search by name, sort by name/update/last session, duplicate or archive from the list. Duplicates preserve targets and preparation, without copying sessions or scores. **Undo archive** restores an item immediately; archive views also support later restoration. Archiving an exercise used by active programs shows those programs first.
 
 The exercise catalogue supports personal/supplied/archived, muscle and equipment filters. Search waits for a short typing pause while retaining previous results. An exercise detail can add it to a program draft. The editor offers direct position selection, a compact preparation section and save actions that remain available while scrolling. Its paginated picker supports a selection across pages; individual additions focus the new set count, while batch additions keep the picker open. Repeated additions require an explicit action.
 

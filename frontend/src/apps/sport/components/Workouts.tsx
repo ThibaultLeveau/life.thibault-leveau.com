@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { tr } from "../i18n";
+import { CompactActions, CompactOptions } from "./compact";
 import { Dialog, ErrorMessage } from "../../../shared/ui/Dialog";
 import { Icon } from "../../../shared/ui/Icon";
 import { sportApi } from "../api";
@@ -142,52 +143,67 @@ export function Workouts({
           <span>{tr("resume")}</span>
         </button>
       )}
-      <div className="sport-toolbar">
-        <label className="sport-toggle">
-          <input
-            type="checkbox"
-            checked={archived}
-            onChange={(event) => onArchivedChange(event.target.checked)}
-          />
-          {tr("archived_programs")}
-        </label>
-        <button className="primary-button" onClick={() => onEdit("new")}>
+      <div className="sport-toolbar sport-list-toolbar">
+        <button
+          className="primary-button"
+          aria-label={tr("new_program")}
+          onClick={() => onEdit("new")}
+        >
           <Icon name="plus" />
-          {tr("new_program")}
+          <span className="sport-desktop-label">{tr("new_program")}</span>
+          <span className="sport-mobile-label">{tr("new_program_short")}</span>
         </button>
+        {presentation.controls}
       </div>
-      <div className="sport-filters">
-        <label>
-          {tr("search_programs")}
+      <div className="sport-filters sport-list-controls">
+        <label className="sport-search">
+          <span>{tr("search_programs")}</span>
           <input
             type="search"
+            aria-label={tr("search_programs")}
+            placeholder={tr("search_programs")}
             maxLength={160}
             value={filters.program_q}
             onChange={(event) => update({ program_q: event.target.value })}
           />
         </label>
-        <label>
-          {tr("sort_programs")}
-          <select
-            value={sort}
-            onChange={(event) => update({ program_sort: event.target.value })}
-          >
-            <option value="updated">{tr("sort_updated")}</option>
-            <option value="name">{tr("sort_name")}</option>
-            <option value="recent">{tr("sort_recent")}</option>
-          </select>
-        </label>
-        {presentation.controls}
-      </div>
-      {(filters.program_q || filters.program_exercise) && (
-        <button
-          type="button"
-          className="text-button"
-          onClick={() => update({ program_q: "", program_exercise: "" })}
+        <CompactOptions
+          count={
+            Number(archived) +
+            Number(sort !== "updated") +
+            Number(!!filters.program_exercise)
+          }
         >
-          {tr("clear_filters")}
-        </button>
-      )}
+          <label>
+            {tr("sort_programs")}
+            <select
+              value={sort}
+              onChange={(event) => update({ program_sort: event.target.value })}
+            >
+              <option value="updated">{tr("sort_updated")}</option>
+              <option value="name">{tr("sort_name")}</option>
+              <option value="recent">{tr("sort_recent")}</option>
+            </select>
+          </label>
+          <label className="sport-toggle">
+            <input
+              type="checkbox"
+              checked={archived}
+              onChange={(event) => onArchivedChange(event.target.checked)}
+            />
+            {tr("archived_programs")}
+          </label>
+          {(filters.program_q || filters.program_exercise) && (
+            <button
+              type="button"
+              className="text-button"
+              onClick={() => update({ program_q: "", program_exercise: "" })}
+            >
+              {tr("clear_filters")}
+            </button>
+          )}
+        </CompactOptions>
+      </div>
       <LoadState {...resource} />
       <ErrorMessage message={action.error} />
       {archivedItem && (
@@ -248,6 +264,9 @@ export function Workouts({
             <div className="sport-workout-top">
               <div>
                 <span className="sport-tag">
+                  {isHyrox(workout.name, workout.context) && (
+                    <span className="sport-compact-brand">HYROX · </span>
+                  )}
                   {tr("exercise_count", { count: workout.entries.length })} ·{" "}
                   {tr("set_count", {
                     count: workout.entries.reduce(
@@ -271,7 +290,7 @@ export function Workouts({
                 )}
               </div>
               <button
-                className="icon-button"
+                className="icon-button sport-desktop-only"
                 aria-label={tr("edit_named", { name: workout.name })}
                 onClick={() => onEdit(workout.id)}
               >
@@ -326,9 +345,11 @@ export function Workouts({
                     else if (!active) start(workout);
                   }}
                 >
-                  {active?.workout_id === workout.id
-                    ? tr("resume")
-                    : tr("start_session_short")}
+                  <span className="sport-start-label">
+                    {active?.workout_id === workout.id
+                      ? tr("resume")
+                      : tr("start_session_short")}
+                  </span>
                   <Icon name="arrow" />
                 </button>
               ) : (
@@ -340,29 +361,43 @@ export function Workouts({
                   {tr("restore")}
                 </button>
               )}
-              <button
-                className="icon-button"
-                aria-label={tr("duplicate_named", { name: workout.name })}
-                onClick={() => {
-                  action.clear();
-                  setCopy(workout);
-                  setCopyName(
-                    tr("copy_name", { name: workout.name }).slice(0, 160),
-                  );
-                }}
-              >
-                <Icon name="copy" />
-              </button>
-              {!archived && (
+              <CompactActions name={workout.name}>
+                <button
+                  className="icon-button sport-mobile-only"
+                  aria-label={tr("edit_named", { name: workout.name })}
+                  onClick={() => onEdit(workout.id)}
+                >
+                  <Icon name="edit" />
+                  <span className="sport-action-label">{tr("edit")}</span>
+                </button>
                 <button
                   className="icon-button"
-                  aria-label={tr("archive_named", { name: workout.name })}
-                  disabled={action.busy}
-                  onClick={() => archive(workout, true)}
+                  aria-label={tr("duplicate_named", { name: workout.name })}
+                  onClick={() => {
+                    action.clear();
+                    setCopy(workout);
+                    setCopyName(
+                      tr("copy_name", { name: workout.name }).slice(0, 160),
+                    );
+                  }}
                 >
-                  <Icon name="archive" />
+                  <Icon name="copy" />
+                  <span className="sport-action-label">
+                    {tr("duplicate_program")}
+                  </span>
                 </button>
-              )}
+                {!archived && (
+                  <button
+                    className="icon-button"
+                    aria-label={tr("archive_named", { name: workout.name })}
+                    disabled={action.busy}
+                    onClick={() => archive(workout, true)}
+                  >
+                    <Icon name="archive" />
+                    <span className="sport-action-label">{tr("archive")}</span>
+                  </button>
+                )}
+              </CompactActions>
             </div>
           </article>
         ))}

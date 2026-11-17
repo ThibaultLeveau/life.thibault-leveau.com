@@ -1,3 +1,4 @@
+import { openSportActions, openProgramOptions, expectPickerFocus } from "./sport-mobile-helpers";
 import { test, expect, type BrowserContext, type Page } from "@playwright/test";
 import type { Training, Workout } from "../src/apps/sport/types";
 
@@ -85,7 +86,7 @@ for (const width of [320, 1440]) for (const theme of ["light", "dark"]) {
     await page.clock.install({ time: new Date("2028-03-25T11:00:00Z") });
     await write(page, "/preferences", { theme });
     await page.goto("/sport?tab=workouts&program=new");
-    const name = `Prépa hYrOx ${width} ${theme}`;
+    const name = `Prépa hYrOx ${width} ${theme} ${Date.now()}`;
     await page.getByLabel("Nom du programme").fill("Force du samedi");
     await expect(page.getByRole("region", { name: "Préparation HYROX" })).toHaveCount(0);
     await page.getByLabel("Nom du programme").fill(name);
@@ -93,6 +94,7 @@ for (const width of [320, 1440]) for (const theme of ["light", "dark"]) {
     await expect(brand.getByAltText("HYROX")).toBeVisible();
     await expect(brand.getByAltText("HYROX")).toHaveJSProperty("naturalWidth", 520);
     await expect(brand).toContainText("EN ROUTE");
+    await openProgramOptions(page);
     const date = page.getByLabel("Date de votre prochain HYROX");
     await date.fill("2028-03-28");
     await expect(brand).toContainText("J−3");
@@ -104,8 +106,9 @@ for (const width of [320, 1440]) for (const theme of ["light", "dark"]) {
     await expect(clearDate).toBeFocused();
     await page.getByRole("button", { name: "Ajouter un exercice", exact: true }).click();
     const search = page.getByLabel("Rechercher un exercice");
-    await expect(search).toBeFocused();
-    await expect(page.locator("#program-picker").getByAltText("HYROX")).toBeVisible();
+    await expectPickerFocus(page);
+    if (width > 800) await expect(page.locator("#program-picker").getByAltText("HYROX")).toBeVisible();
+    else await expect(page.getByRole("dialog", { name: "Ajouter un exercice" })).toBeVisible();
     await search.fill("Développé couché à la barre");
     const option = page.locator(".sport-picker-item").filter({ hasText: "Développé couché à la barre" }).first();
     await option.focus();
@@ -123,7 +126,9 @@ for (const width of [320, 1440]) for (const theme of ["light", "dark"]) {
     const card = page.locator(".sport-workout").filter({ has: page.getByRole("heading", { name, exact: true }) });
     await expect(card).toContainText("J−3");
     await card.screenshot({ path: info.outputPath("card.png") });
+    await openSportActions(card);
     await card.getByRole("button", { name: `Modifier ${name}` }).click();
+    await openProgramOptions(page);
     await expect(date).toHaveValue("2028-03-28");
     await date.fill("2028-03-29");
     await page.route(`**/api/v1/sport/workouts/${workout.id}`, async (route) => {
@@ -161,6 +166,7 @@ for (const width of [320, 1440]) for (const theme of ["light", "dark"]) {
     await expect(brand).toHaveCount(0);
     await page.getByLabel("Nom du programme").fill(name);
     await expect(date).toHaveValue("2028-04-20");
+    await openProgramOptions(page);
     await clearDate.focus();
     await clearDate.press("Enter");
     const cleared = page.waitForResponse((r) => r.url().endsWith(`/sport/workouts/${workout.id}`) && r.request().method() === "PUT");
@@ -202,7 +208,7 @@ test("HYROX : jours civils, jour J, date passée, effacement et titre", async ({
 
 test("HYROX : date conservée après archivage et réactivation", async ({ page }) => {
   const workout = await write<Workout>(page, "/sport/workouts", {
-    name: "HYROX — cycle de vie", competition_date: "2028-02-29",
+    name: `HYROX — cycle de vie ${Date.now()}`, competition_date: "2028-02-29",
     entries: [{ exercise_id: "builtin-da98dd6929927833d279", sets: 1 }],
   }, "POST");
   await page.goto("/sport?tab=workouts");

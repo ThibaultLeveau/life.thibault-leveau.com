@@ -12,6 +12,7 @@ import { LoadState, useAction, useResource } from "./components/common";
 import { Icon } from "../../shared/ui/Icon";
 import { ErrorMessage } from "../../shared/ui/Dialog";
 import { tr } from "./i18n";
+import { useSportMobile } from "./components/compact";
 
 const Preferences = createContext<{
   settings: SportSettings;
@@ -47,15 +48,7 @@ export function useSportSettings() {
 
 export function useView(section: ViewSection) {
   const { settings, accept, reload } = useSportSettings();
-  const [mobile, setMobile] = useState(
-    () => matchMedia("(max-width: 800px)").matches,
-  );
-  useEffect(() => {
-    const media = matchMedia("(max-width: 800px)");
-    const change = () => setMobile(media.matches);
-    media.addEventListener("change", change);
-    return () => media.removeEventListener("change", change);
-  }, []);
+  const mobile = useSportMobile();
   const key: `${ViewSection}_view` | `${ViewSection}_mobile_view` =
     `${section}${mobile ? "_mobile" : ""}_view`;
   const action = useAction();
@@ -106,12 +99,13 @@ export function useView(section: ViewSection) {
           <button
             type="button"
             key={mode}
+            aria-label={tr(mode === "list" ? "view_list" : "view_grid")}
             aria-pressed={settings[key] === mode}
             aria-disabled={action.busy}
             onClick={() => change(mode)}
           >
             <Icon name={mode} />
-            {tr(mode === "list" ? "view_list" : "view_grid")}
+            <span>{tr(mode === "list" ? "view_list" : "view_grid")}</span>
           </button>
         ))}
       </div>

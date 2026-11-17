@@ -1,6 +1,6 @@
 import { tr } from "../i18n";
 import { useEffect, useRef, useState } from "react";
-import { ErrorMessage } from "../../../shared/ui/Dialog";
+import { Dialog, ErrorMessage } from "../../../shared/ui/Dialog";
 import { Icon } from "../../../shared/ui/Icon";
 import { sportApi } from "../api";
 import type { Entry, KindDefinition, Workout, SportContext } from "../types";
@@ -13,7 +13,8 @@ import {
   ValuesFields,
   valuesText,
 } from "./common";
-import { ExercisePicker } from "./Exercises";
+import { CompactActions, useSportMobile } from "./compact";
+import { ExercisePicker, useExercisePickerState } from "./Exercises";
 import { isHyrox } from "../hyrox";
 import { HyroxBrand, HyroxMark } from "./HyroxBrand";
 
@@ -34,6 +35,7 @@ function ProgramForm({
   registerGuard,
   addedExercise,
 }: EditorProps & { workout?: Workout }) {
+  const mobile = useSportMobile();
   const [name, setName] = useState(workout?.name ?? "");
   const [notes, setNotes] = useState(workout?.notes ?? "");
   const [competitionDate, setCompetitionDate] = useState(
@@ -53,6 +55,7 @@ function ProgramForm({
   );
   const nextKey = useRef(entries.length);
   const [picking, setPicking] = useState(false);
+  const pickerState = useExercisePickerState();
 
   const addButton = useRef<HTMLButtonElement>(null);
   const focusEntry = useRef<string | null>(null);
@@ -220,6 +223,55 @@ function ProgramForm({
       },
     ]);
   }, [suggestion.data]);
+  const picker = (
+    <ExercisePicker
+      state={pickerState}
+      kinds={kinds}
+      active={picking}
+      capacity={Math.min(50 - entries.length, 300 - total)}
+      onPick={(selected, individual) => {
+        const choices = selected.slice(
+          0,
+          Math.min(50 - entries.length, 300 - total),
+        );
+        if (!choices.length) return;
+        const sets = Math.min(3, Math.floor((300 - total) / choices.length));
+        if (individual) {
+          focusEntry.current = `entry-${nextKey.current}`;
+          setPicking(false);
+        }
+        setEntries((old) => [
+          ...old,
+          ...choices.map((exercise) => ({
+            key: `entry-${nextKey.current++}`,
+            exercise_id: exercise.id,
+            name: exercise.name,
+            kind: exercise.kind,
+            sets,
+            target: {},
+          })),
+        ]);
+      }}
+    />
+  );
+  const addControl = (
+    <button
+      ref={addButton}
+      type="button"
+      className="secondary-button sport-add-exercise"
+      aria-label={picking ? tr("close_catalogue") : tr("add_an_exercise")}
+      aria-expanded={picking}
+      aria-controls="program-picker"
+      disabled={entries.length >= 50}
+      onClick={() => setPicking((value) => !value)}
+    >
+      <Icon name={picking ? "x" : "plus"} />
+      <span className="sport-desktop-label">
+        {picking ? tr("close_catalogue") : tr("add_an_exercise")}
+      </span>
+      <span className="sport-mobile-label">{tr("add_exercise_short")}</span>
+    </button>
+  );
   return (
     <form
       ref={form}
@@ -260,9 +312,15 @@ function ProgramForm({
           </button>
           <button
             className="primary-button"
+            aria-label={tr("save_program")}
             disabled={!entries.length || !!limit || action.busy}
           >
-            {action.busy ? tr("saving") : tr("save_program")}
+            <span className="sport-desktop-label">
+              {action.busy ? tr("saving") : tr("save_program")}
+            </span>
+            <span className="sport-mobile-label">
+              {action.busy ? tr("saving") : tr("save_short")}
+            </span>
           </button>
         </div>
       </div>
@@ -290,24 +348,30 @@ function ProgramForm({
             />
           </label>
           {validation.error("name")}
-          <label>
-            {tr("program_context")}
-            <select
-              value={context}
-              onChange={(event) =>
-                setContext(event.target.value as SportContext)
-              }
-            >
-              <option value="auto">{tr("context_auto")}</option>
-              <option value="standard">{tr("context_standard")}</option>
-              <option value="hyrox">HYROX</option>
-            </select>
-          </label>
           <details
             className="sport-program-options"
-            open={hyrox || !!competitionDate}
+            open={!mobile && (hyrox || !!competitionDate)}
           >
-            <summary>{tr("preparation_options")}</summary>
+            <summary aria-label={tr("preparation_options")}>
+              <span className="sport-desktop-label">
+                {tr("preparation_options")}
+              </span>
+              <span className="sport-mobile-label">{tr("options")}</span>
+            </summary>
+            <label>
+              {tr("program_context")}
+              <select
+                value={context}
+                onChange={(event) =>
+                  setContext(event.target.value as SportContext)
+                }
+              >
+                <option value="auto">{tr("context_auto")}</option>
+                <option value="standard">{tr("context_standard")}</option>
+                <option value="hyrox">HYROX</option>
+              </select>
+            </label>
+
             {(hyrox || competitionDate) && (
               <div className="sport-hyrox-date">
                 <label>
@@ -353,7 +417,12 @@ function ProgramForm({
         <section aria-labelledby="program-exercises-title">
           <div className="sport-section-heading">
             <div>
-              <h2 id="program-exercises-title">{tr("program_exercises")}</h2>
+              <h2 id="program-exercises-title">
+                <span className="sport-desktop-label">
+                  {tr("program_exercises")}
+                </span>
+                <span className="sport-mobile-label">{tr("exercises")}</span>
+              </h2>
               <p className="muted small-text" role="status">
                 {tr("program_limits", {
                   exercises: entries.length,
@@ -361,11 +430,13 @@ function ProgramForm({
                 })}
               </p>
             </div>
-            {hyrox && (
-              <span className="sport-hyrox-stamp">
-                <HyroxMark />
-              </span>
-            )}
+            {mobile
+              ? addControl
+              : hyrox && (
+                  <span className="sport-hyrox-stamp">
+                    <HyroxMark />
+                  </span>
+                )}
           </div>
           {!entries.length && (
             <div className="sport-empty">
@@ -388,136 +459,134 @@ function ProgramForm({
                   {entry.name}
                 </h3>
                 <div className="sport-inline">
-                  <label className="sport-move-select">
-                    <span>{tr("position")}</span>
-                    <select
-                      aria-label={tr("move_to_position", { name: entry.name })}
-                      value={index}
-                      onChange={(event) =>
-                        move(index, Number(event.target.value) - index)
-                      }
+                  <CompactActions name={entry.name}>
+                    <label className="sport-move-select">
+                      <span>{tr("position")}</span>
+                      <select
+                        aria-label={tr("move_to_position", {
+                          name: entry.name,
+                        })}
+                        value={index}
+                        onChange={(event) =>
+                          move(index, Number(event.target.value) - index)
+                        }
+                      >
+                        {entries.map((_, position) => (
+                          <option key={position} value={position}>
+                            {position + 1}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <button
+                      type="button"
+                      className="icon-button"
+                      aria-label={tr("move_up", { name: entry.name })}
+                      disabled={index === 0}
+                      onClick={() => move(index, -1)}
                     >
-                      {entries.map((_, position) => (
-                        <option key={position} value={position}>
-                          {position + 1}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <button
-                    type="button"
-                    className="icon-button"
-                    aria-label={tr("move_up", { name: entry.name })}
-                    disabled={index === 0}
-                    onClick={() => move(index, -1)}
-                  >
-                    <Icon name="up" />
-                  </button>
-                  <button
-                    type="button"
-                    className="icon-button"
-                    aria-label={tr("move_down", { name: entry.name })}
-                    disabled={index === entries.length - 1}
-                    onClick={() => move(index, 1)}
-                  >
-                    <Icon name="down" />
-                  </button>
-                  <button
-                    type="button"
-                    className="icon-button"
-                    aria-label={tr("remove_named", { name: entry.name })}
-                    onClick={() => {
-                      focusEntry.current =
-                        entries[index + 1]?.key ??
-                        entries[index - 1]?.key ??
-                        null;
-                      setEntries((old) => old.filter((_, i) => i !== index));
-                      if (entries.length === 1) addButton.current?.focus();
-                    }}
-                  >
-                    <Icon name="x" />
-                  </button>
+                      <Icon name="up" />
+                      <span className="sport-action-label">
+                        {tr("move_up_short")}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      className="icon-button"
+                      aria-label={tr("move_down", { name: entry.name })}
+                      disabled={index === entries.length - 1}
+                      onClick={() => move(index, 1)}
+                    >
+                      <Icon name="down" />
+                      <span className="sport-action-label">
+                        {tr("move_down_short")}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      className="icon-button"
+                      aria-label={tr("remove_named", { name: entry.name })}
+                      onClick={() => {
+                        focusEntry.current =
+                          entries[index + 1]?.key ??
+                          entries[index - 1]?.key ??
+                          null;
+                        setEntries((old) => old.filter((_, i) => i !== index));
+                        if (entries.length === 1) addButton.current?.focus();
+                      }}
+                    >
+                      <Icon name="x" />
+                      <span className="sport-action-label">
+                        {tr("remove_short")}
+                      </span>
+                    </button>
+                  </CompactActions>
                 </div>
               </div>
-              <label>
-                {tr("number_of_sets")}
-                <input
-                  {...validation.attrs(`entries.${index}.sets`)}
-                  type="number"
-                  inputMode="numeric"
-                  min={1}
-                  max={30}
-                  required
-                  value={entry.sets || ""}
-                  onChange={(e) =>
-                    edit(index, { sets: Number(e.target.value) })
-                  }
-                />
-              </label>
-              {validation.error(`entries.${index}.sets`)}
-              <p className="muted small-text">
-                {tr("target_per_set_optional")}
-              </p>
-              <ValuesFields
-                validation={validation}
-                prefix={`entries.${index}.target.`}
-                kind={kinds.find((k) => k.id === entry.kind)!}
-                value={entry.target}
-                onChange={(target) => edit(index, { target })}
-              />
+              <div className="sport-entry-values">
+                <label>
+                  <span className="sport-desktop-label">
+                    {tr("number_of_sets")}
+                  </span>
+                  <span className="sport-mobile-label">{tr("sets_short")}</span>
+                  <input
+                    {...validation.attrs(`entries.${index}.sets`)}
+                    aria-label={tr("number_of_sets")}
+                    type="number"
+                    inputMode="numeric"
+                    min={1}
+                    max={30}
+                    required
+                    value={entry.sets || ""}
+                    onChange={(e) =>
+                      edit(index, { sets: Number(e.target.value) })
+                    }
+                  />
+                </label>
+                {validation.error(`entries.${index}.sets`)}
+                <div>
+                  <p className="muted small-text">
+                    {tr("target_per_set_optional")}
+                  </p>
+                  <ValuesFields
+                    validation={validation}
+                    prefix={`entries.${index}.target.`}
+                    kind={kinds.find((k) => k.id === entry.kind)!}
+                    value={entry.target}
+                    onChange={(target) => edit(index, { target })}
+                  />
+                </div>
+              </div>
             </section>
           ))}
-          <button
-            ref={addButton}
-            type="button"
-            className="secondary-button sport-add-exercise"
-            aria-expanded={picking}
-            aria-controls="program-picker"
-            disabled={entries.length >= 50}
-            onClick={() => setPicking((value) => !value)}
-          >
-            <Icon name={picking ? "x" : "plus"} />
-            {picking ? tr("close_catalogue") : tr("add_an_exercise")}
-          </button>
-          <div id="program-picker" hidden={!picking}>
-            {hyrox && (
-              <div className="sport-hyrox-picker-heading">
-                <HyroxMark />
-                <span>{tr("build_next_session")}</span>
-              </div>
-            )}
-            <ExercisePicker
-              kinds={kinds}
-              active={picking}
-              capacity={Math.min(50 - entries.length, 300 - total)}
-              onPick={(selected, individual) => {
-                const choices = selected.slice(
-                  0,
-                  Math.min(50 - entries.length, 300 - total),
-                );
-                if (!choices.length) return;
-                const sets = Math.min(
-                  3,
-                  Math.floor((300 - total) / choices.length),
-                );
-                if (individual) {
-                  focusEntry.current = `entry-${nextKey.current}`;
-                  setPicking(false);
-                }
-                setEntries((old) => [
-                  ...old,
-                  ...choices.map((exercise) => ({
-                    key: `entry-${nextKey.current++}`,
-                    exercise_id: exercise.id,
-                    name: exercise.name,
-                    kind: exercise.kind,
-                    sets,
-                    target: {},
-                  })),
-                ]);
-              }}
-            />
-          </div>
+          {!mobile && addControl}
+          {mobile ? (
+            picking && (
+              <Dialog
+                title={tr("add_an_exercise")}
+                wide
+                initialFocus="close"
+                onClose={() => setPicking(false)}
+              >
+                <div
+                  className="dialog-body sport-picker-dialog"
+                  id="program-picker"
+                >
+                  {picker}
+                </div>
+              </Dialog>
+            )
+          ) : (
+            <div id="program-picker" hidden={!picking}>
+              {hyrox && (
+                <div className="sport-hyrox-picker-heading">
+                  <HyroxMark />
+                  <span>{tr("build_next_session")}</span>
+                </div>
+              )}
+              {picker}
+            </div>
+          )}
           {entries.length >= 50 && (
             <p className="muted">
               {tr("limit_of_50_exercises_reached_remove_an_exercise_to_add")}

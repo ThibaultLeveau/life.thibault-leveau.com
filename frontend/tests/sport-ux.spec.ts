@@ -1,3 +1,4 @@
+import { openProgramOptions } from "./sport-mobile-helpers";
 import { test, expect, type BrowserContext, type Page } from "@playwright/test";
 import type {
   Exercise,
@@ -636,6 +637,7 @@ test("Sport UX : contexte explicite et erreur de préférence sans changement de
   const source = await program(page, `HYROX UX ${Date.now()}`);
   await page.goto(`/sport?tab=workouts&program=${source.id}`);
   await expect(page.locator(".sport-hyrox-brand")).toBeVisible();
+  await openProgramOptions(page);
   await page.getByLabel("Style du programme").selectOption("standard");
   await expect(page.locator(".sport-hyrox-brand")).toHaveCount(0);
   await page.getByRole("button", { name: "Enregistrer le programme" }).click();

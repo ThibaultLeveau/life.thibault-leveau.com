@@ -1,3 +1,4 @@
+import { openSportActions, openSportFilters } from "./sport-mobile-helpers";
 import { test, expect, type BrowserContext, type Page } from "@playwright/test";
 import type {
   ExercisePage,
@@ -373,15 +374,19 @@ test("Sport : création personnelle, mobile, clavier, archives et validation en 
   await page.getByLabel("Rechercher", { exact: true }).fill(name);
   const item = page.locator(".sport-exercise").filter({ hasText: name });
   await expect(item).toContainText("Charge et distance");
+  await openSportActions(item);
   await item.getByRole("button", { name: "Modifier", exact: true }).click();
   await page
     .getByLabel("Notes", { exact: true })
     .fill("Deux haltères additionnés");
   await page.getByRole("button", { name: "Enregistrer l’exercice" }).click();
   await expect(item).toContainText("Deux haltères additionnés");
+  await openSportActions(item);
   await item.getByRole("button", { name: "Archiver" }).click();
   await expect(item).toHaveCount(0);
+  await openSportFilters(page);
   await page.getByLabel("Afficher", { exact: true }).selectOption("true");
+  await openSportActions(item);
   await page
     .locator(".sport-exercise")
     .filter({ hasText: name })
@@ -872,13 +877,13 @@ test("Sport : blocs d’exercice et lignes de séries compactes pour les dix typ
         expect(geometry.border).toBeGreaterThan(0);
         expect(geometry.titleInside).toBe(true);
         for (const row of geometry.rows) {
-          expect(row.aligned).toBe(width > 560);
+          expect(row.aligned).toBe(true);
           expect(row.inside).toBe(true);
           expect(row.separate).toBe(true);
           expect(row.touch).toBe(true);
         }
         // An untouched series remains compact, including its labels and status.
-        expect(geometry.rows[1].height).toBeLessThan(width <= 560 ? 165 : 115);
+        expect(geometry.rows[1].height).toBeLessThan(115);
         for (const field of kinds[i].fields)
           await expect(
             card.getByLabel(`${field.label} (${field.unit})`, { exact: true }),
