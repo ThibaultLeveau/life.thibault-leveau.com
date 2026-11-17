@@ -1,7 +1,12 @@
 import { tr, documentationPath } from "../../shared/i18n";
 import { AccountMenu } from "../../platform/auth/AccountMenu";
 import { Icon } from "../../shared/ui/Icon";
-export function Navbar() {
+import type { ComponentProps } from "react";
+export function Navbar({
+  account,
+}: {
+  account?: ComponentProps<typeof AccountMenu>;
+}) {
   const path = window.location.pathname;
   return (
     <header className="site-header">
@@ -32,7 +37,7 @@ export function Navbar() {
             {tr("documentation")}
           </a>
         </nav>
-        <AccountMenu />
+        <AccountMenu {...account} dropdown />
       </div>
     </header>
   );

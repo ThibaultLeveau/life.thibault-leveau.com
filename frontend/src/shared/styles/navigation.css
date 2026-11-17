@@ -37,7 +37,7 @@
 .application-sidebar-links {
   padding-bottom: 24px;
 }
-.application-sidebar .application-nav-item {
+:is(.application-sidebar, .settings-navigation) .application-nav-item {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -58,16 +58,16 @@
 .application-nav-item > svg {
   flex-shrink: 0;
 }
-.application-sidebar .application-nav-item:hover {
+:is(.application-sidebar, .settings-navigation) .application-nav-item:hover {
   background: var(--ui-hover);
   color: var(--ui-text);
 }
-.application-sidebar .application-nav-item.is-active {
+:is(.application-sidebar, .settings-navigation) .application-nav-item.is-active {
   background: var(--ui-accent-bg);
   color: var(--ui-accent);
   font-weight: 600;
 }
-.application-sidebar .application-nav-item:disabled {
+:is(.application-sidebar, .settings-navigation) .application-nav-item:disabled {
   opacity: 0.5;
 }
 .application-sidebar .icon-button,

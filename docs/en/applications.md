@@ -45,3 +45,5 @@ The footer contains, in order, the **Application library**, **Documentation** fo
 ## Recipes and shopping available
 
 **Recipes & Shopping Lists** starts disabled. Save recipes, scale servings, choose from 301 bilingual ingredients or your private catalogue, combine quantities and reuse templates or previous lists. The shopping mode, four Tracking metrics and 60 quests are included. [Guide](recipes.md).
+
+Preferences are grouped in [General settings](settings.md). An application’s Settings control opens its section; the progression timezone and vacations are under General, and usage days are in each application section.

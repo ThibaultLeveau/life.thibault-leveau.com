@@ -104,3 +104,5 @@ Removing “Hyrox” from the title hides the branding but preserves the date. A
 ## Progress and quests
 
 The top-right badge shows your level, title and streak. Open it for nearby quests; the full wall and journal are in Tracking → Achievements. [Points, 60 quests and streak rules](progression.md).
+
+Preferences are grouped in [General settings](settings.md). An application’s Settings control opens its section; the progression timezone and vacations are under General, and usage days are in each application section.

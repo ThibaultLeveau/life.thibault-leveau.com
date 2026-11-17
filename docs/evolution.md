@@ -21,13 +21,14 @@ backend/src/life_app/apps/<id>/
 frontend/src/apps/<id>/
 ├── manifest.ts
 ├── Page.tsx
+├── Settings.tsx       # optionnel, ADR 007
 ├── api.ts
 ├── types.ts
 ├── components/
 └── styles.css
 ```
 
-1. Choisir un identifiant immuable : lettre minuscule suivie de lettres/chiffres/underscores, 50 caractères maximum. Fournir les noms/descriptions français et anglais dans le manifeste backend, selon l’[ADR 004](decisions/004-internationalisation.md). Réserver un chemin HTML unique (hors `/`, `/applications`, `/api`, `/documentation`, `/assets`).
+1. Choisir un identifiant immuable : lettre minuscule suivie de lettres/chiffres/underscores, 50 caractères maximum. Fournir les noms/descriptions français et anglais dans le manifeste backend, selon l’[ADR 004](decisions/004-internationalisation.md). Réserver un chemin HTML unique (hors `/`, `/applications`, `/settings`, `/api`, `/documentation`, `/assets`).
 2. Définir les contrats Pydantic, contrôles de propriétaire et services transactionnels. Les schémas refusent les champs inconnus ; le propriétaire vient de `CurrentUser`. Les routeurs committent les mutations après validation. Réutiliser `core.database.Database` et les sessions existantes ; aucune couche générique de dépôt.
 3. Définir les tables propres au métier et une migration dans la chaîne globale `migrations/versions/` si nécessaire. Le manifeste importe le routeur, qui charge les modèles de l’application. L’import du registre lors des migrations doit charger toutes les métadonnées ORM. Ne pas modifier une ancienne migration.
 4. Fournir `manifest.py` avec une `ApplicationDefinition` et l’importer dans `apps/registry.py`. L’ordre du tuple définit celui du catalogue. Le défaut est désactivé ; toute exception demande une justification de migration. L’assemblage API monte le routeur et lui applique automatiquement le contrôle d’activation. Les nouvelles routes métier utilisent un préfixe propre à l’application pour éviter les collisions ; Tâches garde ses URL historiques.
@@ -91,3 +92,7 @@ Déclarer le fournisseur dans le manifeste ; le registre demeure l’unique asse
 ## Recettes disponible
 
 **Recettes & Liste de courses** est une application livrée (`recipes`, `/recipes`), désactivée par défaut. Son catalogue bilingue, ses recettes, listes et modèles, son mode magasin et ses fournisseurs Suivi/progression réutilisent les contrats existants. [Guide](recipes.md) et [API](recipes-api.md). Ménage et plantes restent futurs.
+
+## Panneau de réglages
+
+L’[ADR 007](decisions/007-reglages-generaux.md) permet un `Settings.tsx` optionnel dans chaque application, chargé à la demande par son manifeste. Implémenter `SettingsPanelProps` (`onDirty`, `onBusy`), nettoyer ces états au démontage et utiliser les API métier existantes. Ne pas importer la Page complète ni déplacer le métier dans le socle. Le shell fournit noms, activation et calendrier commun. Le lien Réglages ouvre `/settings?application=<id>` ; les réglages contextuels peuvent rester au niveau de leur objet avec un accès explicite depuis le panneau. Tester brouillons, erreurs, conflit, session, activation et navigation FR/EN/mobile.

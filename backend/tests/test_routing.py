@@ -30,6 +30,7 @@ def test_documentation_404_page_preserves_status(client: TestClient) -> None:
     "path",
     [
         "/unknown",
+        "/settings/unknown",
         "/api/v1/unknown",
         "/api/unknown",
         "/assets/missing.js",
@@ -57,7 +58,10 @@ def test_public_api_documentation(client: TestClient) -> None:
     assert schema["components"]["securitySchemes"]["APIKeyCookie"]["in"] == "cookie"
 
 
-@pytest.mark.parametrize("path", ["/", "/applications", "/tasks", "/favicon.svg"])
+@pytest.mark.parametrize(
+    "path",
+    ["/", "/applications", "/settings", "/settings?application=sport", "/tasks", "/favicon.svg"],
+)
 def test_static_head_returns_headers_without_body(client: TestClient, path: str) -> None:
     response = client.head(path)
     assert response.status_code == 200

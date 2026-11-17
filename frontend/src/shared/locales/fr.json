@@ -133,5 +133,15 @@
   "progression_workweek": "Du lundi au vendredi",
   "progression_days_per_week_one": "{{count}} jour prévu par semaine",
   "progression_days_per_week_other": "{{count}} jours prévus par semaine",
-  "progression_schedule": "Jours prévus : {{days}}"
+  "progression_schedule": "Jours prévus : {{days}}",
+  "settings": "Réglages",
+  "settings_general": "Général",
+  "settings_description": "Vos préférences de compte et d’applications, réunies au même endroit.",
+  "settings_sections": "Sections des réglages",
+  "settings_account": "Compte et apparence",
+  "settings_autosave": "Le thème et la langue sont enregistrés automatiquement pour votre compte.",
+  "settings_loading": "Chargement des réglages…",
+  "settings_no_specific": "Cette application utilise les préférences communes et le calendrier ci-dessous.",
+  "settings_busy": "Enregistrement en cours. Attendez sa confirmation avant de quitter.",
+  "settings_reload": "Recharger les valeurs enregistrées"
 }

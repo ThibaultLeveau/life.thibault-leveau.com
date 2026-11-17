@@ -1,4 +1,3 @@
-import { ProgressionSettings } from "../../platform/progression/ProgressionSettings";
 import { AchievementsView } from "./components/Achievements";
 import { ProgressionBadge } from "../../platform/progression/ProgressionBadge";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -114,6 +113,10 @@ export function Page() {
   function choose(tab: Tab, edit: string | null = null, saved = false) {
     if (!saved && !permit()) return;
     dirty.current = false;
+    if (tab === "settings") {
+      window.location.assign("/settings?application=tracking");
+      return;
+    }
     const params = new URLSearchParams({ tab });
     if (edit) params.set("edit", edit);
     if (!saved) index.current++;
@@ -273,15 +276,6 @@ export function Page() {
                   )}
                   {view.tab === "achievements" && (
                     <AchievementsView revision={revision} />
-                  )}
-                  {view.tab === "settings" && (
-                    <>
-                      <Settings
-                        timezone={settings.data.timezone}
-                        onSaved={refresh}
-                      />
-                      <ProgressionSettings onDirty={setDirty} />
-                    </>
                   )}
                 </>
               )}
@@ -510,65 +504,5 @@ function Trackers({
         </div>
       )}
     </>
-  );
-}
-function Settings({
-  timezone,
-  onSaved,
-}: {
-  timezone: string;
-  onSaved: () => void;
-}) {
-  const [value, setValue] = useState(timezone),
-    [saved, setSaved] = useState(false),
-    action = useAction();
-  return (
-    <form
-      className="tracking-settings"
-      onSubmit={(e) => {
-        e.preventDefault();
-        void action.run(
-          () => trackingApi.saveSettings(value),
-          () => {
-            setSaved(true);
-            onSaved();
-          },
-        );
-      }}
-    >
-      <label>
-        {tr("timezone")}
-        <input
-          required
-          maxLength={100}
-          list="tracking-timezones"
-          value={value}
-          onChange={(e) => {
-            setValue(e.target.value);
-            setSaved(false);
-          }}
-        />
-      </label>
-      <datalist id="tracking-timezones">
-        {[
-          "Europe/Paris",
-          "Europe/London",
-          "Europe/Brussels",
-          "America/Montreal",
-          "America/New_York",
-          "Asia/Tokyo",
-          "UTC",
-        ].map((z) => (
-          <option key={z} value={z} />
-        ))}
-      </datalist>
-      <p className="muted">{tr("settings_hint")}</p>
-      <ErrorMessage message={action.error} />
-      <button className="primary-button" disabled={action.busy}>
-        {tr(action.busy ? "saving" : "save_settings")}
-      </button>
-      {saved && <p role="status">{tr("saved")}</p>}
-      <p className="muted tracking-small">{tr("data_preserved")}</p>
-    </form>
   );
 }

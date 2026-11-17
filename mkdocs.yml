@@ -53,6 +53,7 @@ extra:
 nav:
   - Présentation: index.md
   - Vos applications: applications.md
+  - Réglages généraux: settings.md
   - Utiliser les tâches: taches.md
   - Utiliser Sport: sport.md
   - API Sport: sport-api.md
@@ -68,6 +69,7 @@ nav:
   - English user guides:
       - Welcome: en/index.md
       - Your applications: en/applications.md
+      - General settings: en/settings.md
       - Tasks: en/taches.md
       - Sport: en/sport.md
       - Tracking: en/tracking.md
@@ -98,3 +100,4 @@ nav:
       - Français et anglais: decisions/004-internationalisation.md
       - Intégrations et Suivi: decisions/005-integrations-tracking.md
       - Progression commune: decisions/006-progression-applications.md
+      - Réglages généraux: decisions/007-reglages-generaux.md

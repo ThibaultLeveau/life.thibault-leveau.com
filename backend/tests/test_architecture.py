@@ -20,6 +20,7 @@ def test_applications_have_matching_manifests_and_standard_structure():
     assert all(re.fullmatch(r"/[a-z][a-z0-9_-]*", item.path) for item in APPLICATIONS)
     assert not {item.path for item in APPLICATIONS} & {
         "/applications",
+        "/settings",
         "/documentation",
         "/api",
         "/assets",

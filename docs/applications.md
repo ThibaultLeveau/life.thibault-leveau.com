@@ -49,3 +49,5 @@ Le footer propose, dans l’ordre, la **Bibliothèque des applications**, la **D
 ## Recettes et courses disponible
 
 **Recettes & Liste de courses** est désactivée par défaut. Activez-la pour conserver vos recettes, adapter les portions, choisir parmi 301 ingrédients bilingues ou vos ingrédients personnels, préparer des listes qui cumulent les quantités et réutiliser vos modèles ou anciennes listes. Le mode magasin, les quatre métriques Suivi et 60 quêtes sont inclus. [Guide](recipes.md).
+
+Les préférences sont réunies dans les [réglages généraux](settings.md). Le lien Réglages de l’application ouvre sa section ; fuseau de progression et vacances se trouvent dans Général, jours d’utilisation dans chaque application.

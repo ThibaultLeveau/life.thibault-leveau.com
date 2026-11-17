@@ -133,5 +133,15 @@
   "progression_workweek": "Monday to Friday",
   "progression_days_per_week_one": "{{count}} scheduled day per week",
   "progression_days_per_week_other": "{{count}} scheduled days per week",
-  "progression_schedule": "Scheduled days: {{days}}"
+  "progression_schedule": "Scheduled days: {{days}}",
+  "settings": "Settings",
+  "settings_general": "General",
+  "settings_description": "Your account and application preferences, together in one place.",
+  "settings_sections": "Settings sections",
+  "settings_account": "Account and appearance",
+  "settings_autosave": "Theme and language are saved automatically for your account.",
+  "settings_loading": "Loading settings…",
+  "settings_no_specific": "This application uses the shared preferences and the calendar below.",
+  "settings_busy": "Saving in progress. Wait for confirmation before leaving.",
+  "settings_reload": "Reload saved values"
 }

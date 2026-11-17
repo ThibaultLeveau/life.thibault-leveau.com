@@ -71,3 +71,5 @@ Les saisies existantes gardent leur définition et leurs objectifs. Les changeme
 **Archiver** retire un suivi des périodes à remplir, sans supprimer ses saisies. **Archives → Restaurer** le réactive. Le calendrier conserve les périodes passées et les périodes longues déjà commencées ; les nouvelles périodes respectent les dates d’archive/restauration. Les suivis actifs se réordonnent avec Monter/Descendre. Jusqu’à 50 suivis peuvent être actifs. Il n’y a pas de suppression définitive dans l’interface ou l’API.
 
 Toutes ces opérations sont accessibles par l’[API versionnée](tracking-api.md). Le calendrier et les tendances acceptent au plus 367 jours par requête ; les séries/entrées lues et les évaluations de métriques sont bornées à 20 000 éléments. Les données et leurs historiques sont inclus dans les [sauvegardes PostgreSQL](sauvegardes.md#migration-0009-suivi).
+
+Les préférences sont réunies dans les [réglages généraux](settings.md). Le lien Réglages de l’application ouvre sa section ; fuseau de progression et vacances se trouvent dans Général, jours d’utilisation dans chaque application.

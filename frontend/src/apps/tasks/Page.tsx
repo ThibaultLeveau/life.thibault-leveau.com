@@ -1,5 +1,6 @@
 import { ProgressionBadge } from "../../platform/progression/ProgressionBadge";
 import { tr } from "./i18n";
+import { tr as common } from "../../shared/i18n";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSession } from "../../platform/auth/SessionProvider";
 import { ApplicationFooter } from "../../platform/auth/ApplicationFooter";
@@ -120,7 +121,11 @@ function TasksPage() {
   const [createSpace, setCreateSpace] = useState(false);
   const [manageSpaces, setManageSpaces] = useState(false);
   const [targetSection, setTargetSection] = useState<string>();
-  const [settingsTab, setSettingsTab] = useState<SettingsTab | null>(null);
+  const [settingsTab, setSettingsTab] = useState<SettingsTab | null>(() =>
+    new URLSearchParams(location.search).get("settings") === "space"
+      ? "space"
+      : null,
+  );
   const [editor, setEditor] = useState<Task | "new" | null>(null);
   const [moving, setMoving] = useState<Task | null>(null);
   const focusSearch = useRef(false);
@@ -386,6 +391,29 @@ function TasksPage() {
           <kbd>⌘ K</kbd>
         </button>
         <TaskNavigationMore current={locationView} onNavigate={navigate} />
+        <a
+          className="application-nav-item"
+          href="/settings?application=tasks"
+          onClick={(event) => {
+            if (
+              event.metaKey ||
+              event.ctrlKey ||
+              event.shiftKey ||
+              event.altKey
+            )
+              return;
+            event.preventDefault();
+            if (!drafts.confirm()) return;
+            void sync
+              .idle()
+              .then(() =>
+                window.location.assign("/settings?application=tasks"),
+              );
+          }}
+        >
+          <Icon name="settings" />
+          {common("settings")}
+        </a>
         <div className="sidebar-divider" />
         <div className="sidebar-label">
           <span>{tr("my_workspaces")}</span>
