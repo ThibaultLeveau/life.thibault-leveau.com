@@ -5,6 +5,7 @@ import { relativeDate } from "../dates";
 import { workspaceTree } from "../workspaceTree";
 import type { AgendaSettings, Task, Workspace } from "../types";
 import { Icon } from "../../../shared/ui/Icon";
+import { TaskFilterDisclosure } from "./TaskFilterDisclosure";
 import { TaskContents } from "./TaskContents";
 import { TaskEditor } from "./TaskEditor";
 import { MoveDialog } from "./MoveDialog";
@@ -124,96 +125,107 @@ export function AgendaView({
               </button>
             ))}
           </div>
-          <div className="global-task-filters agenda-filters">
-            <label>
-              {tr("search_tasks")}
-              <input
-                value={search}
-                maxLength={500}
-                onChange={(event) => setSearch(event.target.value)}
-              />
-            </label>
-            <label>
-              {tr("workspace")}
-              <select
-                value={settings.workspace_id ?? ""}
-                onChange={(event) =>
-                  change({
-                    workspace_id: event.target.value || null,
-                    label_id: null,
-                  })
-                }
-              >
-                <option value="">{tr("all_workspaces")}</option>
-                {workspaceTree(workspaces).map(({ space, path }) => (
-                  <option key={space.id} value={space.id}>
-                    {path}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              {tr("priority")}
-              <select
-                value={settings.priority ?? ""}
-                onChange={(event) =>
-                  change({
-                    priority: event.target.value
-                      ? Number(event.target.value)
-                      : null,
-                  })
-                }
-              >
-                <option value="">{tr("all_priorities")}</option>
-                {[1, 2, 3, 4].map((value) => (
-                  <option key={value} value={value}>
-                    P{value}
-                  </option>
-                ))}
-              </select>
-            </label>
-            {settings.workspace_id && (
+          <TaskFilterDisclosure
+            active={
+              [
+                search,
+                settings.workspace_id,
+                settings.priority,
+                settings.label_id,
+              ].filter(Boolean).length
+            }
+          >
+            <div className="global-task-filters agenda-filters">
               <label>
-                {tr("label")}
+                {tr("search_tasks")}
+                <input
+                  value={search}
+                  maxLength={500}
+                  onChange={(event) => setSearch(event.target.value)}
+                />
+              </label>
+              <label>
+                {tr("workspace")}
                 <select
-                  value={settings.label_id ?? ""}
+                  value={settings.workspace_id ?? ""}
                   onChange={(event) =>
-                    change({ label_id: event.target.value || null })
+                    change({
+                      workspace_id: event.target.value || null,
+                      label_id: null,
+                    })
                   }
                 >
-                  <option value="">{tr("all_labels")}</option>
-                  {data.labels
-                    .filter(
-                      (label) => label.workspace_id === settings.workspace_id,
-                    )
-                    .map((label) => (
-                      <option key={label.id} value={label.id}>
-                        {label.name}
-                      </option>
-                    ))}
+                  <option value="">{tr("all_workspaces")}</option>
+                  {workspaceTree(workspaces).map(({ space, path }) => (
+                    <option key={space.id} value={space.id}>
+                      {path}
+                    </option>
+                  ))}
                 </select>
               </label>
-            )}
-            {(settings.search ||
-              settings.workspace_id ||
-              settings.priority ||
-              settings.label_id) && (
-              <button
-                className="text-button"
-                onClick={() => {
-                  setSearch("");
-                  change({
-                    search: "",
-                    workspace_id: null,
-                    priority: null,
-                    label_id: null,
-                  });
-                }}
-              >
-                {tr("clear_filters")}
-              </button>
-            )}
-          </div>
+              <label>
+                {tr("priority")}
+                <select
+                  value={settings.priority ?? ""}
+                  onChange={(event) =>
+                    change({
+                      priority: event.target.value
+                        ? Number(event.target.value)
+                        : null,
+                    })
+                  }
+                >
+                  <option value="">{tr("all_priorities")}</option>
+                  {[1, 2, 3, 4].map((value) => (
+                    <option key={value} value={value}>
+                      P{value}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {settings.workspace_id && (
+                <label>
+                  {tr("label")}
+                  <select
+                    value={settings.label_id ?? ""}
+                    onChange={(event) =>
+                      change({ label_id: event.target.value || null })
+                    }
+                  >
+                    <option value="">{tr("all_labels")}</option>
+                    {data.labels
+                      .filter(
+                        (label) => label.workspace_id === settings.workspace_id,
+                      )
+                      .map((label) => (
+                        <option key={label.id} value={label.id}>
+                          {label.name}
+                        </option>
+                      ))}
+                  </select>
+                </label>
+              )}
+              {(settings.search ||
+                settings.workspace_id ||
+                settings.priority ||
+                settings.label_id) && (
+                <button
+                  className="text-button"
+                  onClick={() => {
+                    setSearch("");
+                    change({
+                      search: "",
+                      workspace_id: null,
+                      priority: null,
+                      label_id: null,
+                    });
+                  }}
+                >
+                  {tr("clear_filters")}
+                </button>
+              )}
+            </div>
+          </TaskFilterDisclosure>
           <div className="agenda-options">
             {settings.period === "custom" && (
               <form
@@ -355,8 +367,13 @@ export function AgendaView({
                               className="color-dot"
                               style={{ background: space?.color }}
                             />
-                            {spacePaths.get(task.workspace_id) ?? space?.name}
-                            {section && ` / ${section.name}`}
+                            <span
+                              className="agenda-context-path"
+                              title={`${spacePaths.get(task.workspace_id) ?? space?.name ?? ""}${section ? ` / ${section.name}` : ""}`}
+                            >
+                              {spacePaths.get(task.workspace_id) ?? space?.name}
+                              {section && ` / ${section.name}`}
+                            </span>
                           </button>
                         }
                       />

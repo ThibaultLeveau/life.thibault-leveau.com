@@ -13,6 +13,8 @@ export function useTaskCompletion(today: string) {
     clear: () => setNotice(""),
     canUndo: !!undo,
     complete: (task: Task) => {
+      sync.dismissNotice();
+      setNotice("");
       setUndo(null);
       sync.mutate(
         `/tasks/${task.id}/${task.completed_at ? "reopen" : "complete"}`,
@@ -60,21 +62,25 @@ export function CompletionNotice({
   completion: ReturnType<typeof useTaskCompletion>;
 }) {
   return completion.notice ? (
-    <p className="notice task-feedback-toast" role="status">
+    <div className="task-feedback-toast" role="status">
       <Icon name="check" />
-      {completion.notice}
+      <span className="task-feedback-message">{completion.notice}</span>
       {completion.canUndo && (
-        <button className="text-button" onClick={completion.undo}>
-          {tr("undo_completion")}
+        <button
+          className="text-button task-feedback-undo"
+          aria-label={tr("undo_completion")}
+          onClick={completion.undo}
+        >
+          {tr("cancel")}
         </button>
       )}
       <button
-        className="icon-button"
+        className="icon-button task-feedback-close"
         onClick={completion.clear}
         aria-label={tr("close_message")}
       >
         <Icon name="x" />
       </button>
-    </p>
+    </div>
   ) : null;
 }
