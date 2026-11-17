@@ -118,3 +118,7 @@ Le menu du compte propose **Langue / Language**. Les exercices fournis portent l
 ## Progression et quêtes
 
 Le badge en haut à droite affiche votre niveau, titre et série. Ouvrez-le pour consulter les quêtes les plus proches ; le mur complet et le journal sont dans Suivi → Réussites. [Barèmes, 60 quêtes et règles de séries](progression.md).
+
+## Revue de l’interface
+
+La [revue mobile et ordinateur du 17 novembre 2026](revue-sport-2026-11-17.md) inventorie les parcours testés et les améliorations proposées, dont le choix Liste / Grille. Elle décrit un plan d’amélioration ; ces propositions ne sont pas des fonctionnalités déjà livrées.
