@@ -16,7 +16,7 @@ Ouvrez une recette et changez **Nombre de personnes** : les quantités sont reca
 
 Le catalogue livré contient **301 ingrédients et articles courants**, avec un nom français et anglais : fruits/légumes, frais, protéines, épicerie, condiments, boissons, surgelés et maison/hygiène. Le nom affiché suit la langue du compte. La recherche accepte les noms dans les deux langues et ignore casse et accents, y compris « oeuf » pour « œuf ».
 
-Dans une recette, une liste ou un modèle, recherchez puis sélectionnez un ingrédient. Choisissez la quantité et l’une des trois unités : **g** (grammes), **l** (litres), **u** (pièces/articles). Le catalogue suggère une unité mais vous pouvez en choisir une autre. Pour 250 ml, saisissez 0,25 l ; pour 1 kg, 1 000 g.
+Dans une recette, une liste ou un modèle, recherchez puis sélectionnez un ingrédient. Choisissez la quantité et l’une des sept unités : **g** (grammes), **mg** (milligrammes), **l** (litres), **ml** (millilitres), **c. à café** (cuillère à café), **c. à soupe** (cuillère à soupe), **u** (pièces/articles). Le catalogue suggère une unité mais vous pouvez en choisir une autre. Vous pouvez saisir directement 250 ml ou 0,5 cuillère à café ; pour 1 kg, saisissez 1 000 g.
 
 Si le nom n’existe pas, **Créer « … » dans mon catalogue** l’ajoute directement, avec l’unité choisie, puis le sélectionne. Cet ingrédient est privé : les autres comptes ne le voient pas. Son nom personnel reste identique dans les deux langues ; aucune traduction automatique n’est appliquée. Un nom exact déjà connu dans l’une des langues réutilise son identité, même si l’appel est répété. La recherche reste une recherche de sous-chaîne, sans rapprochement automatique des synonymes ou des pluriels : sélectionnez l’ingrédient existant pour qu’il se cumule correctement.
 
@@ -24,7 +24,7 @@ Si le nom n’existe pas, **Créer « … » dans mon catalogue** l’ajoute dir
 
 Dans **Listes de courses → Nouvelle liste**, donnez un nom à votre liste. Ajoutez des articles à la main ou choisissez **Importer une recette**, la recette et le nombre de personnes. Vous pouvez aussi partir d’une recette avec **Ajouter à une liste**. La recherche et la pagination permettent de retrouver des listes et recettes plus anciennes.
 
-Chaque import **ajoute** les quantités. Deux imports de 200 g du même ingrédient donnent une ligne de 400 g. La même identité et la même unité s’additionnent ; g, l et u restent séparés, sans conversion entre masse, volume et pièces. Relancer volontairement un import ajoute une seconde portion ; en cas de double envoi de la même version, le serveur refuse le second envoi avec un conflit.
+Chaque import **ajoute** les quantités. Deux imports de 200 g du même ingrédient donnent une ligne de 400 g. La même identité et la même unité s’additionnent ; les unités différentes restent séparées, même g/mg et l/ml. Aucune conversion automatique n’est appliquée, y compris pour les cuillères. Relancer volontairement un import ajoute une seconde portion ; en cas de double envoi de la même version, le serveur refuse le second envoi avec un conflit.
 
 Les commandes de préparation permettent de corriger une quantité, retirer un article, renommer, archiver ou restaurer la liste. Une liste terminée est en lecture seule jusqu’à **Rouvrir la liste**. Les articles retirés restent présents dans l’historique de la liste.
 

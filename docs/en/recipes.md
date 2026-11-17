@@ -16,7 +16,7 @@ Open a saved recipe and change **Servings** to scale its quantities without chan
 
 The supplied database contains **301 ingredients and everyday items** across produce, chilled/dairy, proteins, pantry, seasonings, drinks, frozen and household/toiletries. Their displayed names follow your account language. Search accepts French or English and ignores case and accents.
 
-Search and select an ingredient, then enter a quantity and unit: **g** for grams, **l** for litres, **u** for individual items. The default unit is a suggestion; you can change it. Enter 0.25 l for 250 ml and 1,000 g for 1 kg.
+Search and select an ingredient, then enter a quantity and unit: **g** for grams, **mg** for milligrams, **l** for litres, **ml** for millilitres, **tsp** for teaspoons, **tbsp** for tablespoons and **u** for individual items. The default unit is a suggestion; you can change it. Enter 250 ml or 0.5 tsp directly, and 1,000 g for 1 kg.
 
 For an unknown name, **Create “…” in my catalogue** creates a private ingredient with your chosen unit and selects it. Personal names stay unchanged in both languages and are invisible to other users. An exact existing French or English name reuses the same identity. Search does not automatically merge synonyms or singular/plural names: choose an existing ingredient to combine its quantities correctly.
 
@@ -24,7 +24,7 @@ For an unknown name, **Create “…” in my catalogue** creates a private ingr
 
 Choose **Shopping lists → New list**. Add items manually or **Import a recipe**, choose the recipe and serving count. You can also start from a recipe using **Add to a list**. Search and pagination reach older recipes and lists.
 
-Imports add quantities. Two imports of 200 g combine into one 400 g row. Only the same ingredient identity and unit combine; grams, litres and items remain separate. There is no implicit mass/volume conversion. Repeating an import deliberately adds another portion; replaying the same stale version is rejected.
+Imports add quantities. Two imports of 200 g combine into one 400 g row. Only the same ingredient identity and unit combine; different units remain separate, including g/mg and l/ml. There is no automatic conversion, including for spoons. Repeating an import deliberately adds another portion; replaying the same stale version is rejected.
 
 You can rename a list, edit quantities, remove items, archive and restore. A completed list stays read-only until reopened. Removed items remain in its history.
 

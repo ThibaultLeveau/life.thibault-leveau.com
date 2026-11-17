@@ -21,7 +21,7 @@ from life_app.core.database import Base, utcnow
 class Ingredient(Base):
     __tablename__ = "recipes_ingredients"
     __table_args__ = (
-        CheckConstraint("unit IN ('g','l','u')"),
+        CheckConstraint("unit IN ('g','mg','l','ml','tsp','tbsp','u')"),
         CheckConstraint("length(trim(name_fr)) > 0 AND length(trim(name_en)) > 0"),
         CheckConstraint("(owner_id IS NULL) = (builtin_key IS NOT NULL)"),
         UniqueConstraint("owner_id", "normalized_name"),
@@ -33,7 +33,7 @@ class Ingredient(Base):
     name_en: Mapped[str] = mapped_column(String(120))
     normalized_name: Mapped[str] = mapped_column(String(240))
     search_text: Mapped[str] = mapped_column(String(500))
-    unit: Mapped[str] = mapped_column(String(1))
+    unit: Mapped[str] = mapped_column(String(4))
     category: Mapped[str] = mapped_column(String(30), default="other")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
@@ -65,14 +65,14 @@ class RecipeItem(Base):
         ),
         UniqueConstraint("recipe_id", "ingredient_id", "unit"),
         CheckConstraint("quantity > 0 AND quantity <= 1000000000"),
-        CheckConstraint("unit IN ('g','l','u') AND position >= 0"),
+        CheckConstraint("unit IN ('g','mg','l','ml','tsp','tbsp','u') AND position >= 0"),
     )
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     owner_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
     recipe_id: Mapped[UUID]
     ingredient_id: Mapped[UUID] = mapped_column(ForeignKey("recipes_ingredients.id"))
     quantity: Mapped[Decimal] = mapped_column(Numeric(18, 6))
-    unit: Mapped[str] = mapped_column(String(1))
+    unit: Mapped[str] = mapped_column(String(4))
     position: Mapped[int]
 
 
@@ -105,7 +105,7 @@ class ShoppingItem(Base):
         UniqueConstraint("list_id", "ingredient_id", "unit"),
         CheckConstraint("quantity > 0 AND quantity <= 1000000000"),
         CheckConstraint("purchased_quantity >= 0 AND purchased_quantity <= quantity"),
-        CheckConstraint("unit IN ('g','l','u') AND position >= 0"),
+        CheckConstraint("unit IN ('g','mg','l','ml','tsp','tbsp','u') AND position >= 0"),
     )
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     owner_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
@@ -113,7 +113,7 @@ class ShoppingItem(Base):
     ingredient_id: Mapped[UUID] = mapped_column(ForeignKey("recipes_ingredients.id"))
     quantity: Mapped[Decimal] = mapped_column(Numeric(18, 6))
     purchased_quantity: Mapped[Decimal] = mapped_column(Numeric(18, 6), default=Decimal(0))
-    unit: Mapped[str] = mapped_column(String(1))
+    unit: Mapped[str] = mapped_column(String(4))
     position: Mapped[int]
 
 

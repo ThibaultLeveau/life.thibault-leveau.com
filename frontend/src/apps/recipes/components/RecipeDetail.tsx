@@ -3,7 +3,7 @@ import { useApiAction, useApiResource } from "../../../platform/useApiResource";
 import { ErrorMessage } from "../../../shared/ui/Dialog";
 import { Icon } from "../../../shared/ui/Icon";
 import { recipesApi } from "../api";
-import { number, tr } from "../i18n";
+import { number, tr, unitLabel } from "../i18n";
 import type { Recipe, ShoppingList } from "../types";
 import { History, LoadState, useDraft, type DraftProps } from "./common";
 import { ImportDialog } from "./ImportDialog";
@@ -109,7 +109,7 @@ export function RecipeDetail({
               <li key={line.id}>
                 <span>{line.name}</span>
                 <strong>
-                  {number(line.quantity)} <small>{line.unit}</small>
+                  {number(line.quantity)} <small>{unitLabel(line.unit)}</small>
                 </strong>
               </li>
             ))}

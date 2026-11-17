@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useApiAction, useApiResource } from "../../../platform/useApiResource";
 import { Dialog, ErrorMessage } from "../../../shared/ui/Dialog";
 import { recipesApi } from "../api";
-import { number, tr } from "../i18n";
+import { number, tr, unitLabel } from "../i18n";
 import type { Recipe, ShoppingList } from "../types";
 import { LoadState, Pager, useDraft, type DraftProps } from "./common";
 
@@ -136,7 +136,7 @@ export function ImportDialog({
                   <li key={line.id}>
                     <span>{line.name}</span>
                     <strong>
-                      {number(line.quantity)} {line.unit}
+                      {number(line.quantity)} {unitLabel(line.unit)}
                     </strong>
                   </li>
                 ))}

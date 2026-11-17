@@ -3,8 +3,8 @@ import { useApiAction, useApiResource } from "../../../platform/useApiResource";
 import { ErrorMessage } from "../../../shared/ui/Dialog";
 import { Icon } from "../../../shared/ui/Icon";
 import { recipesApi } from "../api";
-import { tr } from "../i18n";
-import type { Ingredient, Item, Unit } from "../types";
+import { tr, unitLabel } from "../i18n";
+import { units, type Ingredient, type Item, type Unit } from "../types";
 import { LoadState, Pager, useDraft, type DraftProps } from "./common";
 
 export function IngredientPicker({
@@ -132,7 +132,8 @@ export function IngredientPicker({
                 >
                   <span>{item.name}</span>
                   <small>
-                    {item.unit} · {tr(item.builtin ? "catalogue" : "personal")}
+                    {unitLabel(item.unit)} ·{" "}
+                    {tr(item.builtin ? "catalogue" : "personal")}
                   </small>
                 </button>
               ))}
@@ -173,7 +174,7 @@ export function IngredientPicker({
                 setTouched(true);
               }}
             >
-              {(["g", "l", "u"] as const).map((u) => (
+              {units.map((u) => (
                 <option key={u} value={u}>
                   {tr(`unit_${u}`)}
                 </option>

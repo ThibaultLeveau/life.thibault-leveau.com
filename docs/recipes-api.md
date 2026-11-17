@@ -30,7 +30,9 @@ Toutes les routes exigent session et activation `recipes`. Le propriétaire vien
 | PUT | `/lists/{id}/archive` | `{archived, expected_version}` |
 | GET | `/lists/{id}/history?offset=0&limit=30` | Historique immuable, limite 100 |
 
-`items` contient `{ingredient_id: UUID, quantity: decimal, unit: "g"|"l"|"u"}`. Les réponses encodent les décimaux en **chaînes**, sans perte de précision. Envoyer de préférence des chaînes décimales à point. Les entrées JSON numériques sont également acceptées, sauf booléens et valeurs non finies. Les sorties ajoutent `id`, `name` localisé, `category`, `position`, `purchased_quantity` et `checked`. Les noms personnels restent intacts. La fiche ingrédient fournit aussi `name_fr`, `name_en`, `builtin` et l’unité suggérée.
+`items` contient `{ingredient_id: UUID, quantity: decimal, unit: "g"|"mg"|"l"|"ml"|"tsp"|"tbsp"|"u"}`. Les réponses encodent les décimaux en **chaînes**, sans perte de précision. Envoyer de préférence des chaînes décimales à point. Les entrées JSON numériques sont également acceptées, sauf booléens et valeurs non finies. Les sorties ajoutent `id`, `name` localisé, `category`, `position`, `purchased_quantity` et `checked`. Les noms personnels restent intacts. La fiche ingrédient fournit aussi `name_fr`, `name_en`, `builtin` et l’unité suggérée.
+
+`mg` désigne les milligrammes, `ml` les millilitres, `tsp` les cuillères à café et `tbsp` les cuillères à soupe. Ces identifiants API restent identiques en FR/EN. Exemple de ligne : `{"ingredient_id":"<UUID>","quantity":"0.5","unit":"tsp"}`. Les unités différentes ne sont jamais converties ni cumulées entre elles, même g/mg et l/ml.
 
 Les recettes fournissent leurs dates, `version`, `servings` affiché, `base_servings`, préparation et ingrédients. Les listes ajoutent `kind`, `completed_at`, `archived_at`. Un modèle n’a pas de date de fin. Les résultats de recherche sont `{items, total, offset, limit}`. L’ordre est stable ; les objets sont triés par dernière modification puis identifiant.
 

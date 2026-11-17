@@ -97,7 +97,7 @@
   "history": "Historique",
   "quests_hint": "Votre carnet, vos listes et vos modèles font progresser vos 60 quêtes.",
   "quests": "Voir mes réussites dans Suivi",
-  "stack_hint": "Même ingrédient + même unité = une seule ligne. Grammes, litres et pièces restent séparés.",
+  "stack_hint": "Même ingrédient + même unité = une seule ligne. Les unités différentes restent séparées, sans conversion automatique.",
   "portions_hint": "Les quantités sont calculées depuis la recette de référence, qui reste intacte.",
   "edit_portions_hint": "Ces quantités correspondent au nombre de personnes indiqué. Pour adapter sans modifier la recette, utilisez sa vue de consultation.",
   "produce": "Fruits & légumes",
@@ -126,5 +126,16 @@
   "rename": "Renommer",
   "view": "Ouvrir",
   "not_found": "Cet élément n’est plus disponible.",
-  "qty_error": "Saisissez une quantité positive, avec au maximum six décimales."
+  "qty_error": "Saisissez une quantité positive, avec au maximum six décimales.",
+  "unit_mg": "mg · milligrammes",
+  "unit_ml": "ml · millilitres",
+  "unit_tsp": "c. à café · cuillère à café",
+  "unit_tbsp": "c. à soupe · cuillère à soupe",
+  "unit_short_g": "g",
+  "unit_short_mg": "mg",
+  "unit_short_l": "l",
+  "unit_short_ml": "ml",
+  "unit_short_tsp": "c. à café",
+  "unit_short_tbsp": "c. à soupe",
+  "unit_short_u": "u"
 }
