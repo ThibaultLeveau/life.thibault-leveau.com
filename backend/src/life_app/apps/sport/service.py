@@ -43,6 +43,69 @@ def touch(item):
         item.updated_at = utcnow()
 
 
+def create_exercise(db, user, payload):
+    item = m.Exercise(owner_id=user.id, **payload.model_dump())
+    db.add(item)
+    return item
+
+
+def update_exercise(db, user, exercise_id, payload):
+    item = owned(db, m.Exercise, user, exercise_id)
+    version(item, payload.expected_version)
+    for key, value in payload.model_dump(exclude={"expected_version"}).items():
+        setattr(item, key, value)
+    touch(item)
+    return item
+
+
+def create_workout(db, user, payload):
+    item = m.Workout(
+        owner_id=user.id,
+        name=payload.name,
+        competition_date=payload.competition_date,
+        context=payload.context,
+        notes=payload.notes,
+        entries=snapshot(db, user, payload.entries),
+    )
+    db.add(item)
+    return item
+
+
+def update_workout(db, user, workout_id, payload):
+    item = owned(db, m.Workout, user, workout_id)
+    version(item, payload.expected_version)
+    item.name, item.notes = payload.name, payload.notes
+    item.competition_date = payload.competition_date
+    if "context" in payload.model_fields_set:
+        item.context = payload.context
+    item.entries = snapshot(db, user, payload.entries)
+    touch(item)
+    return item
+
+
+def current_session(db, user):
+    item = db.scalar(
+        select(m.Training).where(m.Training.owner_id == user.id, m.Training.status == "active")
+    )
+    return training_output(item) if item else None
+
+
+def measurements(db, user, archived=False):
+    return [
+        measurement_output(i)
+        for i in db.scalars(
+            select(m.Measurement)
+            .where(
+                m.Measurement.owner_id == user.id,
+                m.Measurement.archived_at.is_not(None)
+                if archived
+                else m.Measurement.archived_at.is_(None),
+            )
+            .order_by(m.Measurement.measured_on.desc(), m.Measurement.id)
+        )
+    ]
+
+
 def exercise_output(item):
     return s.ExerciseOutput(
         id=str(item.id),

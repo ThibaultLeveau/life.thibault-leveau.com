@@ -1,5 +1,13 @@
 # Evolving LifeOS
 
+## Assistant capabilities {#capacites-de-lassistant}
+
+[ADR 008](decisions/008-assistant-ia.md) approves optional `ApplicationDefinition.actions`. Expose an application by creating `apps/<id>/assistant.py` and an `ActionProvider(actions=(...))`. Each `ActionDefinition` supplies a stable name, description, closed input model, handler, corresponding HTTP method/path, output model, mutation flag and optional confirmation. Arguments combine path/query fields with a `payload` using existing domain schemas. Handlers call domain services without committing: the dispatcher owns the transaction and receipt.
+
+Every business route needs a capability or a tested explicit technical exclusion. Bulk operations, archives and deletion require previews. Operations lacking business versions need a precondition that detects relevant changes after preview. Extract rules found only in routers into services shared with HTTP; never call route functions directly or access another application's domain. Register the provider in the existing manifest and test route coverage, output parity, owners, disabled applications, conflicts and rollback.
+
+Frontend manifests may supply an application-owned lazily loaded `Snippet` renderer. It receives a versioned snippet and callbacks; the shell injects renderers into chat. Cards display server receipt proposals/results, never model-invented confirmations. Reuse components/tokens and check keyboard, FR/EN, themes and 320 px. See the [guide](assistant.md) and [API](assistant-api.md).
+
 ## Delivered state {#etat-disponible}
 
 LifeOS has a shared platform, per-account application library and **Tasks**, **Sport**, **Tracking**, **OKR Goals** and **Recipes & Shopping Lists**. Household chores and plants remain future ideas. [ADR 003](decisions/003-applications-lifeos.md) defines the approved organization; earlier ADRs retain architecture/persistence history.

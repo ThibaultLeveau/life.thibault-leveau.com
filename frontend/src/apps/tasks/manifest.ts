@@ -3,6 +3,9 @@ import type { ApplicationModule } from "../../platform/applications/definition";
 
 export const application: ApplicationModule = {
   id: "tasks",
+  AssistantSnippet: lazy(() =>
+    import("./assistant/Snippet").then(({ Snippet }) => ({ default: Snippet })),
+  ),
   Settings: lazy(() =>
     import("./Settings").then(({ Settings }) => ({ default: Settings })),
   ),

@@ -1,5 +1,30 @@
 # Sauvegardes, migrations et restauration
 
+## Migration 0015 : assistant {#migration-0015-assistant}
+
+`0015_assistant` ajoute sept tables `assistant_*` sans réécrire les données des applications. Le dump conserve réglages, ciphertexts des tokens, conversations, messages, résumés, sources de mémoire, exécutions, événements et reçus. Le trousseau `LIFE_ASSISTANT_ENCRYPTION_KEYS` reste hors du dump et de l’image : conserver une copie protégée indépendante, avec les références des sauvegardes et commits concernés. Les conversations et souvenirs ne bénéficient pas du chiffrement réservé aux tokens ; protéger les dumps comme les autres données privées.
+
+Le suffixe de restauration marque les runs/messages `running` comme `interrupted`, invalide les propositions `preview` en `failed`, puis révoque toutes les sessions restaurées. Les succès `complete` restent intacts. Après restauration, aucune exécution ni proposition ancienne ne doit reprendre une écriture ; vérifier les reçus et formuler une nouvelle demande si nécessaire. Restaurer un ancien dump peut réintroduire des conversations, souvenirs ou credentials supprimés depuis : le signaler lors de l’intervention, appliquer les oublis nécessaires et remplacer les tokens concernés. Un oubli dans Life ne purge pas les sauvegardes historiques ni les copies déjà transmises au fournisseur.
+
+Pour vérifier une copie restaurée, utiliser la clé historique correspondante, tester le déchiffrement sur un compte synthétique, comparer mémoire/messages/reçus, vérifier l’absence de runs actifs et la révocation des sessions. Une clé perdue ne se reconstruit pas depuis le dump : ressaisir un token dans les réglages. Cela n’empêche pas de récupérer les applications, conversations et souvenirs. Un simple test de format du dump ne prouve pas ces propriétés.
+
+L’ancienne image ne connaît pas la révision `0015_assistant`. Le downgrade refuse si l’une des nouvelles tables contient des données, y compris des réglages ; ne pas les supprimer pour contourner ce contrôle. Privilégier une correction en avant ou une restauration explicite du dump et de l’image compatibles, avec leurs clés.
+
+### Rotation du chiffrement
+
+Générer une nouvelle clé Fernet dans un terminal privé. Mettre `nouvelle,ancienne` dans le trousseau protégé : la première chiffre, les autres permettent de déchiffrer. Conserver une sauvegarde indépendante du nouveau trousseau. Avec l’image publiée, contrôler puis rechiffrer le compte explicitement concerné :
+
+```bash
+export LIFE_IMAGE=$(cat .deployment/current-image)
+docker compose --env-file .env.production run --rm --no-deps web \
+  life rotate-assistant-key thibault --dry-run
+docker compose --env-file .env.production run --rm --no-deps web \
+  life rotate-assistant-key thibault
+docker compose --env-file .env.production up -d --no-build --wait web
+```
+
+La commande verrouille ce compte, valide l’enveloppe utilisateur/fournisseur et rechiffre dans une transaction. L’aperçu ne modifie rien ; l’échec préserve le ciphertext. Elle n’affiche ni token ni clé et n’appelle aucun fournisseur. Vérifier le token avec la nouvelle clé seule sur une copie isolée avant de retirer l’ancienne du trousseau actif. Conserver les anciennes clés dans l’archive protégée tant que les dumps correspondants doivent être restaurables. Cette rotation ne remplace ni ne révoque le token chez le fournisseur.
+
 ## Sauvegarder
 
 Depuis la racine du dépôt sur le serveur, avec `.env.production` configuré et PostgreSQL démarré :

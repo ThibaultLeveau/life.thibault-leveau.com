@@ -30,6 +30,11 @@ def main():
     )
     backfill_parser.add_argument("username")
     backfill_parser.add_argument("--dry-run", action="store_true")
+    rotation_parser = sub.add_parser(
+        "rotate-assistant-key", help="Rechiffrer le token IA d’un compte avec la première clé"
+    )
+    rotation_parser.add_argument("username")
+    rotation_parser.add_argument("--dry-run", action="store_true")
     for name in ("create-user", "reset-password"):
         account = sub.add_parser(name)
         account.add_argument("username")
@@ -45,6 +50,35 @@ def main():
     username = args.username.strip().casefold()
     if not username or len(username) > 80:
         parser.error("Identifiant requis, 80 caractères maximum")
+    if args.command == "rotate-assistant-key":
+        from fastapi import HTTPException
+
+        from life_app.platform.assistant import credentials
+        from life_app.platform.assistant.models import AssistantSettings
+
+        engine = create_engine(settings.database_url.get_secret_value())
+        try:
+            with Session(engine) as db, db.begin():
+                user = db.scalar(select(User).where(User.username == username).with_for_update())
+                if user is None:
+                    parser.error("Compte introuvable")
+                row = db.get(AssistantSettings, user.id)
+                if row is None or not row.ciphertext:
+                    print("Aucun token IA enregistré pour ce compte.")
+                    return
+                try:
+                    token = credentials.decrypt(settings, row)
+                    replacement = credentials.encrypt(settings, user.id, row.provider, token)
+                except HTTPException as error:
+                    parser.error(str(error.detail))
+                if args.dry_run:
+                    print("Token lisible ; rotation possible avec la première clé du trousseau.")
+                    return
+                row.ciphertext = replacement
+            print("Token IA rechiffré ; conserver les anciennes clés pour les sauvegardes.")
+        finally:
+            engine.dispose()
+        return
     if args.command == "backfill-progression":
         from life_app.apps.registry import APPLICATIONS
         from life_app.platform.progression.service import backfill, preview_backfill

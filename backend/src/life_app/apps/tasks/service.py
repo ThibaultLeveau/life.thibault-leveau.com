@@ -9,8 +9,206 @@ from sqlalchemy import delete, func, or_, select
 from life_app.apps.tasks import models as m
 from life_app.apps.tasks import schemas as s
 from life_app.apps.tasks.messages import tr
-from life_app.apps.tasks.recurrence import Recurrence, dates, next_due
+from life_app.apps.tasks.recurrence import Recurrence, dates, describe, next_due
+from life_app.apps.tasks.scheduling import parse_schedule
 from life_app.core.database import utcnow
+
+
+def parse_scheduling(payload):
+    try:
+        Recurrence.valid_timezone(payload.timezone)
+    except ValueError as error:
+        raise HTTPException(422, str(error)) from error
+    return parse_schedule(payload.text, payload.today, payload.timezone)
+
+
+def preview_scheduling(payload):
+    rule = payload.recurrence
+    after = payload.after or rule.start_date
+    upcoming = dates(
+        rule,
+        after,
+        inclusive=True,
+        limit=payload.limit,
+        completed=payload.completed,
+        anchor=after if rule.mode == "completion" else None,
+    )
+    if not upcoming:
+        raise HTTPException(
+            422, tr("these_settings_produce_no_occurrences_check_the_days_and_end_date")
+        )
+    return s.SchedulePreviewOutput(
+        label=describe(rule),
+        dates=upcoming,
+        explanation=tr("preview_completion") if rule.mode == "completion" else tr("preview_fixed"),
+    )
+
+
+def list_workspaces(db, user, archived=False):
+    return db.scalars(
+        select(m.Workspace)
+        .where(
+            m.Workspace.owner_id == user.id,
+            m.Workspace.archived_at.is_not(None) if archived else m.Workspace.archived_at.is_(None),
+        )
+        .order_by(m.Workspace.position, m.Workspace.id)
+    ).all()
+
+
+def reorder_workspaces(db, user, payload):
+    reorder(
+        db,
+        db.scalars(select(m.Workspace).where(m.Workspace.owner_id == user.id)).all(),
+        payload.ids,
+    )
+
+
+def list_sections(db, user, workspace_id, archived=False):
+    workspace(db, user, workspace_id)
+    return db.scalars(
+        select(m.Section)
+        .where(
+            m.Section.workspace_id == workspace_id,
+            m.Section.archived_at.is_not(None) if archived else m.Section.archived_at.is_(None),
+        )
+        .order_by(m.Section.position, m.Section.id)
+    ).all()
+
+
+def create_section(db, user, workspace_id, payload):
+    workspace(db, user, workspace_id, active=True)
+    item = m.Section(
+        workspace_id=workspace_id,
+        **payload.model_dump(),
+        position=next_position(db, m.Section, m.Section.workspace_id == workspace_id),
+    )
+    db.add(item)
+    return item
+
+
+def reorder_sections(db, user, workspace_id, payload):
+    workspace(db, user, workspace_id, active=True)
+    reorder(
+        db,
+        db.scalars(select(m.Section).where(m.Section.workspace_id == workspace_id)).all(),
+        payload.ids,
+    )
+
+
+def update_section(db, user, workspace_id, section_id, payload):
+    workspace(db, user, workspace_id, active=True)
+    item = member(db, m.Section, section_id, workspace_id)
+    patch_entity(item, payload)
+    return item
+
+
+def list_statuses(db, user, workspace_id):
+    workspace(db, user, workspace_id)
+    return db.scalars(
+        select(m.Status)
+        .where(m.Status.workspace_id == workspace_id)
+        .order_by(m.Status.position, m.Status.id)
+    ).all()
+
+
+def create_status(db, user, workspace_id, payload):
+    workspace(db, user, workspace_id, active=True)
+    item = m.Status(
+        workspace_id=workspace_id,
+        **payload.model_dump(),
+        position=next_position(db, m.Status, m.Status.workspace_id == workspace_id),
+    )
+    db.add(item)
+    return item
+
+
+def reorder_statuses(db, user, workspace_id, payload):
+    workspace(db, user, workspace_id, active=True)
+    reorder(
+        db,
+        db.scalars(select(m.Status).where(m.Status.workspace_id == workspace_id)).all(),
+        payload.ids,
+    )
+
+
+def update_status(db, user, workspace_id, status_id, payload):
+    workspace(db, user, workspace_id, active=True)
+    item = member(db, m.Status, status_id, workspace_id)
+    patch_status(db, item, payload)
+    return item
+
+
+def delete_status(db, user, workspace_id, status_id, replacement_id=None):
+    workspace(db, user, workspace_id, active=True)
+    remove_status(db, member(db, m.Status, status_id, workspace_id), replacement_id)
+
+
+def list_labels(db, user, workspace_id):
+    workspace(db, user, workspace_id)
+    return db.scalars(
+        select(m.Label)
+        .where(m.Label.workspace_id == workspace_id)
+        .order_by(m.Label.name, m.Label.id)
+    ).all()
+
+
+def create_label(db, user, workspace_id, payload):
+    workspace(db, user, workspace_id, active=True)
+    item = m.Label(workspace_id=workspace_id, **payload.model_dump())
+    db.add(item)
+    return item
+
+
+def update_label(db, user, workspace_id, label_id, payload):
+    workspace(db, user, workspace_id, active=True)
+    item = member(db, m.Label, label_id, workspace_id)
+    patch_entity(item, payload)
+    return item
+
+
+def delete_label(db, user, workspace_id, label_id):
+    workspace(db, user, workspace_id, active=True)
+    item = member(db, m.Label, label_id, workspace_id)
+    db.execute(delete(m.TaskLabel).where(m.TaskLabel.label_id == item.id))
+    view = db.get(m.ViewPreference, workspace_id)
+    if view and view.settings.get("label_id") == str(item.id):
+        view.settings = {**view.settings, "label_id": None}
+    db.delete(item)
+
+
+def view_settings(db, user, workspace_id):
+    workspace(db, user, workspace_id)
+    item = db.get(m.ViewPreference, workspace_id)
+    return s.ViewSettings.model_validate(item.settings if item else {})
+
+
+def save_view_settings(db, user, workspace_id, payload):
+    workspace(db, user, workspace_id)
+    if payload.status_id:
+        member(db, m.Status, payload.status_id, workspace_id)
+    if payload.label_id:
+        member(db, m.Label, payload.label_id, workspace_id)
+    item = db.get(m.ViewPreference, workspace_id)
+    if item is None:
+        item = m.ViewPreference(workspace_id=workspace_id)
+        db.add(item)
+    item.settings = payload.model_dump(mode="json")
+    return payload
+
+
+def task_events(db, user, task_id, offset=0, limit=100):
+    task(db, user, task_id)
+    query = select(m.TaskEvent).where(m.TaskEvent.task_id == task_id)
+    total = db.scalar(select(func.count()).select_from(query.subquery()))
+    items = db.scalars(
+        query.order_by(m.TaskEvent.occurred_at, m.TaskEvent.id).offset(offset).limit(limit)
+    ).all()
+    return s.EventPage(
+        items=[s.EventOutput.model_validate(item) for item in items],
+        total=total,
+        offset=offset,
+        limit=limit,
+    )
 
 
 def workspace(db, user, workspace_id, *, active=False):

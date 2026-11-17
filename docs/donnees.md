@@ -1,5 +1,19 @@
 # Données et historique
 
+## Assistant IA
+
+La migration additive `0015_assistant` crée sept tables privées. `assistant_settings` conserve fournisseur, modèle, ciphertext du token, suffixe masqué, activation/version/coupure de mémoire. `assistant_conversations` conserve titre, archive et résumé daté ; `assistant_messages` conserve contenu, rôle, état, snippets et référence d’exécution. `assistant_runs` possède l’intention unique `(user_id, request_id)`, l’empreinte de requête, la session d’origine, l’état et la version de mémoire. `assistant_run_events` impose l’unicité `(run_id, sequence)`. `assistant_operations` impose `(run_id, step)` et conserve arguments, empreinte, précondition, état et résultat. `assistant_memories` conserve texte, catégorie, sources et dates.
+
+Toutes les lectures sont limitées au propriétaire. Une opération métier et son reçu sont commités ensemble ; les aperçus n’écrivent pas le métier. Un tour interrompu conserve ses succès partiels et ne reprend aucune écriture implicitement. Les états d’exécution sont `running/complete/interrupted/failed` ; ceux d’opération `preview/complete/failed`. Les confirmations expirent après 24 heures et conservent les contrôles de version métier. La désactivation d’une application conserve l’historique IA mais interdit ses nouvelles actions.
+
+Un oubli, une correction ou une bascule de mémoire incrémente `memory_version`, place une coupure de contexte et efface les résumés du compte. Les messages antérieurs restent visibles, mais ne sont plus réinjectés ; les tours utilisant l’ancienne version s’interrompent. Les souvenirs du chat possèdent un extrait exact de leur message source ; un ajout manuel peut ne pas avoir de source. La déduplication compare le contenu sans casse. La limite est de 500 souvenirs par compte, jusqu’à 1 000 caractères chacun ; le contexte reprend au plus 40 souvenirs, classés par correspondance avec la demande et priorité au profil/profession, puis par date de modification.
+
+L’extraction exige une demande explicite pour les catégories autres que `profile`, `profession`, `projects` et `preferences`, ou lorsqu’un motif sensible FR/EN est détecté, même si le modèle indique le contraire. Les refus explicites empêchent l’extraction. Ces gardes conservatrices complètent la classification du modèle ; elles ne constituent pas une détection exhaustive des informations sensibles dans toutes les langues.
+
+Les résumés traitent des groupes JSON de 60 000 caractères au maximum. Un message trop long est découpé en parties ; `summary_until` n’avance qu’après son traitement entier. Chaque groupe complet sauvegarde son résumé dans une transaction courte. Une interruption ou un budget épuisé conserve le dernier résumé complet et les messages non couverts, sans considérer une partie tronquée comme résumée.
+
+Supprimer une conversation supprime ses messages, exécutions, événements et reçus en cascade. Par défaut les souvenirs associés restent avec références de source nulles ; `forget_memories=true` les efface également et invalide le contexte. Les textes métier des applications ne sont pas supprimés par cette opération. Les tokens sont des enveloppes chiffrées authentifiées liant utilisateur et fournisseur ; le dump ne contient pas le trousseau secret. Voir [sauvegarde/restauration](sauvegardes.md#migration-0015-assistant) et [contrats API](assistant-api.md).
+
 ## Relations
 
 ![Relations entre compte, espaces, sections, statuts, tâches et événements.](assets/diagrams/data.svg)

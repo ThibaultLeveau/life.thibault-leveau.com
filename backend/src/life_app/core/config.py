@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     documentation_dir: Path = PROJECT_ROOT / "site"
     database_url: SecretStr | None = None
     session_hours: int = Field(default=168, ge=1, le=720)
+    assistant_encryption_keys: SecretStr | None = None
+    assistant_timeout_seconds: int = Field(default=180, ge=10, le=600)
 
     @field_validator("database_url")
     @classmethod

@@ -32,12 +32,16 @@ test("bibliothèque, accueil, conservation et réactivation depuis les formulair
   await page.getByLabel("Identifiant").fill(credentials.username);
   await page.getByLabel("Mot de passe").fill(credentials.password);
   await page.getByRole("button", { name: "Se connecter" }).click();
-  await expect(page.getByRole("heading", { name: /Bonjour/ })).toBeVisible();
+  await expect(
+    page.getByRole("heading", {
+      name: "De quoi avez-vous envie aujourd’hui ?",
+    }),
+  ).toBeVisible();
   await page
     .getByRole("combobox", { name: "Apparence", exact: true })
     .selectOption("light");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-  await page.getByRole("link", { name: "Ouvrir Tâches", exact: true }).click();
+  await page.getByRole("link", { name: "Tâches", exact: true }).click();
   await page
     .getByRole("button", { name: "Nouvel espace", exact: true })
     .click();
@@ -91,11 +95,13 @@ test("bibliothèque, accueil, conservation et réactivation depuis les formulair
   await expect(toggle).not.toBeChecked();
   await page.getByRole("link", { name: "Accueil", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "Aucune application activée" }),
+    page.getByText(
+      "Activez vos applications dans la bibliothèque pour les utiliser avec votre assistant.",
+    ),
   ).toBeVisible();
-  await expect(page.getByRole("link", { name: "Ouvrir Tâches" })).toHaveCount(
-    0,
-  );
+  await expect(
+    page.getByRole("link", { name: "Tâches", exact: true }),
+  ).toHaveCount(0);
   await page.goto(`/tasks?space=${space.id}`);
   await expect(
     page.getByRole("heading", { name: "Tâches est désactivée" }),
@@ -158,7 +164,16 @@ test("thème partagé, navigation et bibliothèque à 320 px", async ({
     });
     await page.getByRole("link", { name: "Accueil", exact: true }).click();
     await expect(
-      page.getByRole("link", { name: "Ouvrir Tâches" }),
+      page.getByRole("heading", {
+        name: "De quoi avez-vous envie aujourd’hui ?",
+      }),
+    ).toBeVisible();
+    if (width <= 800)
+      await page
+        .getByRole("button", { name: "Ouvrir la navigation", exact: true })
+        .click();
+    await expect(
+      page.getByRole("link", { name: "Tâches", exact: true }),
     ).toBeVisible();
     expect(
       await page.evaluate(
@@ -169,7 +184,9 @@ test("thème partagé, navigation et bibliothèque à 320 px", async ({
       path: testInfo.outputPath(`accueil-${width}.png`),
       fullPage: true,
     });
-    await page.getByRole("link", { name: "Bibliothèque", exact: true }).click();
+    await page
+      .getByRole("link", { name: "Bibliothèque des applications", exact: true })
+      .click();
   }
   await page
     .getByRole("combobox", { name: "Apparence", exact: true })
@@ -197,7 +214,9 @@ test("erreurs de lecture et écriture sans fausse activation", async ({
   );
   await page.unroute("**/api/v1/applications");
   await page.getByRole("button", { name: "Réessayer" }).click();
-  await page.getByRole("link", { name: "Bibliothèque", exact: true }).click();
+  await page
+    .getByRole("link", { name: "Bibliothèque des applications", exact: true })
+    .click();
   await page.route("**/api/v1/applications/tasks", (route) =>
     route.abort("failed"),
   );

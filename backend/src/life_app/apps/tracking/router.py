@@ -2,12 +2,9 @@ from datetime import date
 from uuid import UUID
 
 from fastapi import APIRouter, Query, Request
-from sqlalchemy import select
 
-from life_app.apps.tracking import models as m
 from life_app.apps.tracking import schemas as s
 from life_app.apps.tracking import service as svc
-from life_app.apps.tracking.messages import tr
 from life_app.core.database import Database
 from life_app.platform.auth.service import CurrentUser
 
@@ -30,16 +27,9 @@ def create(payload: s.TrackerInput, request: Request, user: CurrentUser, db: Dat
 
 @router.put("/trackers/order", response_model=list[s.TrackerOutput])
 def order(payload: s.Order, user: CurrentUser, db: Database):
-    from fastapi import HTTPException
-
-    items = svc.trackers(db, user)
-    if len(set(payload.ids)) != len(payload.ids) or set(payload.ids) != {i.id for i in items}:
-        raise HTTPException(422, tr("invalid"))
-    positions = {id: i for i, id in enumerate(payload.ids)}
-    for item in items:
-        item.position = positions[item.id]
+    items = svc.order_trackers(db, user, payload)
     db.commit()
-    return [svc.output(i) for i in sorted(items, key=lambda i: i.position)]
+    return [svc.output(i) for i in items]
 
 
 @router.get("/trackers/{id}", response_model=s.TrackerOutput)
@@ -74,13 +64,9 @@ def settings(user: CurrentUser, db: Database):
 
 @router.put("/settings", response_model=s.Settings)
 def save_settings(payload: s.Settings, user: CurrentUser, db: Database):
-    item = db.get(m.TrackingSettings, user.id)
-    if item is None:
-        item = m.TrackingSettings(owner_id=user.id)
-        db.add(item)
-    item.timezone = payload.timezone
+    result = svc.save_settings(db, user, payload)
     db.commit()
-    return payload
+    return result
 
 
 @router.get("/current", response_model=list[s.Occurrence])
@@ -141,13 +127,4 @@ def history(
     limit: int = Query(30, ge=1, le=100),
     offset: int = Query(0, ge=0),
 ):
-    _, entry = svc.get_occurrence(db, user, svc.owned(db, user, id), day)
-    if entry is None:
-        return []
-    return db.scalars(
-        select(m.EntryRevision)
-        .where(m.EntryRevision.entry_id == entry.id)
-        .order_by(m.EntryRevision.version.desc())
-        .offset(offset)
-        .limit(limit)
-    ).all()
+    return svc.history(db, user, id, day, offset, limit)

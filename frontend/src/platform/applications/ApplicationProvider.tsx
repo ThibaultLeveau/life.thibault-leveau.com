@@ -61,6 +61,7 @@ export function ApplicationProvider({ children }: { children: ReactNode }) {
       );
     };
     window.addEventListener("focus", focus);
+    window.addEventListener("life-assistant-changed", refresh);
     window.addEventListener("pageshow", focus);
     document.addEventListener("visibilitychange", focus);
     window.addEventListener("life-application-disabled", disabled);
@@ -68,6 +69,7 @@ export function ApplicationProvider({ children }: { children: ReactNode }) {
       mounted.current = false;
       read.current?.abort();
       window.removeEventListener("focus", focus);
+      window.removeEventListener("life-assistant-changed", refresh);
       window.removeEventListener("pageshow", focus);
       document.removeEventListener("visibilitychange", focus);
       window.removeEventListener("life-application-disabled", disabled);

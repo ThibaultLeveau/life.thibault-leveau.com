@@ -1,5 +1,7 @@
 # Référence API
 
+L’[API Assistant](assistant-api.md) documente fournisseur/token, conversations, streaming, reçus et confirmations, mémoire et catalogue de capacités. Les routes métier ci-dessous restent disponibles indépendamment de l’assistant ; leurs règles sont partagées avec ses outils.
+
 Toutes les fonctions métier de l'interface passent par `/api/v1`. Les schémas exacts, champs requis et réponses sont disponibles dans [OpenAPI](https://life.thibault-leveau.com/api/openapi.json) et [Swagger UI](https://life.thibault-leveau.com/api/docs), pour le commit effectivement déployé. Les routes privées exigent une session ; aucune inscription publique n'est disponible.
 
 ## Session et protections

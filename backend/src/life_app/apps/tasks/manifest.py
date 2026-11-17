@@ -1,3 +1,4 @@
+from life_app.apps.tasks.assistant import provider as actions
 from life_app.apps.tasks.integrations import TasksMetrics
 from life_app.apps.tasks.progression import provider as progression
 from life_app.apps.tasks.router import router
@@ -10,6 +11,7 @@ application = ApplicationDefinition(
     path="/tasks",
     icon="check",
     router=router,
+    actions=actions,
     progression=progression,
     metrics=TasksMetrics(),
     default_enabled=True,

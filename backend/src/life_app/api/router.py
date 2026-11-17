@@ -6,6 +6,7 @@ from life_app.api.health import router as health_router
 from life_app.apps.registry import APPLICATIONS
 from life_app.platform.applications.dependencies import require_application
 from life_app.platform.applications.router import router as applications_router
+from life_app.platform.assistant.router import router as assistant_router
 from life_app.platform.auth.router import router as auth_router
 from life_app.platform.integrations.router import router as integrations_router
 from life_app.platform.progression.router import router as progression_router
@@ -13,6 +14,7 @@ from life_app.platform.progression.router import router as progression_router
 router = APIRouter(prefix="/api/v1")
 router.include_router(health_router)
 router.include_router(auth_router)
+router.include_router(assistant_router)
 router.include_router(applications_router)
 router.include_router(integrations_router)
 router.include_router(progression_router)

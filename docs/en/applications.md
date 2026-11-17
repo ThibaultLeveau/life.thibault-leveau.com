@@ -1,6 +1,6 @@
 # Your LifeOS applications
 
-After signing in, **Home** shows the applications enabled for your account. Choose **Open** on a card to use an application.
+After signing in, **Home** shows the [AI assistant](assistant.md), your conversations and enabled application links. Use the **Library** to choose and open applications.
 
 ## Sign in
 
@@ -13,15 +13,15 @@ After signing in, **Home** shows the applications enabled for your account. Choo
 
 ## Choose applications
 
-1. Open **Library** in navigation or **Manage my applications** from Home.
+1. Open **Library** in Home navigation.
 2. Use the **Enable / Disable** switch on an application’s card. It also works with Tab and Space.
-3. Return Home to see your saved selection.
+3. Open the application or return Home: available links and tools reflect your saved selection.
 
 The selection belongs to your account. It survives reloads and sign-out and is available on other devices. A network error is shown without pretending that a change was saved.
 
 Disabling an application preserves **all its data**, including archives, dates, preferences and history. It removes the application from Home and blocks its business API routes. A direct link offers to open the library. Enable it again to access the same data. Disabling does not archive or complete tasks, cancel training or reset dates.
 
-When every application is disabled, Home offers to explore the library. Sign-in, appearance, language and the library remain available. An open tab refreshes the application list when it returns to the foreground; a disabled application’s rejected request also offers a return to the library. Changes are not pushed instantly between devices.
+When every application is disabled, conversation and the library remain accessible without business tools. Sign-in, appearance and language remain available. An open tab refreshes the application list when it returns to the foreground; a disabled application’s rejected request also offers a return to the library. Changes are not pushed instantly between devices.
 
 ![Library: enable an application before opening it.](../assets/screenshots/en/general-library.png){ loading=lazy }
 
@@ -43,9 +43,9 @@ All applications share one session and the **system / light / dark** appearance 
 
 An expired session returns to sign-in and removes private views. HTML pages contain no private records; the API loads them only after authentication and activation checks. All preferences and application activation are also available through the [versioned API](api.md).
 
-![Personal Home: open enabled applications.](../assets/screenshots/en/general-home.png){ loading=lazy }
+![Personal Home: assistant, history and application access.](../assets/screenshots/en/general-home.png){ loading=lazy }
 
-*Personal Home: open enabled applications.*
+*Personal Home: assistant, history and application access.*
 
 ## Shared navigation
 

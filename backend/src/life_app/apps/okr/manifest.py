@@ -1,3 +1,4 @@
+from life_app.apps.okr.assistant import provider as actions
 from life_app.apps.okr.integrations import provider as metrics
 from life_app.apps.okr.progression import provider as progression
 from life_app.apps.okr.router import router
@@ -10,6 +11,7 @@ application = ApplicationDefinition(
     path="/okr",
     icon="flag",
     router=router,
+    actions=actions,
     metrics=metrics,
     progression=progression,
     translations={

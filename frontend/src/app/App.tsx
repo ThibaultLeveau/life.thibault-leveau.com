@@ -63,9 +63,9 @@ function Routes() {
     );
   if (path === "/")
     return (
-      <AppLayout>
-        <HomePage />
-      </AppLayout>
+      <ApplicationBoundary>
+        <HomePage modules={applications} />
+      </ApplicationBoundary>
     );
   if (path === "/applications")
     return (

@@ -55,7 +55,7 @@ test.afterAll(async () => {
 test("menu du nom : clavier, clic extérieur, erreurs et lien Réglages", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/applications");
   const trigger = page.getByRole("button", { name: username, exact: true });
   await trigger.focus();
   await page.keyboard.press("Enter");
@@ -70,7 +70,9 @@ test("menu du nom : clavier, clic extérieur, erreurs et lien Réglages", async 
   await expect(trigger).toBeFocused();
   await expect(page.getByRole("menu")).toHaveCount(0);
   await trigger.click();
-  await page.getByRole("heading", { name: /Bonjour/ }).click();
+  await page
+    .getByRole("heading", { name: "Bibliothèque des applications" })
+    .click();
   await expect(page.getByRole("menu")).toHaveCount(0);
   await page.route("**/api/v1/auth/session", (route) =>
     route.request().method() === "DELETE"

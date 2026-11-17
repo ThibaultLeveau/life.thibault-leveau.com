@@ -1,5 +1,19 @@
 # Data and history
 
+## AI assistant {#assistant-ia}
+
+Additive migration `0015_assistant` creates seven private tables. `assistant_settings` stores provider, model, encrypted token, masked suffix and memory enablement/version/cutoff. `assistant_conversations` stores title, archive state and dated summary; `assistant_messages` stores content, role, status, snippets and run reference. `assistant_runs` has unique intention `(user_id, request_id)`, request fingerprint, original session, status and memory version. `assistant_run_events` enforces unique `(run_id, sequence)`. `assistant_operations` enforces `(run_id, step)` and retains arguments, fingerprint, precondition, status and result. `assistant_memories` holds content, category, sources and dates.
+
+All reads are owner-scoped. Business writes and their receipts commit together; previews leave business data unchanged. Interrupted turns retain partial successes and never implicitly resume writes. Run states are `running/complete/interrupted/failed`; operation states are `preview/complete/failed`. Confirmations expire after 24 hours and retain business version checks. Disabling an application preserves assistant history but blocks new business actions.
+
+Forgetting, correcting or toggling memory increments `memory_version`, sets a context cutoff and clears account summaries. Older messages stay visible but are not reinjected; turns using the old version stop. Chat memories have an exact source excerpt; manually added memories may have no source. Deduplication compares case-insensitive content. Accounts can retain 500 memories of up to 1,000 characters; context includes at most 40 memories, ranked by query relevance and profile/profession priority, then by update time.
+
+Extraction requires an explicit request for categories other than `profile`, `profession`, `projects` and `preferences`, or when a sensitive FR/EN pattern is detected, even if the model says otherwise. Explicit refusals prevent extraction. These conservative checks supplement model classification; they do not provide exhaustive sensitive-data detection in every language.
+
+Summaries process JSON batches of at most 60,000 characters. Oversized messages are split into parts; `summary_until` advances only after the whole message is processed. Each completed batch saves its summary in a short transaction. Interruption or exhausted budgets preserve the last completed summary and uncovered messages without treating truncated input as summarized.
+
+Deleting a conversation cascades to messages, runs, events and receipts. By default memories survive with null source references; `forget_memories=true` also deletes them and invalidates context. Application business objects are unaffected. Tokens are authenticated encrypted envelopes binding user and provider; the secret keyring is excluded from dumps. See [backup/restore](sauvegardes.md#migration-0015-assistant) and [API contracts](assistant-api.md).
+
 ## Relationships {#relations}
 
 ![Relationships among account, workspaces, sections, statuses, tasks and events.](../assets/diagrams/en/data.svg)

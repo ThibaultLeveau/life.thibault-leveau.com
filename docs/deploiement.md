@@ -1,5 +1,15 @@
 # Déploiement
 
+## Livraison de l’assistant IA
+
+Après validation, revue, CI et fusion, publier le `main` propre avec `scripts/deploy.sh`. La sauvegarde précède la migration additive `0015_assistant`. Configurer `LIFE_ASSISTANT_ENCRYPTION_KEYS` dans `.env.production` protégé et sauvegarder ce trousseau séparément avant de permettre l’enregistrement de tokens. Le délai `LIFE_ASSISTANT_TIMEOUT_SECONDS` vaut 180 secondes par défaut. Les dépendances HTTP/chiffrement rejoignent l’image existante ; aucun nouveau service, volume, DNS ou proxy. Vérifier les sorties HTTPS vers les trois fournisseurs et la diffusion progressive derrière Caddy.
+
+Le compte utilisateur configure son fournisseur, modèle et token via les réglages ; ne pas inventer de token, l’inscrire dans un fichier versionné ou l’exposer dans des journaux. Sans credential réel disponible, vérifier l’interface et les erreurs de configuration, puis consigner explicitement l’absence de validation réseau réelle. Les tests avec fournisseurs simulés ne prouvent pas l’accès au compte fournisseur.
+
+Sur un compte synthétique : vérifier accueil et historique FR/EN, enregistrement/masquage/suppression du token, mémoire sourcée puis correction/oubli/désactivation, lecture et mutation dans chacune des cinq applications, aperçu/confirmation/conflit, archivage/restauration de conversation, interruption et rechargement sans double écriture. Vérifier une désactivation et une expiration de session pendant un tour, les applications directes, thèmes, clavier, animations réduites et mobile 320 px. Tester la [restauration et rotation](sauvegardes.md#migration-0015-assistant) sur une base jetable.
+
+Comparer le SHA de l’image réellement exécutée et la révision Alembic, contrôler sondes, `/`, `/settings`, `/applications`, routes des cinq applications, OpenAPI, `/documentation/assistant/`, `/documentation/en/assistant/` et les références API FR/EN en HTTPS. Consigner sauvegarde, SHA, révision et résultats dans l’issue #85 ; ne pas qualifier une étape non exécutée de réussie.
+
 ## Principe
 
 Le déploiement sur le VPS termine chaque changement, y compris documentaire ou portant sur `AGENTS.md`. Après la revue, la réussite de la CI et la fusion, l'agent publie le dernier `main` validé sans attendre une nouvelle demande. Il vérifie la version exécutée et les routes publiques, puis consigne les résultats dans l'issue. Un blocage de production doit être signalé explicitement ; une fusion seule ne termine pas la livraison.

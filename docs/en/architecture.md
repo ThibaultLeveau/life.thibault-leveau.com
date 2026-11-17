@@ -2,6 +2,12 @@
 
 ## Overview {#vue-densemble}
 
+[ADR 008](decisions/008-assistant-ia.md), approved in issue #85, extends this monolith with `platform/assistant`. Signed-in Home composes chat, history and personal memory. PostgreSQL stores these records and action receipts; no agent service, queue or vector store is added.
+
+The coordinator calls only relevant specialists: five domain specialists and a `lifeos` specialist for the platform. Manifests expose 118 domain capabilities; `platform/assistant/common.py` supplies 11 capabilities for library/activation, preferences, progression and integrations. Every application owns `assistant.py` and supplies `ActionProvider` through its manifest; capabilities reuse the domain's schemas, ownership, versions, events and progression. The platform discovers injected contracts without importing applications. Snippets use application-owned React renderers loaded through the frontend registry, with versioned structured data and no generated executable code.
+
+Message admission releases the owner lock before calling a provider. Each action opens a short transaction, rechecks session/activation/version and records the mutation and receipt together. Previews simulate the action in a rolled-back savepoint; confirmation executes the saved proposal with version checks. Conversation history, summaries and memories remain distinct. See [Assistant API](assistant-api.md), [data](donnees.md#assistant-ia) and [configuration](configuration.md).
+
 Life retains the FastAPI / React / MkDocs monorepo. One Uvicorn process serves the API, compiled frontend and documentation. PostgreSQL 17 is the only added data service, under [ADR 002](decisions/002-gestion-taches.md).
 
 ![Production flow: browser, Caddy, application and private PostgreSQL.](../assets/diagrams/en/production.svg)

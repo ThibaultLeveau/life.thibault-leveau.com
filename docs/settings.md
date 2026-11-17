@@ -2,7 +2,7 @@
 
 [English guide](en/settings.md)
 
-Depuis l’accueil ou la bibliothèque, cliquez sur votre nom en haut à droite : le menu propose **Réglages** et **Se déconnecter**. Le menu fonctionne avec Entrée, les flèches, Début/Fin et Échap. Depuis une application, **Réglages** ouvre directement sa section dans la même page. Les anciennes adresses comme `/sport?tab=settings` restent utilisables.
+Depuis l’accueil, utilisez **Réglages** dans la navigation ; depuis la bibliothèque, le menu du nom propose **Réglages** et **Se déconnecter**. Le menu fonctionne avec Entrée, les flèches, Début/Fin et Échap. Depuis une application, **Réglages** ouvre directement sa section dans la même page. Les anciennes adresses comme `/sport?tab=settings` restent utilisables.
 
 ## Général
 
@@ -14,6 +14,10 @@ Le **calendrier de progression** possède son propre fuseau IANA et les période
 ![Réglages généraux : apparence, langue, fuseau de progression et vacances.](assets/screenshots/fr/general-settings.png){ loading=lazy }
 
 *Réglages généraux : apparence, langue, fuseau de progression et vacances.*
+
+## Assistant IA
+
+La section Général comprend aussi l’encart **Assistant IA** : fournisseur OpenAI/Anthropic/Gemini, identifiant de modèle, token API et activation de la mémoire. Enregistrer précède **Tester la connexion**. Un champ token vide conserve la valeur ; sa suppression est explicite. Changer de fournisseur efface l’ancien token et le modèle. La mémoire se consulte et se corrige depuis le chat ou les réglages généraux. Voir le [guide Assistant](assistant.md) et son [API](assistant-api.md).
 
 ## Une section par application
 
@@ -37,11 +41,12 @@ Une lecture en échec propose **Réessayer**. Une sauvegarde en échec conserve 
 
 ## API et conservation
 
-La page compose les API existantes, sans nouvelle table ni stockage métier dans le navigateur :
+La page compose les API du socle et des applications, sans stockage métier dans le navigateur. L’assistant conserve ses réglages dans `assistant_settings` :
 
 | Préférences | Lecture / écriture |
 | --- | --- |
 | Thème et langue | `GET /api/v1/preferences`, `PUT /api/v1/preferences` (champs partiels) |
+| Assistant IA | `GET /api/v1/assistant/settings`, `PUT /api/v1/assistant/settings`, `POST /api/v1/assistant/settings/test` |
 | Progression | `GET /api/v1/progression/settings`, `PUT /api/v1/progression/settings` (`expected_version`) |
 | Agenda | `GET /api/v1/agenda/view`, `PUT /api/v1/agenda/view` |
 | Vue d’espace | `GET /api/v1/workspaces/{id}/view`, `PUT /api/v1/workspaces/{id}/view` |
@@ -49,7 +54,7 @@ La page compose les API existantes, sans nouvelle table ni stockage métier dans
 | Suivi | `GET /api/v1/tracking/settings`, `PUT /api/v1/tracking/settings` |
 | Objectifs OKR | `GET /api/v1/okr/settings`, `PUT /api/v1/okr/settings` (`expected_version`) |
 
-Les mutations nécessitent session, origine autorisée et jeton CSRF. Les routes métier exigent l’application active et le propriétaire. Voir les [exemples API](api.md), les [données](donnees.md) et la [sauvegarde/restauration](sauvegardes.md). La sauvegarde PostgreSQL existante conserve tous ces réglages ; cette interface ne nécessite aucune migration.
+Les mutations nécessitent session, origine autorisée et jeton CSRF. Les routes métier exigent l’application active et le propriétaire. Voir les [exemples API](api.md), les [données](donnees.md) et la [sauvegarde/restauration](sauvegardes.md). Le dump conserve les réglages ; `0015_assistant` ajoute ceux de l’IA, dont le trousseau de chiffrement doit être sauvegardé séparément.
 
 ![Réglages Sport : repos entre séries et jours d’utilisation.](assets/screenshots/fr/sport-settings.png){ loading=lazy }
 

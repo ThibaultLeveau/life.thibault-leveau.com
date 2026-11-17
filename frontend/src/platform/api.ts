@@ -1,24 +1,25 @@
-import { tr } from "../shared/i18n";
+import { errorMessage, tr } from "../shared/i18n";
 import i18next from "i18next";
 import type { Session } from "./auth/types";
 
 let csrf = "";
 let epoch = 0;
-i18next.on("languageChanged", () => {
+const streams = new Set<AbortController>();
+function invalidate() {
   epoch += 1;
-});
+  streams.forEach((controller) => controller.abort());
+}
+i18next.on("languageChanged", invalidate);
 export function setApiSession(session: Session | null) {
   const token = session?.csrf_token ?? "";
-  if (token !== csrf) epoch += 1;
+  if (token !== csrf) invalidate();
   csrf = token;
 }
-
 export interface ApiFieldError {
   loc?: (string | number)[];
   msg: string;
   type?: string;
 }
-
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -28,16 +29,15 @@ export class ApiError extends Error {
     super(message);
   }
 }
-
-export async function api<T>(
+async function responseFor(
   path: string,
-  method = "GET",
+  method: string,
   body?: unknown,
   signal?: AbortSignal,
-): Promise<T> {
-  const requestEpoch = epoch;
-  const requestCsrf = csrf;
-  const requestLanguage = i18next.language;
+  streaming = false,
+) {
+  const requestEpoch = epoch,
+    requestCsrf = csrf;
   const ensureCurrent = () => {
     if (requestEpoch !== epoch || signal?.aborted)
       throw new DOMException("Obsolete response", "AbortError");
@@ -49,7 +49,8 @@ export async function api<T>(
       credentials: "same-origin",
       signal,
       headers: {
-        "Accept-Language": requestLanguage,
+        "Accept-Language": i18next.language,
+        ...(streaming ? { Accept: "text/event-stream" } : {}),
         ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
         ...(csrf ? { "X-CSRF-Token": csrf } : {}),
       },
@@ -88,14 +89,92 @@ export async function api<T>(
         new CustomEvent("life-application-disabled", { detail: disabled }),
       );
     throw new ApiError(
-      message,
+      errorMessage(message),
       response.status,
       Array.isArray(data.detail) ? data.detail : [],
     );
   }
+  return { response, ensureCurrent };
+}
+export async function api<T>(
+  path: string,
+  method = "GET",
+  body?: unknown,
+  signal?: AbortSignal,
+): Promise<T> {
+  const { response, ensureCurrent } = await responseFor(
+    path,
+    method,
+    body,
+    signal,
+  );
   const result = response.status === 204 ? undefined : await response.json();
   ensureCurrent();
   if (!["GET", "HEAD", "OPTIONS"].includes(method))
     window.dispatchEvent(new Event("life-data-changed"));
   return result as T;
+}
+
+/** Same session, CSRF and stale-response rules as JSON requests, including each streamed event. */
+export async function apiStream<T>(
+  path: string,
+  body: unknown,
+  receive: (event: T) => void,
+  signal?: AbortSignal,
+): Promise<void> {
+  const controller = new AbortController();
+  const abort = () => controller.abort();
+  if (signal?.aborted) abort();
+  signal?.addEventListener("abort", abort, { once: true });
+  streams.add(controller);
+  let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
+  try {
+    const { response, ensureCurrent } = await responseFor(
+      path,
+      "POST",
+      body,
+      controller.signal,
+      true,
+    );
+    if (
+      !response.body ||
+      !response.headers.get("content-type")?.includes("text/event-stream")
+    )
+      throw new ApiError(tr("assistant_stream_lost"), 0);
+    reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    const dispatch = (block: string) => {
+      const data = block
+        .split(/\r?\n/)
+        .filter((line) => line.startsWith("data:"))
+        .map((line) => line.slice(5).replace(/^ /, ""))
+        .join("\n");
+      if (!data || data === "[DONE]") return;
+      ensureCurrent();
+      receive(JSON.parse(data) as T);
+    };
+    for (;;) {
+      const { value, done } = await reader.read();
+      ensureCurrent();
+      buffer += decoder.decode(value, { stream: !done });
+      let separator: RegExpExecArray | null;
+      while ((separator = /\r?\n\r?\n/.exec(buffer))) {
+        dispatch(buffer.slice(0, separator.index));
+        buffer = buffer.slice(separator.index + separator[0].length);
+      }
+      if (buffer.length > 2_000_000)
+        throw new ApiError(tr("assistant_stream_lost"), 0);
+      if (done) {
+        if (buffer.trim()) dispatch(buffer);
+        break;
+      }
+    }
+    window.dispatchEvent(new Event("life-data-changed"));
+  } finally {
+    await reader?.cancel().catch(() => {});
+    reader?.releaseLock();
+    streams.delete(controller);
+    signal?.removeEventListener("abort", abort);
+  }
 }

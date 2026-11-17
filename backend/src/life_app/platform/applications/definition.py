@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from fastapi import APIRouter
 
 from life_app.core.i18n import locale
+from life_app.platform.assistant.definition import ActionProvider
 from life_app.platform.integrations.definition import MetricProvider
 from life_app.platform.progression.definition import ProgressionProvider
 
@@ -21,6 +22,7 @@ class ApplicationDefinition:
     translations: dict[str, tuple[str, str]] = field(default_factory=dict)
     metrics: MetricProvider | None = None
     progression: ProgressionProvider | None = None
+    actions: ActionProvider | None = None
 
     def localized_metadata(self) -> tuple[str, str]:
         return self.translations.get(locale(), (self.name, self.description))

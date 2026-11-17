@@ -79,9 +79,11 @@ test("anonymous browser language and account preference survive sign-in, theme c
   await page.goto("/");
   await language(page, "en");
   await expect(
-    page.getByRole("heading", { name: "My applications" }),
+    page.getByRole("heading", { name: "What would you like to do today?" }),
   ).toBeVisible();
-  await expect(page.getByRole("link", { name: "Open Tasks" })).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Tasks", exact: true }),
+  ).toBeVisible();
   await page.getByRole("combobox", { name: "Appearance" }).selectOption("dark");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   expect(await (await page.request.get("/api/v1/preferences")).json()).toEqual({

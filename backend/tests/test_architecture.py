@@ -120,3 +120,26 @@ def test_progression_providers_keep_catalogues_in_their_application():
         assert all(len(t) == 2 and all(t) for t in app.progression.titles)
         assert all(len(q.names) == 2 and len(q.descriptions) == 2 for q in app.progression.quests)
         assert "ProgressionBadge" in (FRONTEND / "apps" / app.id / "Page.tsx").read_text()
+
+
+def test_assistant_capabilities_cover_application_routes_with_owned_handlers():
+    for app in APPLICATIONS:
+        assert app.actions is not None
+        actions = app.actions.actions
+        assert actions and len({action.name for action in actions}) == len(actions)
+        assert {(action.method, action.path) for action in actions} == {
+            (method, route.path) for route in app.router.routes for method in route.methods
+        }
+        for action in actions:
+            assert action.labels and len(action.labels) == 2 and all(action.labels)
+            assert action.handler.__module__ == f"life_app.apps.{app.id}.assistant"
+            assert action.input_model.model_json_schema()["additionalProperties"] is False
+            assert action.output_model is not None or any(
+                route.path == action.path and route.status_code == 204
+                for route in app.router.routes
+            )
+            assert action.method != "DELETE" or action.confirmation
+            assert action.mutating or not action.confirmation
+        manifest = (FRONTEND / "apps" / app.id / "manifest.ts").read_text()
+        assert "AssistantSnippet" in manifest
+        assert 'import("./assistant/Snippet")' in manifest
