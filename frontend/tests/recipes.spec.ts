@@ -146,7 +146,7 @@ test("recette, catalogue bilingue, ingrédient inconnu et portions calculées", 
   );
   await page.getByLabel("Nombre de personnes", { exact: true }).fill("6");
   await expect(
-    page.locator(".recipes-ingredient-list").getByText("450", { exact: false }),
+    page.locator(".recipes-ingredient-list").getByText("450 g", { exact: true }),
   ).toBeVisible();
   expect(
     (
