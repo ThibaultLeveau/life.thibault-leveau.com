@@ -85,13 +85,9 @@ def on_page_context(context, *, page, config, nav):
     if alternate_source not in _pages:
         raise PluginError(f"Missing translation for {page.file.src_uri}")
     alternate = next(p for p in nav.pages if p.file.src_uri == alternate_source)
-    local_config["extra"]["alternate"] = [
-        {
-            "name": "Français" if locale == "en" else "English",
-            "lang": "fr" if locale == "en" else "en",
-            "link": alternate.url,
-        }
-    ]
+    # The toolbar links directly to the equivalent page. Material's built-in
+    # language selector assumes separate site roots and probes their sitemaps.
+    local_config["extra"].pop("alternate", None)
     local_config["extra"]["homepage"] = local_nav.homepage.url
     # Search is scoped in on_post_page, while normal assets retain MkDocs' base_url.
     context.update(

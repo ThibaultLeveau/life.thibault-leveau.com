@@ -87,3 +87,7 @@ Toutes ces opérations sont accessibles par l’[API versionnée](tracking-api.m
 ![Statistiques : choisir un suivi pour lire ses tendances.](assets/screenshots/fr/tracking-statistics.png){ loading=lazy }
 
 *Statistiques : choisir un suivi pour lire ses tendances.*
+
+![Sur mobile, sélectionner un jour puis lire son détail sous le calendrier.](assets/screenshots/fr/tracking-calendar-mobile.png){ loading=lazy width="390" }
+
+*Sur mobile, sélectionner un jour puis lire son détail sous le calendrier.*

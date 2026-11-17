@@ -1,5 +1,5 @@
 // Real screenshots of synthetic accounts. Run via scripts/capture-documentation.sh.
-import { chromium } from '@playwright/test';
+import { chromium, expect } from '@playwright/test';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 const baseURL = process.env.LIFE_DOCS_URL;
@@ -22,7 +22,12 @@ try {
     const page = await context.newPage();
     await mkdir(`${root}/${locale}`, { recursive: true });
     const capture = async (name, route, prepare) => {
-      if (route) await page.goto(route, { waitUntil: 'networkidle' });
+      if (route) {
+        const response = await page.goto(route, { waitUntil: 'networkidle' });
+        if (!response?.ok()) throw new Error(`Capture ${name}: HTTP ${response?.status()}`);
+      }
+      if (route === '/api/docs') await expect(page.locator('.swagger-ui .opblock').first()).toBeVisible();
+      else await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
       if (prepare) await prepare();
       await page.evaluate(() => document.fonts.ready);
       await page.screenshot({ path: `${root}/${locale}/${name}.png`, animations: 'disabled' });

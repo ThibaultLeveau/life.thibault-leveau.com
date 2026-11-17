@@ -49,7 +49,11 @@ for (const [index, locale] of ["fr", "en"].entries()) {
       }
       const search = page.locator(".md-search__input");
       await expect(search).toHaveAttribute("placeholder", locale === "fr" ? "Rechercher" : "Search");
-      await search.fill(guide.query[index]);
+      await search.focus();
+      await expect(page.locator(".md-search-result__meta")).toHaveText(
+        locale === "fr" ? "Taper pour démarrer la recherche" : "Type to start searching",
+      );
+      await search.pressSequentially(guide.query[index]);
       const result = page.locator(".md-search-result__link");
       await expect(result.first()).toBeVisible();
       checkScope(await result.evaluateAll((links) => links.map((link) => (link as HTMLAnchorElement).href)));
@@ -72,9 +76,10 @@ for (const [index, locale] of ["fr", "en"].entries()) {
     await page.goto(`${prefix}technique/`);
     await expect(page.locator(".guide-toolbar")).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
-    const menu = page.locator('label[for="__drawer"]').first();
+    const menu = page.locator('.md-header label[for="__drawer"]');
     await menu.click();
     await expect(page.locator("#__drawer")).toBeChecked();
+    await page.locator('.md-nav--primary label.md-nav__link').filter({ hasText: locale === "fr" ? "Développer" : "Development" }).first().click();
     const gettingStarted = page.locator('.md-nav--primary a[href$="demarrage/"]');
     await gettingStarted.focus();
     await page.keyboard.press("Enter");

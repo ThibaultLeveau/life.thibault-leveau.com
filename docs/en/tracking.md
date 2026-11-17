@@ -61,3 +61,7 @@ The calendar and trends allow up to 367 days per request. Queries and entry hist
 ![Statistics: select a tracker to read its trends.](../assets/screenshots/en/tracking-statistics.png){ loading=lazy }
 
 *Statistics: select a tracker to read its trends.*
+
+![On mobile, select a day and read its details below the calendar.](../assets/screenshots/en/tracking-calendar-mobile.png){ loading=lazy width="390" }
+
+*On mobile, select a day and read its details below the calendar.*

@@ -21,7 +21,6 @@ theme:
     primary: custom
     accent: custom
   features:
-    - navigation.sections
     - navigation.top
     - navigation.tracking
     - search.suggest
