@@ -526,9 +526,9 @@ test("chat : contrat SSE, cinq snippets, confirmation, historique et actions", a
   await expect(page.locator(".assistant-welcome h1")).toBeVisible();
   await expect(page.locator(".assistant-message")).toHaveCount(0);
   await expect(page.locator(".assistant-history-item")).toHaveCount(0);
-  await expect(
-    page.getByLabel("Votre message", { exact: true }),
-  ).toHaveValue("");
+  await expect(page.getByLabel("Votre message", { exact: true })).toHaveValue(
+    "",
+  );
   await expect(page).toHaveTitle("Assistant · LifeOS");
   await page
     .getByLabel("Votre message", { exact: true })
@@ -570,6 +570,19 @@ for (const locale of ["fr", "en"] as const) {
     await page.goto("/?conversation=conversation-1");
     const composer = page.getByLabel(labels.message, { exact: true });
     await composer.fill("Un brouillon dans la conversation supprimée");
+    await page.locator('input[type="file"]').setInputFiles({
+      name: "draft.txt",
+      mimeType: "text/plain",
+      buffer: Buffer.from(
+        "Pièce jointe du brouillon à conserver en cas d’échec",
+      ),
+    });
+    const attached = page.locator(".assistant-composer .assistant-source");
+    await expect(attached.getByRole("status")).toHaveText(
+      locale === "fr" ? "Prêt à envoyer" : "Ready to send",
+    );
+    const source = [...data.sources.values()][0];
+    expect(source.removed_at).toBeNull();
     const remove = page.getByRole("button", {
       name: labels.remove,
       exact: true,
@@ -581,6 +594,7 @@ for (const locale of ["fr", "en"] as const) {
       .click();
     await expect(page).toHaveURL(/conversation=conversation-1/);
     await expect(page.locator(".assistant-message")).toHaveCount(2);
+    await expect(attached).toContainText("draft.txt");
     expect(
       data.requests.filter((request) => request.method === "DELETE"),
     ).toHaveLength(0);
@@ -608,6 +622,15 @@ for (const locale of ["fr", "en"] as const) {
       "Un brouillon dans la conversation supprimée",
     );
     expect(data.conversations.has("conversation-1")).toBe(true);
+    await expect(attached).toContainText("draft.txt");
+    expect(source.removed_at).toBeNull();
+    expect(
+      data.requests.filter(
+        (request) =>
+          request.method === "DELETE" &&
+          request.path === `/assistant/sources/${source.id}`,
+      ),
+    ).toHaveLength(0);
 
     fail = false;
     await dialog
@@ -619,6 +642,15 @@ for (const locale of ["fr", "en"] as const) {
     await expect(page.locator(".assistant-message")).toHaveCount(0);
     await expect(composer).toHaveValue("");
     await expect(composer).toBeEnabled();
+    await expect(attached).toHaveCount(0);
+    await expect.poll(() => source.removed_at).toBe(now);
+    expect(
+      data.requests.filter(
+        (request) =>
+          request.method === "DELETE" &&
+          request.path === `/assistant/sources/${source.id}`,
+      ),
+    ).toHaveLength(1);
     expect(data.conversations.size).toBe(0);
     await page.reload();
     await expect(page.locator(".assistant-welcome h1")).toBeVisible();

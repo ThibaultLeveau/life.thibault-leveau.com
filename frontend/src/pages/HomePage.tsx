@@ -252,12 +252,9 @@ export function HomePage({ modules }: { modules: ApplicationModule[] }) {
           onClick={() => {
             if (!id) {
               if (permit()) {
-                setDraft("");
-                sources.clear();
-                dictation.cancel();
-                setDictationOverflow("");
+                clearDraft();
                 setSidebar(false);
-                composer.current?.focus();
+                requestAnimationFrame(() => composer.current?.focus());
               }
             } else navigate(null);
           }}
@@ -551,7 +548,7 @@ export function HomePage({ modules }: { modules: ApplicationModule[] }) {
                       "/",
                     );
                     setId(null);
-                    setDraft("");
+                    clearDraft();
                     setVisible(40);
                     setAtBottom(true);
                     follow.current = true;
