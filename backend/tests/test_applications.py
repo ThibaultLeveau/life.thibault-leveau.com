@@ -1,5 +1,6 @@
 """Account activation, HTTP access parity, preservation, constraints and migration."""
 
+import re
 from concurrent.futures import ThreadPoolExecutor
 from threading import Event
 from uuid import UUID, uuid4
@@ -7,6 +8,7 @@ from uuid import UUID, uuid4
 import pytest
 from alembic import command
 from fastapi.testclient import TestClient
+from http_contracts import application_operations
 from sqlalchemy import event, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -39,6 +41,7 @@ def test_catalogue_defaults_and_idempotence(client, engine):
         ("tracking", False),
         ("okr", False),
         ("recipes", False),
+        ("life_ai", False),
     ]
     assert response.json()[0]["updated_at"] is None
     off = toggle(client, False)
@@ -94,14 +97,11 @@ def test_every_registered_business_route_is_guarded(client):
             client.put(f"/api/v1/applications/{definition.id}", json={"enabled": False}).status_code
             == 200
         )
-        for route in definition.router.routes:
-            path = route.path
-            for name in route.param_convertors:
-                path = path.replace("{" + name + "}", str(uuid4()))
-            for method in route.methods:
-                response = client.request(method, "/api/v1" + path, json={})
-                assert response.status_code == 403, (method, path, response.text)
-                assert response.headers["X-Life-Application-Disabled"] == definition.id
+        for method, path in application_operations(definition):
+            path = re.sub(r"\{[^}]+\}", str(uuid4()), path)
+            response = client.request(method, "/api/v1" + path, json={})
+            assert response.status_code == 403, (method, path, response.text)
+            assert response.headers["X-Life-Application-Disabled"] == definition.id
     assert client.get("/api/v1/preferences").status_code == 200
     assert client.get("/api/v1/auth/session").status_code == 200
     assert client.get("/api/v1/health/ready").status_code == 200

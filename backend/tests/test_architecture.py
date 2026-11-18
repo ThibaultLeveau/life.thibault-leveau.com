@@ -4,6 +4,8 @@ import ast
 import re
 from pathlib import Path
 
+from http_contracts import application_operations
+
 from life_app.apps.registry import APPLICATIONS
 
 ROOT = Path(__file__).parents[2]
@@ -34,14 +36,13 @@ def test_applications_have_matching_manifests_and_standard_structure():
         for base in (BACKEND, FRONTEND):
             for language in ("fr", "en"):
                 assert (base / "apps" / item.id / "locales" / f"{language}.json").is_file()
-        for route in item.router.routes:
-            for method in route.methods:
-                operation = (method, route.path)
-                assert operation not in operations, "Collision entre routes métier"
-                assert not route.path.startswith(
-                    ("/auth/", "/preferences", "/applications", "/health", "/progression")
-                )
-                operations.add(operation)
+        for method, path in application_operations(item):
+            operation = (method, path)
+            assert operation not in operations, "Collision entre routes métier"
+            assert not path.startswith(
+                ("/auth/", "/preferences", "/applications", "/health", "/progression")
+            )
+            operations.add(operation)
     for base in (BACKEND, FRONTEND):
         assert {
             p.name for p in (base / "apps").iterdir() if p.is_dir() and p.name != "__pycache__"
@@ -103,7 +104,7 @@ def test_metric_providers_are_owned_by_their_application_and_frames_are_shared()
         )
         for metric in metrics:
             assert len({f.id for f in metric.filters}) == len(metric.filters)
-    for app_id in ("sport", "tasks", "tracking", "okr", "recipes"):
+    for app_id in (app.id for app in APPLICATIONS):
         assert (
             "shared/ui/ApplicationNavigation"
             in (FRONTEND / "apps" / app_id / "Page.tsx").read_text()
@@ -112,6 +113,9 @@ def test_metric_providers_are_owned_by_their_application_and_frames_are_shared()
 
 def test_progression_providers_keep_catalogues_in_their_application():
     for app in APPLICATIONS:
+        if app.id == "life_ai":
+            assert app.progression is None  # ADR 011: conversation is not a scored habit.
+            continue
         assert app.progression is not None
         assert type(app.progression).__module__ == f"life_app.apps.{app.id}.progression"
         assert len(app.progression.quests) >= 50
@@ -124,6 +128,9 @@ def test_progression_providers_keep_catalogues_in_their_application():
 
 def test_assistant_capabilities_cover_application_routes_with_owned_handlers():
     for app in APPLICATIONS:
+        if app.id == "life_ai":
+            assert app.actions is None  # Direct-user controls must not recursively call the model.
+            continue
         assert app.actions is not None
         actions = app.actions.actions
         assert actions and len({action.name for action in actions}) == len(actions)

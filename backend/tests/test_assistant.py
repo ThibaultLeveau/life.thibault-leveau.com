@@ -13,10 +13,11 @@ from fastapi.testclient import TestClient
 from pydantic import SecretStr
 from sqlalchemy import func, select
 
+from life_app.apps.life_ai import execution, service
+from life_app.apps.life_ai import models as m
+from life_app.apps.life_ai import schemas as s
 from life_app.core.database import utcnow
-from life_app.platform.assistant import credentials, execution, service
-from life_app.platform.assistant import models as m
-from life_app.platform.assistant import schemas as s
+from life_app.platform.assistant import credentials
 from life_app.platform.assistant.providers import Response
 from life_app.platform.auth.models import LoginSession, User
 
@@ -24,7 +25,7 @@ TOKEN = "sk-synthetic-assistant-private-token"
 
 
 @pytest.fixture
-def client(app, authenticated_client):
+def client(app, authenticated_client, life_ai_enabled):
     app.state.settings.assistant_encryption_keys = SecretStr(Fernet.generate_key().decode())
     result = authenticated_client.put(
         "/api/v1/assistant/settings",
@@ -84,6 +85,7 @@ class ScriptedSession:
             self.block.set()
             assert self.release.wait(10)
         names = {item["name"] for item in tools}
+        assert "delegate_life_ai" not in names
         call = None
         if "delegate_tasks" in names and self.turn == 1:
             call = ("delegate_tasks", {"task": "Créer un espace Projet IA"})
@@ -206,7 +208,8 @@ def test_disabled_app_session_revocation_and_scope_are_checked_at_execution(app,
     assert revoked.value.status_code == 401
 
 
-def test_provider_wait_does_not_hold_owner_lock_and_logout_stops_next_action(app, client):
+@pytest.mark.parametrize("revoke", ["logout", "life_ai"])
+def test_provider_wait_releases_owner_lock_and_revocation_stops_next_action(app, client, revoke):
     block, release = Event(), Event()
 
     class SlowSession(ScriptedSession):
@@ -225,12 +228,19 @@ def test_provider_wait_does_not_hold_owner_lock_and_logout_stops_next_action(app
         try:
             write = pool.submit(client.post, "/api/v1/workspaces", json={"name": "Concurrent"})
             assert write.result(timeout=3).status_code == 201
-            logout = pool.submit(client.delete, "/api/v1/auth/session")
-            assert logout.result(timeout=3).status_code == 204
+            if revoke == "logout":
+                logout = pool.submit(client.delete, "/api/v1/auth/session")
+                assert logout.result(timeout=3).status_code == 204
+            else:
+                disabled = pool.submit(
+                    client.put, "/api/v1/applications/life_ai", json={"enabled": False}
+                )
+                assert disabled.result(timeout=3).status_code == 200
         finally:
             release.set()
         output = events(stream.result(timeout=10))
-    assert any(item.get("code") == "assistant.session_expired" for item in output), output
+    code = "assistant.session_expired" if revoke == "logout" else "assistant.application_disabled"
+    assert any(item.get("code") == code for item in output), output
     with app.state.sessions() as db:
         assert db.scalar(select(func.count()).select_from(m.Operation)) == 0
 
@@ -348,7 +358,7 @@ def test_history_search_archive_restore_and_delete_are_owner_scoped(app, client)
 
 
 def test_memory_is_sourced_relevant_across_conversations_and_forgettable(app, client):
-    from life_app.platform.assistant.runtime import Runtime
+    from life_app.apps.life_ai.runtime import Runtime
 
     quote = "Je travaille sur le projet Atlas pour mon portfolio."
 
@@ -403,7 +413,7 @@ def test_memory_is_sourced_relevant_across_conversations_and_forgettable(app, cl
 def test_memory_agent_rejects_unsourced_or_unrequested_sensitive_facts(
     app, client, quote, sensitive
 ):
-    from life_app.platform.assistant.runtime import Runtime
+    from life_app.apps.life_ai.runtime import Runtime
 
     class UnsafeMemory(ScriptedSession):
         def respond(self, tools):
@@ -432,8 +442,8 @@ def test_memory_agent_rejects_unsourced_or_unrequested_sensitive_facts(
 
 
 def test_model_budget_stops_before_starting_an_extra_provider_request(app, client):
+    from life_app.apps.life_ai.runtime import Runtime
     from life_app.platform.assistant.providers import ProviderError
-    from life_app.platform.assistant.runtime import Runtime
 
     run_id, _ = admitted(app, client)
     runtime = Runtime(app, run_id)

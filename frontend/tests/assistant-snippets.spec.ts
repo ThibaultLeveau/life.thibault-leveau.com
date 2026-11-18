@@ -110,7 +110,7 @@ test("les consultations sont repliées, toutes les confirmations restent visible
     ),
   );
   data.seed("conversation-1", [...reads, ...previews]);
-  await page.goto("/?conversation=conversation-1");
+  await page.goto("/ai?conversation=conversation-1");
   await expect(
     page.getByRole("button", { name: "Confirmer ce changement" }),
   ).toHaveCount(4);
@@ -183,7 +183,7 @@ for (const locale of ["fr", "en"])
           colorScheme: "dark",
         });
         await page.setViewportSize({ width, height: 1000 });
-        await page.goto("/?conversation=conversation-1");
+        await page.goto("/ai?conversation=conversation-1");
         await page.locator(".assistant-snippets-more").click();
         await expect(page.locator(".assistant-snippet:visible")).toHaveCount(6);
         for (let index = 0; index < cards.length; index++) {
@@ -265,7 +265,7 @@ test("le texte long se déplie sans scroll imbriqué et reste intégral après r
   const data = await fixture(page);
   data.seed("conversation-1", [cards[4]]);
   await page.setViewportSize({ width: 320, height: 900 });
-  await page.goto("/?conversation=conversation-1");
+  await page.goto("/ai?conversation=conversation-1");
   const button = page.getByRole("button", { name: "Lire le texte complet" });
   await button.focus();
   await page.keyboard.press("Enter");
@@ -291,7 +291,7 @@ test("pages complètes, états vides, version inconnue et application désactiv�
   data.seed("conversation-1", [
     card("recipes", { items: rows, total: 40, offset: 0, limit: 12 }),
   ]);
-  await page.goto("/?conversation=conversation-1");
+  await page.goto("/ai?conversation=conversation-1");
   await page.locator(".assistant-snippet-details > summary").click();
   await expect(
     page.getByText("12 sur 40 résultats dans cette consultation."),
@@ -364,7 +364,7 @@ test("les champs personnels conservent leurs libellés par objet et leurs valeur
       },
     ]),
   ]);
-  await page.goto("/?conversation=conversation-1");
+  await page.goto("/ai?conversation=conversation-1");
   await page.locator(".assistant-snippet-details > summary").click();
   const details = page.locator(".assistant-snippet-details-body");
   await expect(page.locator(".assistant-snippet-summary")).toContainText("007");

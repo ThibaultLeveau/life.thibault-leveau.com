@@ -8,10 +8,12 @@ from fastapi import HTTPException
 from fastapi.testclient import TestClient
 from sqlalchemy import delete, func, select, text
 
+from life_app.apps.life_ai import documents, service, sources, web_sources
+from life_app.apps.life_ai import models as m
 from life_app.core.database import utcnow
-from life_app.platform.assistant import documents, service, sources, web_sources
-from life_app.platform.assistant import models as m
 from life_app.platform.auth.models import LoginSession, User
+
+pytestmark = pytest.mark.usefixtures("life_ai_enabled")
 
 BASE = "/api/v1/assistant/sources"
 
@@ -80,19 +82,29 @@ def test_invalid_import_does_not_leave_reservation_or_consume_quota(app, authent
         assert db.scalar(select(func.count()).select_from(m.Source)) == 0
 
 
+@pytest.mark.parametrize("revoke", ["logout", "life_ai"])
 def test_revoked_session_during_parser_discards_import_and_owner_lock_is_released(
-    app, authenticated_client, monkeypatch
+    app, authenticated_client, monkeypatch, revoke
 ):
     def parse(data, filename):
         with app.state.sessions() as db:
             db.execute(text("SET LOCAL lock_timeout = '200ms'"))
             user = db.scalar(select(User).where(User.username == "alice").with_for_update())
-            db.execute(delete(LoginSession).where(LoginSession.user_id == user.id))
+            if revoke == "logout":
+                db.execute(delete(LoginSession).where(LoginSession.user_id == user.id))
+            else:
+                db.execute(
+                    text(
+                        "UPDATE application_preferences SET enabled=false "
+                        "WHERE user_id=:id AND application_id='life_ai'"
+                    ),
+                    {"id": user.id},
+                )
             db.commit()
         return documents.ParsedDocument(filename, "text/plain", "parsed")
 
     monkeypatch.setattr(documents, "parse_document", parse)
-    assert upload(authenticated_client).status_code == 401
+    assert upload(authenticated_client).status_code == (401 if revoke == "logout" else 403)
     with app.state.sessions() as db:
         assert db.scalar(select(func.count()).select_from(m.Source)) == 0
 

@@ -11,12 +11,12 @@ from sqlalchemy import select
 from test_assistant import ScriptedSession, conversation, events
 from test_assistant import client as client
 
+from life_app.apps.life_ai import documents, execution, service
+from life_app.apps.life_ai import models as m
+from life_app.apps.life_ai import schemas as s
+from life_app.apps.life_ai.runtime import Runtime
 from life_app.core.database import utcnow
-from life_app.platform.assistant import documents, execution, service
-from life_app.platform.assistant import models as m
 from life_app.platform.assistant import providers as p
-from life_app.platform.assistant import schemas as s
-from life_app.platform.assistant.runtime import Runtime
 from life_app.platform.auth.models import LoginSession, User
 
 

@@ -16,6 +16,14 @@ Connexion, bibliothèque, langue, thème et progression.
 
 <div markdown>
 
+[Life AI](assistant.md)
+
+Conversations, mémoire, sources et dictée.
+
+</div>
+
+<div markdown>
+
 [Tâches](taches.md)
 
 Espaces, listes, kanban, agenda et récurrences.

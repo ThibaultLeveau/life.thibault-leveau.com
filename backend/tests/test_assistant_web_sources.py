@@ -7,8 +7,8 @@ from email.message import Message
 
 import pytest
 
-from life_app.platform.assistant import web_sources as w
-from life_app.platform.assistant.documents import DocumentError
+from life_app.apps.life_ai import web_sources as w
+from life_app.apps.life_ai.documents import DocumentError
 
 
 def address(ip="93.184.216.34", port=443):

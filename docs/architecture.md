@@ -2,9 +2,9 @@
 
 ## Vue d'ensemble
 
-L’[ADR 008](decisions/008-assistant-ia.md), approuvé dans l’issue #85, étend ce monolithe avec `platform/assistant`. L’accueil connecté compose le chat, son historique et la mémoire personnelle. PostgreSQL conserve ces données et les reçus d’actions ; aucun service d’agents, file ou stockage vectoriel n’est ajouté.
+L’[ADR 011](decisions/011-dashboard-life-ai.md), approuvé dans l’issue #104, sépare le Dashboard `/` et l’application activable Life AI `/ai`. `apps/life_ai` possède conversations, historique, mémoire, sources, dictée, orchestration et reçus. `platform/assistant` conserve les contrats de capacités/snippets, capacités LifeOS, fournisseurs, chiffrement, configuration commune et génération structurée utilisée par Recettes. PostgreSQL et les tables historiques restent inchangés ; aucun service, framework ou stockage supplémentaire.
 
-Le coordinateur appelle seulement les spécialistes utiles : cinq spécialistes métier et un spécialiste `lifeos` pour le socle. Les manifestes exposent 119 capacités métier ; `platform/assistant/common.py` fournit 11 capacités de bibliothèque/activation, préférences, progression et intégrations. Chaque application possède `assistant.py` et fournit `ActionProvider` via son manifeste ; les capacités réutilisent schémas, propriétaires, versions, événements et progression du métier. Le socle découvre les contrats injectés sans importer les applications. Les snippets utilisent des renderers React métier chargés par le registre frontend, avec données structurées versionnées et aucun code généré exécuté.
+Le coordinateur appelle seulement les spécialistes utiles : cinq spécialistes métier et un spécialiste `lifeos` pour le socle. Les manifestes exposent 119 capacités métier ; `platform/assistant/common.py` fournit 11 capacités de bibliothèque/activation, préférences, progression et intégrations. Chaque application exposant des capacités possède `assistant.py` et fournit `ActionProvider` via son manifeste ; les capacités réutilisent schémas, propriétaires, versions, événements et progression du métier. Le socle découvre les contrats injectés sans importer les applications. Les snippets utilisent des renderers React métier chargés par le registre frontend, avec données structurées versionnées et aucun code généré exécuté.
 
 La requête de message libère son verrou propriétaire avant l’appel fournisseur. Chaque action ouvre une transaction courte, revalide session/activation/version et enregistre mutation et reçu ensemble. Les aperçus simulent l’action dans un savepoint annulé ; la confirmation exécute la proposition validée, sous contrôle de version. Les historiques de conversation, résumés et souvenirs sont distincts. Voir [API Assistant](assistant-api.md), [données](donnees.md#assistant-ia) et [configuration](configuration.md).
 
@@ -57,7 +57,7 @@ React ne conserve pas de base métier parallèle dans localStorage. Les champs e
 
 ## HTTP et compilation
 
-`/` (accueil), `/applications` (bibliothèque), `/settings` (réglages) et les chemins des manifestes (`/tasks`, `/sport`, `/tracking`, `/okr` et `/recipes`) sont les seules routes HTML React. Les assets sont sous `/assets/`, l'API sous `/api/v1`, Swagger sous `/api/docs` et MkDocs sous `/documentation/`. Tout chemin inconnu reste 404. Le frontend utilise des URL API relatives, sans service réseau distinct pour le rendu.
+`/` (accueil), `/applications` (bibliothèque), `/settings` (réglages) et les chemins des manifestes (`/tasks`, `/sport`, `/tracking`, `/okr`, `/recipes` et `/ai`) sont les seules routes HTML React. Les assets sont sous `/assets/`, l'API sous `/api/v1`, Swagger sous `/api/docs` et MkDocs sous `/documentation/`. Tout chemin inconnu reste 404. Le frontend utilise des URL API relatives, sans service réseau distinct pour le rendu.
 
 ![Construction multi-étapes : frontend et documentation compilés rejoignent le runtime Python.](assets/diagrams/build.svg)
 
@@ -117,7 +117,7 @@ Les lignes de courses et modèles acceptent aussi des articles libres depuis `00
 
 ## Documentations séparées
 
-Les sept guides FR/EN partagent la compilation MkDocs et le service statique existants. `mkdocs.yml` associe les pages à leur guide ; le hook `scripts/documentation.py` fournit un menu, des liens précédent/suivant et un index de recherche propres au guide et à sa langue. Le lien de traduction cible la même page ; l’annuaire est accessible explicitement. Les sources et URL existantes restent stables, les traductions techniques suivent `docs/en/`. Aucun changement de service, de stockage ou de frontière métier.
+Les huit guides FR/EN partagent la compilation MkDocs et le service statique existants. `mkdocs.yml` associe les pages à leur guide ; le hook `scripts/documentation.py` fournit un menu, des liens précédent/suivant et un index de recherche propres au guide et à sa langue. Le lien de traduction cible la même page ; l’annuaire est accessible explicitement. Les sources et URL existantes restent stables, les traductions techniques suivent `docs/en/`. Aucun changement de service, de stockage ou de frontière métier.
 
 ## Réglages généraux
 
@@ -125,8 +125,12 @@ L’[ADR 007](decisions/007-reglages-generaux.md), approuvé dans l’issue #76,
 
 ## Sources multimodales et dictée
 
-L’[ADR 009](decisions/009-sources-assistant.md), approuvé dans l’issue #89, étend `platform/assistant` : sources privées PostgreSQL, blocs fournisseur typés, extraction bornée et transcription transitoire. Aucun nouveau service, stockage objet ou base vectorielle. Le lecteur web ajoute uniquement des connexions HTTP/HTTPS vers des pages publiques explicitement importées ; validation DNS/IP et redirections, connexion à l’adresse publique vérifiée et nom TLS conservé. Les adaptateurs IA gardent leurs hôtes fixes.
+L’[ADR 009](decisions/009-sources-assistant.md), approuvé dans l’issue #89, a introduit les sources désormais dans `apps/life_ai` : sources privées PostgreSQL, blocs fournisseur typés, extraction bornée et transcription transitoire. Aucun nouveau service, stockage objet ou base vectorielle. Le lecteur web ajoute uniquement des connexions HTTP/HTTPS vers des pages publiques explicitement importées ; validation DNS/IP et redirections, connexion à l’adresse publique vérifiée et nom TLS conservé. Les adaptateurs IA gardent leurs hôtes fixes.
 
 PDF/images/XML et pages sont traités dans des processus jetables limités en CPU, mémoire et durée ; aucun HTML externe exécuté. L’admission réserve le quota avant lecture, hors transaction pendant l’I/O, puis revalide session et propriétaire. La demande directe reste séparée des sources : le marquage `external_context` force les aperçus de mutation et désactive la mémoire automatique, y compris dans les suivis. Aucun résumé externe persistant ; contexte récent et lectures de sources par identifiant restent bornés. Voir [données](donnees.md), [API](assistant-api.md) et [sauvegardes](sauvegardes.md#migration-0016-sources-et-dictee).
 
 L’[ADR 010](decisions/010-import-web-recettes.md) ajoute le navigateur et le proxy privés d’import Recettes. Les règles métier restent dans `apps/recipes`, la génération structurée réutilisable dans `platform/assistant/structured.py`. Les réseaux internes, les sessions éphémères et la sauvegarde atomique bornent cette évolution approuvée.
+
+## Dashboard et activation Life AI
+
+Le shell fournit `ApplicationPageProps` : modules du registre, démarrage optionnel (`id`, `applicationId`, `text`) et callback de consommation. `platform/navigation.ts` centralise les changements d’URL dans le même document et les gardes de retour ; `history.state` ne contient qu’une position. Une session/langue remplacée démonte aussi l’intention. Les anciens liens `/?conversation=…` sont redirigés. Les routes de Life AI, y compris les sous-routeurs sources/dictée, passent par le contrôle central et revalident les traitements longs. La migration `0019_life_ai` active les comptes présents et respecte toute préférence explicite ; nouveaux comptes désactivés par défaut. Les contrats optionnels de progression/capacités restent absents pour les contrôles de conversation, sans badge ou quêtes artificiels.

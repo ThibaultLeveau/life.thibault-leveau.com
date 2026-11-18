@@ -65,3 +65,7 @@ Les tests combinent artefacts temporaires pour le routage et PostgreSQL réel po
 ## Progression
 
 `platform/progression` applique les règles de niveau et de calendrier, conserve les premières confirmations et attribue les quêtes uniques. Les fournisseurs résident dans les trois applications et sont injectés par le manifeste. Le service n’importe aucun métier ; toutes les mutations utilisent le verrou utilisateur et la transaction existants. Les GET ne créent aucun gain. La commande `life backfill-progression <compte> [--dry-run]` reprend explicitement l’historique d’un compte. Voir [API](api.md#progression-par-application), [modèle](donnees.md#donnees-de-progression) et [ADR 006](decisions/006-progression-applications.md).
+
+## Domaine Life AI
+
+`apps/life_ai` possède les routes historiques `/api/v1/assistant/*` sauf la configuration commune `/provider-settings`. Le registre monte aussi les sous-routeurs sources et dictée sous son garde d’activation. `execution.authorize` revalide Life AI avant chaque étape ; les retours d’import et de transcription reprennent le verrou propriétaire et contrôlent encore session/activation. Les capacités sont découvertes uniquement pour les définitions ayant `actions`, afin de ne pas déléguer récursivement au chat. Les fournisseurs et la génération structurée restent indépendants de ces tables métier.

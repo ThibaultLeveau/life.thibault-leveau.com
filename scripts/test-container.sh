@@ -99,6 +99,7 @@ result = request('/applications/tasks', {'enabled': False}, 'PUT', {'X-CSRF-Toke
 assert result['enabled'] is False
 preferences = request('/preferences', {'locale': 'en'}, 'PUT', {'X-CSRF-Token': session['csrf_token']})
 assert preferences['locale'] == 'en'
+request('/applications/life_ai', {'enabled': True}, 'PUT', headers)
 assistant_settings = request('/assistant/settings', {
     'provider': 'openai', 'model': 'synthetic-model',
     'api_token': 'synthetic-provider-token-for-backup',
@@ -125,8 +126,8 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 from life_app.core.config import get_settings
 from life_app.core.database import utcnow
-from life_app.platform.assistant import models as m, sources
-from life_app.platform.assistant.transcription_models import TranscriptionSettings
+from life_app.apps.life_ai import models as m, sources
+from life_app.apps.life_ai.transcription_models import TranscriptionSettings
 from life_app.platform.auth.models import LoginSession, User
 
 engine = create_engine(get_settings().database_url.get_secret_value())
@@ -284,8 +285,8 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 from life_app.core.config import get_settings
 from life_app.platform.assistant import credentials
-from life_app.platform.assistant.models import AssistantSettings, Conversation, Source
-from life_app.platform.assistant.transcription_models import TranscriptionSettings
+from life_app.apps.life_ai.models import AssistantSettings, Conversation, Source
+from life_app.apps.life_ai.transcription_models import TranscriptionSettings
 from life_app.platform.auth.models import User
 from life_app.main import create_app
 from fastapi.testclient import TestClient

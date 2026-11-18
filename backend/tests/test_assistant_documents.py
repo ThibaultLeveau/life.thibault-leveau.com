@@ -7,7 +7,7 @@ import pytest
 from PIL import Image
 from pypdf import PdfWriter
 
-from life_app.platform.assistant import documents as d
+from life_app.apps.life_ai import documents as d
 
 RNS = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 PNS = "http://schemas.openxmlformats.org/package/2006/relationships"

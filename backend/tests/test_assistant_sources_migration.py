@@ -11,10 +11,10 @@ from sqlalchemy.exc import IntegrityError
 from test_assistant_key_rotation import command as rotate
 from test_assistant_key_rotation import configuration
 
+from life_app.apps.life_ai import models as m
+from life_app.apps.life_ai.transcription_models import TranscriptionSettings
 from life_app.cli import migration_config
 from life_app.platform.assistant import credentials
-from life_app.platform.assistant import models as m
-from life_app.platform.assistant.transcription_models import TranscriptionSettings
 from life_app.platform.auth.models import User
 
 

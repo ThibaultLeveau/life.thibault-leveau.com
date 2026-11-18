@@ -1,6 +1,6 @@
 # Your LifeOS applications
 
-After signing in, **Home** shows the [AI assistant](assistant.md), your conversations and enabled application links. Use the **Library** to choose and open applications.
+After signing in, **Home** is Dashboard: enabled applications scroll in one row and a card starts a conversation with [Life AI](assistant.md). The **Library** manages activation. Carousel buttons, touch scrolling and arrows/Home/End let you browse cards.
 
 ## Sign in
 
@@ -43,9 +43,9 @@ All applications share one session and the **system / light / dark** appearance 
 
 An expired session returns to sign-in and removes private views. HTML pages contain no private records; the API loads them only after authentication and activation checks. All preferences and application activation are also available through the [versioned API](api.md).
 
-![Personal Home: assistant, history and application access.](../assets/screenshots/en/general-home.png){ loading=lazy }
+![Dashboard: one-row application carousel and conversation starter.](../assets/screenshots/en/general-home.png){ loading=lazy }
 
-*Personal Home: assistant, history and application access.*
+*Dashboard: one-row application carousel and conversation starter.*
 
 ## Shared navigation
 
@@ -74,3 +74,7 @@ An application’s **Documentation** link opens only its guide in your account l
 Use Tab/Shift+Tab to move between controls, Enter or Space to activate them, and Escape to close menus/dialogs. On mobile, open navigation to reach all links. Affected unsaved forms ask before leaving. See the [progression guide](progression.md) for levels, quests, usage days and vacations.
 
 Preferences are grouped in [General settings](settings.md). An application’s Settings control opens its section; the progression timezone and vacations are under General, and usage days are in each application section.
+
+## Start with Life AI
+
+Life AI is available at `/ai`, disabled by default for new accounts. Migration preserves access for existing accounts. Enable it in the library. On Dashboard, type a message and choose **Let’s talk** or Enter (Shift+Enter adds a line). Life AI receives the draft and sends it once to the configured provider. Without configuration, it remains editable in chat. Suggested ideas only fill the field. Back/reload never resend it; drafts remain only in memory during the visit. Deactivating Life AI preserves conversations, memory, sources and settings.

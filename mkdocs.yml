@@ -66,9 +66,13 @@ extra:
       en: General
       chapters:
         - {file: applications.md, fr: Compte et applications, en: Account and applications}
-        - {file: assistant.md, fr: Assistant et mémoire, en: Assistant and memory}
         - {file: settings.md, fr: Réglages généraux, en: General settings}
         - {file: progression.md, fr: Réussites et progression, en: Achievements and progress}
+    - id: life_ai
+      fr: Life AI
+      en: Life AI
+      chapters:
+        - {file: assistant.md, fr: Conversations et mémoire, en: Conversations and memory}
     - id: tasks
       fr: Tâches
       en: Tasks
@@ -144,3 +148,4 @@ extra:
             - {file: decisions/008-assistant-ia.md, fr: ADR 008 · Assistant IA, en: ADR 008 · AI assistant}
             - {file: decisions/009-sources-assistant.md, fr: ADR 009 · Sources et dictée, en: ADR 009 · Sources and dictation}
             - {file: decisions/010-import-web-recettes.md, fr: ADR 010 · Import web Recettes, en: ADR 010 · Recipe web import}
+            - {file: decisions/011-dashboard-life-ai.md, fr: ADR 011 · Dashboard et Life AI, en: ADR 011 · Dashboard and Life AI}

@@ -65,3 +65,7 @@ Tests combine temporary routing artifacts with real PostgreSQL for private featu
 ## Progression {#progression}
 
 `platform/progression` applies level/calendar rules, stores first confirmations and awards unique quests. Application-owned providers are injected through manifests. The service imports no business domain; mutations use the existing user lock and transaction. GET requests never award points. `life backfill-progression <account> [--dry-run]` explicitly imports a named account’s history. See [API](api.md#progression-par-application), [data](donnees.md#donnees-de-progression) and [ADR 006](decisions/006-progression-applications.md).
+
+## Life AI domain
+
+`apps/life_ai` owns existing `/api/v1/assistant/*` routes except shared `/provider-settings`. Registry composition also guards source and dictation subrouters. `execution.authorize` rechecks Life AI before each step; import and transcription responses reacquire the owner lock and revalidate session/activation. Capability discovery selects only definitions with `actions`, preventing recursive delegation to chat. Providers and structured generation remain independent of conversation tables.

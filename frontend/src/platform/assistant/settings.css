@@ -1,0 +1,30 @@
+.assistant-settings-fields {
+  display: grid;
+  gap: 16px;
+}
+.assistant-settings-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.assistant-settings-fields label {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.assistant-settings-fields input,
+.assistant-settings-fields select {
+  width: 100%;
+  min-width: 0;
+}
+.assistant-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+@media (max-width: 560px) {
+  .assistant-settings-pair {
+    grid-template-columns: 1fr;
+  }
+}

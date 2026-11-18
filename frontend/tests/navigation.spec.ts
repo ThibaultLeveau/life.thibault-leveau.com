@@ -20,6 +20,12 @@ const applications = [
     current: "Aujourd’hui",
   },
   { path: "/tasks", name: "Tâches", document: "taches", current: "À venir" },
+  {
+    path: "/ai",
+    name: "Life AI",
+    document: "assistant",
+    current: "De quoi avez-vous envie aujourd’hui ?",
+  },
   { path: "/sport", name: "Sport", document: "sport", current: "Programmes" },
 ];
 let headers: Record<string, string>;
@@ -32,7 +38,7 @@ test.beforeEach(async ({ page }) => {
   });
   expect(login.ok()).toBeTruthy();
   headers = { "X-CSRF-Token": (await login.json()).csrf_token };
-  for (const id of ["tasks", "sport", "tracking", "okr", "recipes"])
+  for (const id of ["tasks", "sport", "tracking", "okr", "recipes", "life_ai"])
     expect(
       (
         await page.request.put(`/api/v1/applications/${id}`, {
@@ -78,7 +84,10 @@ async function navigationStyles(page: Page) {
       ".application-sidebar-footer a",
       ".application-sidebar-links [aria-current=page]",
     ].map((selector) => {
-      const style = getComputedStyle(document.querySelector(selector)!);
+      const element = document.querySelector(selector);
+      if (!element)
+        throw new Error(`Missing common navigation element: ${selector}`);
+      const style = getComputedStyle(element);
       return Object.fromEntries(
         [
           "background-color",
@@ -104,6 +113,11 @@ async function navigationStyles(page: Page) {
 
 async function singleLineTopbar(page: Page) {
   const topbar = page.locator(".application-topbar");
+  if (new URL(page.url()).pathname === "/ai") {
+    await expect(page.locator(".progression-badge")).toHaveCount(0);
+    expect((await topbar.boundingBox())!.height).toBeLessThanOrEqual(66);
+    return;
+  }
   await expect(page.locator(".progression-level-number")).toHaveText(/\d+/);
   const header = (await topbar.boundingBox())!;
   const breadcrumb = (await page

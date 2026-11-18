@@ -1,13 +1,18 @@
-# Assistant API
+# Life AI API
 
 [Référence française](../assistant-api.md) · [User guide](assistant.md) · [OpenAPI](https://life.thibault-leveau.com/api/docs)
 
 All routes use `/api/v1/assistant`. The shared session identifies the owner; mutations require the allowed origin and `X-CSRF-Token`. Inputs reject unknown fields and client-selected ownership. Business capabilities also require an enabled application.
 
+All conversation, memory, capability, source and dictation routes now require **Life AI enabled** (`life_ai`), otherwise 403 with `X-Life-Application-Disabled: life_ai`. The central guard also covers subrouters; long operations recheck activation after I/O. Only shared `/provider-settings` routes remain independent.
+
 ## Routes and contracts
 
 | Method and relative path | Behavior |
 | --- | --- |
+| `GET /provider-settings` | Shared `provider`, `model`, `configured`, `token_hint` |
+| `PUT /provider-settings` | Partial `provider`, `model`, `api_token`, without memory |
+| `POST /provider-settings/test` | Shared provider test, independent of Life AI |
 | `GET /settings` | `provider`, `model`, `configured`, `token_hint`, `memory_enabled`; no readable token |
 | `PUT /settings` | Partial update: `provider` (`openai/anthropic/gemini`), `model`, `api_token`, `memory_enabled` |
 | `POST /settings/test` | Calls the configured provider; returns `{ "ok": true }` on success |
@@ -60,6 +65,8 @@ with httpx.Client(base_url="http://127.0.0.1:8100/api/v1", timeout=240) as clien
     })
     login.raise_for_status()
     client.headers["X-CSRF-Token"] = login.json()["csrf_token"]
+    activation = client.put("/applications/life_ai", json={"enabled": True})
+    activation.raise_for_status()
     created = client.post("/assistant/conversations", json={"title": "Acceptance read"})
     created.raise_for_status()
     conversation_id = created.json()["id"]

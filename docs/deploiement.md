@@ -295,7 +295,7 @@ Publier le `main` validé par `scripts/deploy.sh`, sauvegarde habituelle incluse
 
 ## Livraison documentations séparées
 
-Publier le `main` validé avec la procédure habituelle de sauvegarde, construction, migration et publication. Aucune migration de données, variable ni service supplémentaire. Vérifier les deux accueils, les sept documentations en FR/EN, les liens de langue vers la page équivalente, les menus et recherches propres au guide, les captures locales et les liens d’aide existants des applications. Contrôler mobile/clavier, SHA réellement exécuté et sondes publiques ; consigner commit, sauvegarde et résultats dans l’issue.
+Publier le `main` validé avec la procédure habituelle de sauvegarde, construction, migration et publication. Aucune migration de données, variable ni service supplémentaire. Vérifier les deux accueils, les huit documentations en FR/EN, les liens de langue vers la page équivalente, les menus et recherches propres au guide, les captures locales et les liens d’aide existants des applications. Contrôler mobile/clavier, SHA réellement exécuté et sondes publiques ; consigner commit, sauvegarde et résultats dans l’issue.
 
 ## Livraison des réglages généraux
 
@@ -340,3 +340,9 @@ Exécuter `make docker-build` puis `bash scripts/test-recipe-browser.sh` sur un 
 Après publication, vérifier les labels `org.opencontainers.image.revision` des trois conteneurs, leurs sondes, les routes HTTPS et le parcours Recettes. Les sondes privées sont `recipe-browser:8090/health` et `recipe-egress:3128/health`. Un redémarrage invalide les pages ouvertes, jamais les recettes enregistrées. Pour diagnostiquer un refus, vérifier la santé du proxy et les quotas sans journaliser les pages, cookies, captures ou secrets. Mettre à jour Chromium/Playwright ensemble et relancer ces tests.
 
 Le retour arrière exige des images des trois services au même SHA et un schéma compatible. Pour revenir à une version antérieure à l’ADR 010, utiliser le checkout et les instructions de cette version, arrêter les deux services ajoutés et vérifier explicitement la compatibilité du schéma ; ne pas supprimer les provenances ni les reçus. Aucun retour arrière de données n’est automatique.
+
+## Livraison Dashboard et Life AI
+
+Après revue, contrôles et fusion, publier `main` avec `scripts/deploy.sh`, sauvegarde puis migration additive `0019_life_ai`. Aucun service, dépendance, variable ou secret supplémentaire. Conserver la configuration fournisseur et le trousseau existants. Vérifier la migration des comptes existants et le défaut désactivé d’un compte synthétique créé après migration.
+
+Contrôler SHA des trois images réellement exécutées, révision Alembic, sondes et routes HTTPS `/`, `/ai`, `/applications`, `/settings?application=life_ai`, OpenAPI et guides FR/EN. Sur compte synthétique, vérifier rangée unique à 320 px/clavier, activation Life AI, préremplissage sans fournisseur, ancien lien de conversation, conservation après désactivation/réactivation et fournisseur commun accessible à Recettes. Les tests de fournisseur simulé couvrent l’envoi automatique unique ; distinguer cette preuve d’un appel LLM réel. Consigner le commit publié, la sauvegarde et les résultats dans l’issue #104. Respecter les [limites de retour arrière](sauvegardes.md#migration-0019-activation-life-ai).

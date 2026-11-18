@@ -1,14 +1,14 @@
-# Your LifeOS assistant
+# Life AI
 
 [Guide français](../assistant.md)
 
-Signed-in Home combines a conversation with Life, your history and application links. Ask questions, inspect your data or request changes in Tasks, Sport, Tracking, OKR Goals and Recipes & Shopping Lists. Applications remain directly accessible through the library.
+**Life AI** is your conversation application at `/ai`: history, memory, documents/images/web pages and dictation. Open it from Dashboard or the library. Inspect and change enabled applications: Tasks, Sport, Tracking, OKR Goals and Recipes & Shopping Lists.
 
-This page describes the implementation for [issues #85 and #89](https://github.com/ThibaultLeveau/life.thibault-leveau.com/issues/89). Acceptance evidence and the commit actually deployed are recorded in that issue.
+Dashboard/Life AI separation follows [ADR 011](decisions/011-dashboard-life-ai.md). Validation evidence and the published commit are recorded in [issue #104](https://github.com/ThibaultLeveau/life.thibault-leveau.com/issues/104).
 
 ## Configure a provider
 
-Open **Settings → General → AI assistant**. Choose OpenAI, Anthropic or Google Gemini, enter the identifier of a model available to your provider account and its API token, then save. **Test connection** makes a real provider request and may consume quota. The model must support the assistant's tools and streaming responses.
+Open **Settings → Life AI → AI provider (or General)**. Choose OpenAI, Anthropic or Google Gemini, enter the identifier of a model available to your provider account and its API token, then save. **Test connection** makes a real provider request and may consume quota. The model must support the assistant's tools and streaming responses.
 
 The server encrypts the token. The interface only retrieves its configuration status and a masked suffix. Leaving the field blank preserves the token; **Remove token** explicitly deletes it. Changing provider clears the previous token and model: enter the new provider's credentials. A missing or unreadable server key requires administrator intervention or a replacement token; other applications remain accessible.
 
@@ -64,7 +64,7 @@ A reply may be partial when credentials, quota, provider timeouts or business va
 
 Memory retains durable facts you communicate: your name, profession, active projects, preferences or useful personal context. A memory extracted from chat has a source conversation, message and dated excerpt. Fictional examples, application text and assumptions must not become personal facts. Sensitive facts require an explicit request to remember them; do not provide secrets in chat. Fact selection depends on the model, with conservative server checks for refusals and sensitive FR/EN patterns. These checks do not detect every wording or language: review saved memories and correct them when needed.
 
-Open **Memory**, from chat navigation or General settings, to inspect, add, correct or remove a memory, or forget everything. Disable memory in AI settings to stop injecting saved memories and automatically adding new ones. Memories and conversation history are separate; deleting a conversation without choosing to forget preserves its memories.
+Open **Memory**, from chat navigation or Life AI settings, to inspect, add, correct or remove a memory, or forget everything. Disable memory in AI settings to stop injecting saved memories and automatically adding new ones. Memories and conversation history are separate; deleting a conversation without choosing to forget preserves its memories.
 
 Corrections, forgetting and memory toggles clear derived summaries and exclude older messages from reused context. Messages remain visible in history, but an old source must not silently recreate a forgotten memory. A running reply is interrupted if its memory version becomes outdated; send your request again with useful context. Local deletion cannot retract data already sent to a provider.
 
@@ -105,3 +105,11 @@ All operations have an [independent API](assistant-api.md). See [settings](setti
 For example, ask “Create a Portfolio workspace and prepare these ten tasks…”. The coordinator can delegate workspace creation, then pass its confirmed identifier to the Tasks specialist. Separate subtasks can start fresh instances of the same specialist; delegations run sequentially in the existing process. For multiple creations, the assistant prefers **Import tasks**: 1–100 tasks with a complete preview and confirmation. A preview creates no tasks; confirmation saves the entire batch or nothing. Do not confirm duplicate proposals.
 
 Default budgets are 96 model calls, 200 business actions and 600 seconds per response. Each specialist has at most 24 exchanges, and the coordinator 16; administrators can lower the global budgets in configuration. These guardrails prevent loops and unbounded costs; they do not limit the number of stored tasks. A slow provider can still exceed the deadline. After interruption, committed actions remain saved and must not be recreated.
+
+## Dashboard, activation and first message
+
+Dashboard `/` remains an overview. Its chat card accepts up to 12,000 characters. **Let’s talk** opens Life AI and sends the text once using saved configuration. Missing configuration or rejection before admission preserves the draft; editing while settings load cancels automatic sending. After an uncertain network error, inspect history before resending. Reloading may lose an unsent draft: it is not stored in the browser.
+
+Old `/?conversation=…` links still work and open `/ai?conversation=…`. Browser back, language changes and logout protect drafts. Active runs block internal navigation. Deactivation from another tab stops subsequent steps; committed actions keep their receipts. Re-enable Life AI to recover its data. Configure memory and dictation under **Settings → Life AI**. The provider is shared with Recipes and remains configurable in General while Life AI is disabled. Chatting awards no XP.
+
+![Life AI: a conversation separate from Dashboard.](../assets/screenshots/en/life-ai.png){ loading=lazy }

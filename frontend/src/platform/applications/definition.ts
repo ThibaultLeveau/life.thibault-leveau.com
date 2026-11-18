@@ -6,9 +6,21 @@ export interface SettingsPanelProps {
   onBusy: (busy: boolean) => void;
 }
 
+export interface ApplicationLaunch {
+  id: string;
+  applicationId: string;
+  text: string;
+}
+
+export interface ApplicationPageProps {
+  modules: ApplicationModule[];
+  launch?: ApplicationLaunch;
+  onConsumeLaunch: (id: string) => void;
+}
+
 export interface ApplicationModule {
   id: string;
-  Page: LazyExoticComponent<ComponentType>;
+  Page: LazyExoticComponent<ComponentType<ApplicationPageProps>>;
   AssistantSnippet?: LazyExoticComponent<ComponentType<AssistantSnippetProps>>;
   Settings?: LazyExoticComponent<ComponentType<SettingsPanelProps>>;
 }

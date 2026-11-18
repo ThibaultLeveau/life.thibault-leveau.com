@@ -12,7 +12,7 @@ export function ApplicationCard({
   busy?: boolean;
   onToggle?: () => void;
 }) {
-  const icon: IconName = application.icon === "check" ? "check" : "grid";
+  const icon = application.icon as IconName;
   return (
     <article className="application-card" aria-label={application.name}>
       <div className="application-card-top">

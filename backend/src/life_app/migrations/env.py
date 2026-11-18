@@ -3,12 +3,12 @@
 from alembic import context
 from sqlalchemy import create_engine, pool
 
+from life_app.apps.life_ai import transcription_models  # noqa: F401
 from life_app.apps.registry import APPLICATIONS  # noqa: F401
 from life_app.core.config import get_settings
 from life_app.core.database import Base
 from life_app.platform.applications import models as application_models  # noqa: F401
 from life_app.platform.assistant import models as assistant_models  # noqa: F401
-from life_app.platform.assistant import transcription_models  # noqa: F401
 from life_app.platform.auth import models as auth_models  # noqa: F401
 
 

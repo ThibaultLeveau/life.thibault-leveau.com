@@ -77,12 +77,14 @@ get('/documentation/en/sport/')
 get('/applications')
 get('/settings')
 get('/settings?application=sport')
+get('/ai')
+get('/settings?application=life_ai')
 get('/documentation/settings/')
 get('/documentation/en/settings/')
-for path in ('settings', 'capabilities', 'conversations', 'memories'):
+for path in ('provider-settings', 'settings', 'capabilities', 'conversations', 'memories'):
     get(f'/api/v1/assistant/{path}', 401)
 for locale in ('', 'en/'):
-    for path in ('assistant', 'assistant-api', 'decisions/008-assistant-ia'):
+    for path in ('assistant', 'assistant-api', 'decisions/008-assistant-ia', 'decisions/011-dashboard-life-ai'):
         get(f'/documentation/{locale}{path}/')
 get('/api/v1/applications', 401)
 get('/api/v1/health/ready')
@@ -95,6 +97,8 @@ schema_paths = json.loads(body)['paths']
 for path in ('/api/v1/recipes/ingredients', '/api/v1/recipes/recipes', '/api/v1/recipes/lists/{id}/import', '/api/v1/okr/objectives', '/api/v1/okr/achievements', '/api/v1/okr/settings', '/api/v1/health', '/api/v1/agenda/view', '/api/v1/agenda/tasks', '/api/v1/applications', '/api/v1/applications/{application_id}', '/api/v1/sport/statistics', '/api/v1/sport/sessions', '/api/v1/tracking/calendar', '/api/v1/tracking/trackers', '/api/v1/integrations/evaluate', '/api/v1/progression', '/api/v1/progression/settings', '/api/v1/progression/{application_id}/history', '/api/v1/progression/{application_id}/quests'):
     assert path in schema_paths, f'Schéma OpenAPI incomplet : {path}'
 for path, methods in {
+    'provider-settings': ('get', 'put'),
+    'provider-settings/test': ('post',),
     'settings': ('get', 'put'),
     'settings/test': ('post',),
     'capabilities': ('get',),

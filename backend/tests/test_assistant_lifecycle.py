@@ -10,9 +10,9 @@ from sqlalchemy import select
 from test_assistant import TOKEN, admitted, events
 from test_assistant import client as client
 
+from life_app.apps.life_ai import execution, runtime
+from life_app.apps.life_ai import models as m
 from life_app.core.database import utcnow
-from life_app.platform.assistant import execution, runtime
-from life_app.platform.assistant import models as m
 from life_app.platform.assistant.providers import Response
 
 

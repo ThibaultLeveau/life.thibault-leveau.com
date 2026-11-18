@@ -10,8 +10,8 @@ from test_assistant import admitted
 from test_assistant import client as client
 from test_tasks import create_section, create_space, history
 
+from life_app.apps.life_ai import execution
 from life_app.apps.tasks import models as tasks
-from life_app.platform.assistant import execution
 
 
 def batch(space, count=10):

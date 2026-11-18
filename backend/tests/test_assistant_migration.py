@@ -8,9 +8,9 @@ from alembic.script import ScriptDirectory
 from sqlalchemy import inspect, select, text
 from sqlalchemy.exc import IntegrityError
 
+from life_app.apps.life_ai import models as m
 from life_app.cli import migration_config
 from life_app.core.database import Base
-from life_app.platform.assistant import models as m
 from life_app.platform.auth.models import User
 
 ASSISTANT_TABLES = tuple(
@@ -116,10 +116,13 @@ def test_assistant_migration_preserves_business_data_and_allows_empty_round_trip
     )
     assert completed.status_code == 200, completed.text
     assert client.put("/api/v1/preferences", json={"locale": "en", "theme": "dark"}).is_success
+    # Activation migration 0019 adds its own preferences; their preservation is
+    # covered by test_life_ai_migration_preserves_data_and_explicit_activation.
     business_tables = [
         table
         for table in Base.metadata.sorted_tables
-        if not table.name.startswith("assistant_") and table.name != "recipes_web_import_receipts"
+        if not table.name.startswith("assistant_")
+        and table.name not in {"recipes_web_import_receipts", "application_preferences"}
     ]
     before = snapshot(engine, business_tables)
     try:

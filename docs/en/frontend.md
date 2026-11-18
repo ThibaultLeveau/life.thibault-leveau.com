@@ -4,7 +4,7 @@ React, TypeScript and Vite retain the existing toolchain. `App.tsx` assembles sh
 
 ## Assistant message formatting
 
-`platform/assistant/components/MessageText.tsx` renders paragraphs, bold text, inline/fenced code and pipe tables using React text nodes. Header and separator column counts must match; outer pipes are optional, `\|` escapes a pipe, and colons control alignment. Missing row cells are padded; rows with surplus cells stay literal to avoid hiding content. Lines without a pipe end a table. Fences (including unfinished ones) keep table examples as code. This is a bounded formatter, not a complete Markdown engine; it never injects HTML or loads message images/links.
+`apps/life_ai/components/MessageText.tsx` renders paragraphs, bold text, inline/fenced code and pipe tables using React text nodes. Header and separator column counts must match; outer pipes are optional, `\|` escapes a pipe, and colons control alignment. Missing row cells are padded; rows with surplus cells stay literal to avoid hiding content. Lines without a pipe end a table. Fences (including unfinished ones) keep table examples as code. This is a bounded formatter, not a complete Markdown engine; it never injects HTML or loads message images/links.
 
 Tables use semantic column headers and a focusable, localized scrolling region with existing theme tokens. The original API `content` stays unchanged in PostgreSQL: streaming and history use the same renderer, with no new setting, dependency, migration or backup procedure. `assistant.spec.ts` covers rendering, malformed input, SSE chunks, security, FR/EN themes, keyboard scrolling and 320 px layout.
 
@@ -118,3 +118,9 @@ Long mobile application names truncate visually to preserve the current breadcru
 ## General settings
 
 `pages/SettingsPage` receives registered modules from the shell, composes authorized `Settings` panels, and manages direct links, browser history, drafts and pending writes through `SettingsPanelProps`. `useSettingsDraft` reports these states and clears them on unmount. `ProgressionSettings` separates General (timezone/vacations) from application usage days, preserving other fields in versioned writes. The account-name menu on Home/library offers Settings and Sign out with keyboard/Escape/focus return; application footers retain `AccountMenu`. See [ADR 007](decisions/007-reglages-generaux.md) and the [guide](settings.md).
+
+## Dashboard and first message
+
+`pages/HomePage` composes shared navigation, `ApplicationCarousel` (existing cards, one row, touch scrolling, buttons and arrows/Home/End) and a conversation card. Dashboard makes no chat request. The shell navigates to the manifest path and passes text only in memory to `apps/life_ai/Page`. Once settings load, the Page consumes the intent and creates/sends a conversation with its UUID; back, reload and React StrictMode never replay it. Editing while settings load cancels automatic sending. Missing configuration or rejection before admission preserves the draft. Session expiry, deactivation or leaving the application clears the shell's private intent.
+
+Conversation translations live in `apps/life_ai/locales`; shared provider labels and snippet contracts remain in the platform. Pages receive `ApplicationPageProps`, even when they ignore its fields.

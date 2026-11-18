@@ -1,5 +1,12 @@
 import { tr } from "../shared/i18n";
-import { Component, Suspense, useEffect, type ReactNode } from "react";
+import {
+  Component,
+  Suspense,
+  useEffect,
+  useState,
+  useCallback,
+  type ReactNode,
+} from "react";
 import { applications } from "../apps/registry";
 import { AppLayout } from "../components/layout/AppLayout";
 import { SettingsPage } from "../pages/SettingsPage";
@@ -14,6 +21,8 @@ import { ErrorMessage } from "../shared/ui/Dialog";
 import { Icon } from "../shared/ui/Icon";
 import { useMobileFormViewport } from "../shared/ui/useMobileFormViewport";
 import "./shell.css";
+import { navigateLocation, useShellLocation } from "../platform/navigation";
+import type { ApplicationLaunch } from "../platform/applications/definition";
 class ApplicationBoundary extends Component<
   { children: ReactNode },
   { failed: boolean }
@@ -40,10 +49,28 @@ class ApplicationBoundary extends Component<
   }
 }
 function Routes() {
-  const path = window.location.pathname;
+  const path = useShellLocation();
+  const [launch, setLaunch] = useState<ApplicationLaunch>();
+  const consumeLaunch = useCallback((id: string) => {
+    setLaunch((value) => (value?.id === id ? undefined : value));
+  }, []);
   const { items, error, refresh } = useApplications();
   useEffect(() => {
-    document.title = `${path === "/applications" ? tr("library") : tr("home")} · LifeOS`;
+    if (
+      launch &&
+      items &&
+      !items.some(
+        (item) =>
+          item.id === launch.applicationId &&
+          item.enabled &&
+          item.path === path,
+      )
+    )
+      setLaunch(undefined);
+  }, [items, path, launch]);
+  useEffect(() => {
+    if (path === "/" || path === "/applications")
+      document.title = `${path === "/applications" ? tr("library") : "Dashboard"} · LifeOS`;
   }, [path]);
   if (error)
     return (
@@ -61,10 +88,25 @@ function Routes() {
         <p role="status">{tr("loading_applications")}</p>
       </AppLayout>
     );
+  const legacyConversation = new URLSearchParams(location.search).get(
+    "conversation",
+  );
+  if (path === "/" && legacyConversation) {
+    const ai = items.find((item) => item.id === "life_ai");
+    if (ai)
+      return <LegacyConversation path={ai.path} id={legacyConversation} />;
+  }
   if (path === "/")
     return (
       <ApplicationBoundary>
-        <HomePage modules={applications} />
+        <HomePage
+          onStart={(id, text) => {
+            const app = items.find((item) => item.id === id && item.enabled);
+            if (!app || !navigateLocation(app.path)) return false;
+            setLaunch({ id: crypto.randomUUID(), applicationId: id, text });
+            return true;
+          }}
+        />
       </ApplicationBoundary>
     );
   if (path === "/applications")
@@ -118,9 +160,23 @@ function Routes() {
           </AppLayout>
         }
       >
-        <module.Page />
+        <module.Page
+          modules={applications}
+          launch={launch?.applicationId === application.id ? launch : undefined}
+          onConsumeLaunch={consumeLaunch}
+        />
       </Suspense>
     </ApplicationBoundary>
+  );
+}
+function LegacyConversation({ path, id }: { path: string; id: string }) {
+  useEffect(() => {
+    location.replace(`${path}?conversation=${encodeURIComponent(id)}`);
+  }, [path, id]);
+  return (
+    <AppLayout>
+      <p role="status">{tr("opening_your_space")}</p>
+    </AppLayout>
   );
 }
 function SettingsRedirect({ applicationId }: { applicationId: string }) {

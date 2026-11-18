@@ -53,9 +53,9 @@ def main():
     if args.command == "rotate-assistant-key":
         from fastapi import HTTPException
 
+        from life_app.apps.life_ai.transcription_models import TranscriptionSettings
         from life_app.platform.assistant import credentials
         from life_app.platform.assistant.models import AssistantSettings
-        from life_app.platform.assistant.transcription_models import TranscriptionSettings
 
         engine = create_engine(settings.database_url.get_secret_value())
         try:

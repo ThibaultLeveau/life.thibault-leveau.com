@@ -82,3 +82,10 @@ make build        # Compilation du frontend et de la documentation en mode stric
 La CI complète ces contrôles par la construction de l'image Docker et les tests HTTP du conteneur. Pour un changement de packaging ou de déploiement, vérifier également l'image et ses routes localement lorsque l'environnement le permet.
 
 La fusion et la mise en production sont deux opérations successives obligatoires : la fusion GitHub ne publie pas le site ; l'agent exécute ensuite le déploiement sur le VPS selon `docs/deploiement.md`.
+
+## Dashboard et Life AI
+
+- L’accueil `/` reste le Dashboard : une seule ligne défilante d’applications activées et une carte de démarrage de conversation. Le chat, l’historique, la mémoire, les sources et la dictée appartiennent à `apps/life_ai`, sur `/ai`, selon l’[ADR 011](docs/decisions/011-dashboard-life-ai.md).
+- Conserver le moteur fournisseur partagé dans `platform/assistant` pour les usages comme Recettes, indépendant de l’activation de Life AI. Les contrôles de conversation ne deviennent pas des outils récursifs du modèle.
+- Un premier message du Dashboard transite seulement en mémoire, est consommé une fois et utilise l’idempotence API. Aucun texte privé dans l’URL, `history.state`, localStorage ou sessionStorage. Préserver le brouillon si la configuration manque ou si l’envoi est refusé ; protéger le retour navigateur.
+- Toute modification livrée actualise les guides, API, limites et captures FR/EN concernés dans la même branche. Life AI dispose de sa documentation propre ; les réglages fournisseur communs restent dans Général, mémoire et dictée dans la section Life AI. Le badge de progression concerne les applications fournissant de la progression ; Life AI n’attribue pas de points pour discuter.

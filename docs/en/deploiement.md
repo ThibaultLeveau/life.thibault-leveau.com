@@ -291,7 +291,7 @@ Publish validated main with the usual backup. No new service/secret/SQL migratio
 
 ## Separate documentation release {#livraison-documentations-separees}
 
-Publish the validated main using the same backup/build/migration/deployment script. No data migration, service or environment setting is added. Verify both directories, all seven guide entries in both languages, language-equivalent links, guide-scoped menus/search, local screenshots and existing application help links. Check mobile/keyboard navigation, actual image SHA and public probes. Record the deployed commit, backup and verification in the issue.
+Publish the validated main using the same backup/build/migration/deployment script. No data migration, service or environment setting is added. Verify both directories, all eight guide entries in both languages, language-equivalent links, guide-scoped menus/search, local screenshots and existing application help links. Check mobile/keyboard navigation, actual image SHA and public probes. Record the deployed commit, backup and verification in the issue.
 
 ## Deploying general settings
 
@@ -336,3 +336,9 @@ Run `make docker-build` then `bash scripts/test-recipe-browser.sh` on a host sup
 After release, verify `org.opencontainers.image.revision` labels on all three containers, health checks, public HTTPS routes and the Recipes workflow. Private probes are `recipe-browser:8090/health` and `recipe-egress:3128/health`. Restarting discards open pages, never saved recipes. Diagnose failures through proxy health and quotas without logging pages, cookies, screenshots or secrets. Update Chromium and Playwright together and repeat these tests.
 
 Rollback requires all three service images at the same SHA and schema compatibility. To return to a version before ADR 010, use that version’s checkout and instructions, stop the two added services and explicitly check schema compatibility; never discard provenance or receipts. Data rollback is never automatic.
+
+## Dashboard and Life AI release
+
+After review, checks and merge, deploy `main` with `scripts/deploy.sh`, backup then additive migration `0019_life_ai`. No new service, dependency, variable or secret. Preserve existing provider configuration and encryption keys. Verify existing-account migration and the disabled default for a synthetic account created afterwards.
+
+Check all three running image SHAs, Alembic revision, probes and HTTPS `/`, `/ai`, `/applications`, `/settings?application=life_ai`, OpenAPI and FR/EN guides. On a synthetic account, check one-row carousel at 320 px/keyboard, Life AI activation, draft preservation without a provider, old conversation links, disable/re-enable preservation and shared provider access for Recipes. Simulated-provider tests cover automatic single submission; distinguish that evidence from a real LLM request. Record published commit, backup and results in issue #104. Follow [rollback limits](sauvegardes.md#migration-0019-life-ai-activation).

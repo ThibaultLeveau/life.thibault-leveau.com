@@ -221,3 +221,9 @@ Older catalogue writes remain compatible during this additive migration. No exis
 Migration 0018 adds `source_url`, `source_title`, `imported_at` to recipes and `recipes_web_import_receipts` (owner/import composite key, recipe/owner composite foreign key, content fingerprint and timestamp). PostgreSQL backups retain attribution, receipts and creation events; disabling/re-enabling Recipes preserves them. Replaying a restored import finds the existing recipe. Downgrade refuses to discard receipts.
 
 Browser pages, frames, cookies and profiles are transient and excluded from backups; stop `recipe-browser` before restoring, then restart it to invalidate in-memory leases too. Protect `.env.production` and its service token separately. Browsers have no persistent volume, SQL access or AI credentials.
+
+## Migration 0019: Life AI activation
+
+Back up before migration using the standard procedure. Dumps include `application_preferences` and all `assistant_*` tables; retain the credential encryption keyring separately. Upgrade is additive and moves no data. Restore using an image supporting `0019_life_ai`: compare activation, dates, conversations/messages, sources, memories and settings, then verify disabled applications remain inaccessible. Existing recovery still invalidates sessions, runs and pending confirmations.
+
+Older images expose chat without Life AI activation checks. Downgrade refuses explicitly disabled Life AI preferences and retains enabled preferences for a later upgrade. This does not authorize exposing accounts created after migration with the disabled default: do not return to an old image with those accounts. Prefer a compatible fix or a coordinated restore of an earlier backup; there is no automatic downgrade.

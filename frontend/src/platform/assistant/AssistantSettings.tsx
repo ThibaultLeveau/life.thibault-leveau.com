@@ -5,19 +5,14 @@ import { Icon } from "../../shared/ui/Icon";
 import type { SettingsPanelProps } from "../applications/definition";
 import { useSettingsDraft } from "../applications/useSettingsDraft";
 import { useApiAction, useApiResource } from "../useApiResource";
-import { assistantApi } from "./api";
+import { providerApi as assistantApi } from "./api";
 import type { AssistantSettings, Provider } from "./types";
-import { TranscriptionSettingsPanel } from "./TranscriptionSettings";
-import "./styles.css";
+import "./settings.css";
 
-export function AssistantSettingsPanel(props: SettingsPanelProps) {
+export function AssistantSettingsPanel(
+  props: SettingsPanelProps & { onSaved?: (value: AssistantSettings) => void },
+) {
   const resource = useApiResource(assistantApi.settings, []);
-  const [savedChat, setSavedChat] = useState<AssistantSettings>();
-  const [chatDirty, setChatDirty] = useState(false),
-    [voiceDirty, setVoiceDirty] = useState(false);
-  const [chatBusy, setChatBusy] = useState(false),
-    [voiceBusy, setVoiceBusy] = useState(false);
-  useSettingsDraft(props, chatDirty || voiceDirty, chatBusy || voiceBusy);
   return (
     <section className="settings-card settings-form" id="assistant-settings">
       <h3>
@@ -34,16 +29,11 @@ export function AssistantSettingsPanel(props: SettingsPanelProps) {
       {resource.data && (
         <SettingsForm
           initial={resource.data}
-          onSaved={setSavedChat}
-          onDirty={setChatDirty}
-          onBusy={setChatBusy}
+          onSaved={props.onSaved ?? (() => {})}
+          onDirty={props.onDirty}
+          onBusy={props.onBusy}
         />
       )}
-      <TranscriptionSettingsPanel
-        chatSettings={savedChat ?? resource.data}
-        onDirty={setVoiceDirty}
-        onBusy={setVoiceBusy}
-      />
     </section>
   );
 }
@@ -59,18 +49,13 @@ function SettingsForm({
   const [provider, setProvider] = useState(initial.provider);
   const [model, setModel] = useState(initial.model);
   const [token, setToken] = useState("");
-  const [memory, setMemory] = useState(initial.memory_enabled);
   const [notice, setNotice] = useState("");
   const action = useApiAction();
   const retainsToken = saved.configured && provider === saved.provider;
   const needsModel =
     !!token.trim() ||
     (provider === saved.provider && model !== saved.model && !!saved.model);
-  const dirty =
-    provider !== saved.provider ||
-    model !== saved.model ||
-    !!token ||
-    memory !== saved.memory_enabled;
+  const dirty = provider !== saved.provider || model !== saved.model || !!token;
   useSettingsDraft(draft, dirty, action.busy);
   function save(apiToken?: string | null) {
     setNotice("");
@@ -79,7 +64,6 @@ function SettingsForm({
         assistantApi.saveSettings({
           provider,
           ...(model.trim() ? { model: model.trim() } : {}),
-          memory_enabled: memory,
           ...(apiToken !== undefined
             ? { api_token: apiToken }
             : token.trim()
@@ -92,7 +76,6 @@ function SettingsForm({
         setProvider(value.provider);
         setModel(value.model);
         setToken("");
-        setMemory(value.memory_enabled);
         setNotice(tr("assistant_saved"));
       },
     );
@@ -157,14 +140,7 @@ function SettingsForm({
               : tr("assistant_token_empty")}{" "}
           {tr("assistant_token_encrypted")}
         </p>
-        <label className="assistant-check">
-          <input
-            type="checkbox"
-            checked={memory}
-            onChange={(event) => setMemory(event.target.checked)}
-          />
-          <span>{tr("assistant_memory_enabled")}</span>
-        </label>
+
         <p className="muted small-text">{tr("assistant_provider_notice")}</p>
         <div className="assistant-actions">
           <button
