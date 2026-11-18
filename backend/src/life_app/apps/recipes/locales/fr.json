@@ -31,5 +31,6 @@
   "web_cancelled": "Import annulé.",
   "web_uncertain_measurements": "Certaines portions, quantités ou unités sont à préciser. Complétez les champs vides en consultant les lignes originales ; les fourchettes ne sont pas remplacées par une valeur arbitraire.",
   "item_identity": "Indiquez soit un article libre (name), soit un ingrédient du catalogue (ingredient_id).",
-  "invalid_item_name": "Saisissez un nom d’article valide."
+  "invalid_item_name": "Saisissez un nom d’article valide.",
+  "preparation_too_long": "La préparation complète est limitée à 20 000 caractères, textes des sections compris."
 }

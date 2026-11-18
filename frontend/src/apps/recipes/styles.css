@@ -1267,3 +1267,71 @@
     animation: none;
   }
 }
+
+.recipes-preparation-editor {
+  margin-top: 28px;
+}
+.recipes-text-block label {
+  margin-bottom: 4px;
+}
+.recipes-preparation-sections {
+  display: grid;
+  gap: 18px;
+  margin: 18px 0;
+}
+.recipes-preparation-section {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--ui-border);
+  border-radius: 10px;
+  background: var(--ui-sidebar);
+}
+.recipes-preparation-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.recipes-preparation-heading h3 {
+  margin: 0;
+  font-size: 14px;
+}
+.recipes-preparation-heading .recipes-actions {
+  gap: 0;
+  flex-wrap: nowrap;
+}
+.recipes-preparation-read + .recipes-preparation-read {
+  border-top: 1px solid var(--ui-border);
+  margin-top: 24px;
+  padding-top: 12px;
+}
+.recipes-preparation-read h3 {
+  overflow-wrap: anywhere;
+}
+/* A bounded native textarea scrolls its text as the caret advances. */
+.recipes-content textarea.recipes-preparation-input {
+  height: 220px;
+  min-height: 0;
+  max-height: max(56px, calc(var(--ui-viewport-height, 100svh) - 160px));
+  overflow-y: auto;
+  resize: vertical;
+  scroll-padding-block: 12px;
+}
+@media (pointer: coarse) {
+  .recipes-content textarea.recipes-preparation-input {
+    resize: none;
+  }
+  /* Leave room to raise even the last field when only the visual viewport shrinks. */
+  .recipes-content:has(:is(input, textarea):focus) {
+    padding-bottom: max(
+      80px,
+      calc(100svh - var(--ui-viewport-height, 100svh) + 80px)
+    );
+  }
+}
+@media (max-width: 560px) {
+  .recipes-preparation-section {
+    padding: 12px 10px;
+  }
+}

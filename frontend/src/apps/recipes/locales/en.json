@@ -210,5 +210,18 @@
   "assistant_field_purchase": "Basket",
   "assistant_item_bought": "Bought",
   "assistant_item_to_buy": "To buy",
-  "assistant_item_in_cart": "{{quantity}} in the basket"
+  "assistant_item_in_cart": "{{quantity}} in the basket",
+  "section_split": "Split at cursor",
+  "sections_hint": "Place the cursor at the start of a passage, then split it into a section. Each section has its own title and text.",
+  "section_number": "Section {{count}}",
+  "section_title": "Section {{count}} title",
+  "section_text": "Section {{count}} text",
+  "section_up": "Move section {{count}} up",
+  "section_down": "Move section {{count}} down",
+  "section_remove": "Remove section {{count}}",
+  "section_remove_confirm": "Remove this section and its text from the draft?",
+  "section_add": "Add a section",
+  "preparation_count": "{{count}} / 20,000 preparation characters",
+  "assistant_field_sections": "Preparation sections",
+  "assistant_field_text": "Text"
 }

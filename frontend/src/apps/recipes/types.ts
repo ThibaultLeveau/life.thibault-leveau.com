@@ -32,10 +32,15 @@ export type ShoppingItemInput = ItemInput | FreeItemInput;
 export interface ShoppingItem extends Omit<Item, "ingredient_id"> {
   ingredient_id: string | null;
 }
+export interface PreparationSection {
+  title: string;
+  text: string;
+}
 export interface RecipeInput {
   title: string;
   servings: number;
   instructions: string;
+  sections: PreparationSection[];
   items: ItemInput[];
 }
 export interface Recipe extends RecipeInput {
@@ -123,6 +128,7 @@ export interface RecipeImportDraft {
   title: string;
   servings: number | null;
   instructions: string;
+  sections: PreparationSection[];
   items: ImportedIngredient[];
   warnings: string[];
   source_url: string | null;

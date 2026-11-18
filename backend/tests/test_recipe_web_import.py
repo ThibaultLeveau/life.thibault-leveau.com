@@ -442,3 +442,26 @@ def test_receipts_prevent_lossy_migration_and_enforce_owner_fk(client, app, engi
             )
         )
         db.flush()
+
+
+def test_web_save_sections_replay_and_validation(client):
+    payload = saved_payload(prepare(client).json())
+    payload["sections"] = [{"title": "Finition", "text": "Ajouter le basilic.\nServir."}]
+    first = client.post(ROOT + "/save", json=payload)
+    assert first.status_code == 201
+    recipe = first.json()
+    assert recipe["sections"] == payload["sections"]
+    assert client.post(ROOT + "/save", json=payload).json() == recipe
+    changed = {**payload, "sections": [{"title": "Finition", "text": "Autre texte."}]}
+    assert client.post(ROOT + "/save", json=changed).status_code == 409
+    invalid = {**payload, "import_id": str(uuid4()), "instructions": "x" * 20000}
+    assert client.post(ROOT + "/save", json=invalid).status_code == 422
+    assert client.get("/api/v1/recipes/recipes").json()["total"] == 1
+
+
+def test_web_save_old_payload_and_empty_sections_have_same_fingerprint(client):
+    payload = saved_payload(prepare(client).json())
+    payload.pop("sections", None)
+    first = client.post(ROOT + "/save", json=payload)
+    assert first.status_code == 201
+    assert client.post(ROOT + "/save", json={**payload, "sections": []}).json() == first.json()

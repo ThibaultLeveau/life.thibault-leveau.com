@@ -216,6 +216,14 @@ for (const [locale, theme, width] of [
       })
       .click();
     await page.getByLabel(t.title, { exact: true }).fill(title + " reviewed");
+    await page
+      .getByRole("button", { name: t.section_add, exact: true })
+      .click();
+    const preparationSection = page.locator(".recipes-preparation-section");
+    await preparationSection.locator("input").fill("Service");
+    await preparationSection
+      .locator("textarea")
+      .fill("Servir immédiatement.\nBon appétit !");
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth),
     ).toBeLessThanOrEqual(width);
@@ -224,6 +232,9 @@ for (const [locale, theme, width] of [
       fullPage: true,
     });
     await page.getByRole("button", { name: t.web_save, exact: true }).click();
+    await expect(page.locator(".recipes-preparation-read")).toContainText(
+      "Servir immédiatement.",
+    );
     await expect(
       page.getByRole("heading", { name: title + " reviewed", exact: true }),
     ).toBeVisible();
