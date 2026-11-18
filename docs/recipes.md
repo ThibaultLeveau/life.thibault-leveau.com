@@ -90,3 +90,17 @@ Les préférences sont réunies dans les [réglages généraux](settings.md). Le
 ![Ouvrir Réglages pour adapter les préférences et les jours d’utilisation de cette application.](assets/screenshots/fr/recipes-settings.png){ loading=lazy }
 
 *Ouvrir Réglages pour adapter les préférences et les jours d’utilisation de cette application.*
+
+## Importer une recette depuis le web
+
+Dans **Recettes → Importer du web**, collez l’URL puis choisissez **Ouvrir la page**. Le cadre est un navigateur temporaire : cliquez, faites défiler la page et répondez vous-même aux demandes de cookies ou de vérification. Le bouton clavier permet de saisir du texte ; **Échap** rend le clavier à LifeOS. Sur mobile, le champ sous le cadre permet aussi de saisir du texte dans le champ sélectionné du site.
+
+Quand la recette est visible, choisissez **Importer la recette**. L’IA utilise le fournisseur, le modèle et le token déjà configurés dans les réglages du compte. Elle lit cette même page et prépare le titre, les ingrédients et la préparation en français ou anglais selon la langue actuelle du compte. Seuls le contenu de la page et les noms du catalogue public sont transmis au fournisseur ; aucune conversation ou mémoire personnelle n’est jointe.
+
+Relisez le brouillon : corrigez le titre, les portions, les quantités, unités et étapes. Les lignes d’ingrédients d’origine et les points à vérifier restent consultables. Une mesure ambiguë (tasse sans taille, pincée, « au goût »…) reste à compléter ; aucune conversion masse/volume n’est devinée. Vous pouvez ajouter ou retirer une ligne et choisir un ingrédient du catalogue. **Enregistrer la recette** crée en une transaction la recette et ses éventuels nouveaux ingrédients privés. L’URL source demeure sur la fiche ; un nouvel envoi de la même sauvegarde ne crée pas de doublon.
+
+Le brouillon reste temporaire jusqu’à l’enregistrement. Quitter, changer de langue ou se déconnecter suit les protections habituelles des formulaires. La navigation expire après 10 minutes sans interaction, 30 minutes au maximum, ou après perte de connexion avec LifeOS. Les cookies du site sont propres à cette session et ne sont pas conservés. Deux navigateurs peuvent fonctionner simultanément sur le serveur, un par compte.
+
+Certains sites bloquent les navigateurs hébergés ou leurs vérifications humaines. Utilisez alors **Coller le texte de la recette** : copiez les ingrédients et étapes depuis votre navigateur. Le collage utilise la même extraction IA et la même relecture. Un changement de page pendant l’extraction demande de relancer l’import. Les erreurs du fournisseur, un quota atteint ou une page sans recette ne créent aucune donnée. Les imports consomment le quota de votre fournisseur IA.
+
+Les fourchettes comme « 2–3 tranches » ou « ¼–1 cuillère » laissent la quantité vide : choisissez une valeur lors de la relecture. La ligne originale est conservée et un avertissement signale les champs à compléter, sans moyenne ni borne choisie automatiquement.

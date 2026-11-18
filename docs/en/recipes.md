@@ -85,3 +85,17 @@ Preferences are grouped in [General settings](settings.md). An application’s S
 ![Open Settings to adjust this application’s preferences and usage days.](../assets/screenshots/en/recipes-settings.png){ loading=lazy }
 
 *Open Settings to adjust this application’s preferences and usage days.*
+
+## Import a recipe from the web
+
+In **Recipes → Import from web**, paste a URL and choose **Open page**. The frame is a temporary browser: click, scroll and complete cookie prompts or human checks yourself. Enable keyboard input to type; **Escape** returns keyboard control to LifeOS. On mobile, the field below the frame can also type into the selected website field.
+
+When the recipe is visible, choose **Import recipe**. AI uses the provider, model and token configured in your account settings. It reads that same page and prepares the title, ingredients and instructions in your current account language, French or English. Only page content and public ingredient catalogue names go to the provider; personal conversation history and memories are excluded.
+
+Review the draft: edit the title, servings, quantities, units and steps. Original ingredient lines and review warnings remain available. Ambiguous measurements (unspecified cups, pinches, “to taste”…) require your input; mass/volume conversions are never guessed. Add or remove lines and select catalogue ingredients as needed. **Save recipe** creates the recipe and any new private ingredients in one transaction. The source URL stays on the recipe; retrying the same save does not create duplicates.
+
+The draft is temporary until saved. Leaving, switching language or signing out follows the usual draft protections. Browsing expires after 10 minutes without interaction, 30 minutes maximum, or loss of the connection to LifeOS. Website cookies belong only to that session and are discarded. The server allows two browsers at once, one per account.
+
+Some websites reject hosted browsers or human checks. Use **Paste recipe text** to copy ingredients and steps from your browser, with the same AI extraction and review. A page change during capture requires retrying. Provider errors, capacity limits and pages without recipes never create data. Imports consume your AI provider quota.
+
+Ranges such as “2–3 slices” or “¼–1 teaspoon” leave the quantity empty: choose a value during review. The original line is preserved and a warning highlights incomplete fields, without automatically choosing an average or an endpoint.

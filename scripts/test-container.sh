@@ -233,7 +233,7 @@ done
 # Free shopping items are real persisted data, independent of the ingredient catalogue.
 [[ $(docker exec "$db" psql -U life -d life_restored -Atc 'SELECT count(*) FROM recipes_list_items WHERE ingredient_id IS NULL AND name IS NOT NULL AND normalized_name IS NOT NULL') -gt 0 ]]
 # All recipe quantities, purchase states, templates, ingredients and history survive intact.
-for recipes_table in recipes_ingredients recipes_recipes recipes_recipe_items recipes_lists recipes_list_items recipes_events; do
+for recipes_table in recipes_ingredients recipes_recipes recipes_recipe_items recipes_lists recipes_list_items recipes_events recipes_web_import_receipts; do
   recipes_query="SELECT coalesce(jsonb_agg(to_jsonb(t) ORDER BY to_jsonb(t)::text), '[]'::jsonb) FROM $recipes_table t"
   source_recipes=$(docker exec "$db" psql -U life -d life -Atc "$recipes_query")
   restored_recipes=$(docker exec "$db" psql -U life -d life_restored -Atc "$recipes_query")

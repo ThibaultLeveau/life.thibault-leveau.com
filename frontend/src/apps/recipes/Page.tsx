@@ -11,6 +11,7 @@ import {
 import { Icon } from "../../shared/ui/Icon";
 import { recipesApi } from "./api";
 import { Empty, LoadState, NameDialog, Pager } from "./components/common";
+import { WebImport } from "./components/WebImport";
 import { RecipeEditor } from "./components/RecipeEditor";
 import { RecipeDetail } from "./components/RecipeDetail";
 import { ListDetail } from "./components/ListDetail";
@@ -32,6 +33,11 @@ function readView() {
     id: params.get("id"),
     edit: params.get("edit") === "1",
     shop: params.get("shop") === "1",
+    web:
+      params.get("import") === "web" &&
+      (!params.get("tab") || params.get("tab") === "recipes") &&
+      !params.get("id") &&
+      params.get("edit") !== "1",
   };
 }
 
@@ -72,7 +78,7 @@ export function Page() {
   );
   const catalogue = useApiResource<PageResult<Recipe | ShoppingList>>(
     async (signal) => {
-      if (view.id || view.edit)
+      if (view.id || view.edit || view.web)
         return { items: [], total: 0, offset: 0, limit: 24 };
       const archived = view.tab === "archives";
       if (view.tab === "recipes" || (archived && archiveKind === "recipes"))
@@ -87,7 +93,7 @@ export function Page() {
         signal,
       );
     },
-    [view.tab, view.id, view.edit, archiveKind, q, offset, revision],
+    [view.tab, view.id, view.edit, view.web, archiveKind, q, offset, revision],
   );
   const resource = useApiResource<Recipe | ShoppingList | null>(
     (signal) =>
@@ -105,11 +111,13 @@ export function Page() {
       : resource.data?.id === view.id
         ? resource.data
         : undefined;
-  const title = view.edit
-    ? tr(view.id ? "edit_recipe" : "new_recipe")
-    : view.id && detail
-      ? detail.title
-      : tr(view.tab);
+  const title = view.web
+    ? tr("web_import")
+    : view.edit
+      ? tr(view.id ? "edit_recipe" : "new_recipe")
+      : view.id && detail
+        ? detail.title
+        : tr(view.tab);
   useEffect(() => {
     index.current = history.state?.recipesIndex ?? 0;
     history.replaceState({ ...history.state, recipesIndex: index.current }, "");
@@ -155,6 +163,7 @@ export function Page() {
     edit = false,
     shop = false,
     accepted = false,
+    web = false,
   ) {
     if (!accepted && !permit()) return;
     dirty.current = false;
@@ -169,9 +178,10 @@ export function Page() {
     if (id) params.set("id", id);
     if (edit) params.set("edit", "1");
     if (shop) params.set("shop", "1");
+    if (web) params.set("import", "web");
     index.current++;
     history.pushState({ recipesIndex: index.current }, "", `?${params}`);
-    setView({ tab, id, edit, shop });
+    setView({ tab, id, edit, shop, web });
     window.scrollTo({ top: 0, behavior: "instant" });
   }
   function open(item: Recipe | ShoppingList, accepted = false) {
@@ -255,7 +265,7 @@ export function Page() {
           status={<ProgressionBadge applicationId="recipes" />}
         />
         <div className="recipes-content">
-          {(view.id || view.edit) && (
+          {(view.id || view.edit || view.web) && (
             <button className="recipes-back" onClick={() => go(view.tab)}>
               <Icon name="chevron" />
               {tr("back")}
@@ -267,21 +277,34 @@ export function Page() {
               <h1 ref={heading} tabIndex={-1}>
                 {title}
               </h1>
-              {!view.id && !view.edit && (
+              {!view.id && !view.edit && !view.web && (
                 <p className="muted">{tr(`${view.tab}_subtitle`)}</p>
               )}
             </div>
-            {!view.id && !view.edit && view.tab !== "archives" && (
-              <button className="primary-button" onClick={create}>
-                <Icon name="plus" />
-                {tr(
-                  view.tab === "recipes"
-                    ? "new_recipe"
-                    : view.tab === "templates"
-                      ? "new_template"
-                      : "new_list",
+            {!view.id && !view.edit && !view.web && view.tab !== "archives" && (
+              <div className="recipes-heading-actions">
+                {view.tab === "recipes" && (
+                  <button
+                    className="secondary-button"
+                    onClick={() =>
+                      go("recipes", null, false, false, false, true)
+                    }
+                  >
+                    <Icon name="sparkles" />
+                    {tr("web_import")}
+                  </button>
                 )}
-              </button>
+                <button className="primary-button" onClick={create}>
+                  <Icon name="plus" />
+                  {tr(
+                    view.tab === "recipes"
+                      ? "new_recipe"
+                      : view.tab === "templates"
+                        ? "new_template"
+                        : "new_list",
+                  )}
+                </button>
+              </div>
             )}
           </header>
           {notice && (
@@ -289,6 +312,13 @@ export function Page() {
               <Icon name="check" />
               {notice}
             </p>
+          )}
+          {view.web && (
+            <WebImport
+              onSaved={(recipe) => open(recipe, true)}
+              onCancel={() => go("recipes", null, false, false, true)}
+              {...draft}
+            />
           )}
           {view.id && <LoadState {...resource} />}
           {view.edit && (!view.id || (detail && "servings" in detail)) && (
@@ -349,7 +379,7 @@ export function Page() {
               {tr("refresh")}
             </button>
           )}
-          {!view.id && !view.edit && (
+          {!view.id && !view.edit && !view.web && (
             <>
               <div className="recipes-toolbar">
                 <label className="recipes-search">

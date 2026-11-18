@@ -116,3 +116,5 @@ Un renderer conserve un résumé métier compact et utilise `platform/assistant/
 ## Sources de l’assistant
 
 L’[ADR 009](decisions/009-sources-assistant.md) autorise les sources multimodales et la dictée dans `platform/assistant`. Toute extension respecte formats/budgets, propriétaire, CSRF, admission avant I/O, contrôles après traitement et données externes distinctes de la demande. Ajouter les blocs aux trois adaptateurs et les erreurs FR/EN ; ne pas introduire de téléchargement libre dans un outil métier. Les sources doivent survivre à l’historique et être supprimables via l’API. Couvrir parsing hostile, SSRF, idempotence, injection/confirmation, mémoire, compaction, annulation, quotas, migration/restauration et UI mobile/clavier. Un nouveau service, stockage ou élargissement des accès nécessite un nouvel accord explicite.
+
+Import web Recettes livré selon l’[ADR 010](decisions/010-import-web-recettes.md) : navigateur isolé, intervention humaine, extraction IA dans la langue du compte, brouillon relu et provenance persistante. Il ne s’agit plus d’une proposition.

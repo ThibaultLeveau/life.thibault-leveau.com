@@ -110,6 +110,7 @@ export async function api<T>(
   method = "GET",
   body?: unknown,
   signal?: AbortSignal,
+  notifyChange = true,
 ): Promise<T> {
   const { response, ensureCurrent } = await responseFor(
     path,
@@ -119,7 +120,7 @@ export async function api<T>(
   );
   const result = response.status === 204 ? undefined : await response.json();
   ensureCurrent();
-  if (!["GET", "HEAD", "OPTIONS"].includes(method))
+  if (notifyChange && !["GET", "HEAD", "OPTIONS"].includes(method))
     window.dispatchEvent(new Event("life-data-changed"));
   return result as T;
 }

@@ -122,6 +122,14 @@ export function RecipeDetail({
           </div>
         </section>
       </div>
+      {recipe.source_url && (
+        <p className="recipes-web-source">
+          <span>{tr("web_source")}</span>
+          <a href={recipe.source_url} target="_blank" rel="noopener noreferrer">
+            {recipe.source_title || recipe.source_url}
+          </a>
+        </p>
+      )}
       <History id={recipe.id} type="recipes" version={recipe.version} />
       {importing && preview.data && (
         <ImportDialog

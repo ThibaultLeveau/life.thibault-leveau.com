@@ -8,6 +8,8 @@ from pydantic import Field
 from life_app.apps.recipes import models as m
 from life_app.apps.recipes import schemas as s
 from life_app.apps.recipes import service as svc
+from life_app.apps.recipes import web_import as web
+from life_app.apps.recipes import web_schemas as w
 from life_app.platform.assistant.definition import ActionDefinition, ActionProvider, arguments
 
 Offset = Annotated[int, Field(ge=0)]
@@ -28,6 +30,17 @@ def removed_item_targets(context, payload):
 
 provider = ActionProvider(
     actions=(
+        ActionDefinition(
+            name="save_web_import",
+            description="Save a reviewed imported recipe and source atomically, with confirmation.",
+            input_model=arguments("RecipesWebImportSave", payload=(w.ImportSave, ...)),
+            handler=lambda c, a: svc.output(c.db, web.save(c.db, c.user, a.payload)),
+            method="POST",
+            path="/recipes/web-import/save",
+            mutating=True,
+            confirmation=True,
+            output_model=s.RecipeOutput,
+        ),
         ActionDefinition(
             name="list_ingredients",
             description="Search the shared bilingual catalogue and your private ingredients.",
@@ -349,6 +362,7 @@ provider = ActionProvider(
 
 provider = provider.with_labels(
     {
+        "save_web_import": ("Enregistrer une recette importée", "Save an imported recipe"),
         "list_ingredients": ("Rechercher des ingrédients", "Find ingredients"),
         "create_ingredient": ("Créer un ingrédient", "Create an ingredient"),
         "list_recipes": ("Rechercher des recettes", "Find recipes"),

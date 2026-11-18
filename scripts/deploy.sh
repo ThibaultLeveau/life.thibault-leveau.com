@@ -47,6 +47,16 @@ else
 fi
 
 export LIFE_IMAGE="$target_image"
+revision=${target_image##*:}
+export LIFE_BROWSER_IMAGE="local/life-recipe-browser:$revision"
+export LIFE_RECIPE_EGRESS_IMAGE="local/life-recipe-egress:$revision"
+if [[ ${1:-} != --rollback ]]; then
+  docker build --build-arg "REVISION=$revision" -t "$LIFE_BROWSER_IMAGE" infrastructure/recipe-browser
+  docker build --build-arg "REVISION=$revision" -t "$LIFE_RECIPE_EGRESS_IMAGE" infrastructure/recipe-egress
+else
+  # Older releases without the isolated services require their documented checkout.
+  docker image inspect "$LIFE_BROWSER_IMAGE" "$LIFE_RECIPE_EGRESS_IMAGE" >/dev/null
+fi
 compose up -d --wait --wait-timeout 120 db
 if [[ ${1:-} != --rollback ]]; then
   # A backup also records the empty schema on the first deployment.
@@ -63,9 +73,9 @@ with app.state.sessions() as db:
 '
 fi
 
-if ! compose up -d --no-build --wait --wait-timeout 90 web; then
+if ! compose up -d --no-build --wait --wait-timeout 120 recipe-egress recipe-browser web; then
   echo 'La nouvelle version ne devient pas saine.' >&2
-  compose logs --tail 60 web >&2
+  compose logs --tail 60 web recipe-browser recipe-egress >&2
   if [[ -n "$current_image" && "$current_image" != "$target_image" ]]; then
     echo "L’image précédente est $current_image. Vérifier sa compatibilité avec le schéma avant de la relancer." >&2
   fi

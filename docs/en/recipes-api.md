@@ -97,3 +97,34 @@ The last request adds 450 g. Check with PUT `/lists/{id}/items/{item_id}/check` 
 Business messages use account language. Immutable events retain owner, object, kind, UTC instant and version snapshot. Supplied names in snapshots retain event-time language; current objects follow account language.
 
 The metrics provider exposes recipes/lists/imports/templates through `/api/v1/integrations`, count only, no filters, UTC bounds derived from requested period/timezone. Unique first-confirmation events drive counts; archives/reopening do not rewrite history. Progression awards XP in the same transaction, with 60 quests and ten titles. See [scales/limits](recipes.md#tracking-and-rewards) and [shared contracts](api.md#progression-par-application).
+
+## Web import and AI draft
+
+All routes below use `/api/v1/recipes/web-import` and require authentication and Recipes activation. Mutations require `X-CSRF-Token` and the normal origin check. Responses are not cached. Browser controls belong to the human workflow; the assistant only receives `save_web_import`, requiring confirmation.
+
+| Method / route | Contract |
+| --- | --- |
+| `POST /sessions` | `{id: UUID, url: HTTP(S) URL, width?: 320..1280}`; creates/replaces the account browser; 201 with `id,url,title,document,width,height,image,expires_at` |
+| `GET /sessions/{id}/frame` | Renews the lease and returns a base64 JPEG without a data URI prefix |
+| `POST /sessions/{id}/input` | `{document,action,...}`; `click/move/down/up` require `x,y`, `scroll` requires `dx,dy` (±1500), `key` requires an allowed key, `text` accepts 1–2000 characters, `back/reload` accept no extra fields |
+| `DELETE /sessions/{id}` | Closes the session; 204, or 404 if already expired |
+| `POST /prepare` | Either `{session_id,document}` or `{text,source_url?}`; text length 20–60,000; returns a draft without database writes |
+| `POST /save` | Atomic, replayable save using the contract below; 201 with the recipe |
+
+Allowed keys: Enter, Tab, Shift+Tab, Backspace, Delete, Escape, arrows, Home, End, PageUp, PageDown, Space. No arbitrary JavaScript or DevTools access. `document` is the frame version; navigation invalidates stale commands or capture (409). Identifiers never grant access to another account or login session (404).
+
+Example without the frame, using a cookie jar and CSRF from the login API:
+
+```bash
+curl -b cookies.txt -H "X-CSRF-Token: $CSRF" -H 'Content-Type: application/json' \
+  -d '{"text":"Lemon pasta for 2: 200 g pasta, 1 lemon. Boil pasta and add lemon.","source_url":"https://example.com/lemon-pasta"}' \
+  https://life.thibault-leveau.com/api/v1/recipes/web-import/prepare
+```
+
+The draft contains `import_id`, `locale`, `title`, `servings`, `instructions`, `items`, `warnings`, `source_url`, `source_title`. Each line contains `name`, `quantity`, `unit`, `ingredient_id`, `catalogue_name`, `source_text`, `note`. Uncertain values remain `null`. After review, send `/save` with these root fields except `warnings`, and lines limited to `{ingredient_id?,name,quantity,unit}`. Quantity, unit and servings must satisfy Recipes contracts. Retain useful notes in the instructions. A line without an ingredient ID reuses an exact name or creates a private ingredient. A foreign ID or any error rolls back the entire transaction.
+
+Retain `import_id` when retrying the same save: same content → same recipe, changed content → 409. A new import uses a new UUID. The language must still match the account (409 otherwise). Recipes expose `source_url`, `source_title`, `imported_at`, also included in their creation event.
+
+Errors: 401 invalid session, 403 CSRF/origin/disabled application, 404 inaccessible browser, 409 language/page/replay conflict or unconfigured provider, 422 invalid input or no usable recipe, 429 capacity/rate limit, 502 website/provider unavailable, 503 browser unconfigured. Generation permits one operation per account, two globally and five attempts per minute per account; these transient quotas reset on restart. Network calls release SQL locks; access and language are checked again before returning data.
+
+Numeric ranges returned by the AI become `null` draft quantities or servings, with a warning and original lines retained. The `/save` contract remains strict: complete numeric values are required.

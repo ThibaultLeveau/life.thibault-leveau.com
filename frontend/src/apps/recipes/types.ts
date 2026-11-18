@@ -39,6 +39,9 @@ export interface RecipeInput {
   items: ItemInput[];
 }
 export interface Recipe extends RecipeInput {
+  source_url: string | null;
+  source_title: string | null;
+  imported_at: string | null;
   id: string;
   version: number;
   base_servings: number;
@@ -75,3 +78,53 @@ export const itemInput = (item: ItemInput): ItemInput => ({
   quantity: item.quantity,
   unit: item.unit,
 });
+
+export interface BrowserFrame {
+  id: string;
+  url: string;
+  title: string;
+  document: number;
+  width: number;
+  height: number;
+  image: string | null;
+  expires_at: string;
+}
+export interface BrowserCommand {
+  action:
+    | "click"
+    | "move"
+    | "down"
+    | "up"
+    | "scroll"
+    | "key"
+    | "text"
+    | "back"
+    | "reload";
+  document: number;
+  x?: number;
+  y?: number;
+  dx?: number;
+  dy?: number;
+  key?: string;
+  text?: string;
+}
+export interface ImportedIngredient {
+  name: string;
+  source_text: string;
+  quantity: string | null;
+  unit: Unit | null;
+  note: string;
+  ingredient_id: string | null;
+  catalogue_name: string | null;
+}
+export interface RecipeImportDraft {
+  import_id: string;
+  locale: "fr" | "en";
+  title: string;
+  servings: number | null;
+  instructions: string;
+  items: ImportedIngredient[];
+  warnings: string[];
+  source_url: string | null;
+  source_title: string;
+}

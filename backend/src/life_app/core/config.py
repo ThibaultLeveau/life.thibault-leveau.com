@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     documentation_dir: Path = PROJECT_ROOT / "site"
     database_url: SecretStr | None = None
     session_hours: int = Field(default=168, ge=1, le=720)
+    recipe_browser_url: str = "http://recipe-browser:8090"
+    recipe_browser_token: SecretStr | None = None
     assistant_encryption_keys: SecretStr | None = None
     assistant_timeout_seconds: int = Field(default=600, ge=10, le=600)
     assistant_max_model_calls: int = Field(default=96, ge=1, le=256)

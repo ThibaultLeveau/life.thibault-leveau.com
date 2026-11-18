@@ -865,3 +865,405 @@
   z-index: 2;
   box-shadow: 0 4px 16px #00000008;
 }
+
+/* Web import is business content; shared navigation remains untouched. */
+.recipes-heading-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.recipes-web-import {
+  max-width: 1060px;
+  margin: 0 auto;
+}
+.recipes-web-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  list-style: none;
+  padding: 0 0 22px;
+  margin: 0 0 28px;
+  border-bottom: 1px solid var(--ui-border);
+  color: var(--ui-muted);
+  font-size: 13px;
+}
+.recipes-web-steps li {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.recipes-web-steps li > span {
+  display: grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  border: 1px solid var(--ui-border);
+  font-size: 12px;
+}
+.recipes-web-steps [aria-current="step"] {
+  color: var(--ui-text);
+  font-weight: 600;
+}
+.recipes-web-steps [aria-current="step"] > span {
+  background: var(--ui-text);
+  color: var(--ui-paper);
+  border-color: var(--ui-text);
+}
+.recipes-web-intro {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  margin-bottom: 28px;
+}
+.recipes-web-mark {
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--ui-accent) 9%, var(--ui-paper));
+  color: var(--ui-accent);
+}
+.recipes-web-intro h2 {
+  font: 550 clamp(23px, 3vw, 30px) / 1.2 var(--font-sans);
+  letter-spacing: -0.025em;
+  margin: 0 0 9px;
+}
+.recipes-web-intro p {
+  margin: 0;
+  max-width: 690px;
+  line-height: 1.65;
+}
+.recipes-web-url-form > label {
+  margin-bottom: 9px;
+}
+.recipes-web-url-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+}
+.recipes-web-language {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--ui-muted);
+  font-size: 12px;
+  padding: 13px 0 20px;
+}
+.recipes-web-language svg {
+  color: var(--ui-accent);
+  flex-shrink: 0;
+}
+.recipes-web-browser {
+  overflow: hidden;
+  border: 1px solid var(--ui-border);
+  border-radius: 12px;
+  background: var(--ui-paper);
+  margin-bottom: 20px;
+}
+.recipes-web-browser-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-bottom: 1px solid var(--ui-border);
+  background: color-mix(in srgb, var(--ui-text) 3%, var(--ui-paper));
+}
+.recipes-web-browser-bar > .icon-button svg {
+  transform: rotate(180deg);
+}
+.recipes-web-address {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+  font-size: 12px;
+}
+.recipes-web-address strong,
+.recipes-web-address a {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.recipes-web-address a {
+  color: var(--ui-muted);
+}
+.recipes-web-screen {
+  display: block;
+  width: 100%;
+  height: auto;
+  touch-action: none;
+  user-select: none;
+}
+.recipes-web-screen:focus-visible {
+  outline: 3px solid var(--ui-accent);
+  outline-offset: -3px;
+}
+.recipes-web-browser-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 14px 0;
+  border-top: 1px solid var(--ui-border);
+}
+.recipes-web-browser > p {
+  padding: 0 14px;
+  line-height: 1.6;
+}
+.recipes-web-type {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px 14px;
+}
+.recipes-web-type > label {
+  flex: 1;
+}
+.recipes-web-paste {
+  border-top: 1px solid var(--ui-border);
+  border-bottom: 1px solid var(--ui-border);
+  padding: 15px 0;
+  margin-bottom: 20px;
+}
+.recipes-web-paste summary {
+  min-height: 44px;
+  display: list-item;
+  align-content: center;
+  cursor: pointer;
+  color: var(--ui-muted);
+  font-size: 13px;
+}
+.recipes-web-paste label {
+  margin: 14px 0 8px;
+}
+.recipes-web-paste textarea {
+  min-height: 180px;
+  resize: vertical;
+}
+.recipes-web-loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px;
+  background: color-mix(in srgb, var(--ui-accent) 7%, var(--ui-paper));
+  border-radius: 10px;
+  color: var(--ui-text);
+  margin: 15px 0;
+}
+.recipes-web-loading > span {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border: 2px solid var(--ui-border);
+  border-top-color: var(--ui-accent);
+  border-radius: 50%;
+  animation: recipes-import-spin 1s linear infinite;
+}
+@keyframes recipes-import-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.recipes-web-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px 0 0;
+}
+.recipes-web-bottom > p {
+  max-width: 430px;
+  line-height: 1.65;
+  margin: 0;
+}
+.recipes-web-bottom .recipes-actions {
+  flex-shrink: 0;
+  margin: 0;
+}
+.recipes-web-review {
+  background: color-mix(in srgb, var(--ui-accent) 2%, var(--ui-paper));
+  border: 1px solid var(--ui-border);
+  border-radius: 14px;
+  padding: 28px;
+}
+.recipes-web-review fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.recipes-web-review-heading {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 26px;
+}
+.recipes-web-review-heading > svg {
+  color: var(--ui-accent);
+  flex-shrink: 0;
+}
+.recipes-web-review-heading h2 {
+  margin: 0 0 6px;
+  font: 550 25px/1.25 var(--font-sans);
+}
+.recipes-web-review-heading p {
+  margin: 0;
+  line-height: 1.6;
+}
+.recipes-web-warnings {
+  padding: 16px 18px;
+  background: color-mix(in srgb, var(--ui-accent) 8%, var(--ui-paper));
+  border-radius: 9px;
+  margin-bottom: 24px;
+  font-size: 13px;
+}
+.recipes-web-warnings ul {
+  padding-left: 20px;
+  margin: 8px 0 0;
+}
+.recipes-web-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 180px;
+  gap: 18px;
+  margin-bottom: 30px;
+}
+.recipes-web-ingredient {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--ui-border);
+}
+.recipes-web-ingredient-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 105px 100px 44px;
+  align-items: center;
+  gap: 10px;
+}
+.recipes-web-ingredient-main input[type="number"] {
+  text-align: right;
+}
+.recipes-web-ingredient-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  color: var(--ui-muted);
+  margin-top: 3px;
+}
+.recipes-web-text-button {
+  color: var(--ui-accent);
+  border: 0;
+  background: transparent;
+  padding: 0 5px;
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.recipes-web-source-line {
+  font-size: 12px;
+  color: var(--ui-muted);
+}
+.recipes-web-source-line summary {
+  min-height: 44px;
+  align-content: center;
+  cursor: pointer;
+}
+.recipes-web-source-line p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.recipes-web-matches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 0;
+}
+.recipes-web-matches > label {
+  flex-basis: 100%;
+}
+.recipes-web-instructions {
+  margin-top: 28px;
+}
+.recipes-web-source {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 12px;
+  margin: 24px 0 0;
+  color: var(--ui-muted);
+}
+.recipes-web-source a {
+  overflow-wrap: anywhere;
+  color: var(--ui-accent);
+}
+@media (max-width: 800px) {
+  .recipes-heading-actions {
+    width: 100%;
+  }
+  .recipes-web-intro {
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .recipes-web-mark {
+    padding: 13px;
+  }
+  .recipes-web-review {
+    padding: 20px;
+  }
+  .recipes-web-bottom {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .recipes-web-fields {
+    grid-template-columns: minmax(0, 1fr) 130px;
+  }
+}
+@media (max-width: 500px) {
+  .recipes-web-steps {
+    gap: 12px;
+    font-size: 12px;
+  }
+  .recipes-web-url-row,
+  .recipes-web-fields {
+    grid-template-columns: 1fr;
+  }
+  .recipes-web-intro {
+    display: block;
+  }
+  .recipes-web-mark {
+    display: none;
+  }
+  .recipes-web-review {
+    padding: 16px 12px;
+  }
+  .recipes-web-ingredient-main {
+    grid-template-columns: minmax(0, 1fr) minmax(70px, 1fr) 44px;
+    gap: 8px;
+  }
+  .recipes-web-ingredient-main > label:first-child {
+    grid-column: 1 / -1;
+  }
+  .recipes-web-browser-bar {
+    flex-wrap: wrap;
+  }
+  .recipes-web-address {
+    min-width: 120px;
+  }
+  .recipes-web-type {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .recipes-web-bottom .recipes-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  .recipes-web-browser-tools > button {
+    flex: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .recipes-web-loading > span {
+    animation: none;
+  }
+}

@@ -143,3 +143,4 @@ extra:
             - {file: decisions/007-reglages-generaux.md, fr: ADR 007 · Réglages généraux, en: ADR 007 · General settings}
             - {file: decisions/008-assistant-ia.md, fr: ADR 008 · Assistant IA, en: ADR 008 · AI assistant}
             - {file: decisions/009-sources-assistant.md, fr: ADR 009 · Sources et dictée, en: ADR 009 · Sources and dictation}
+            - {file: decisions/010-import-web-recettes.md, fr: ADR 010 · Import web Recettes, en: ADR 010 · Recipe web import}

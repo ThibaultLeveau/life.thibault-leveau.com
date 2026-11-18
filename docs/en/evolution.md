@@ -116,3 +116,5 @@ A renderer keeps a compact business summary and uses `platform/assistant/compone
 ## Assistant sources
 
 [ADR 009](decisions/009-sources-assistant.md) authorizes multimodal sources and dictation within `platform/assistant`. Extensions must preserve formats/budgets, ownership, CSRF, admission before I/O, post-processing revalidation and separation of sources from direct instructions. Add blocks to all three adapters and FR/EN errors; never add unrestricted fetching to business tools. Sources must survive history and support API deletion. Cover hostile parsing, SSRF, idempotency, injection/confirmation, memory, compaction, cancellation, quotas, migration/restore and mobile/keyboard UI. New services, storage or broader access require a new explicit agreement.
+
+Recipes web import is implemented under [ADR 010](decisions/010-import-web-recettes.md): isolated browser, human interaction, AI extraction in the account language, reviewed draft and persistent attribution. This is no longer a proposal.

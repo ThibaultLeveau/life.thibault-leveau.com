@@ -94,3 +94,5 @@ Les [réussites](docs/progression.md) proposent **60 quêtes par application**, 
 [Recettes & Liste de courses](docs/recipes.md) propose un catalogue de **301 ingrédients FR/EN**, vos ingrédients privés, des recettes à portions ajustables, le cumul des ingrédients, des listes et modèles réutilisables et un mode magasin mobile/ordinateur. Ses quatre métriques et **60 quêtes** sont disponibles dans Suivi. Toutes les opérations disposent de leur [API](docs/recipes-api.md). L’application est désactivée par défaut.
 
 Les [réglages généraux](docs/settings.md) réunissent les préférences du compte et de chaque application. La navigation de l’accueil propose Réglages ; son footer commun contient le compte et la déconnexion. Depuis la bibliothèque, le menu du nom ouvre aussi les réglages. Les liens Réglages des applications ouvrent leur section directement.
+
+Recettes permet aussi l’[import web interactif avec relecture IA](docs/recipes.md#importer-une-recette-depuis-le-web), dans la langue du compte. Le déploiement inclut les services navigateur et proxy privés de l’[ADR 010](docs/decisions/010-import-web-recettes.md).
