@@ -77,6 +77,13 @@ for (const locale of ["fr", "en"])
       await review.focus();
       await page.keyboard.press("Enter");
       await expect(dialog.locator("ol li")).toHaveCount(10);
+      await expect(
+        dialog.getByRole("heading", {
+          name: locale === "fr" ? "10 tâches à créer" : "10 tasks to create",
+          exact: true,
+        }),
+      ).toBeVisible();
+      await expect(input).toHaveCount(0);
       expect((await tasks()).total).toBe(0);
       const confirm = dialog.getByRole("button", {
         name: locale === "fr" ? "Créer 10 tâches" : "Create 10 tasks",
@@ -105,7 +112,9 @@ test("JSON : aperçu complet, refus atomique, brouillon et correction", async ({
     .click();
   const dialog = page.getByRole("dialog");
   const input = dialog.getByRole("textbox");
-  await dialog.getByRole("combobox", { name: "Format", exact: true }).selectOption("json");
+  await dialog
+    .getByRole("combobox", { name: "Format", exact: true })
+    .selectOption("json");
   await input.fill("{invalid}");
   await dialog
     .getByRole("button", { name: "Vérifier l’import", exact: true })

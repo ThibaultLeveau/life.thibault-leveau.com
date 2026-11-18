@@ -106,56 +106,60 @@ export function ImportTasksDialog({
         aria-busy={busy}
       >
         <p>{tr("import_destination", { name: workspace.name })}</p>
-        <p className="field-help">{tr("import_help")}</p>
-        <label>
-          {tr("import_format")}
-          <select
-            name="format"
-            value={format}
-            disabled={busy || !!preview}
-            onChange={(event) => setFormat(event.target.value)}
-          >
-            <option value="lines">{tr("import_lines")}</option>
-            <option value="json">JSON</option>
-          </select>
-        </label>
-        <label>
-          {tr("section")}
-          <select
-            name="section"
-            value={sectionId}
-            disabled={busy || !!preview}
-            onChange={(event) => setSectionId(event.target.value)}
-          >
-            <option value="">{tr("no_section")}</option>
-            {sections
-              .filter((section) => !section.archived_at)
-              .map((section) => (
-                <option key={section.id} value={section.id}>
-                  {section.name}
-                </option>
-              ))}
-          </select>
-        </label>
-        <label>
-          {tr("import_content")}
-          <textarea
-            name="source"
-            value={source}
-            disabled={busy || !!preview}
-            rows={9}
-            maxLength={200000}
-            placeholder={
-              format === "json"
-                ? '[{"title": "…", "description": "…", "priority": 2}]'
-                : tr("import_placeholder")
-            }
-            onChange={(event) => setSource(event.target.value)}
-            required
-          />
-        </label>
-        {format === "json" && (
-          <p className="field-help">{tr("import_json_help")}</p>
+        {!preview && (
+          <>
+            <p className="field-help">{tr("import_help")}</p>
+            <label>
+              {tr("import_format")}
+              <select
+                name="format"
+                value={format}
+                disabled={busy || !!preview}
+                onChange={(event) => setFormat(event.target.value)}
+              >
+                <option value="lines">{tr("import_lines")}</option>
+                <option value="json">JSON</option>
+              </select>
+            </label>
+            <label>
+              {tr("section")}
+              <select
+                name="section"
+                value={sectionId}
+                disabled={busy || !!preview}
+                onChange={(event) => setSectionId(event.target.value)}
+              >
+                <option value="">{tr("no_section")}</option>
+                {sections
+                  .filter((section) => !section.archived_at)
+                  .map((section) => (
+                    <option key={section.id} value={section.id}>
+                      {section.name}
+                    </option>
+                  ))}
+              </select>
+            </label>
+            <label>
+              {tr("import_content")}
+              <textarea
+                name="source"
+                value={source}
+                disabled={busy || !!preview}
+                rows={9}
+                maxLength={200000}
+                placeholder={
+                  format === "json"
+                    ? '[{"title": "…", "description": "…", "priority": 2}]'
+                    : tr("import_placeholder")
+                }
+                onChange={(event) => setSource(event.target.value)}
+                required
+              />
+            </label>
+            {format === "json" && (
+              <p className="field-help">{tr("import_json_help")}</p>
+            )}
+          </>
         )}
         {preview && (
           <section aria-label={tr("import_preview")}>
