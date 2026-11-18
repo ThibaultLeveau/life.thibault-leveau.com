@@ -20,7 +20,7 @@ Sans URL de base, la sonde `/health` et les fichiers publics restent utilisables
 
 Sans trousseau IA valide, l’enregistrement ou la lecture des tokens chiffrés est indisponible ; les applications et sondes restent utilisables. Générer une clé avec `uv run python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'` dans un terminal privé, la placer dans `.env.production` protégé et la sauvegarder séparément des dumps. Ne pas employer une clé d’exemple ni une valeur générée dans un journal public. Les anciennes clés servent au déchiffrement et à la [rotation](sauvegardes.md#migration-0015-assistant).
 
-Le fournisseur, le modèle et le token utilisateur se règlent via l’[API Assistant](assistant-api.md), pas dans des variables frontend. Les adaptateurs utilisent uniquement les hôtes HTTPS OpenAI, Anthropic et Gemini prédéfinis ; aucune URL de fournisseur arbitraire n’est acceptée. Le trafic sortant vers ces fournisseurs doit être disponible depuis le conteneur web.
+Le fournisseur, le modèle et le token utilisateur se règlent via l’[API Assistant](assistant-api.md), pas dans des variables frontend. Les adaptateurs utilisent uniquement `api.openai.com`, `api.anthropic.com` et `generativelanguage.googleapis.com` en HTTPS ; aucune URL de fournisseur arbitraire n’est acceptée. Le conteneur `web` rejoint le bridge Compose non interne `egress`, qui fournit la route sortante et permet la résolution DNS de ces hôtes. Ce contrôle des hôtes est applicatif ; le bridge ne filtre pas les domaines.
 
 `LIFE_PUBLIC_BASE_URL` doit être l'origine exacte, sans sous-chemin : `http://localhost:5173` en développement, `https://life.thibault-leveau.com` en production. Elle ne configure ni DNS ni Caddy. Le proxy Vite permet d'éviter CORS ; aucune politique CORS générale n'est ouverte. En développement/test, l'origine du backend lui-même est également acceptée.
 
@@ -34,6 +34,8 @@ Le fournisseur, le modèle et le token utilisateur se règlent via l’[API Assi
 | `LIFE_DATABASE_URL` | Connexion applicative avec le même mot de passe que `LIFE_POSTGRES_PASSWORD`, hôte `db`, base `life` |
 
 Copier `.env.production.example` vers `.env.production`, remplacer les marqueurs avec deux mots de passe aléatoires distincts et protéger le fichier (`chmod 600`). Choisir une représentation hexadécimale pour éviter les caractères réservés des URL. Ne pas afficher `docker compose config` sans `--quiet` dans des journaux publics : la sortie contient les secrets interpolés.
+
+Compose crée `life_egress` pour le seul service `web`, sans variable supplémentaire ni port publié. Conserver `database` interne et le réseau externe existant `multisite_proxy` dans son état interne. « Externe » signifie ici que Compose ne gère pas ce réseau ; cela ne lui donne pas une sortie Internet. Avec ces deux réseaux seuls, les sondes peuvent être saines alors que l’assistant ne peut pas joindre son fournisseur. Voir la [vérification depuis le conteneur](deploiement.md#sortie-https-des-fournisseurs).
 
 Le script d'initialisation PostgreSQL crée le rôle `life` propriétaire de sa base, sans droits superutilisateur, création de bases ou création de rôles. Il ne s'exécute que sur un volume vide. Changer le fichier d'environnement ne change pas le mot de passe d'un rôle existant : coordonner une commande d'administration PostgreSQL et la nouvelle URL lors d'une rotation.
 

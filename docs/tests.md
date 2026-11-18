@@ -42,6 +42,8 @@ Les tests de routage fabriquent de petits artefacts ; ils ne remplacent pas le c
 
 ## Image, navigateur et sauvegarde
 
+`scripts/test-container-network.sh`, appelé au début de `make test-container`, charge le vrai `compose.yaml` dans un projet jetable avec un proxy interne. Il vérifie les réseaux du web, l’isolement de PostgreSQL, l’absence de ports publiés, puis la résolution Docker, une réponse HTTP synthétique sur `egress` et la route par défaut vers sa passerelle. Il ne contacte aucun fournisseur ni service Internet. La vérification DNS/TLS réelle des trois fournisseurs reste une [étape de déploiement](deploiement.md#sortie-https-des-fournisseurs).
+
 ```bash
 make docker-build
 (cd frontend && npx playwright install --with-deps chromium)

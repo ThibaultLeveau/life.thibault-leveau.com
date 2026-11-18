@@ -29,6 +29,8 @@ Routing tests use small synthetic artifacts and do not replace real-image valida
 
 ## Image, browser and backup {#image-navigateur-et-sauvegarde}
 
+`scripts/test-container-network.sh`, run at the start of `make test-container`, loads the real `compose.yaml` in a disposable project with an internal proxy. It checks web network attachments, PostgreSQL isolation and the absence of published ports, then Docker DNS, a synthetic HTTP response on `egress` and the default route through its gateway. It contacts no provider or Internet service. Real DNS/TLS checks for all three providers remain a [deployment step](deploiement.md#sortie-https-des-fournisseurs).
+
 ```bash
 make docker-build
 (cd frontend && npx playwright install --with-deps chromium)

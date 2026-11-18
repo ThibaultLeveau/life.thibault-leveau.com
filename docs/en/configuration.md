@@ -20,7 +20,7 @@ Without a database URL, `/api/v1/health` and public files remain available; priv
 
 Without a valid AI keyring, saving or decrypting provider tokens is unavailable; applications and probes remain usable. Generate a key with `uv run python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'` in a private terminal, store it in protected `.env.production` and back it up separately from database dumps. Never use an example key or a key printed in public logs. Older keys support decryption and [rotation](sauvegardes.md#migration-0015-assistant).
 
-Provider, model and user token are account preferences managed through the [Assistant API](assistant-api.md), not frontend variables. Adapters only use predefined OpenAI, Anthropic and Gemini HTTPS hosts; arbitrary provider URLs are not accepted. Outbound access to these providers must be available from the web container.
+Provider, model and user token are account preferences managed through the [Assistant API](assistant-api.md), not frontend variables. Adapters only use `api.openai.com`, `api.anthropic.com` and `generativelanguage.googleapis.com` over HTTPS; arbitrary provider URLs are not accepted. The `web` container joins the non-internal Compose `egress` bridge, providing an outbound route and DNS resolution for those hosts. Host restrictions are enforced by the application; the bridge does not filter domains.
 
 `LIFE_PUBLIC_BASE_URL` must be the exact origin with no subpath: `http://localhost:5173` in development, `https://life.thibault-leveau.com` in production. It configures neither DNS nor Caddy. Vite’s proxy avoids CORS; no general CORS policy is opened. In development/test, the backend’s own origin is also accepted.
 
@@ -34,6 +34,8 @@ Provider, model and user token are account preferences managed through the [Assi
 | `LIFE_DATABASE_URL` | Application connection using the same password as `LIFE_POSTGRES_PASSWORD`, host `db`, database `life` |
 
 Copy `.env.production.example` to `.env.production`, replace placeholders with two distinct random passwords and protect the file (`chmod 600`). Hexadecimal values avoid reserved URL characters. Do not print `docker compose config` without `--quiet` in public logs: its output includes interpolated secrets.
+
+Compose creates `life_egress` for `web` alone, without another variable or published port. Keep `database` internal and the existing external `multisite_proxy` network in its internal state. “External” means Compose does not manage that network; it does not grant Internet access. With only those two networks, probes can be healthy while the assistant cannot reach its provider. See [verification from the container](deploiement.md#sortie-https-des-fournisseurs).
 
 PostgreSQL initialization creates `life` as database owner without superuser, database-creation or role-creation privileges. It runs only on an empty volume. Editing the environment file does not change an existing role’s password: coordinate PostgreSQL administration and the new connection URL when rotating it.
 
