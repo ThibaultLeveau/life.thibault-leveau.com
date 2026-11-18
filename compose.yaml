@@ -50,6 +50,7 @@ services:
       proxy:
         aliases:
           - life-web
+      egress:
     logging:
       driver: json-file
       options:
@@ -62,6 +63,9 @@ networks:
   proxy:
     external: true
     name: multisite_proxy
+  egress:
+    driver: bridge
+    internal: false
 
 volumes:
   postgres_data:

@@ -16,6 +16,8 @@ Life retains the FastAPI / React / MkDocs monorepo. One Uvicorn process serves t
 
 Caddy terminates TLS and forwards to `life-web:8000` on `multisite_proxy`. The web service also joins the private Compose `database` network. PostgreSQL never joins the proxy network or publishes a host port; `postgres_data` persists its data. The application role owns its database without cluster-administration privileges.
 
+Only `web` also joins the non-internal Compose `egress` bridge (`life_egress` in production), providing provider hostname resolution and outbound HTTPS for the assistant. `database` and the existing `multisite_proxy` network remain internal; no host port or additional service is introduced. Application adapters fix the three allowed provider hosts; the bridge itself does not filter traffic by domain.
+
 In development, Vite, FastAPI and MkDocs have separate servers; Vite’s proxy keeps one origin. `compose.dev.yaml` provides a local PostgreSQL instance independent of production.
 
 Application organization follows [ADR 003](decisions/003-applications-lifeos.md). Explicit registries assemble applications; the platform does not depend on business domains.

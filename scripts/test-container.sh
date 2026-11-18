@@ -3,6 +3,7 @@
 set -Eeuo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 image=${LIFE_TEST_IMAGE:-local/life:$(git rev-parse HEAD)}
+LIFE_TEST_IMAGE="$image" bash scripts/test-container-network.sh
 prefix="life-check-$$"
 network="$prefix-network"
 http_network="$prefix-http"

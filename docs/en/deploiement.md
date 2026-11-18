@@ -10,6 +10,32 @@ On a synthetic account, check FR/EN Home/history, token save/masking/removal, so
 
 Compare the running image SHA and Alembic revision; verify probes, `/`, `/settings`, `/applications`, all five application routes, OpenAPI, `/documentation/assistant/`, `/documentation/en/assistant/` and both API references over HTTPS. Record backup, SHA, revision and results in issue #85; never report an unexecuted check as successful.
 
+### Provider outbound HTTPS {#sortie-https-des-fournisseurs}
+
+The existing `multisite_proxy` network is internal: Compose’s `external` flag only means it is managed elsewhere. `compose.yaml` therefore attaches the non-internal `egress` bridge to `web` alone. Compose creates `life_egress` during deployment; `database` and `multisite_proxy` stay internal, with no additional host port. A healthy probe does not prove outbound connectivity.
+
+After each release affecting networking or the image, inspect the networks and make these unauthenticated GET requests **from the running web container**, with TLS verification:
+
+```bash
+export LIFE_IMAGE=$(cat .deployment/current-image)
+docker network inspect --format '{{.Name}} internal={{.Internal}}' \
+  life_database multisite_proxy life_egress
+docker compose --env-file .env.production exec -T web python - <<'PY'
+import httpx
+
+with httpx.Client(timeout=15, follow_redirects=False, trust_env=False) as client:
+    for url in (
+        'https://api.openai.com/v1/models',
+        'https://api.anthropic.com/v1/models',
+        'https://generativelanguage.googleapis.com/v1beta/models',
+    ):
+        response = client.get(url)
+        print(f'GET {url}: HTTP {response.status_code}')
+PY
+```
+
+Expect `internal=true` for the first two networks and `false` for `life_egress`. Responses 401/403 without a token are normal and demonstrate resolution, connectivity and TLS, without paid generation. They do not validate credentials, models or quotas. If resolution fails in the container but works on the host, check the `egress` attachment; do not make private networks public as a workaround. Adapters restrict hosts in code; the bridge does not filter by domain.
+
 ## Principle {#principe}
 
 VPS deployment completes every change, including documentation and AGENTS.md. After review, successful CI and merge, publish the latest validated main without waiting for another deployment request. Verify the running version/public routes and record results in the issue. Report production blockers explicitly; merging alone is not delivery.

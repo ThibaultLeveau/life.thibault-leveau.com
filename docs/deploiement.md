@@ -10,6 +10,32 @@ Sur un compte synthétique : vérifier accueil et historique FR/EN, enregistreme
 
 Comparer le SHA de l’image réellement exécutée et la révision Alembic, contrôler sondes, `/`, `/settings`, `/applications`, routes des cinq applications, OpenAPI, `/documentation/assistant/`, `/documentation/en/assistant/` et les références API FR/EN en HTTPS. Consigner sauvegarde, SHA, révision et résultats dans l’issue #85 ; ne pas qualifier une étape non exécutée de réussie.
 
+### Sortie HTTPS des fournisseurs
+
+Le réseau `multisite_proxy` existant est interne : son statut `external` dans Compose indique seulement qu’il est géré ailleurs. `compose.yaml` ajoute donc le bridge non interne `egress` au seul service `web`. Compose crée `life_egress` lors du déploiement ; `database` et `multisite_proxy` restent internes, sans port hôte supplémentaire. Une sonde saine ne prouve pas cette sortie réseau.
+
+Après chaque livraison affectant le réseau ou l’image, vérifier les réseaux puis effectuer ces GET sans authentification **depuis le web exécuté**, avec validation TLS :
+
+```bash
+export LIFE_IMAGE=$(cat .deployment/current-image)
+docker network inspect --format '{{.Name}} internal={{.Internal}}' \
+  life_database multisite_proxy life_egress
+docker compose --env-file .env.production exec -T web python - <<'PY'
+import httpx
+
+with httpx.Client(timeout=15, follow_redirects=False, trust_env=False) as client:
+    for url in (
+        'https://api.openai.com/v1/models',
+        'https://api.anthropic.com/v1/models',
+        'https://generativelanguage.googleapis.com/v1beta/models',
+    ):
+        response = client.get(url)
+        print(f'GET {url}: HTTP {response.status_code}')
+PY
+```
+
+Attendre `internal=true` pour les deux premiers réseaux et `false` pour `life_egress`. Les réponses 401/403 sans token sont normales et attestent la résolution, la connexion et TLS, sans génération payante. Elles ne valident ni credential, ni modèle, ni quota. Si la résolution échoue dans le conteneur mais fonctionne sur l’hôte, vérifier l’attachement à `egress` ; ne pas rendre les réseaux privés publics pour contourner la panne. Les adaptateurs limitent les hôtes dans le code, sans filtrage par domaine au niveau du bridge.
+
 ## Principe
 
 Le déploiement sur le VPS termine chaque changement, y compris documentaire ou portant sur `AGENTS.md`. Après la revue, la réussite de la CI et la fusion, l'agent publie le dernier `main` validé sans attendre une nouvelle demande. Il vérifie la version exécutée et les routes publiques, puis consigne les résultats dans l'issue. Un blocage de production doit être signalé explicitement ; une fusion seule ne termine pas la livraison.
