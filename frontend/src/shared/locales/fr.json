@@ -274,5 +274,6 @@
   "assistant_vacation": "Vacances",
   "assistant_active_days": "{{count}} jours d’utilisation par semaine",
   "assistant_more_snippets": "Voir {{count}} autres résultats",
+  "assistant_table": "Tableau du message — défilement horizontal",
   "assistant_snippet_read": "Consultation"
 }
