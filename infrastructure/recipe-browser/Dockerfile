@@ -1,6 +1,4 @@
 FROM node:24.22.1-bookworm-slim
-ARG REVISION=development
-LABEL org.opencontainers.image.revision=$REVISION
 ENV NODE_ENV=production PLAYWRIGHT_BROWSERS_PATH=/opt/chromium XDG_CONFIG_HOME=/tmp/config XDG_CACHE_HOME=/tmp/cache
 WORKDIR /app
 COPY package.json package-lock.json ./
@@ -11,3 +9,5 @@ COPY . .
 USER node
 EXPOSE 8090
 CMD ["xvfb-run", "-a", "-s", "-screen 0 1280x900x24 -nolisten tcp", "node", "server.mjs"]
+ARG REVISION=development
+LABEL org.opencontainers.image.revision=$REVISION
