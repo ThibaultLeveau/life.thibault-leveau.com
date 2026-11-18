@@ -200,3 +200,11 @@ Downgrade to 0013_recipe_units refuses any saved view preference, explicit conte
 SQL revision stays `0013_recipe_units`. The calculation adds `scoring` to existing metrics JSONB without changing raw measurements. PostgreSQL dump/transactional restore retains references, provenance, counts, scores and roots; container acceptance compares all Sport tables after creating partial/empty v2 sessions. Existing numeric v1 scores remain unchanged.
 
 Back up before deployment and targeted missing-score repair. Repair preserves sets, dates, notes, versions and rewards; repeating it has no effect. Returning to the previous image is **incompatible** despite the unchanged SQL schema: it rejects unknown JSON fields and could use an empty v2 session as a reference denominator. Prefer a forward fix; restoration needs a compatible dump/image, stopped writes and consideration of data created since backup. Do not delete calculation details to bypass this restriction.
+
+## Migration 0016: sources and dictation
+
+Additive migration `0016_assistant_sources` adds `assistant_sources`, `assistant_transcription_settings` and `external_context` (false for existing history). PostgreSQL dumps include binaries, extracted text and encrypted credentials; plan for quota-bounded growth. No separate file volume or audio backup; keep the keyring separately. Local deletion does not erase an older backup.
+
+Downgrade refuses any source (including removed receipts), dictation configuration or externally marked conversation to preserve data and confirmations. Old images do not recognize the revision. Do not drop tables to roll back; restore a compatible backup and image using the existing procedure.
+
+After restore, `restore-suffix.sql` revokes sessions, interrupts runs, invalidates previews, releases transcription leases and removes unfinished import reservations. Ready/bound sources, digests, metadata, extracted text, external marker and credentials remain intact. Verify integrity and authenticated downloads on a synthetic account. `life rotate-assistant-key <account> --dry-run`, then without the option, validates/re-encrypts both credentials atomically; one unreadable key aborts everything. Retain old keys needed for earlier dumps.

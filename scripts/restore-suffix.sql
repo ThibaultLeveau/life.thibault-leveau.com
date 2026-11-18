@@ -11,6 +11,12 @@ BEGIN
     IF to_regclass('public.assistant_operations') IS NOT NULL THEN
         EXECUTE 'UPDATE public.assistant_operations SET status = ''failed'' WHERE status = ''preview''';
     END IF;
+    IF to_regclass('public.assistant_transcription_settings') IS NOT NULL THEN
+        EXECUTE 'UPDATE public.assistant_transcription_settings SET lease_id = NULL, lease_until = NULL';
+    END IF;
+    IF to_regclass('public.assistant_sources') IS NOT NULL THEN
+        EXECUTE 'DELETE FROM public.assistant_sources WHERE message_id IS NULL AND data IS NULL AND removed_at IS NULL';
+    END IF;
     IF to_regclass('public.login_sessions') IS NOT NULL THEN
         EXECUTE 'DELETE FROM public.login_sessions';
     END IF;

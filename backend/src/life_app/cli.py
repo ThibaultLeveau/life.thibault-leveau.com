@@ -55,6 +55,7 @@ def main():
 
         from life_app.platform.assistant import credentials
         from life_app.platform.assistant.models import AssistantSettings
+        from life_app.platform.assistant.transcription_models import TranscriptionSettings
 
         engine = create_engine(settings.database_url.get_secret_value())
         try:
@@ -62,19 +63,31 @@ def main():
                 user = db.scalar(select(User).where(User.username == username).with_for_update())
                 if user is None:
                     parser.error("Compte introuvable")
-                row = db.get(AssistantSettings, user.id)
-                if row is None or not row.ciphertext:
+                rows = [
+                    row
+                    for model in (AssistantSettings, TranscriptionSettings)
+                    if (row := db.get(model, user.id)) is not None and row.ciphertext
+                ]
+                if not rows:
                     print("Aucun token IA enregistré pour ce compte.")
                     return
                 try:
-                    token = credentials.decrypt(settings, row)
-                    replacement = credentials.encrypt(settings, user.id, row.provider, token)
+                    replacements = [
+                        (
+                            row,
+                            credentials.encrypt(
+                                settings, user.id, row.provider, credentials.decrypt(settings, row)
+                            ),
+                        )
+                        for row in rows
+                    ]
                 except HTTPException as error:
                     parser.error(str(error.detail))
                 if args.dry_run:
                     print("Token lisible ; rotation possible avec la première clé du trousseau.")
                     return
-                row.ciphertext = replacement
+                for row, replacement in replacements:
+                    row.ciphertext = replacement
             print("Token IA rechiffré ; conserver les anciennes clés pour les sauvegardes.")
         finally:
             engine.dispose()

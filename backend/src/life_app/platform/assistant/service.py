@@ -8,7 +8,7 @@ from datetime import timedelta
 from sqlalchemy import case, delete, func, select, update
 
 from life_app.core.database import utcnow
-from life_app.platform.assistant import credentials
+from life_app.platform.assistant import credentials, sources
 from life_app.platform.assistant import models as m
 from life_app.platform.assistant import schemas as s
 from life_app.platform.assistant.messages import failure
@@ -165,7 +165,12 @@ def new_run(db, user, conversation, payload, session_hash):
     previous = db.scalar(
         select(m.Run).where(m.Run.user_id == user.id, m.Run.request_id == payload.request_id)
     )
-    request_hash = fingerprint({"conversation": str(conversation.id), "content": payload.content})
+    # Source identities are immutable; retain them in the receipt fingerprint after
+    # erasure so retrying the original request never reattaches or rereads a source.
+    request_data = {"conversation": str(conversation.id), "content": payload.content}
+    if payload.source_ids:
+        request_data["sources"] = [str(id) for id in payload.source_ids]
+    request_hash = fingerprint(request_data)
     if previous:
         if previous.request_hash != request_hash:
             raise failure(409, "assistant.request_conflict")
@@ -177,10 +182,15 @@ def new_run(db, user, conversation, payload, session_hash):
     config = settings(db, user)
     if not config.ciphertext or not config.model:
         raise failure(409, "assistant.provider_not_configured")
+    attachments = sources.validate_for_message(db, user, conversation, payload.source_ids)
     if not db.scalar(
         select(m.Message.id).where(m.Message.conversation_id == conversation.id).limit(1)
     ):
-        conversation.title = payload.content[:80]
+        conversation.title = (payload.content or attachments[0].name)[:80]
+    if attachments:
+        conversation.external_context = True
+        conversation.summary = ""
+        conversation.summary_until = None
     conversation.updated_at = utcnow()
     user_message = m.Message(
         user_id=user.id, conversation_id=conversation.id, role="user", content=payload.content
@@ -190,6 +200,7 @@ def new_run(db, user, conversation, payload, session_hash):
     )
     db.add_all([user_message, reply])
     db.flush()
+    sources.attach_to_message(attachments, user_message)
     row = m.Run(
         user_id=user.id,
         conversation_id=conversation.id,

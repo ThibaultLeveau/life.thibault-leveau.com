@@ -17,7 +17,7 @@ Toutes les routes utilisent `/api/v1/assistant`. La session commune identifie le
 | `GET /conversations/{id}` | Conversation et messages ; `offset=0`, `limit=100` (1–200), `has_more` |
 | `PATCH /conversations/{id}` | `title` non vide et/ou booléen `archived` |
 | `DELETE /conversations/{id}` | Suppression (204) ; `forget_memories=false` conserve les souvenirs associés |
-| `POST /conversations/{id}/messages` | `{ "content": "…", "request_id": "UUID" }` ; contenu de 1–12 000 caractères ; flux SSE |
+| `POST /conversations/{id}/messages` | `{ "content": "…", "request_id": "UUID" }` ; texte et sources ; voir ci-dessous ; flux SSE |
 | `GET /runs/{id}/events` | Relecture des événements persistés après `after=0` ; aucun lancement d’action |
 | `POST /runs/{id}/cancel` | Demande l’arrêt des étapes suivantes ; `{ "ok": true }` |
 | `POST /operations/{id}/confirm` | Confirme l’opération enregistrée ; retourne état, résultat et snippet |
@@ -80,3 +80,48 @@ with httpx.Client(base_url="http://127.0.0.1:8100/api/v1", timeout=240) as clien
 ```
 
 Utiliser HTTPS en production. Les routes métier d’origine restent l’API de référence pour les objets, indépendamment de toute génération IA. Voir [contrats des applications](evolution.md), [données](donnees.md) et [restauration](sauvegardes.md#migration-0015-assistant).
+
+## Sources et transcription
+
+| Route | Contrat |
+| --- | --- |
+| `GET /sources/limits` | Formats, limites de fichiers/images/pages/texte, budget par message, quota configuré et durée des brouillons |
+| `POST /sources/files?filename=rapport.pdf` | Corps binaire brut, nom encodé dans la query ; métadonnées de source (201). Pas de multipart ni base64 |
+| `POST /sources/web` | JSON `{ "url": "https://example.org/article" }` ; instantané texte et métadonnées (201) |
+| `GET /sources/{id}` | Métadonnées accessibles au propriétaire uniquement |
+| `GET /sources/{id}/content` | Téléchargement authentifié en pièce jointe, `no-store` et `nosniff` ; jamais de HTML actif rendu dans LifeOS |
+| `DELETE /sources/{id}` | Efface le contenu, conserve la trace si attachée ; 204. Refus 409 pendant une exécution de la conversation |
+| `GET /transcription/settings` | `provider`, `model`, `configured`, `token_hint`, `use_chat_provider` effectifs ; `custom_provider`, `custom_model`, `custom_configured`, `custom_token_hint` conservent le profil indépendant lorsque le chat est réutilisé ; jamais le token |
+| `PUT /transcription/settings` | Entrée partielle : `provider` OpenAI/Gemini, `model`, `api_token` ou null, `use_chat_provider` |
+| `POST /transcription?filename=voice.webm` | Corps audio brut WAV/WebM/OGG/MP3/MP4/M4A, 10 Mio maximum ; `{ "text": "…" }` jusqu’à 12 000 caractères, aucun message créé |
+
+`SendMessage` accepte désormais `source_ids: UUID[]` (défaut `[]`, maximum quatre) et `content` de 0–12 000 caractères ; au moins un texte non vide ou une source est obligatoire. Les sources doivent être prêtes, non expirées, appartenir au compte et ne pas être attachées à un autre message. Leur association au message et l’admission du tour sont atomiques. `request_id` inclut la liste ordonnée des sources dans son empreinte ; rejouer exactement la demande rend les mêmes reçus, même après retrait d’une source. Modifier texte, conversation ou sources avec le même UUID renvoie 409.
+
+Les messages incluent `sources`, liste de métadonnées : `id`, `kind` (`file/web`), `name`, `media_type`, `size_bytes`, `sha256`, `url`, `page_count`, `created_at`, `removed_at`. Pas de binaire ou texte extrait dans la réponse d’historique. Les octets sont disponibles seulement via la route de contenu. Une source retirée ne redevient pas lisible lors d’une relecture d’événements.
+
+Erreurs avant traitement : 401/403 session/CSRF, 404 propriétaire ou référence, 409 source occupée/attachée/expirée ou quota de stockage/nombre, 413 volume, 422 format/contenu/adresse interdite, 429 imports simultanés/fréquence, 502 fournisseur/lecture distante, 503 chiffrement. La réponse HTTP contient un détail localisé ; les événements SSE du chat gardent leurs codes. Aucun détail brut de fournisseur, adresse réseau interne ou secret n’est exposé.
+
+À insérer dans le bloc `with` du client authentifié de l’exemple précédent :
+
+```python
+from pathlib import Path
+from uuid import uuid4
+
+source = client.post("/assistant/sources/files", params={"filename": "rapport.pdf"},
+                     content=Path("rapport.pdf").read_bytes(),
+                     headers={"Content-Type": "application/pdf"})
+source.raise_for_status()
+page = client.post("/assistant/sources/web", json={"url": "https://example.org/"})
+page.raise_for_status()
+response = client.post(f"/assistant/conversations/{conversation_id}/messages", json={
+    "content": "Résume ces deux sources sans modifier mes données.",
+    "source_ids": [source.json()["id"], page.json()["id"]], "request_id": str(uuid4()),
+})
+response.raise_for_status()  # Inspecter aussi les événements SSE et l’état final.
+transcript = client.post("/assistant/transcription", params={"filename": "voice.wav"},
+                         content=Path("voice.wav").read_bytes())
+transcript.raise_for_status()
+print(transcript.json()["text"])  # Relire avant tout envoi au chat.
+```
+
+Les champs `custom_provider`, `custom_model`, `custom_configured` et `custom_token_hint` décrivent séparément la configuration indépendante conservée, même lorsque `use_chat_provider=true`. Ils permettent de revenir à celle-ci sans écraser son modèle ni son credential. Aucun secret n’est retourné.

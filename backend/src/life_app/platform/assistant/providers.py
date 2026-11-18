@@ -1,5 +1,6 @@
 """Small provider adapters preserving native tool items inside each agent's loop."""
 
+import base64
 import json
 import re
 from dataclasses import dataclass, field
@@ -12,6 +13,9 @@ MAX_RESPONSE_BYTES = 4_000_000
 MAX_TEXT_CHARS = 60_000
 MAX_TOOL_CALLS = 16
 MAX_EVENTS = 20_000
+MAX_SOURCE_BYTES = 20 * 1024 * 1024
+MAX_SOURCE_TEXT_CHARS = 500_000
+MAX_SOURCES = 4
 
 
 class ProviderError(Exception):
@@ -113,6 +117,64 @@ class ProviderSession:
             ]
         else:
             self.history = [{"role": item["role"], "content": item["content"]} for item in messages]
+        self._source_message = None
+        blocks = [block for item in messages for block in item.get("sources", [])]
+        if blocks:
+            self.replace_sources(blocks)
+
+    def replace_sources(self, blocks):
+        """Keep one bounded reference payload across tool turns, never encode into text."""
+        identifiers = {block["source_id"] for block in blocks if block.get("source_id")}
+        # Text labels must not make an otherwise valid 20 MiB binary batch fail.
+        # Extracted text has its own bound (four 120k-character documents + labels).
+        size = sum(len(block.get("data", b"")) for block in blocks)
+        text_size = sum(len(block.get("text", "")) for block in blocks)
+        if (
+            len(identifiers) > MAX_SOURCES
+            or size > MAX_SOURCE_BYTES
+            or text_size > MAX_SOURCE_TEXT_CHARS
+        ):
+            raise ProviderError("assistant.source_context_limit")
+        content = []
+        for block in blocks:
+            if block["type"] == "text":
+                content.append(
+                    {"type": "input_text", "text": block["text"]}
+                    if self.provider == "openai"
+                    else {"type": "text", "text": block["text"]}
+                    if self.provider == "anthropic"
+                    else {"text": block["text"]}
+                )
+                continue
+            if block["type"] not in {"image", "document"}:
+                raise ProviderError("assistant.provider_request_failed")
+            encoded = base64.b64encode(block["data"]).decode("ascii")
+            mime = block["mime_type"]
+            if self.provider == "openai":
+                data_url = f"data:{mime};base64,{encoded}"
+                content.append(
+                    {"type": "input_image", "image_url": data_url}
+                    if block["type"] == "image"
+                    else {"type": "input_file", "filename": block["name"], "file_data": data_url}
+                )
+            elif self.provider == "anthropic":
+                content.append(
+                    {
+                        "type": block["type"],
+                        "source": {"type": "base64", "media_type": mime, "data": encoded},
+                    }
+                )
+            else:
+                content.append({"inlineData": {"mimeType": mime, "data": encoded}})
+        if self._source_message is not None:
+            self.history.remove(self._source_message)
+            self._source_message = None
+        if content:
+            self._source_message = {
+                "role": "user",
+                "parts" if self.provider == "gemini" else "content": content,
+            }
+            self.history.append(self._source_message)
 
     def request(self, tools):
         headers = {"Content-Type": "application/json"}

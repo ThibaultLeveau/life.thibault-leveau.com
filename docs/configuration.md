@@ -51,3 +51,9 @@ Le script d'initialisation PostgreSQL crée le rôle `life` propriétaire de sa 
 Les secrets sont des paramètres serveur. Les noms, couleurs, ordres, filtres et thèmes sont des **données métier**, modifiables via l'[API](api.md), jamais via des variables frontend.
 
 Les réglages de la vue **À venir** sont propres au compte : période (jour/demain/semaine/personnalisée), horizon de 1 à 90 jours, inclusion des retards et des tâches terminées. Ils passent par `/api/v1/agenda/view` ; aucun nouveau paramètre d’environnement n’est nécessaire.
+
+## Quota des sources IA et dictée
+
+`LIFE_ASSISTANT_SOURCE_QUOTA_BYTES` borne les fichiers et textes extraits conservés par compte (défaut `209715200`, soit 200 Mio ; plage 20 Mio–2 Gio). La valeur est exposée par `GET /api/v1/assistant/sources/limits`. Les limites de format/message/traitement restent conservatrices dans le module assistant. Une réservation compte 10 Mio avant import ; prévoir cette marge même pour un petit fichier. Réduire le quota ne supprime aucune donnée, mais peut bloquer les nouveaux imports jusqu’à libération d’espace.
+
+Les réglages de dictée sont personnels via `/assistant/transcription/settings`, et ne nécessitent aucun secret serveur supplémentaire : le trousseau `LIFE_ASSISTANT_ENCRYPTION_KEYS` protège aussi le credential distinct éventuel. Réutilisation OpenAI : `gpt-transcribe` ; Gemini : modèle du chat. Choisir explicitement un modèle/token séparé au besoin. Aucun fallback silencieux entre fournisseurs.

@@ -253,3 +253,10 @@ def forget_all(user: CurrentUser, db: Database):
     service.invalidate_memory_context(db, user)
     db.commit()
     return Response(status_code=204)
+
+
+from life_app.platform.assistant.source_routes import router as source_router  # noqa: E402
+from life_app.platform.assistant.transcription_routes import router as transcription_router  # noqa: E402
+
+router.include_router(source_router)
+router.include_router(transcription_router)

@@ -3,9 +3,17 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import CheckConstraint, DateTime, ForeignKey, String, Text, UniqueConstraint
+from sqlalchemy import (
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    LargeBinary,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from life_app.core.database import Base, utcnow
 
@@ -34,6 +42,7 @@ class Conversation(Base):
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
     title: Mapped[str] = mapped_column(String(160))
     archived: Mapped[bool] = mapped_column(default=False)
+    external_context: Mapped[bool] = mapped_column(default=False, server_default="false")
     summary: Mapped[str] = mapped_column(Text, default="")
     summary_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
@@ -57,6 +66,9 @@ class Message(Base):
     content: Mapped[str] = mapped_column(Text, default="")
     status: Mapped[str] = mapped_column(String(16), default="complete")
     snippets: Mapped[list] = mapped_column(JSONB, default=list)
+    sources: Mapped[list["Source"]] = relationship(
+        lazy="selectin", order_by="Source.created_at, Source.id", passive_deletes=True
+    )
     run_id: Mapped[UUID | None] = mapped_column()
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utcnow, index=True
@@ -135,3 +147,35 @@ class Memory(Base):
     source_excerpt: Mapped[str | None] = mapped_column(String(1000))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class Source(Base):
+    """An immutable imported source; removing it erases content, retaining its receipt."""
+
+    __tablename__ = "assistant_sources"
+    __table_args__ = (
+        CheckConstraint("kind IN ('file', 'web')"),
+        CheckConstraint("size_bytes > 0"),
+        CheckConstraint("page_count IS NULL OR page_count > 0"),
+        CheckConstraint("(message_id IS NULL) = (conversation_id IS NULL)"),
+        CheckConstraint("removed_at IS NULL OR (data IS NULL AND extracted_text IS NULL)"),
+    )
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    conversation_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("assistant_conversations.id", ondelete="CASCADE"), index=True
+    )
+    message_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("assistant_messages.id", ondelete="CASCADE"), index=True
+    )
+    kind: Mapped[str] = mapped_column(String(10))
+    name: Mapped[str] = mapped_column(String(200))
+    media_type: Mapped[str] = mapped_column(String(100))
+    size_bytes: Mapped[int] = mapped_column()
+    sha256: Mapped[str] = mapped_column(String(64))
+    data: Mapped[bytes | None] = mapped_column(LargeBinary, deferred=True)
+    extracted_text: Mapped[str | None] = mapped_column(Text, deferred=True)
+    url: Mapped[str | None] = mapped_column(String(2048))
+    page_count: Mapped[int | None] = mapped_column()
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    removed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

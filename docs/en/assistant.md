@@ -4,7 +4,7 @@
 
 Signed-in Home combines a conversation with Life, your history and application links. Ask questions, inspect your data or request changes in Tasks, Sport, Tracking, OKR Goals and Recipes & Shopping Lists. Applications remain directly accessible through the library.
 
-This page describes the implementation for [issue #85](https://github.com/ThibaultLeveau/life.thibault-leveau.com/issues/85). Acceptance evidence and the commit actually deployed are recorded in that issue.
+This page describes the implementation for [issues #85 and #89](https://github.com/ThibaultLeveau/life.thibault-leveau.com/issues/89). Acceptance evidence and the commit actually deployed are recorded in that issue.
 
 ## Configure a provider
 
@@ -40,9 +40,33 @@ Open **Memory**, from chat navigation or General settings, to inspect, add, corr
 
 Corrections, forgetting and memory toggles clear derived summaries and exclude older messages from reused context. Messages remain visible in history, but an old source must not silently recreate a forgotten memory. A running reply is interrupted if its memory version becomes outdated; send your request again with useful context. Local deletion cannot retract data already sent to a provider.
 
+## Documents, images and web pages
+
+Attach a file, drop it into the composer or paste an image. **Add a web page** imports an explicit URL; mentioning a link in a sentence does not download it. Wait until sources are ready, then send a question or the sources alone. Remove a draft attachment, retry failed imports and find sources again in history. Admission failures preserve the draft; uncertain network failures recover saved state without automatically resending.
+
+| Source | Support and limits |
+| --- | --- |
+| PDF | Text and pages through a compatible model; up to 10 MiB and 50 pages |
+| PNG, JPEG, WebP | Visual analysis; 5 MiB, maximum side 8,000 pixels, 40 million pixels |
+| TXT, Markdown, CSV | UTF-8 text; 10 MiB and 120,000 extracted characters |
+| DOCX, XLSX, PPTX | Extracted text and available cell values; 10 MiB and 120,000 characters. No formula/macro execution or embedded image/chart analysis: export to PDF to retain visuals |
+| Public page | Directly accessible HTTP/HTTPS HTML or text; no login, JavaScript or automatic link crawling |
+
+A message accepts four sources, 20 MiB and 50 PDF pages combined. Unreadable, encrypted, oversized or unsupported active structures produce errors instead of silent truncation. The selected model must support image/PDF inputs and may impose lower limits. Selected sources are sent to the configured provider under its processing and billing terms.
+
+Sources persist with the conversation. Unsent imports expire after 24 hours and are cleaned during source operations; the default quota is 200 MiB per account including extracted content. Two simultaneous imports, 32 drafts and 2,000 non-removed sources bound accumulation. Removing a saved source erases its content but leaves a message receipt; existing replies quoting it remain in history. Deleting the conversation also deletes its sources. Local deletion cannot retract data already received by a provider or stored in an older backup.
+
+Every proposed mutation in a conversation containing external sources requires confirmation, including after removal. Automatic memory extraction is disabled there; use **Memory** to explicitly save a fact. Recent context includes up to ten messages; older documents remain accessible by reference within reading budgets; name the document you need in a long conversation.
+
+## Dictate text
+
+The microphone button requests permission and shows recording status. Stop to transcribe or cancel to discard. Capture is limited to two minutes and 10 MiB. Text is added to your draft without replacing typed content; review and edit before Send. Dictation never automatically sends a message. Microphone refusal, interruption and provider failures remain visible; typing is still available.
+
+In dictation settings, reuse the chat’s OpenAI or Gemini provider or explicitly configure a separate provider and token. Anthropic chat requires OpenAI or Gemini for transcription. OpenAI defaults to `gpt-transcribe`; Gemini reuses the selected model. Availability depends on your account and quota. Audio is sent to the provider and remains transient on LifeOS; only messages you send are saved. The server allows one concurrent transcription and 30 requests per hour per account. Dictation requires HTTPS and audio-recording support; it does not require browser-specific speech recognition.
+
 ## Limits and accessibility
 
-Conversations are text-only: no attachments, unrestricted web browsing, code execution or automatic access to third-party services. Turns have duration and call limits; long histories are summarized. Models can make mistakes or ask for clarification. Cards are controlled LifeOS components, never generated code executed from a response.
+Multimodal sources follow the limits above. No unrestricted browsing, code execution or automatic third-party login. Turns have duration and call limits; text-only histories may be summarized, while conversations containing sources use recent context and bounded references. Models can make mistakes or ask for clarification. Cards are controlled LifeOS components, never generated code executed from a response.
 
 Chat uses light/dark/system themes, FR/EN languages and shared navigation. On mobile, open navigation for history and the library. Tab and Shift+Tab move between controls, Escape closes dialogs, and system reduced-motion preferences apply. Signing out or session expiration removes private data from the interface.
 

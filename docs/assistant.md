@@ -4,7 +4,7 @@
 
 L’accueil connecté réunit une conversation avec Life, votre historique et les liens vers les applications. Vous pouvez poser une question, consulter vos données ou demander une modification dans Tâches, Sport, Suivi, Objectifs OKR et Recettes & Liste de courses. Les applications restent accessibles directement depuis la bibliothèque.
 
-Cette page décrit le comportement implémenté pour la livraison de l’[issue #85](https://github.com/ThibaultLeveau/life.thibault-leveau.com/issues/85). Les preuves de recette et le commit effectivement publié sont consignés dans cette issue.
+Cette page décrit le comportement implémenté pour la livraison de l’[issues #85 et #89](https://github.com/ThibaultLeveau/life.thibault-leveau.com/issues/89). Les preuves de recette et le commit effectivement publié sont consignés dans cette issue.
 
 ## Configurer votre fournisseur
 
@@ -40,9 +40,33 @@ Ouvrez **Mémoire**, depuis la navigation du chat ou les réglages généraux, p
 
 Une correction, un oubli ou une bascule de mémoire efface les résumés dérivés et écarte les anciens messages du contexte réutilisé. Les messages restent visibles dans l’historique, mais une ancienne source ne doit pas recréer silencieusement un souvenir oublié. Une réponse déjà en cours est interrompue si sa version de mémoire est devenue obsolète ; renvoyez votre demande avec le contexte utile. Des données déjà envoyées à un fournisseur ne peuvent pas être retirées par une suppression locale.
 
+## Documents, images et pages web
+
+Joignez un fichier avec le bouton dédié, glissez-le dans le champ ou collez une image. **Ajouter une page web** importe une URL explicite ; un lien simplement mentionné dans une phrase ne déclenche pas de téléchargement. Attendez que les sources soient prêtes, puis envoyez votre question, ou les sources seules. Vous pouvez retirer une pièce avant envoi, réessayer un import échoué et retrouver les sources dans l’historique. Les erreurs d’admission conservent le brouillon ; après une coupure incertaine, l’application récupère l’état sans renvoyer automatiquement la demande.
+
+| Source | Prise en charge et limites |
+| --- | --- |
+| PDF | Texte et pages via un modèle compatible ; 10 Mio et 50 pages maximum |
+| PNG, JPEG, WebP | Analyse visuelle ; 5 Mio, côté maximal 8 000 pixels, 40 millions de pixels |
+| TXT, Markdown, CSV | Texte UTF-8 ; 10 Mio et 120 000 caractères extraits |
+| DOCX, XLSX, PPTX | Extraction du texte et des cellules disponibles ; 10 Mio et 120 000 caractères extraits. Pas d’exécution des formules/macros ni d’analyse des images/graphiques incorporés : exportez en PDF pour préserver le visuel |
+| Page publique | HTML ou texte directement accessible par HTTP/HTTPS ; pas de connexion, JavaScript ou exploration automatique des liens |
+
+Un message accepte quatre sources, 20 Mio et 50 pages PDF cumulés. Les fichiers illisibles, chiffrés, trop volumineux ou contenant des structures actives refusées donnent une erreur ; leur contenu n’est pas tronqué silencieusement. Le modèle choisi doit prendre en charge les images/PDF ; les plafonds propres au modèle peuvent être plus bas. Les sources sélectionnées sont envoyées au fournisseur configuré, avec sa facturation et ses conditions de traitement.
+
+Les sources persistent avec la conversation. Les imports non envoyés expirent après 24 heures, avec nettoyage lors des opérations sur les sources ; le quota par défaut est de 200 Mio par compte, contenu extrait compris. Deux imports simultanés, 32 brouillons et 2 000 sources non retirées au maximum limitent l’accumulation. Retirer une source enregistrée efface son contenu et laisse une trace dans le message ; les réponses déjà écrites qui la citent restent dans l’historique. Supprimer la conversation retire aussi ses sources. Cette suppression ne rétracte pas les données déjà reçues par le fournisseur ou contenues dans une ancienne sauvegarde.
+
+Dans une conversation contenant des sources externes, toute modification proposée exige une confirmation, même après retrait de la source. L’extraction automatique de souvenirs y est désactivée ; utilisez **Mémoire** pour enregistrer explicitement un fait. Le contexte récent conserve jusqu’aux dix derniers messages ; les anciens documents restent accessibles par référence, avec un budget de lecture limité ; demandez un document précis lorsque l’historique est long.
+
+## Dicter un texte
+
+Le bouton microphone demande votre autorisation, puis affiche l’enregistrement. Arrêtez pour transcrire, ou annulez pour abandonner. La capture est limitée à deux minutes et 10 Mio. Le texte est ajouté au brouillon sans effacer votre saisie ; relisez-le et corrigez-le avant de cliquer sur Envoyer. La dictée n’envoie jamais un message automatiquement. Un refus du microphone, une interruption ou une erreur fournisseur reste visible ; le champ texte reste utilisable.
+
+Dans les réglages de dictée, réutilisez OpenAI ou Gemini du chat, ou choisissez explicitement un fournisseur et un token distincts. Avec Anthropic pour le chat, configurez OpenAI ou Gemini pour la transcription. Le modèle OpenAI par défaut est `gpt-transcribe` ; Gemini réutilise le modèle choisi. La disponibilité dépend de votre compte et de son quota. L’audio est transmis au fournisseur et demeure transitoire sur LifeOS ; seuls les messages que vous envoyez sont conservés. Le serveur accepte une transcription simultanée et 30 demandes par heure et par compte. La dictée exige HTTPS et un navigateur compatible avec l’enregistrement audio ; aucune reconnaissance vocale propre au navigateur n’est requise.
+
 ## Limites et accessibilité
 
-Les conversations sont textuelles : pas de pièces jointes, navigation web libre, exécution de code ou connexion automatique à des services tiers. Un tour est limité en durée et en nombre d’appels ; les longs historiques sont résumés. Le modèle peut se tromper ou demander une précision. Les cartes sont des composants contrôlés de LifeOS, jamais du code exécuté à partir d’une réponse générée.
+Les sources multimodales sont disponibles selon les limites ci-dessus. Aucune navigation web libre, exécution de code ou connexion automatique à des services tiers. Un tour est limité en durée et en nombre d’appels ; les historiques purement textuels peuvent être résumés, tandis que les conversations avec sources utilisent un contexte récent et des références bornées. Le modèle peut se tromper ou demander une précision. Les cartes sont des composants contrôlés de LifeOS, jamais du code exécuté à partir d’une réponse générée.
 
 Le chat utilise les thèmes clair/sombre/système, les langues FR/EN et la navigation commune. Sur mobile, ouvrez le menu pour retrouver historique et bibliothèque. Tab et Maj+Tab parcourent les commandes, Échap ferme les dialogues ; la préférence système de réduction des animations est respectée. Les données privées disparaissent à la déconnexion ou à l’expiration de session.
 

@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     session_hours: int = Field(default=168, ge=1, le=720)
     assistant_encryption_keys: SecretStr | None = None
     assistant_timeout_seconds: int = Field(default=180, ge=10, le=600)
+    assistant_source_quota_bytes: int = Field(
+        default=200 * 1024 * 1024, ge=20 * 1024 * 1024, le=2 * 1024 * 1024 * 1024
+    )
 
     @field_validator("database_url")
     @classmethod

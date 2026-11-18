@@ -2,13 +2,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { errorMessage, tr } from "../../shared/i18n";
 import { ApiError } from "../api";
 import { assistantApi, synchronizeAssistant } from "./api";
-import type { Conversation, Message } from "./types";
+import type { AssistantDraft, Conversation, Message } from "./types";
 
 export function useConversation(
   id: string | null,
   onCreated: (id: string) => void,
   onChanged: () => void,
-  onRejected: (content: string) => void,
+  onRejected: (draft: AssistantDraft) => void,
 ) {
   const [conversation, setConversation] = useState<Conversation>();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -142,8 +142,9 @@ export function useConversation(
     }, 1800);
     return () => clearInterval(timer);
   }, [busy, runId, id, refresh]);
-  async function send(content: string) {
-    if (pending.current || !content.trim()) return;
+  async function send(draft: AssistantDraft) {
+    const { content, sources } = draft;
+    if (pending.current || (!content.trim() && !sources.length)) return;
     pending.current = true;
     setBusy(true);
     setError("");
@@ -178,6 +179,7 @@ export function useConversation(
           id: `user-${draftId}`,
           role: "user",
           content,
+          sources,
           status: "complete",
           created_at: now,
           snippets: [],
@@ -227,6 +229,7 @@ export function useConversation(
             );
         },
         controller.signal,
+        sources.map((source) => source.id),
       );
       if (!complete && valid()) throw new Error(tr("assistant_stream_lost"));
     } catch (e) {
@@ -239,7 +242,7 @@ export function useConversation(
               e.status >= 400 &&
               e.status < 500 &&
               e.status !== 401));
-        if (rejected) onRejected(content);
+        if (rejected) onRejected(draft);
         setMessages((values) =>
           values.map((value) =>
             value.id === replyId ? { ...value, status: "interrupted" } : value,

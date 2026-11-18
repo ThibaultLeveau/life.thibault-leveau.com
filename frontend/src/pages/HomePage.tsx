@@ -16,6 +16,9 @@ import { MemoryManager } from "../platform/assistant/MemoryManager";
 import { Welcome } from "../platform/assistant/components/Welcome";
 import { ConversationHistory } from "../platform/assistant/components/ConversationHistory";
 import { MessageList } from "../platform/assistant/components/MessageList";
+import { useSourceDraft } from "../platform/assistant/useSourceDraft";
+import { useDictation } from "../platform/assistant/useDictation";
+import type { AssistantDraft } from "../platform/assistant/types";
 import { Composer } from "../platform/assistant/components/Composer";
 import "../platform/assistant/styles.css";
 
@@ -40,6 +43,26 @@ export function HomePage({ modules }: { modules: ApplicationModule[] }) {
   const [draft, setDraft] = useState(""),
     [visible, setVisible] = useState(40),
     [atBottom, setAtBottom] = useState(true);
+  const sources = useSourceDraft();
+  const [urlDirty, setUrlDirty] = useState(false);
+  const [draftGeneration, setDraftGeneration] = useState(0);
+  const [dictationOverflow, setDictationOverflow] = useState("");
+  const dictation = useDictation((text) => {
+    setDraft((value) => {
+      const combined = `${value}${value && !/\s$/.test(value) ? " " : ""}${text}`;
+      if (combined.length > 12000) {
+        setDictationOverflow(text);
+        return value;
+      }
+      return combined;
+    });
+  });
+  const inputDirty =
+    !!sources.items.length ||
+    dictation.active ||
+    dictation.retryAvailable ||
+    urlDirty ||
+    !!dictationOverflow;
   const [dialog, setDialog] = useState<"rename" | "delete" | null>(null),
     [title, setTitle] = useState(""),
     [forgetRelated, setForgetRelated] = useState(false);
@@ -63,8 +86,11 @@ export function HomePage({ modules }: { modules: ApplicationModule[] }) {
     );
     setId(next);
   }, []);
-  const rejected = useCallback((content: string) => {
-    setDraft((value) => value || content);
+  const sourceRestore = useRef(sources.restore);
+  sourceRestore.current = sources.restore;
+  const rejected = useCallback((value: AssistantDraft) => {
+    setDraft((draft) => draft || value.content);
+    sourceRestore.current(value.sources);
   }, []);
   const chat = useConversation(id, created, changed, rejected);
   const busy = chat.busy || !!chat.runId || action.busy || operationBusy;
@@ -75,11 +101,20 @@ export function HomePage({ modules }: { modules: ApplicationModule[] }) {
     }
     return (
       (!draft.trim() &&
+        !inputDirty &&
         !memoryDirty.current &&
         !(dialog === "rename" && title !== chat.conversation?.title)) ||
       window.confirm(tr("assistant_unsaved"))
     );
-  }, [busy, draft, dialog, title, chat.conversation?.title]);
+  }, [busy, draft, inputDirty, dialog, title, chat.conversation?.title]);
+  function clearDraft() {
+    setDraft("");
+    sources.clear();
+    dictation.cancel();
+    setDictationOverflow("");
+    setUrlDirty(false);
+    setDraftGeneration((value) => value + 1);
+  }
   const navigate = (next: string | null) => {
     if (next === id || !permit()) return;
     index.current++;
@@ -89,7 +124,7 @@ export function HomePage({ modules }: { modules: ApplicationModule[] }) {
       conversationUrl(next),
     );
     setId(next);
-    setDraft("");
+    clearDraft();
     setSidebar(false);
     setVisible(40);
     follow.current = true;
@@ -113,12 +148,18 @@ export function HomePage({ modules }: { modules: ApplicationModule[] }) {
       }
       index.current = next;
       setId(conversationFromUrl());
-      setDraft("");
+      clearDraft();
       setVisible(40);
       follow.current = true;
     };
     const unload = (event: BeforeUnloadEvent) => {
-      if (busy || draft.trim() || memoryDirty.current || memoryBusy.current) {
+      if (
+        busy ||
+        draft.trim() ||
+        inputDirty ||
+        memoryDirty.current ||
+        memoryBusy.current
+      ) {
         event.preventDefault();
         event.returnValue = "";
       }
@@ -129,7 +170,7 @@ export function HomePage({ modules }: { modules: ApplicationModule[] }) {
       window.removeEventListener("popstate", pop);
       window.removeEventListener("beforeunload", unload);
     };
-  }, [permit, busy, draft]);
+  }, [permit, busy, draft, inputDirty]);
   useEffect(() => {
     document.title = `${chat.conversation?.title || tr("assistant")} · LifeOS`;
   }, [chat.conversation?.title]);
@@ -142,7 +183,9 @@ export function HomePage({ modules }: { modules: ApplicationModule[] }) {
   }, [chat.messages, chat.status]);
   function send() {
     if (
-      !draft.trim() ||
+      (!draft.trim() && !sources.items.length) ||
+      !sources.ready ||
+      dictation.active ||
       busy ||
       !settings.data?.configured ||
       chat.conversation?.archived
@@ -152,7 +195,9 @@ export function HomePage({ modules }: { modules: ApplicationModule[] }) {
     setDraft("");
     follow.current = true;
     setAtBottom(true);
-    void chat.send(content);
+    const attached = sources.sources;
+    sources.clear(false);
+    void chat.send({ content, sources: attached });
     composer.current?.focus();
   }
   const closeMemory = () => {
@@ -171,10 +216,15 @@ export function HomePage({ modules }: { modules: ApplicationModule[] }) {
         );
         if (
           link &&
+          !link.hasAttribute("download") &&
           !link.getAttribute("href")?.startsWith("#") &&
           !event.ctrlKey &&
           !event.metaKey &&
-          (draft.trim() || busy || memoryDirty.current || memoryBusy.current) &&
+          (draft.trim() ||
+            inputDirty ||
+            busy ||
+            memoryDirty.current ||
+            memoryBusy.current) &&
           !permit()
         ) {
           event.preventDefault();
@@ -203,6 +253,9 @@ export function HomePage({ modules }: { modules: ApplicationModule[] }) {
             if (!id) {
               if (permit()) {
                 setDraft("");
+                sources.clear();
+                dictation.cancel();
+                setDictationOverflow("");
                 setSidebar(false);
                 composer.current?.focus();
               }
@@ -402,6 +455,10 @@ export function HomePage({ modules }: { modules: ApplicationModule[] }) {
           </div>
         </div>
         <Composer
+          key={draftGeneration}
+          sources={sources}
+          dictation={dictation}
+          onUrlDirty={setUrlDirty}
           settings={settings.data}
           value={draft}
           onChange={setDraft}
@@ -423,6 +480,27 @@ export function HomePage({ modules }: { modules: ApplicationModule[] }) {
           }}
         />
       </main>
+      {!!dictationOverflow && (
+        <Dialog
+          title={tr("assistant_dictation_overflow")}
+          onClose={() => setDictationOverflow("")}
+        >
+          <p>{tr("assistant_dictation_overflow_help")}</p>
+          <textarea
+            className="assistant-transcript-overflow"
+            aria-label={tr("assistant_dictation_transcript")}
+            value={dictationOverflow}
+            readOnly
+            rows={8}
+          />
+          <button
+            className="secondary-button"
+            onClick={() => setDictationOverflow("")}
+          >
+            {tr("close")}
+          </button>
+        </Dialog>
+      )}
       {memoryOpen && (
         <Dialog title={tr("assistant_memory")} onClose={closeMemory}>
           <div className="assistant-memory-dialog">

@@ -1,6 +1,9 @@
 import { api, apiStream } from "../api";
 import type {
   AssistantSettings,
+  AssistantSource,
+  SourceLimits,
+  TranscriptionSettings,
   Conversation,
   ConversationDetail,
   Memory,
@@ -21,6 +24,42 @@ export async function synchronizeAssistant() {
 }
 
 export const assistantApi = {
+  sourceLimits: (signal?: AbortSignal) =>
+    api<SourceLimits>(`${root}/sources/limits`, "GET", undefined, signal),
+  uploadSource: (file: File, signal: AbortSignal) =>
+    api<AssistantSource>(
+      `${root}/sources/files?${new URLSearchParams({ filename: file.name })}`,
+      "POST",
+      file,
+      signal,
+    ),
+  webSource: (url: string, signal: AbortSignal) =>
+    api<AssistantSource>(`${root}/sources/web`, "POST", { url }, signal),
+  removeSource: (id: string) =>
+    api<void>(`${root}/sources/${encodeURIComponent(id)}`, "DELETE"),
+  sourceContent: (id: string) =>
+    `/api/v1${root}/sources/${encodeURIComponent(id)}/content`,
+  transcribe: (audio: Blob, filename: string, signal: AbortSignal) =>
+    api<{ text: string }>(
+      `${root}/transcription?${new URLSearchParams({ filename })}`,
+      "POST",
+      audio,
+      signal,
+    ),
+  transcriptionSettings: (signal?: AbortSignal) =>
+    api<TranscriptionSettings>(
+      `${root}/transcription/settings`,
+      "GET",
+      undefined,
+      signal,
+    ),
+  saveTranscriptionSettings: (value: {
+    provider?: "openai" | "gemini";
+    model?: string;
+    api_token?: string | null;
+    use_chat_provider: boolean;
+  }) =>
+    api<TranscriptionSettings>(`${root}/transcription/settings`, "PUT", value),
   settings: (signal?: AbortSignal) =>
     api<AssistantSettings>(`${root}/settings`, "GET", undefined, signal),
   saveSettings: (value: {
@@ -62,10 +101,11 @@ export const assistantApi = {
     requestId: string,
     receive: (event: StreamEvent) => void,
     signal: AbortSignal,
+    sourceIds: string[] = [],
   ) =>
     apiStream<StreamEvent>(
       `${root}/conversations/${encodeURIComponent(id)}/messages`,
-      { content, request_id: requestId },
+      { content, request_id: requestId, source_ids: sourceIds },
       receive,
       signal,
     ),
