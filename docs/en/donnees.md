@@ -233,3 +233,11 @@ Lifecycle: reservation → ready unbound source → message attachment → remov
 `assistant_conversations.external_context` remains true after any source use, including removal: confirmation remains mandatory and automatic memory stays disabled. Existing generated replies may quote removed sources; delete the conversation to also remove that history. Existing memories remain independent.
 
 `assistant_transcription_settings` only stores provider/model preference, optional separate encrypted credential, masked suffix, chat-reuse choice, transient lease and hourly counter. Neither audio nor transcripts are stored. Text becomes persistent only when sent as a message. The lease serializes uploads/transcriptions and expires after a crash; restoration clears it. Keyring rotation atomically re-encrypts chat and dictation credentials for the named account.
+
+## Recipe web import {#import-web-des-recettes}
+
+`recipes_recipes.source_url` (2,048 characters), `source_title` (300 characters) and `imported_at` (UTC timestamp) retain import attribution. Existing/manual recipes keep null values; pasted imports may have no URL. The creation event freezes these fields with the rest of the recipe.
+
+`recipes_web_import_receipts` has composite key `(owner_id, import_id)`, composite foreign key `(recipe_id, owner_id)`, a SHA-256 fingerprint of the confirmed payload and `created_at`. The owner lock serializes saving; private ingredients, recipe, event and receipt commit together. The same identifier and content finds the existing recipe, including after editing or archiving; changed content with that identifier is rejected. Disabling never purges receipts, and backups include them with recipes.
+
+Drafts, original ingredient lines, page text, frames and cookies are not stored in PostgreSQL. Review allows useful notes to be retained in the instructions. Browser sessions stay in memory and ephemeral `/tmp`; closure, expiry and restart destroy them. See [API](recipes-api.md#web-import-and-ai-draft), [limits](configuration.md#private-recipes-import-browser) and [restoration](sauvegardes.md#recipe-web-imports).

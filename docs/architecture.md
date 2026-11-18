@@ -111,7 +111,7 @@ Le frontend `platform/progression` fournit le client API, les réglages et le ba
 
 ## Recettes et courses
 
-`apps/recipes` suit les ADR 003–006 sans nouveau contrat transversal : manifeste, métier, fournisseur de métriques et fournisseur de progression, assemblés par les deux registres existants. La migration additive `0012_recipes` crée six tables : ingrédients globaux/personnels, recettes et lignes, listes/modèles et lignes, événements. Le catalogue bilingue de 301 ingrédients est figé dans les données de migration. PostgreSQL stocke les quantités en `NUMERIC(18,6)` ; les calculs du service utilisent `Decimal`. Aucun stockage métier navigateur ou service externe. Les frontières communes restent inchangées. [Guide](recipes.md), [API](recipes-api.md).
+`apps/recipes` suit les ADR 003–006 sans nouveau contrat transversal : manifeste, métier, fournisseur de métriques et fournisseur de progression, assemblés par les deux registres existants. La migration additive `0012_recipes` crée six tables : ingrédients globaux/personnels, recettes et lignes, listes/modèles et lignes, événements. Le catalogue bilingue de 301 ingrédients est figé dans les données de migration. PostgreSQL stocke les quantités en `NUMERIC(18,6)` ; les calculs du service utilisent `Decimal`. Aucun stockage métier navigateur. L’import web utilise les services privés et le fournisseur IA définis par l’[ADR 010](decisions/010-import-web-recettes.md), sans modifier les frontières métier. [Guide](recipes.md), [API](recipes-api.md).
 
 ## Documentations séparées
 

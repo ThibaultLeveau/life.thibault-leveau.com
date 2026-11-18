@@ -109,7 +109,7 @@ Frontend `platform/progression` supplies API client, settings and the badge inje
 
 ## Recipes and shopping {#recettes-et-courses}
 
-`apps/recipes` follows ADRs 003–006 with no new cross-cutting contract: manifest, business logic, metrics and progression providers compose through existing registries. `0012_recipes` adds six tables for supplied/private ingredients, recipes/items, lists/templates/items and events. The bilingual 301-ingredient catalogue is fixed in migration data. PostgreSQL stores quantities as `NUMERIC(18,6)`; services calculate with `Decimal`. No browser business storage or external service. Shared boundaries remain unchanged. [Guide](recipes.md), [API](recipes-api.md).
+`apps/recipes` follows ADRs 003–006 with no new cross-cutting contract: manifest, business logic, metrics and progression providers compose through existing registries. `0012_recipes` adds six tables for supplied/private ingredients, recipes/items, lists/templates/items and events. The bilingual 301-ingredient catalogue is fixed in migration data. PostgreSQL stores quantities as `NUMERIC(18,6)`; services calculate with `Decimal`. No browser business storage. Web import uses the private services and AI provider defined by [ADR 010](decisions/010-import-web-recettes.md), preserving domain boundaries. [Guide](recipes.md), [API](recipes-api.md).
 
 ## Separate documentation guides
 
