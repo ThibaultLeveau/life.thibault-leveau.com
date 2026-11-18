@@ -24,7 +24,7 @@ Les actions simples explicitement demandées peuvent être enregistrées directe
 
 ## Consultations et détails des cartes
 
-Les lectures intermédiaires sont regroupées sous **Consultations**, replié par défaut sous la réponse. Ouvrez ce volet pour retrouver les objets consultés. Les propositions à confirmer restent visibles, même lorsqu’il y en a plus de trois ; les résultats enregistrés sont distincts des lectures. Les opérations conservent leur ordre et une confirmation remplace son aperçu sans dupliquer l’action.
+Les lectures intermédiaires sont regroupées sous **Consultations**, replié par défaut sous la réponse. Ouvrez ce volet pour retrouver les objets consultés. Les propositions à confirmer restent visibles, même lorsqu’il y en a plus de trois ; les résultats enregistrés sont distincts des lectures. Les opérations conservent leur ordre et une confirmation remplace son aperçu sans dupliquer l’action. Une carte visible reste affichée après sa confirmation, avec le focus conservé.
 
 Chaque carte propose **Voir tous les détails** : instructions complètes, ingrédients, exercices et valeurs de séries, résultats clés, champs de suivi ou préférences. Le résumé reste court ; **Lire le texte complet** déplie aussi un texte long directement dans la carte, sans zone de défilement imbriquée. Vous pouvez ensuite replier le texte ou les détails. Les listes ne sont plus coupées silencieusement à trois, cinq ou huit éléments. Les références techniques restent accessibles par l’API.
 

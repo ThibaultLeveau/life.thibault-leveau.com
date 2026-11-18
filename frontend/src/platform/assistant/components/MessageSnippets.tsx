@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { tr } from "../../../shared/i18n";
 import { Icon } from "../../../shared/ui/Icon";
 import type { ApplicationModule } from "../../applications/definition";
@@ -30,6 +30,13 @@ export function MessageSnippets({
       record(item.data).read_only === true,
   );
   const changes = snippets.filter((item) => !consultations.includes(item));
+  const extraPreview = changes.some(
+    (item, index) => index >= 3 && item.phase === "preview",
+  );
+  useEffect(() => {
+    // Keep a visible proposal in place when its confirmation turns it into a result.
+    if (extraPreview) setExpanded(true);
+  }, [extraPreview]);
   const visible = changes.filter(
     (item, index) => expanded || index < 3 || item.phase === "preview",
   );

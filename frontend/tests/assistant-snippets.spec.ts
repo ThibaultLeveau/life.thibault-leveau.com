@@ -129,6 +129,40 @@ test("les consultations sont repliées, toutes les confirmations restent visible
   );
   await expect(page.locator(".assistant-snippet:visible")).toHaveCount(4);
   expect(data.requests.filter((item) => item.method !== "GET")).toHaveLength(0);
+  let confirmations = 0;
+  await page.route(
+    "**/api/v1/assistant/operations/operation-3/confirm",
+    async (route) => {
+      confirmations++;
+      const receipt: Snippet = { ...previews[3], phase: "result" };
+      for (const message of data.conversations.get("conversation-1")!.messages)
+        message.snippets = message.snippets.map((item) =>
+          item.id === receipt.id ? receipt : item,
+        );
+      await route.fulfill({
+        json: {
+          operation_id: "operation-3",
+          status: "complete",
+          result: {},
+          snippet: receipt,
+        },
+      });
+    },
+  );
+  await page
+    .getByRole("button", { name: "Confirmer ce changement" })
+    .last()
+    .click();
+  const confirmed = page
+    .locator(".assistant-snippet")
+    .filter({ hasText: "Proposition 4" });
+  await expect(confirmed).toBeVisible();
+  await expect(confirmed.locator(".assistant-snippet-phase")).toHaveText(
+    "Résultat",
+  );
+  await expect(confirmed).toBeFocused();
+  await expect(page.locator(".assistant-snippet:visible")).toHaveCount(4);
+  expect(confirmations).toBe(1);
 });
 
 for (const locale of ["fr", "en"])

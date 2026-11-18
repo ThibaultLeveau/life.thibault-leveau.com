@@ -24,7 +24,7 @@ Explicitly requested simple changes may be saved directly. Suggestions, bulk cha
 
 ## Consultations and card details
 
-Intermediate reads are grouped under **Consultations**, collapsed beneath the answer by default. Expand it to inspect the consulted objects. Every proposal awaiting confirmation remains visible, even when there are more than three; saved changes remain distinct from reads. Receipts keep their order and confirming a proposal replaces its preview without duplicating the action.
+Intermediate reads are grouped under **Consultations**, collapsed beneath the answer by default. Expand it to inspect the consulted objects. Every proposal awaiting confirmation remains visible, even when there are more than three; saved changes remain distinct from reads. Receipts keep their order and confirming a proposal replaces its preview without duplicating the action. A visible card stays on screen after confirmation and retains focus.
 
 Each card offers **View all details**: complete instructions, ingredients, exercises and set values, key results, tracking fields or preferences. The summary stays short; **Read full text** also expands long text directly in the card, without an inner scrollbar. Both controls can be collapsed again. Lists are no longer silently cut to three, five or eight items. Technical references remain available through the API.
 
