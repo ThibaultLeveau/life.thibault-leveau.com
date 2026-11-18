@@ -7,7 +7,7 @@ import type {
   Memory,
   Message,
   Snippet,
-} from "../src/platform/assistant/types";
+} from "../src/apps/life_ai/types";
 
 export const now = "2026-11-17T12:00:00Z";
 const ids = ["tasks", "sport", "tracking", "okr", "recipes"];
@@ -95,6 +95,7 @@ export async function fixture(page: Page) {
     locale: "fr",
   };
   let signedIn = true;
+  const disabled = new Set<string>();
   let settings: AssistantSettings = {
     provider: "openai",
     model: "test-model",
@@ -193,13 +194,13 @@ export async function fixture(page: Page) {
     }
     if (path === "/applications")
       return json(
-        ids.map((id, i) => ({
+        [...ids, "life_ai"].map((id, i) => ({
           id,
-          name: (session.locale === "en" ? english : names)[i],
+          name: (session.locale === "en" ? english : names)[i] ?? "Life AI",
           description: "",
-          icon: icons[i],
-          path: `/${id}`,
-          enabled: true,
+          icon: icons[i] ?? "sparkles",
+          path: id === "life_ai" ? "/ai" : `/${id}`,
+          enabled: !disabled.has(id),
           updated_at: now,
         })),
       );
@@ -283,7 +284,10 @@ export async function fixture(page: Page) {
     }
     if (path === "/assistant/transcription")
       return json({ text: "Un texte dicté." });
-    if (path === "/assistant/settings") {
+    if (
+      path === "/assistant/settings" ||
+      path === "/assistant/provider-settings"
+    ) {
       if (method === "PUT") {
         settings = {
           ...settings,
@@ -299,7 +303,11 @@ export async function fixture(page: Page) {
       }
       return json(settings);
     }
-    if (path === "/assistant/settings/test") return json({ ok: true });
+    if (
+      path === "/assistant/settings/test" ||
+      path === "/assistant/provider-settings/test"
+    )
+      return json({ ok: true });
     if (path === "/assistant/memories") {
       if (method === "DELETE") {
         memories = [];
@@ -433,6 +441,7 @@ export async function fixture(page: Page) {
   });
   return {
     session,
+    disabled,
     sources,
     requests,
     seed,

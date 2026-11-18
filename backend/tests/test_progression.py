@@ -39,6 +39,10 @@ def test_catalogues_levels_titles_and_shared_access(authenticated_client):
     assert [s["application_id"] for s in get(c, "")] == ["tasks"]
     for app in APPLICATIONS:
         enable(c, app.id)
+        if app.progression is None:
+            for suffix in ("", "/quests", "/history"):
+                get(c, "/" + app.id + suffix, 404)
+            continue
         summary = get(c, "/" + app.id)
         assert summary["xp"] == 0 and summary["level"] == 1
         assert summary["next_level_xp"] == 100 and summary["level_progress"] == 0
@@ -469,5 +473,7 @@ def test_explicit_history_import_is_owner_scoped_and_idempotent(authenticated_cl
     assert [r["xp"] for r in get(c, "/tasks/history")["items"] if r["kind"] == "activity"] == [10]
     assert [r["xp"] for r in get(c, "/sport/history")["items"] if r["kind"] == "activity"] == [65]
     with app.state.sessions() as db:
-        assert db.scalar(select(func.count()).select_from(m.ImportState)) == len(APPLICATIONS)
+        assert db.scalar(select(func.count()).select_from(m.ImportState)) == sum(
+            definition.progression is not None for definition in APPLICATIONS
+        )
         assert set(db.scalars(select(m.Reward.owner_id))) == {owner}

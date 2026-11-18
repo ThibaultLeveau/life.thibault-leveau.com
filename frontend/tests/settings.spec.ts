@@ -10,6 +10,7 @@ const appNames = {
   tracking: "Suivi",
   okr: "Objectifs OKR",
   recipes: "Recettes & Liste de courses",
+  life_ai: "Life AI",
 };
 const sectionNav = (page: Page) =>
   page.getByRole("navigation", { name: "Sections des réglages" });
@@ -88,17 +89,17 @@ test("menu du nom : clavier, clic extérieur, erreurs et lien Réglages", async 
   await expect(
     page.getByRole("heading", { name: "Général", exact: true }),
   ).toBeVisible();
-  await expect(sectionNav(page).getByRole("link")).toHaveCount(6);
+  await expect(sectionNav(page).getByRole("link")).toHaveCount(7);
 });
 
 test("chaque application ouvre sa section et les anciennes URL restent utilisables", async ({
   page,
 }) => {
   for (const [id, name] of Object.entries(appNames)) {
-    await page.goto(`/${id}`);
+    await page.goto(id === "life_ai" ? "/ai" : `/${id}`);
     const sidebar = page.locator(".application-sidebar");
     const link = sidebar.getByRole(
-      id === "tasks" || id === "recipes" ? "link" : "button",
+      ["tasks", "recipes", "life_ai"].includes(id) ? "link" : "button",
       { name: "Réglages", exact: true },
     );
     await link.click();

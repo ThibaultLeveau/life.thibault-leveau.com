@@ -249,3 +249,7 @@ Drafts, original ingredient lines, page text, frames and cookies are not stored 
 Additive migration `0019_recipe_sections` adds `recipes_recipes.sections`, an ordered, non-null JSONB array, empty by default and limited to 50 elements by a SQL constraint. The domain validates closed `{title, text}` objects: title 1–160 characters, non-empty text, and a combined 20,000-character limit including general preparation. Updates replace the array within the existing transaction/version and store a snapshot in `recipes_events`. Omitting the field on update preserves sections. Sections have no separate business identifier; array position defines order. React keys are transient only.
 
 The migration leaves existing preparation, dates and historical events untouched. Archives, deactivation and serving calculations do not change these personal texts. PostgreSQL backups include sections, snapshots and import receipts. No business data is stored in the browser.
+
+## Migration 0020: Life AI
+
+The nine `assistant_*` tables retain names, keys, constraints, dates and data. Their domain ORM moves to `apps/life_ai`; `assistant_settings` remains shared for provider configuration, with historical memory columns managed exclusively by Life AI. `0020_life_ai` inserts an enabled preference for each existing account without changing explicit preferences. New accounts inherit the disabled default. Deactivation preserves conversations, messages, receipts, sources, memories and settings without implicit archiving/deletion. Dashboard adds no persistent data.

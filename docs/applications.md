@@ -1,6 +1,6 @@
 # Vos applications LifeOS
 
-LifeOS réunit vos applications personnelles dans un même espace. Après connexion, l’**Accueil** propose l’[assistant IA](assistant.md), vos conversations et les liens vers les applications activées. La **Bibliothèque** permet de choisir et d’ouvrir vos applications.
+Après connexion, l’**Accueil** est un Dashboard : vos applications activées défilent sur une seule ligne et une carte permet de commencer une conversation avec [Life AI](assistant.md). La **Bibliothèque** gère les activations. Les boutons du carrousel, le glissement tactile et les touches fléchées/Début/Fin permettent de parcourir les cartes.
 
 ## Se connecter
 
@@ -21,7 +21,7 @@ Le réglage appartient à votre compte et persiste après rechargement, déconne
 
 Une désactivation ne supprime **aucune donnée** : espaces, tâches, archives, échéances, récurrences, préférences et historique restent conservés. L’application disparaît de l’accueil et son accès est bloqué. Un lien direct comme `/tasks?space=…` propose d’ouvrir la bibliothèque. Réactivez l’application pour retrouver vos données. Désactiver n’archive pas les tâches et ne change pas leurs dates.
 
-Si toutes les applications sont désactivées, la conversation et la bibliothèque restent accessibles, sans outils métier disponibles. La connexion et le thème restent disponibles. Un onglet déjà ouvert actualise le catalogue quand il revient au premier plan ; une requête métier refusée après désactivation affiche également le retour à la bibliothèque. Il n’y a pas de synchronisation instantanée entre appareils.
+Si toutes les applications sont désactivées, le Dashboard affiche un lien vers la bibliothèque ; la carte Life AI invite à l’activer. Connexion, thème et réglages fournisseur communs restent accessibles. Un onglet actualise le catalogue au retour au premier plan ; une requête refusée après désactivation retire aussi les données privées de l’écran. Il n’y a pas de synchronisation instantanée entre appareils.
 
 ![Bibliothèque : activer une application avant de l’ouvrir.](assets/screenshots/fr/general-library.png){ loading=lazy }
 
@@ -41,9 +41,9 @@ L’accueil, la bibliothèque et les applications partagent la même connexion e
 
 Le catalogue et l’activation sont aussi accessibles par l’[API versionnée](api.md#bibliotheque-et-activation), indépendamment de l’interface.
 
-![Accueil personnel : assistant, historique et accès aux applications.](assets/screenshots/fr/general-home.png){ loading=lazy }
+![Dashboard : applications sur une ligne et démarrage d’une conversation.](assets/screenshots/fr/general-home.png){ loading=lazy }
 
-*Accueil personnel : assistant, historique et accès aux applications.*
+*Dashboard : applications sur une ligne et démarrage d’une conversation.*
 
 ## Français ou anglais
 
@@ -78,3 +78,7 @@ Le lien **Documentation** d’une application ouvre uniquement son guide dans la
 Utilisez Tab/Maj+Tab pour parcourir les commandes, Entrée ou Espace pour les activer, et Échap pour fermer les menus et dialogues. Sur mobile, ouvrez la navigation pour retrouver tous les liens. Les modifications non enregistrées demandent confirmation avant une sortie concernée. Consultez le [guide de progression](progression.md) pour les niveaux, quêtes, jours d’utilisation et vacances.
 
 Les préférences sont réunies dans les [réglages généraux](settings.md). Le lien Réglages de l’application ouvre sa section ; fuseau de progression et vacances se trouvent dans Général, jours d’utilisation dans chaque application.
+
+## Démarrer avec Life AI
+
+Life AI est disponible sur `/ai`, désactivée par défaut pour les nouveaux comptes. La migration conserve son accès pour les comptes déjà présents. Activez-la dans la bibliothèque. Sur le Dashboard, saisissez un message puis **Discuter** ou Entrée (Maj+Entrée ajoute une ligne). Life AI reçoit le brouillon et l’envoie une fois au fournisseur configuré. Sans configuration, il reste modifiable dans le chat. Les idées proposées remplissent seulement le champ. Retour/rechargement ne renvoient pas le message ; un brouillon reste uniquement en mémoire pendant la visite. Désactiver Life AI conserve conversations, mémoire, sources et réglages.

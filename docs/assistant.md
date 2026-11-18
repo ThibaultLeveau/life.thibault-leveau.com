@@ -1,14 +1,14 @@
-# Votre assistant LifeOS
+# Life AI
 
 [English guide](en/assistant.md)
 
-L’accueil connecté réunit une conversation avec Life, votre historique et les liens vers les applications. Vous pouvez poser une question, consulter vos données ou demander une modification dans Tâches, Sport, Suivi, Objectifs OKR et Recettes & Liste de courses. Les applications restent accessibles directement depuis la bibliothèque.
+**Life AI** est votre application de conversation sur `/ai` : historique, mémoire, documents/images/pages web et dictée. Ouvrez-la depuis le Dashboard ou la bibliothèque. Vous pouvez consulter et modifier les applications activées : Tâches, Sport, Suivi, Objectifs OKR et Recettes & Liste de courses.
 
-Cette page décrit le comportement implémenté pour la livraison de l’[issues #85 et #89](https://github.com/ThibaultLeveau/life.thibault-leveau.com/issues/89). Les preuves de recette et le commit effectivement publié sont consignés dans cette issue.
+La séparation Dashboard/Life AI suit l’[ADR 011](decisions/011-dashboard-life-ai.md). Les preuves de validation et le commit publié figurent dans l’[issue #104](https://github.com/ThibaultLeveau/life.thibault-leveau.com/issues/104).
 
 ## Configurer votre fournisseur
 
-Ouvrez **Réglages → Général → Assistant IA**. Choisissez OpenAI, Anthropic ou Google Gemini, saisissez l’identifiant d’un modèle accessible à votre compte fournisseur et son token API, puis enregistrez. **Tester la connexion** effectue un véritable appel au fournisseur et peut consommer son quota. Le modèle doit accepter les outils et les réponses en streaming utilisés par l’assistant.
+Ouvrez **Réglages → Life AI → Fournisseur IA (ou Général)**. Choisissez OpenAI, Anthropic ou Google Gemini, saisissez l’identifiant d’un modèle accessible à votre compte fournisseur et son token API, puis enregistrez. **Tester la connexion** effectue un véritable appel au fournisseur et peut consommer son quota. Le modèle doit accepter les outils et les réponses en streaming utilisés par l’assistant.
 
 Le token est chiffré sur le serveur. L’interface ne relit que son état de configuration et un suffixe masqué. Un champ vide conserve le token ; **Supprimer le token** le retire explicitement. Changer de fournisseur efface le token et le modèle précédents : renseignez ceux du nouveau fournisseur. Une clé serveur manquante ou devenue illisible demande l’intervention de l’administrateur ou une nouvelle saisie ; les applications restent accessibles.
 
@@ -64,7 +64,7 @@ Une réponse peut être partielle si le fournisseur refuse le token, manque de q
 
 La mémoire retient des faits durables que vous communiquez : votre nom, votre profession, des projets en cours, des préférences ou un contexte personnel utile. Chaque souvenir issu du chat possède sa conversation, son message et un extrait source daté. Les exemples fictifs, textes d’applications et suppositions ne doivent pas devenir des faits personnels. Les informations sensibles nécessitent une demande explicite de mémorisation ; ne fournissez pas de secrets dans le chat. Le choix des faits dépend du modèle, complété par des filtres conservateurs côté serveur pour les refus et des motifs sensibles FR/EN. Ces filtres ne détectent pas toutes les formulations ni toutes les langues : consultez les souvenirs enregistrés et corrigez-les au besoin.
 
-Ouvrez **Mémoire**, depuis la navigation du chat ou les réglages généraux, pour consulter, ajouter, corriger ou supprimer un souvenir, ou tout oublier. Vous pouvez désactiver la mémoire dans les réglages IA : les souvenirs conservés ne sont alors plus injectés et aucun nouveau souvenir automatique n’est ajouté. Les souvenirs et l’historique sont indépendants ; supprimer une conversation sans choisir l’oubli conserve ses souvenirs.
+Ouvrez **Mémoire**, depuis la navigation du chat ou les réglages Life AI, pour consulter, ajouter, corriger ou supprimer un souvenir, ou tout oublier. Vous pouvez désactiver la mémoire dans les réglages IA : les souvenirs conservés ne sont alors plus injectés et aucun nouveau souvenir automatique n’est ajouté. Les souvenirs et l’historique sont indépendants ; supprimer une conversation sans choisir l’oubli conserve ses souvenirs.
 
 Une correction, un oubli ou une bascule de mémoire efface les résumés dérivés et écarte les anciens messages du contexte réutilisé. Les messages restent visibles dans l’historique, mais une ancienne source ne doit pas recréer silencieusement un souvenir oublié. Une réponse déjà en cours est interrompue si sa version de mémoire est devenue obsolète ; renvoyez votre demande avec le contexte utile. Des données déjà envoyées à un fournisseur ne peuvent pas être retirées par une suppression locale.
 
@@ -105,3 +105,11 @@ Toutes ces opérations disposent de leur [API indépendante](assistant-api.md). 
 Demandez par exemple « Crée un espace Portfolio et prépare ces dix tâches… ». Le coordinateur peut déléguer la création de l’espace, puis transmettre son identifiant confirmé au spécialiste Tâches. Une nouvelle délégation peut réutiliser le même spécialiste pour une autre sous-tâche ; les délégations sont exécutées en séquence dans le processus existant. Pour plusieurs créations, l’assistant privilégie **Importer des tâches** : un lot de 1 à 100 tâches, avec un aperçu complet puis une confirmation. L’aperçu ne crée encore aucune tâche ; la confirmation enregistre tout le lot ou rien. Ne confirmez pas plusieurs propositions identiques.
 
 Les budgets par défaut sont de 96 appels modèle, 200 actions métier et 600 secondes pour une réponse. Chaque spécialiste dispose de 24 échanges maximum et le coordinateur de 16 ; l’administrateur peut réduire les budgets globaux dans la configuration. Ces garde-fous évitent les boucles et les coûts sans borne ; ils ne représentent pas une limite au nombre de tâches stockées. Un fournisseur lent peut encore dépasser le délai. Après interruption, les actions déjà enregistrées sont conservées et ne doivent pas être recréées.
+
+## Dashboard, activation et premier message
+
+Le Dashboard `/` reste une vue d’ensemble. Sa carte de chat accepte jusqu’à 12 000 caractères. **Discuter** ouvre Life AI et envoie une seule fois le texte avec la configuration enregistrée. Une configuration absente ou un rejet avant admission conserve le brouillon ; une modification pendant le chargement annule l’envoi automatique. Après une erreur réseau incertaine, consultez l’historique avant de renvoyer. Un rechargement peut perdre une saisie encore non envoyée : elle n’est pas stockée dans le navigateur.
+
+Les anciens liens `/?conversation=…` restent valides et rejoignent `/ai?conversation=…`. Retour navigateur, changement de langue et déconnexion protègent les brouillons. Un tour en cours empêche la navigation interne. Une désactivation depuis un autre onglet coupe les étapes suivantes ; les actions déjà enregistrées conservent leurs reçus. Réactivez Life AI pour retrouver ses données. Mémoire et dictée se règlent dans **Réglages → Life AI**. Le fournisseur est partagé avec Recettes et reste configurable dans Général même lorsque Life AI est désactivée. Aucun XP n’est attribué pour discuter.
+
+![Life AI : conversation indépendante du Dashboard.](assets/screenshots/fr/life-ai.png){ loading=lazy }

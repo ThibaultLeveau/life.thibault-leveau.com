@@ -10,9 +10,9 @@ from fastapi import HTTPException
 from sqlalchemy import func, select, text
 
 from life_app import cli
+from life_app.apps.life_ai import models as m
 from life_app.core.config import Settings
 from life_app.platform.assistant import credentials
-from life_app.platform.assistant import models as m
 from life_app.platform.auth.models import LoginSession, User
 
 

@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import type { Message, Snippet } from "../src/platform/assistant/types";
+import type { Message, Snippet } from "../src/apps/life_ai/types";
 import { fixture, now } from "./assistant-fixture";
 
 test("chat : contrat SSE, cinq snippets, confirmation, historique et actions", async ({
@@ -8,7 +8,7 @@ test("chat : contrat SSE, cinq snippets, confirmation, historique et actions", a
   const data = await fixture(page);
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
-  await page.goto("/");
+  await page.goto("/ai");
   await page
     .getByLabel("Votre message", { exact: true })
     .fill("Aide-moi à préparer ma semaine.");
@@ -77,7 +77,7 @@ test("chat : contrat SSE, cinq snippets, confirmation, historique et actions", a
     .getByRole("dialog")
     .getByRole("button", { name: "Supprimer la conversation", exact: true })
     .click();
-  await expect(page).toHaveURL(/\/$/);
+  await expect(page).toHaveURL(/\/ai$/);
   expect(data.conversations.size).toBe(0);
   await expect(page.locator(".assistant-welcome h1")).toBeVisible();
   await expect(page.locator(".assistant-message")).toHaveCount(0);
@@ -85,7 +85,7 @@ test("chat : contrat SSE, cinq snippets, confirmation, historique et actions", a
   await expect(page.getByLabel("Votre message", { exact: true })).toHaveValue(
     "",
   );
-  await expect(page).toHaveTitle("Assistant · LifeOS");
+  await expect(page).toHaveTitle("Life AI · LifeOS");
   await page
     .getByLabel("Votre message", { exact: true })
     .fill("Une nouvelle demande.");
@@ -123,7 +123,7 @@ for (const locale of ["fr", "en"] as const) {
             cancel: "Cancel",
             message: "Your message",
           };
-    await page.goto("/?conversation=conversation-1");
+    await page.goto("/ai?conversation=conversation-1");
     const composer = page.getByLabel(labels.message, { exact: true });
     await composer.fill("Un brouillon dans la conversation supprimée");
     await page.locator('input[type="file"]').setInputFiles({
@@ -193,7 +193,7 @@ for (const locale of ["fr", "en"] as const) {
       .getByRole("button", { name: labels.remove, exact: true })
       .click();
     await expect(dialog).toHaveCount(0);
-    await expect(page).toHaveURL(/\/$/);
+    await expect(page).toHaveURL(/\/ai$/);
     await expect(page.locator(".assistant-welcome h1")).toBeVisible();
     await expect(page.locator(".assistant-message")).toHaveCount(0);
     await expect(composer).toHaveValue("");
@@ -277,7 +277,7 @@ test("aperçu d'archivage : cible réelle, reçu conservé si la synchronisation
       });
     },
   );
-  await page.goto("/?conversation=conversation-1");
+  await page.goto("/ai?conversation=conversation-1");
   const card = page.locator(".assistant-snippet");
   await expect(
     card.getByRole("heading", { name: "Archiver une tâche" }),
@@ -331,7 +331,7 @@ test("navigation mobile : recherche et conversations restent dans le parcours cl
   const data = await fixture(page);
   data.seed("conversation-1", []);
   await page.setViewportSize({ width: 320, height: 800 });
-  await page.goto("/");
+  await page.goto("/ai");
   const menu = page.getByRole("button", {
     name: "Ouvrir la navigation",
     exact: true,
@@ -367,16 +367,21 @@ test("la mémoire se désactive avant toute configuration de modèle ou de clé"
 }) => {
   const data = await fixture(page);
   data.setSettings({ configured: false, model: "", token_hint: null });
-  await page.goto("/settings");
-  const panel = page.locator("#assistant-settings");
-  await expect(panel.getByLabel("Modèle", { exact: true })).toHaveValue("");
+  await page.goto("/settings?application=life_ai");
+  const panel = page.locator("#assistant-memory");
   await panel
     .getByRole("checkbox", { name: "Mémoriser les informations utiles" })
-    .uncheck();
-  await panel.getByRole("button", { name: "Enregistrer", exact: true }).click();
-  await expect(
-    panel.getByText("Réglages enregistrés.", { exact: true }),
-  ).toBeVisible();
+    .click();
+  await expect(panel.getByRole("checkbox")).not.toBeChecked();
+  await expect
+    .poll(
+      () =>
+        data.requests.filter(
+          (request) =>
+            request.path === "/assistant/settings" && request.method === "PUT",
+        ).length,
+    )
+    .toBe(1);
   const write = data.requests.find(
     (request) =>
       request.path === "/assistant/settings" && request.method === "PUT",
@@ -390,7 +395,7 @@ test("réglages : secret à écriture seule, brouillons et mémoire modifiable",
   page,
 }) => {
   const data = await fixture(page);
-  await page.goto("/settings");
+  await page.goto("/settings?application=life_ai");
   const panel = page.locator("#assistant-settings");
   await panel
     .getByLabel("Nouvelle clé API", { exact: true })
@@ -417,7 +422,8 @@ test("réglages : secret à écriture seule, brouillons et mémoire modifiable",
   expect(
     data.requests.find(
       (request) =>
-        request.path === "/assistant/settings" && request.method === "PUT",
+        request.path === "/assistant/provider-settings" &&
+        request.method === "PUT",
     )?.body.api_token,
   ).toBe("synthetic-provider-secret-only");
   expect(
@@ -507,7 +513,7 @@ test("tableaux : alignements, échappements, code et contenu malformé sans exé
     if (request.url().includes("untrusted.invalid"))
       remoteRequests.push(request.url());
   });
-  await page.goto("/?conversation=conversation-1");
+  await page.goto("/ai?conversation=conversation-1");
   const message = page.locator(".is-assistant .assistant-message-text");
   const tables = message.getByRole("table");
   await expect(tables).toHaveCount(3);
@@ -583,7 +589,7 @@ test("tableaux : réponse SSE partielle puis historique rechargé", async ({
       return original(input, init);
     };
   });
-  await page.goto("/?conversation=conversation-1");
+  await page.goto("/ai?conversation=conversation-1");
   await page
     .getByLabel("Votre message", { exact: true })
     .fill("Prépare un tableau.");
@@ -642,7 +648,7 @@ test("FR/EN, thèmes, 320 px, navigation clavier, snapshots et texte non exécut
         data.session.locale = locale;
         data.session.theme = theme;
         await page.setViewportSize({ width, height: 900 });
-        await page.goto("/");
+        await page.goto("/ai");
         await expect(page.locator("html")).toHaveAttribute("lang", locale);
         await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
         await expect(page.locator(".assistant-welcome h1")).toBeVisible();
@@ -677,7 +683,7 @@ test("FR/EN, thèmes, 320 px, navigation clavier, snapshots et texte non exécut
           await page.keyboard.press("Escape");
           await expect(menu).toBeFocused();
         }
-        await page.goto("/?conversation=conversation-1");
+        await page.goto("/ai?conversation=conversation-1");
         const table = page.getByRole("table");
         await expect(table.getByRole("columnheader")).toHaveText([
           "Tâche",
@@ -763,16 +769,17 @@ test("configuration absente et expiration démontent les données privées", asy
 }) => {
   const data = await fixture(page);
   data.setConfigured(false);
-  await page.goto("/");
+  await page.goto("/ai");
   await expect(
     page.getByRole("link", { name: "Configurer mon assistant" }),
   ).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Envoyer le message" }),
-  ).toHaveCount(0);
+  ).toBeDisabled();
+  await expect(page.getByLabel("Votre message", { exact: true })).toBeVisible();
   data.setConfigured(true);
   data.seed();
-  await page.goto("/?conversation=conversation-1");
+  await page.goto("/ai?conversation=conversation-1");
   await expect(page.locator(".assistant-snippet")).toHaveCount(3);
   await page.locator(".assistant-snippets-more").click();
   await expect(page.locator(".assistant-snippet")).toHaveCount(5);
@@ -834,7 +841,7 @@ test("aperçu LifeOS : protection du brouillon puis synchronisation de langue et
       });
     },
   );
-  await page.goto("/?conversation=conversation-1");
+  await page.goto("/ai?conversation=conversation-1");
   await expect(page.locator(".assistant-snippet")).toContainText("English");
   await page
     .getByLabel("Votre message", { exact: true })
@@ -863,7 +870,7 @@ test("un refus de création ou d'admission conserve le brouillon sans nouvel env
     if (route.request().method() !== "POST") return route.fallback();
     await route.fulfill({ status: 503, json: { detail: "Unavailable" } });
   });
-  await page.goto("/");
+  await page.goto("/ai");
   const composer = page.getByLabel("Votre message", { exact: true });
   await composer.fill("Un message à conserver après création refusée");
   await page.getByRole("button", { name: "Envoyer le message" }).click();
@@ -875,7 +882,7 @@ test("un refus de création ou d'admission conserve le brouillon sans nouvel env
     data.requests.filter((request) => request.path.endsWith("/messages")),
   ).toHaveLength(0);
   data.seed("conversation-1", []);
-  await page.goto("/?conversation=conversation-1");
+  await page.goto("/ai?conversation=conversation-1");
   let attempted = 0;
   await page.route(
     "**/api/v1/assistant/conversations/conversation-1/messages",
@@ -912,7 +919,7 @@ test("une coupure réseau après admission récupère le résultat sans rejouer 
       await route.abort("failed");
     },
   );
-  await page.goto("/?conversation=conversation-1");
+  await page.goto("/ai?conversation=conversation-1");
   const composer = page.getByLabel("Votre message", { exact: true });
   await composer.fill("Une demande dont la réponse réseau sera perdue");
   await page.getByRole("button", { name: "Envoyer le message" }).click();
@@ -937,7 +944,7 @@ test("une réponse en cours est récupérée après rechargement sans répéter 
   response.content = "Première partie reçue.";
   response.status = "running";
   response.run_id = "running-recovery";
-  await page.goto("/?conversation=conversation-1");
+  await page.goto("/ai?conversation=conversation-1");
   await expect(
     page.getByText("Réponse en cours. Synchronisation avec le serveur…"),
   ).toBeVisible();
@@ -965,7 +972,7 @@ test("sources : fichier et page web sans texte, historique, retrait et CSRF", as
   page,
 }) => {
   const data = await fixture(page);
-  await page.goto("/");
+  await page.goto("/ai");
   await page.locator('input[type="file"]').setInputFiles({
     name: "notes.txt",
     mimeType: "text/plain",
@@ -1012,7 +1019,7 @@ test("sources : limites, brouillon protégé, refus d’admission et nouvelle te
 }) => {
   const data = await fixture(page);
   data.seed("conversation-1", []);
-  await page.goto("/?conversation=conversation-1");
+  await page.goto("/ai?conversation=conversation-1");
   await page.locator('input[type="file"]').setInputFiles({
     name: "script.exe",
     mimeType: "application/octet-stream",
@@ -1077,7 +1084,7 @@ test("sources : annulation d’une préparation tardive et réessai après erreu
       .fulfill({ status: 503, json: { detail: "Unavailable" } })
       .catch(() => {});
   });
-  await page.goto("/");
+  await page.goto("/ai");
   await page.locator('input[type="file"]').setInputFiles({
     name: "late.txt",
     mimeType: "text/plain",
@@ -1167,7 +1174,7 @@ test("dictée : format négocié, texte existant préservé, envoi manuel et pis
 }) => {
   const data = await fixture(page);
   await fakeRecorder(page);
-  await page.goto("/");
+  await page.goto("/ai");
   const composer = page.getByLabel("Votre message", { exact: true });
   await composer.fill("Mon brouillon");
   await page.getByLabel("Dicter un texte", { exact: true }).click();
@@ -1193,7 +1200,7 @@ test("dictée : permission refusée, annulation de permission tardive et transcr
 }) => {
   await fixture(page);
   await fakeRecorder(page, "pending");
-  await page.goto("/");
+  await page.goto("/ai");
   await page.getByLabel("Dicter un texte", { exact: true }).click();
   await expect(
     page.getByText("Autorisez le microphone dans votre navigateur."),
@@ -1233,7 +1240,7 @@ test("réglages dictée : fournisseur distinct, secret à écriture seule et bro
   page,
 }) => {
   const data = await fixture(page);
-  await page.goto("/settings");
+  await page.goto("/settings?application=life_ai");
   await page
     .getByRole("checkbox", {
       name: "Utiliser le fournisseur et la clé de la conversation",
@@ -1273,7 +1280,7 @@ test("sources : quatre pièces maximum, image trop grande et cartes accessibles 
 }) => {
   const data = await fixture(page);
   await page.setViewportSize({ width: 320, height: 900 });
-  await page.goto("/");
+  await page.goto("/ai");
   await page.locator('input[type="file"]').setInputFiles(
     Array.from({ length: 5 }, (_, i) => ({
       name: `note-${i}.txt`,
@@ -1323,7 +1330,7 @@ test("dictée : arrêt automatique à deux minutes et réessai sans réenregistr
       return route.fulfill({ status: 503, json: { detail: "Unavailable" } });
     return route.fulfill({ json: { text: "Transcription récupérée." } });
   });
-  await page.goto("/");
+  await page.goto("/ai");
   await page.getByLabel("Dicter un texte", { exact: true }).click();
   await expect(page.getByText(/Dictée en cours/)).toBeVisible();
   await page.clock.runFor(120_001);
@@ -1341,7 +1348,7 @@ test("réglages dictée : la configuration indépendante survit à la réutilisa
   page,
 }) => {
   const data = await fixture(page);
-  await page.goto("/settings");
+  await page.goto("/settings?application=life_ai");
   const reuse = page.getByRole("checkbox", {
     name: "Utiliser le fournisseur et la clé de la conversation",
   });
@@ -1402,7 +1409,7 @@ test("sources : les lots attendent les deux créneaux d’import et les sources 
     active--;
     await route.fallback();
   });
-  await page.goto("/");
+  await page.goto("/ai");
   await page.locator('input[type="file"]').setInputFiles(
     Array.from({ length: 4 }, (_, index) => ({
       name: `queued-${index}.txt`,
@@ -1431,12 +1438,12 @@ test("sources : le retour navigateur conserve une URL refusée et efface son aba
 }) => {
   const data = await fixture(page);
   data.seed("conversation-1", []);
-  await page.goto("/?conversation=conversation-1");
+  await page.goto("/ai?conversation=conversation-1");
   await expect(page.getByLabel("Votre message", { exact: true })).toBeEnabled();
   await page
     .getByRole("button", { name: "Nouvelle conversation", exact: true })
     .click();
-  await expect(page).toHaveURL(/\/$/);
+  await expect(page).toHaveURL(/\/ai$/);
   await page
     .getByRole("button", { name: "Ajouter une page web", exact: true })
     .click();
@@ -1444,7 +1451,7 @@ test("sources : le retour navigateur conserve une URL refusée et efface son aba
   await input.fill("https://example.com/private-draft");
   page.once("dialog", (dialog) => dialog.dismiss());
   await page.evaluate(() => history.back());
-  await expect(page).toHaveURL(/\/$/);
+  await expect(page).toHaveURL(/\/ai$/);
   await expect(input).toHaveValue("https://example.com/private-draft");
   page.once("dialog", (dialog) => dialog.accept());
   await page.evaluate(() => history.back());
@@ -1493,7 +1500,7 @@ test("un aperçu d’import compact permet de consulter les dix tâches complèt
       },
     },
   ]);
-  await page.goto("/?conversation=import-ten");
+  await page.goto("/ai?conversation=import-ten");
   await expect(page.locator(".assistant-snippet-line")).toHaveCount(3);
   await expect(
     page.getByRole("button", { name: "Confirmer ce changement" }),

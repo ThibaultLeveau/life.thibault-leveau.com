@@ -17,7 +17,7 @@ The **progression calendar** contains its own IANA timezone and shared vacation 
 
 ## AI assistant
 
-General also includes an **AI assistant** card: OpenAI/Anthropic/Gemini provider, model identifier, API token and memory enablement. Save before using **Test connection**. A blank token field preserves its value; removal is explicit. Changing provider clears the previous token and model. Inspect and correct memory from chat or General settings. See the [Assistant guide](assistant.md) and [API](assistant-api.md).
+General includes the **AI provider** card shared with Recipes: OpenAI/Anthropic/Gemini provider, model and API token. It stays accessible when Life AI is disabled. Save before **Test connection**. A blank token field preserves its value; removal is explicit. Changing provider clears the previous token and model. **Life AI** has its own section: the same shared provider, dictation settings and memory (enablement, inspection, editing and forgetting). See the [Life AI guide](assistant.md) and [API](assistant-api.md).
 
 ## Application sections
 
@@ -41,10 +41,12 @@ Failed reads offer **Try again**. Failed saves retain your input and show an err
 
 ## API and storage
 
-The page composes versioned APIs: `/preferences`, `/progression/settings`, `/agenda/view`, `/workspaces/{id}/view`, `/sport/settings`, `/tracking/settings`, `/okr/settings` and `/assistant/settings`, all under `/api/v1`, with GET and PUT. `POST /assistant/settings/test` checks the provider. Account preference updates accept partial fields; progression and OKR updates require `expected_version`. See [API examples](api.md) and [Assistant API](assistant-api.md).
+The page composes versioned APIs: `/preferences`, `/progression/settings`, `/agenda/view`, `/workspaces/{id}/view`, `/sport/settings`, `/tracking/settings`, `/okr/settings` and `/assistant/provider-settings`, all under `/api/v1`, with GET and PUT. `POST /assistant/provider-settings/test` checks the provider. Account preference updates accept partial fields; progression and OKR updates require `expected_version`. See [API examples](api.md) and [Assistant API](assistant-api.md).
 
 Writes require the existing session, allowed origin and CSRF token. Business settings enforce application activation and ownership. Dumps preserve preferences; `0015_assistant` adds AI settings whose encryption keyring needs a separate backup. No browser business storage or deployment service is added; see [backup and restore](sauvegardes.md).
 
 ![Sport settings: rest between sets and usage days.](../assets/screenshots/en/sport-settings.png){ loading=lazy }
 
 *Sport settings: rest between sets and usage days.*
+
+Life AI has no dedicated calendar or quests. Its disabled settings section shows only its state and library link; no conversation, memory or dictation data is loaded.

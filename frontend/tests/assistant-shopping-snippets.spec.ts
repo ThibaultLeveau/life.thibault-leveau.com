@@ -55,7 +55,7 @@ for (const locale of ["fr", "en"])
           reducedMotion: "reduce",
         });
         await page.setViewportSize({ width, height: 1000 });
-        await page.goto("/?conversation=conversation-1");
+        await page.goto("/ai?conversation=conversation-1");
         const snippet = page.locator(".assistant-snippet");
         const title = snippet.locator(".assistant-snippet-line");
         await expect(title).toHaveText("Liste de courses");
@@ -162,7 +162,7 @@ test("modèles, aperçu sans reçu et pages conservent les articles, champs et d
       },
     }),
   ]);
-  await page.goto("/?conversation=conversation-1");
+  await page.goto("/ai?conversation=conversation-1");
   await expect(
     page.getByRole("button", { name: "Confirmer ce changement" }),
   ).toBeVisible();
@@ -227,7 +227,7 @@ test("le résumé conserve les noms longs et les grandes quantités à 320 px", 
     }),
   ]);
   await page.setViewportSize({ width: 320, height: 1000 });
-  await page.goto("/?conversation=conversation-1");
+  await page.goto("/ai?conversation=conversation-1");
   const rows = page.locator(".recipes-snippet-items > li");
   await expect(rows.first()).toContainText(name);
   await expect(rows.first()).toContainText("c. à soupe");

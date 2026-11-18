@@ -291,7 +291,7 @@ Publish validated main with the usual backup. No new service/secret/SQL migratio
 
 ## Separate documentation release {#livraison-documentations-separees}
 
-Publish the validated main using the same backup/build/migration/deployment script. No data migration, service or environment setting is added. Verify both directories, all seven guide entries in both languages, language-equivalent links, guide-scoped menus/search, local screenshots and existing application help links. Check mobile/keyboard navigation, actual image SHA and public probes. Record the deployed commit, backup and verification in the issue.
+Publish the validated main using the same backup/build/migration/deployment script. No data migration, service or environment setting is added. Verify both directories, all eight guide entries in both languages, language-equivalent links, guide-scoped menus/search, local screenshots and existing application help links. Check mobile/keyboard navigation, actual image SHA and public probes. Record the deployed commit, backup and verification in the issue.
 
 ## Deploying general settings
 
@@ -340,3 +340,9 @@ Rollback requires all three service images at the same SHA and schema compatibil
 ## Deploying Recipes preparation sections
 
 After checks, review, CI and merge, use the normal procedure: backup followed by additive migration `0019_recipe_sections`. No new secret, service or setting. Verify the running SHA, Alembic revision, HTTPS probes, `/recipes`, OpenAPI and FR/EN guides. On a synthetic account, type long text on a mobile layout, split and title two sections, reorder, save/reload and verify the API; also check import review and an older recipe. Automated tests simulate the keyboard viewport; they do not replace physical testing of every iOS/Android keyboard. Record evidence and this limit in issue #105.
+
+## Dashboard and Life AI release
+
+After review, checks and merge, deploy `main` with `scripts/deploy.sh`, backup then additive migration `0020_life_ai`. No new service, dependency, variable or secret. Preserve existing provider configuration and encryption keys. Verify existing-account migration and the disabled default for a synthetic account created afterwards.
+
+Check all three running image SHAs, Alembic revision, probes and HTTPS `/`, `/ai`, `/applications`, `/settings?application=life_ai`, OpenAPI and FR/EN guides. On a synthetic account, check one-row carousel at 320 px/keyboard, Life AI activation, draft preservation without a provider, old conversation links, disable/re-enable preservation and shared provider access for Recipes. Simulated-provider tests cover automatic single submission; distinguish that evidence from a real LLM request. Record published commit, backup and results in issue #104. Follow [rollback limits](sauvegardes.md#migration-0020-life-ai-activation).

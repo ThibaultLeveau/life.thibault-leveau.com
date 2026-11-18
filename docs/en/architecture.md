@@ -2,9 +2,9 @@
 
 ## Overview {#vue-densemble}
 
-[ADR 008](decisions/008-assistant-ia.md), approved in issue #85, extends this monolith with `platform/assistant`. Signed-in Home composes chat, history and personal memory. PostgreSQL stores these records and action receipts; no agent service, queue or vector store is added.
+[ADR 011](decisions/011-dashboard-life-ai.md), approved in issue #104, separates Dashboard `/` from the activatable Life AI application `/ai`. `apps/life_ai` owns conversations, history, memory, sources, dictation, orchestration and receipts. `platform/assistant` retains capability/snippet contracts, LifeOS capabilities, providers, encryption, shared configuration and structured generation used by Recipes. PostgreSQL and existing tables stay unchanged; no new service, framework or storage.
 
-The coordinator calls only relevant specialists: five domain specialists and a `lifeos` specialist for the platform. Manifests expose 119 domain capabilities; `platform/assistant/common.py` supplies 11 capabilities for library/activation, preferences, progression and integrations. Every application owns `assistant.py` and supplies `ActionProvider` through its manifest; capabilities reuse the domain's schemas, ownership, versions, events and progression. The platform discovers injected contracts without importing applications. Snippets use application-owned React renderers loaded through the frontend registry, with versioned structured data and no generated executable code.
+The coordinator calls only relevant specialists: five domain specialists and a `lifeos` specialist for the platform. Manifests expose 119 domain capabilities; `platform/assistant/common.py` supplies 11 capabilities for library/activation, preferences, progression and integrations. Every application exposing capabilities owns `assistant.py` and supplies `ActionProvider` through its manifest; capabilities reuse the domain's schemas, ownership, versions, events and progression. The platform discovers injected contracts without importing applications. Snippets use application-owned React renderers loaded through the frontend registry, with versioned structured data and no generated executable code.
 
 Message admission releases the owner lock before calling a provider. Each action opens a short transaction, rechecks session/activation/version and records the mutation and receipt together. Previews simulate the action in a rolled-back savepoint; confirmation executes the saved proposal with version checks. Conversation history, summaries and memories remain distinct. See [Assistant API](assistant-api.md), [data](donnees.md#assistant-ia) and [configuration](configuration.md).
 
@@ -57,7 +57,7 @@ React stores no parallel business database in localStorage. Input fields and dia
 
 ## HTTP and builds {#http-et-compilation}
 
-`/`, `/applications`, `/settings` and manifest paths (`/tasks`, `/sport`, `/tracking`, `/okr`, `/recipes`) are the only React HTML routes. Assets live under `/assets/`, API under `/api/v1`, Swagger under `/api/docs` and MkDocs under `/documentation/`. Unknown paths remain 404. Frontend API URLs are relative; rendering has no separate network service.
+`/`, `/applications`, `/settings` and manifest paths (`/tasks`, `/sport`, `/tracking`, `/okr`, `/recipes`, `/ai`) are the only React HTML routes. Assets live under `/assets/`, API under `/api/v1`, Swagger under `/api/docs` and MkDocs under `/documentation/`. Unknown paths remain 404. Frontend API URLs are relative; rendering has no separate network service.
 
 ![Multi-stage build: compiled frontend and documentation join the Python runtime.](../assets/diagrams/en/build.svg)
 
@@ -115,7 +115,7 @@ Shopping lists and templates also accept free items through `0017_shopping_free_
 
 ## Separate documentation guides
 
-The seven FR/EN guides share the existing MkDocs build and static server. `mkdocs.yml` assigns pages to guides; `scripts/documentation.py` supplies navigation, previous/next links and search indexes scoped to each guide and language. The language link opens the equivalent page; an explicit link returns to the directory. Existing source paths and URLs remain stable, with technical translations under `docs/en/`. No service, storage or business boundary changes.
+The eight FR/EN guides share the existing MkDocs build and static server. `mkdocs.yml` assigns pages to guides; `scripts/documentation.py` supplies navigation, previous/next links and search indexes scoped to each guide and language. The language link opens the equivalent page; an explicit link returns to the directory. Existing source paths and URLs remain stable, with technical translations under `docs/en/`. No service, storage or business boundary changes.
 
 ## General settings
 
@@ -123,8 +123,12 @@ The seven FR/EN guides share the existing MkDocs build and static server. `mkdoc
 
 ## Multimodal sources and dictation
 
-[ADR 009](decisions/009-sources-assistant.md), approved in issue #89, extends `platform/assistant` with private PostgreSQL sources, typed provider blocks, bounded extraction and transient transcription. No new service, object storage or vector database. The web reader only adds HTTP/HTTPS connections to explicitly imported public pages, validating DNS/IPs and redirects and connecting to a verified address while retaining the TLS hostname. AI adapters keep fixed hosts.
+[ADR 009](decisions/009-sources-assistant.md), approved in issue #89, introduced sources now owned by `apps/life_ai`, with private PostgreSQL sources, typed provider blocks, bounded extraction and transient transcription. No new service, object storage or vector database. The web reader only adds HTTP/HTTPS connections to explicitly imported public pages, validating DNS/IPs and redirects and connecting to a verified address while retaining the TLS hostname. AI adapters keep fixed hosts.
 
 PDF/image/XML parsing and web reading run in disposable processes limited by CPU, memory and time; no external HTML executes. Admission reserves quota before reading, releases SQL during I/O, then revalidates session and owner. Direct instructions remain separate from sources: persistent `external_context` forces mutation previews and disables automatic memory, including follow-ups. No persistent external summary; recent context and ID-based source reading remain bounded. See [data](donnees.md), [API](assistant-api.md) and [backups](sauvegardes.md#migration-0016-sources-and-dictation).
 
 [ADR 010](decisions/010-import-web-recettes.md) adds private recipe browser/proxy services. Business rules stay in `apps/recipes`, reusable typed generation in `platform/assistant/structured.py`. Internal networks, ephemeral sessions and atomic saving bound this approved extension.
+
+## Dashboard and Life AI activation
+
+The shell supplies `ApplicationPageProps`: registry modules, an optional launch (`id`, `applicationId`, `text`) and a consumption callback. `platform/navigation.ts` handles same-document URL changes and back-navigation guards; `history.state` contains only a position. Replacing session/language also unmounts the intent. Old `/?conversation=…` links redirect. All Life AI routes, including source/dictation subrouters, use the central activation check and revalidate long operations. Migration `0020_life_ai` enables existing accounts while preserving explicit preferences; new accounts default to disabled. Optional progression/capability contracts remain absent for conversation controls, without artificial badges or quests.

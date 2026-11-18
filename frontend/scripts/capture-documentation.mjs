@@ -26,7 +26,7 @@ try {
         const response = await page.goto(route, { waitUntil: 'networkidle' });
         if (!response?.ok()) throw new Error(`Capture ${name}: HTTP ${response?.status()}`);
       }
-      if (route === '/api/docs') await expect(page.locator('.swagger-ui .opblock').first()).toBeVisible();
+      if (route === '/api/docs') await expect(page.locator('.swagger-ui .opblock').first()).toBeVisible({ timeout: 30_000 });
       else await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
       if (prepare) await prepare();
       await page.evaluate(() => document.fonts.ready);
@@ -44,7 +44,7 @@ try {
       return r.status() === 204 ? undefined : r.json();
     };
     await api('PUT', '/preferences', { locale, theme: 'light' });
-    for (const id of ['tasks', 'sport', 'tracking', 'okr', 'recipes'])
+    for (const id of ['tasks', 'sport', 'tracking', 'okr', 'recipes', 'life_ai'])
       await api('PUT', `/applications/${id}`, { enabled: true });
     // Reuse only these dedicated demo accounts if a capture needs to be repeated.
     const statePath = `${stateDirectory}/documentation-${locale}.json`;
@@ -110,6 +110,7 @@ try {
     }
     await capture('general-library', '/applications');
     await capture('general-home', '/');
+    await capture('life-ai', '/ai');
     await capture('general-progress', '/tracking?tab=achievements');
     await capture('general-settings', '/settings');
     for (const id of ['tasks', 'sport', 'tracking', 'okr', 'recipes'])

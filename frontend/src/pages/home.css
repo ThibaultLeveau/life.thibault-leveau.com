@@ -1,0 +1,197 @@
+.dashboard-shell {
+  display: grid;
+  grid-template-columns: 252px minmax(0, 1fr);
+  min-height: 100svh;
+  background: var(--ui-paper);
+}
+.dashboard-main {
+  min-width: 0;
+  outline: none;
+}
+.dashboard-content {
+  max-width: 1232px;
+  margin: 0 auto;
+  padding: clamp(28px, 4vw, 56px) clamp(20px, 4vw, 48px) 64px;
+}
+.dashboard-heading {
+  margin-bottom: 40px;
+}
+.dashboard-date {
+  margin: 0 0 14px;
+  color: var(--ui-muted);
+  font-size: 12px;
+  text-transform: capitalize;
+}
+.ui-scope .dashboard-heading h1 {
+  margin: 0;
+  font-size: clamp(28px, 3.4vw, 42px);
+  line-height: 1.2;
+  font-weight: 550;
+  letter-spacing: -0.055em;
+  overflow-wrap: anywhere;
+}
+.dashboard-heading > p:last-child {
+  color: var(--ui-muted);
+  font-size: 14px;
+  line-height: 1.7;
+  margin: 14px 0 0;
+}
+.dashboard-chat {
+  border: 1px solid var(--ui-border);
+  border-radius: 20px;
+  margin-top: 36px;
+  padding: clamp(20px, 3vw, 32px);
+  background: var(--ui-sidebar);
+}
+.dashboard-chat-heading {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.dashboard-ai-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 48px;
+  height: 48px;
+  border-radius: 14px;
+  color: var(--ui-accent);
+  background: var(--ui-accent-bg);
+}
+.dashboard-chat-eyebrow {
+  color: var(--ui-accent);
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+.ui-scope .dashboard-chat h2 {
+  margin: 0;
+  font-size: clamp(20px, 2.5vw, 24px);
+  font-weight: 550;
+  letter-spacing: -0.04em;
+  line-height: 1.35;
+}
+.dashboard-chat-description {
+  font-size: 13px;
+  color: var(--ui-muted);
+  line-height: 1.7;
+  margin: 18px 0 22px;
+}
+.dashboard-chat form {
+  border: 1px solid var(--ui-border);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--ui-paper);
+}
+.dashboard-chat form:focus-within {
+  outline: 2px solid var(--ui-accent);
+  outline-offset: 3px;
+}
+.ui-scope .dashboard-chat textarea {
+  display: block;
+  width: 100%;
+  min-height: 108px;
+  max-height: 260px;
+  resize: vertical;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 18px;
+  color: var(--ui-text);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.65;
+}
+.ui-scope .dashboard-chat textarea:focus {
+  outline: none;
+}
+.dashboard-chat textarea::placeholder {
+  color: var(--ui-muted);
+}
+.dashboard-compose-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 12px 12px 18px;
+}
+.dashboard-compose-footer > span {
+  color: var(--ui-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.dashboard-compose-footer .primary-button {
+  min-height: 44px;
+  flex-shrink: 0;
+  gap: 10px;
+  border-radius: 10px;
+}
+.dashboard-prompts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+.dashboard-prompts button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--ui-border);
+  background: var(--ui-paper);
+  border-radius: 10px;
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  color: var(--ui-text);
+  cursor: pointer;
+}
+.dashboard-prompts button svg {
+  flex-shrink: 0;
+  color: var(--ui-muted);
+}
+.dashboard-prompts button:hover {
+  background: var(--ui-hover);
+}
+.dashboard-chat-disabled p {
+  color: var(--ui-muted);
+  font-size: 13px;
+  line-height: 1.65;
+  margin: 0 0 20px;
+}
+@media (max-width: 800px),
+  (max-width: 1024px) and (max-height: 500px) and (pointer: coarse) {
+  .dashboard-shell {
+    display: block;
+  }
+}
+@media (max-width: 480px) {
+  .dashboard-heading {
+    margin-bottom: 32px;
+  }
+  .dashboard-content {
+    padding-inline: 20px;
+  }
+  .dashboard-chat {
+    margin-top: 24px;
+    padding: 18px;
+  }
+  .dashboard-chat-heading {
+    gap: 12px;
+  }
+  .dashboard-compose-footer {
+    align-items: flex-end;
+  }
+  .dashboard-compose-footer > span {
+    max-width: 90px;
+  }
+  .dashboard-prompts button {
+    width: 100%;
+  }
+  .dashboard-compose-footer .primary-button {
+    padding-inline: 12px;
+  }
+}

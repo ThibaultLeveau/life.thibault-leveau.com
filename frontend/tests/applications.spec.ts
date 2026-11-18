@@ -23,6 +23,88 @@ async function login(page: Page) {
   return headers;
 }
 
+test("Life AI : activation personnelle, historique conservé et fournisseur partagé", async ({
+  page,
+}) => {
+  const headers = await login(page);
+  await page.request.put("/api/v1/preferences", {
+    headers,
+    data: { locale: "fr" },
+  });
+  await page.goto("/applications");
+  const toggle = page.getByRole("switch", {
+    name: "Activer Life AI",
+    exact: true,
+  });
+  if (!(await toggle.isChecked())) await toggle.click();
+  await expect(toggle).toBeChecked();
+  const response = await page.request.post("/api/v1/assistant/conversations", {
+    headers,
+    data: { title: "Conversation conservée Life AI" },
+  });
+  expect(response.ok()).toBeTruthy();
+  const conversation = await response.json();
+  await page.goto(`/ai?conversation=${conversation.id}`);
+  await expect(
+    page.getByRole("heading", { name: conversation.title, exact: true }),
+  ).toBeAttached();
+  await page
+    .getByRole("link", { name: "Bibliothèque des applications", exact: true })
+    .click();
+  await toggle.click();
+  await expect(toggle).not.toBeChecked();
+  expect(
+    (
+      await page.request.get(
+        `/api/v1/assistant/conversations/${conversation.id}`,
+      )
+    ).status(),
+  ).toBe(403);
+  expect(
+    (await page.request.get("/api/v1/assistant/provider-settings")).ok(),
+  ).toBeTruthy();
+  await page.goto(`/ai?conversation=${conversation.id}`);
+  await expect(
+    page.getByRole("heading", { name: "Life AI est désactivée" }),
+  ).toBeVisible();
+  await page.getByRole("link", { name: "Ouvrir la bibliothèque" }).click();
+  await toggle.focus();
+  await page.keyboard.press("Space");
+  await expect(toggle).toBeChecked();
+  await page.goto(`/?conversation=${conversation.id}`);
+  await expect(page).toHaveURL(
+    new RegExp(`/ai\\?conversation=${conversation.id}$`),
+  );
+  await expect(
+    page.getByRole("heading", { name: conversation.title, exact: true }),
+  ).toBeAttached();
+  expect(
+    (
+      await (
+        await page.request.get(
+          `/api/v1/assistant/conversations/${conversation.id}`,
+        )
+      ).json()
+    ).conversation,
+  ).toEqual(conversation);
+  expect(
+    (
+      await page.request.delete(
+        `/api/v1/assistant/conversations/${conversation.id}`,
+        { headers },
+      )
+    ).status(),
+  ).toBe(204);
+  expect(
+    (
+      await page.request.put("/api/v1/applications/life_ai", {
+        headers,
+        data: { enabled: false },
+      })
+    ).ok(),
+  ).toBeTruthy();
+});
+
 test("bibliothèque, accueil, conservation et réactivation depuis les formulaires", async ({
   page,
 }, testInfo) => {
@@ -34,14 +116,14 @@ test("bibliothèque, accueil, conservation et réactivation depuis les formulair
   await page.getByRole("button", { name: "Se connecter" }).click();
   await expect(
     page.getByRole("heading", {
-      name: "De quoi avez-vous envie aujourd’hui ?",
+      name: /^Bonjour,/,
     }),
   ).toBeVisible();
   await page
     .getByRole("combobox", { name: "Apparence", exact: true })
     .selectOption("light");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-  await page.getByRole("link", { name: "Tâches", exact: true }).click();
+  await page.getByRole("link", { name: "Ouvrir Tâches", exact: true }).click();
   await page
     .getByRole("button", { name: "Nouvel espace", exact: true })
     .click();
@@ -95,12 +177,10 @@ test("bibliothèque, accueil, conservation et réactivation depuis les formulair
   await expect(toggle).not.toBeChecked();
   await page.getByRole("link", { name: "Accueil", exact: true }).click();
   await expect(
-    page.getByText(
-      "Activez vos applications dans la bibliothèque pour les utiliser avec votre assistant.",
-    ),
+    page.getByText("Choisissez vos applications dans la bibliothèque."),
   ).toBeVisible();
   await expect(
-    page.getByRole("link", { name: "Tâches", exact: true }),
+    page.getByRole("link", { name: "Ouvrir Tâches", exact: true }),
   ).toHaveCount(0);
   await page.goto(`/tasks?space=${space.id}`);
   await expect(
@@ -165,15 +245,11 @@ test("thème partagé, navigation et bibliothèque à 320 px", async ({
     await page.getByRole("link", { name: "Accueil", exact: true }).click();
     await expect(
       page.getByRole("heading", {
-        name: "De quoi avez-vous envie aujourd’hui ?",
+        name: /^Bonjour,/,
       }),
     ).toBeVisible();
-    if (width <= 800)
-      await page
-        .getByRole("button", { name: "Ouvrir la navigation", exact: true })
-        .click();
     await expect(
-      page.getByRole("link", { name: "Tâches", exact: true }),
+      page.getByRole("link", { name: "Ouvrir Tâches", exact: true }),
     ).toBeVisible();
     expect(
       await page.evaluate(
@@ -184,6 +260,10 @@ test("thème partagé, navigation et bibliothèque à 320 px", async ({
       path: testInfo.outputPath(`accueil-${width}.png`),
       fullPage: true,
     });
+    if (width <= 800)
+      await page
+        .getByRole("button", { name: "Ouvrir la navigation", exact: true })
+        .click();
     await page
       .getByRole("link", { name: "Bibliothèque des applications", exact: true })
       .click();

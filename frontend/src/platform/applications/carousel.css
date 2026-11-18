@@ -1,0 +1,93 @@
+.application-collection {
+  min-width: 0;
+}
+.application-collection-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  margin-bottom: 20px;
+}
+.ui-scope .application-collection-heading h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+}
+.application-collection-heading p {
+  margin: 8px 0 0;
+  color: var(--ui-muted);
+  font-size: 13px;
+}
+.application-collection-library {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  color: var(--ui-accent);
+  font-size: 12px;
+}
+.application-collection-library:hover {
+  text-decoration: underline;
+}
+.application-carousel {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ui-border) transparent;
+  padding: 4px 4px 14px;
+  margin: -4px;
+  border-radius: 16px;
+}
+.application-carousel > .application-card {
+  flex: 0 0 min(272px, calc(100% - 24px));
+  min-width: 0;
+  padding: 24px;
+  scroll-snap-align: start;
+}
+.application-carousel .application-card-top {
+  margin-bottom: 20px;
+}
+.application-carousel .application-card > p {
+  font-size: 13px;
+  line-height: 1.65;
+  margin: 10px 0 24px;
+  overflow-wrap: anywhere;
+}
+.ui-scope .application-carousel .application-card h2 {
+  font-size: 18px;
+  letter-spacing: -0.025em;
+  overflow-wrap: anywhere;
+}
+.application-carousel .application-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+}
+.application-carousel-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 12px;
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+.application-carousel-controls {
+  display: flex;
+  gap: 8px;
+}
+.application-carousel-controls .icon-button {
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--ui-border);
+  border-radius: 50%;
+}
+.application-carousel-previous svg {
+  transform: rotate(180deg);
+}

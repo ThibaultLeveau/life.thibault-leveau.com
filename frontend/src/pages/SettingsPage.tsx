@@ -25,7 +25,6 @@ import "../platform/progression/styles.css";
 import "../shared/styles/navigation.css";
 import "./settings.css";
 import { AssistantSettingsPanel } from "../platform/assistant/AssistantSettings";
-import { MemoryManager } from "../platform/assistant/MemoryManager";
 
 const sectionFromUrl = () =>
   new URLSearchParams(location.search).get("application") || "general";
@@ -199,10 +198,6 @@ export function SettingsPage({ modules }: { modules: ApplicationModule[] }) {
             <div key="general" className="settings-panels">
               <AccountSettings {...guards.account} permit={permit} />
               <AssistantSettingsPanel {...guards.assistant} />
-              <section className="settings-card" id="assistant-memory">
-                <h3>{tr("assistant_memory")}</h3>
-                <MemoryManager {...guards.memory} />
-              </section>
               <div className="settings-card">
                 <ProgressionSettings scope="general" {...guards.progression} />
               </div>
@@ -234,9 +229,11 @@ export function SettingsPage({ modules }: { modules: ApplicationModule[] }) {
               {app.enabled && !module?.Settings && (
                 <p className="muted">{tr("settings_no_specific")}</p>
               )}
-              <div className="settings-card">
-                <ProgressionSettings scope={app.id} {...guards.progression} />
-              </div>
+              {app.id !== "life_ai" && (
+                <div className="settings-card">
+                  <ProgressionSettings scope={app.id} {...guards.progression} />
+                </div>
+              )}
             </div>
           ) : (
             <a href="/settings">{tr("settings_general")}</a>

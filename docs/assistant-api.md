@@ -1,13 +1,18 @@
-# API Assistant
+# API Life AI
 
 [English reference](en/assistant-api.md) · [Guide utilisateur](assistant.md) · [OpenAPI](https://life.thibault-leveau.com/api/docs)
 
 Toutes les routes utilisent `/api/v1/assistant`. La session commune identifie le propriétaire ; les mutations exigent l’origine autorisée et `X-CSRF-Token`. Les entrées refusent les champs inconnus et ne permettent pas de choisir un propriétaire. Les capacités métier exigent aussi une application active.
 
+Toutes les routes de conversation, mémoire, capacités, sources et dictée exigent désormais **Life AI activée** (`life_ai`), avec 403 et `X-Life-Application-Disabled: life_ai` sinon. Le garde central couvre aussi les sous-routeurs ; les traitements longs recontrôlent l’activation après I/O. Seules les routes communes `/provider-settings` restent indépendantes.
+
 ## Routes et contrats
 
 | Méthode et chemin relatif | Comportement |
 | --- | --- |
+| `GET /provider-settings` | Configuration partagée : `provider`, `model`, `configured`, `token_hint` |
+| `PUT /provider-settings` | Mise à jour partielle de `provider`, `model`, `api_token`, sans mémoire |
+| `POST /provider-settings/test` | Test fournisseur partagé, indépendant de Life AI |
 | `GET /settings` | `provider`, `model`, `configured`, `token_hint`, `memory_enabled` ; aucun token lisible |
 | `PUT /settings` | Mise à jour partielle : `provider` (`openai/anthropic/gemini`), `model`, `api_token`, `memory_enabled` |
 | `POST /settings/test` | Appel réseau au fournisseur configuré ; retourne `{ "ok": true }` en cas de succès |
@@ -60,6 +65,8 @@ with httpx.Client(base_url="http://127.0.0.1:8100/api/v1", timeout=240) as clien
     })
     login.raise_for_status()
     client.headers["X-CSRF-Token"] = login.json()["csrf_token"]
+    activation = client.put("/applications/life_ai", json={"enabled": True})
+    activation.raise_for_status()
     created = client.post("/assistant/conversations", json={"title": "Lecture de recette"})
     created.raise_for_status()
     conversation_id = created.json()["id"]

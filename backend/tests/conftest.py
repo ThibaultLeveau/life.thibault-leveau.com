@@ -117,3 +117,15 @@ def legacy_progression(monkeypatch):
 
     for provider in (tasks, sport, tracking):
         monkeypatch.setattr(provider, "record", lambda *args, **kwargs: False)
+
+
+@pytest.fixture
+def life_ai_enabled(app):
+    """Existing assistant scenarios represent accounts that explicitly enabled Life AI."""
+    from sqlalchemy import select
+
+    from life_app.platform.applications.models import ApplicationPreference
+
+    with app.state.sessions() as db, db.begin():
+        for user in db.scalars(select(User)):
+            db.add(ApplicationPreference(user_id=user.id, application_id="life_ai", enabled=True))

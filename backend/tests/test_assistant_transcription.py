@@ -13,11 +13,11 @@ from fastapi.testclient import TestClient
 from pydantic import SecretStr
 from sqlalchemy import delete, func, select
 
+from life_app.apps.life_ai import models as m
+from life_app.apps.life_ai import transcription as t
+from life_app.apps.life_ai.transcription_models import TranscriptionSettings
 from life_app.core.database import utcnow
-from life_app.platform.assistant import models as m
-from life_app.platform.assistant import transcription as t
 from life_app.platform.assistant.providers import ProviderError
-from life_app.platform.assistant.transcription_models import TranscriptionSettings
 from life_app.platform.auth.models import LoginSession
 
 PREFIX = "/api/v1/assistant"
@@ -35,7 +35,7 @@ def wav():
 
 
 @pytest.fixture
-def client(app, authenticated_client):
+def client(app, authenticated_client, life_ai_enabled):
     app.state.settings.assistant_encryption_keys = SecretStr(Fernet.generate_key().decode())
     response = authenticated_client.put(
         PREFIX + "/settings",
@@ -150,7 +150,8 @@ def test_bad_audio_and_oversize_never_call_provider(app, client, monkeypatch):
     )
 
 
-def test_provider_failure_releases_lease_and_session_is_revalidated(app, client):
+@pytest.mark.parametrize("revoke", ["logout", "life_ai"])
+def test_provider_failure_releases_lease_and_session_is_revalidated(app, client, revoke):
     def failed(*args):
         raise ProviderError("assistant.provider_quota")
 
@@ -163,12 +164,22 @@ def test_provider_failure_releases_lease_and_session_is_revalidated(app, client)
 
     def expired(*args):
         with app.state.sessions() as db, db.begin():
-            db.execute(delete(LoginSession))
+            if revoke == "logout":
+                db.execute(delete(LoginSession))
+            else:
+                from sqlalchemy import text
+
+                db.execute(
+                    text(
+                        "UPDATE application_preferences SET enabled=false "
+                        "WHERE application_id='life_ai'"
+                    )
+                )
         return "This private text must not be returned"
 
     app.state.assistant_transcriber = expired
     response = client.post(PREFIX + "/transcription?filename=voice.wav", content=wav())
-    assert response.status_code == 401
+    assert response.status_code == (401 if revoke == "logout" else 403)
     assert "private text" not in response.text
     with app.state.sessions() as db:
         assert db.scalar(select(TranscriptionSettings)).lease_id is None

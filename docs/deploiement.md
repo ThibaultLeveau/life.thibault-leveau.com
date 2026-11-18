@@ -295,7 +295,7 @@ Publier le `main` validé par `scripts/deploy.sh`, sauvegarde habituelle incluse
 
 ## Livraison documentations séparées
 
-Publier le `main` validé avec la procédure habituelle de sauvegarde, construction, migration et publication. Aucune migration de données, variable ni service supplémentaire. Vérifier les deux accueils, les sept documentations en FR/EN, les liens de langue vers la page équivalente, les menus et recherches propres au guide, les captures locales et les liens d’aide existants des applications. Contrôler mobile/clavier, SHA réellement exécuté et sondes publiques ; consigner commit, sauvegarde et résultats dans l’issue.
+Publier le `main` validé avec la procédure habituelle de sauvegarde, construction, migration et publication. Aucune migration de données, variable ni service supplémentaire. Vérifier les deux accueils, les huit documentations en FR/EN, les liens de langue vers la page équivalente, les menus et recherches propres au guide, les captures locales et les liens d’aide existants des applications. Contrôler mobile/clavier, SHA réellement exécuté et sondes publiques ; consigner commit, sauvegarde et résultats dans l’issue.
 
 ## Livraison des réglages généraux
 
@@ -344,3 +344,9 @@ Le retour arrière exige des images des trois services au même SHA et un schém
 ## Livraison des sections de préparation Recettes
 
 Après contrôles, revue, CI et fusion, publier avec la procédure habituelle : sauvegarde puis migration additive `0019_recipe_sections`. Aucun secret, service ou paramètre supplémentaire. Vérifier le SHA exécuté, la révision Alembic, sondes HTTPS, `/recipes`, OpenAPI et guides FR/EN. Sur un compte synthétique, saisir un texte long sur écran mobile, scinder et titrer deux sections, réordonner, enregistrer/recharger et vérifier l’API ; contrôler aussi le brouillon d’import et une recette ancienne. Les tests automatisés simulent le viewport du clavier : ils ne remplacent pas une vérification physique de chaque clavier iOS/Android. Consigner les preuves et cette limite dans l’issue #105.
+
+## Livraison Dashboard et Life AI
+
+Après revue, contrôles et fusion, publier `main` avec `scripts/deploy.sh`, sauvegarde puis migration additive `0020_life_ai`. Aucun service, dépendance, variable ou secret supplémentaire. Conserver la configuration fournisseur et le trousseau existants. Vérifier la migration des comptes existants et le défaut désactivé d’un compte synthétique créé après migration.
+
+Contrôler SHA des trois images réellement exécutées, révision Alembic, sondes et routes HTTPS `/`, `/ai`, `/applications`, `/settings?application=life_ai`, OpenAPI et guides FR/EN. Sur compte synthétique, vérifier rangée unique à 320 px/clavier, activation Life AI, préremplissage sans fournisseur, ancien lien de conversation, conservation après désactivation/réactivation et fournisseur commun accessible à Recettes. Les tests de fournisseur simulé couvrent l’envoi automatique unique ; distinguer cette preuve d’un appel LLM réel. Consigner le commit publié, la sauvegarde et les résultats dans l’issue #104. Respecter les [limites de retour arrière](sauvegardes.md#migration-0020-activation-life-ai).

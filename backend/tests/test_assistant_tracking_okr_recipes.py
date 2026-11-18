@@ -12,11 +12,11 @@ from pydantic import SecretStr, TypeAdapter, ValidationError
 from sqlalchemy import select
 from test_assistant import admitted
 
+from life_app.apps.life_ai import execution
 from life_app.apps.okr import schemas as okr_schemas
 from life_app.apps.registry import APPLICATIONS
 from life_app.apps.tracking import schemas as tracking_schemas
 from life_app.core.database import utcnow
-from life_app.platform.assistant import execution
 from life_app.platform.assistant.definition import ActionContext
 from life_app.platform.auth.models import User
 
@@ -32,7 +32,7 @@ def capability(domain, name):
 
 
 @pytest.fixture
-def client(authenticated_client):
+def client(authenticated_client, life_ai_enabled):
     for domain in DOMAINS:
         response = authenticated_client.put(
             f"/api/v1/applications/{domain}", json={"enabled": True}

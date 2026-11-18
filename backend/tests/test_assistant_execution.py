@@ -9,20 +9,20 @@ from sqlalchemy import func, select
 from test_assistant import admitted
 from test_assistant import client as client
 
+from life_app.apps.life_ai import execution
+from life_app.apps.life_ai import models as m
 from life_app.apps.registry import APPLICATIONS
-from life_app.platform.assistant import execution
-from life_app.platform.assistant import models as m
 
 
 def test_every_business_capability_checks_activation_before_parsing_or_execution(app, client):
-    for domain in APPLICATIONS:
+    for domain in (item for item in APPLICATIONS if item.actions is not None):
         assert (
             client.put(f"/api/v1/applications/{domain.id}", json={"enabled": False}).status_code
             == 200
         )
     run_id, _ = admitted(app, client)
     count = 0
-    for domain in APPLICATIONS:
+    for domain in (item for item in APPLICATIONS if item.actions is not None):
         assert domain.actions is not None
         for action in domain.actions.actions:
             with pytest.raises(HTTPException) as denied:

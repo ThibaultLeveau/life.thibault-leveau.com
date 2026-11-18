@@ -103,7 +103,7 @@ Déclarer le fournisseur dans le manifeste ; le registre demeure l’unique asse
 
 ## Faire évoluer les documentations
 
-Conserver les sept guides indépendants déclarés dans `mkdocs.yml` : Technique, Général, Tâches, Sport, Suivi, Objectifs OKR et Cook & Shop. Ajouter chaque page au bon guide et fournir son homologue dans `docs/en/`, au même chemin relatif. Le hook `scripts/documentation.py` conserve les URL publiques et isole navigation/recherche ; les liens explicites entre guides restent possibles. Actualiser les captures fictives FR/EN avec `make docs-screenshots`, leurs légendes, les contrats et les parcours navigateur. La compilation demeure MkDocs dans l’image existante ; aucun service ni stockage supplémentaire.
+Conserver les huit guides indépendants déclarés dans `mkdocs.yml` : Technique, Général, Life AI, Tâches, Sport, Suivi, Objectifs OKR et Cook & Shop. Ajouter chaque page au bon guide et fournir son homologue dans `docs/en/`, au même chemin relatif. Le hook `scripts/documentation.py` conserve les URL publiques et isole navigation/recherche ; les liens explicites entre guides restent possibles. Actualiser les captures fictives FR/EN avec `make docs-screenshots`, leurs légendes, les contrats et les parcours navigateur. La compilation demeure MkDocs dans l’image existante ; aucun service ni stockage supplémentaire.
 
 ## Panneau de réglages
 
@@ -115,6 +115,10 @@ Un renderer conserve un résumé métier compact et utilise `platform/assistant/
 
 ## Sources de l’assistant
 
-L’[ADR 009](decisions/009-sources-assistant.md) autorise les sources multimodales et la dictée dans `platform/assistant`. Toute extension respecte formats/budgets, propriétaire, CSRF, admission avant I/O, contrôles après traitement et données externes distinctes de la demande. Ajouter les blocs aux trois adaptateurs et les erreurs FR/EN ; ne pas introduire de téléchargement libre dans un outil métier. Les sources doivent survivre à l’historique et être supprimables via l’API. Couvrir parsing hostile, SSRF, idempotence, injection/confirmation, mémoire, compaction, annulation, quotas, migration/restauration et UI mobile/clavier. Un nouveau service, stockage ou élargissement des accès nécessite un nouvel accord explicite.
+L’[ADR 009](decisions/009-sources-assistant.md) autorise les sources multimodales et la dictée, désormais dans `apps/life_ai` (ADR 011). Toute extension respecte formats/budgets, propriétaire, CSRF, admission avant I/O, contrôles après traitement et données externes distinctes de la demande. Ajouter les blocs aux trois adaptateurs et les erreurs FR/EN ; ne pas introduire de téléchargement libre dans un outil métier. Les sources doivent survivre à l’historique et être supprimables via l’API. Couvrir parsing hostile, SSRF, idempotence, injection/confirmation, mémoire, compaction, annulation, quotas, migration/restauration et UI mobile/clavier. Un nouveau service, stockage ou élargissement des accès nécessite un nouvel accord explicite.
 
 Import web Recettes livré selon l’[ADR 010](decisions/010-import-web-recettes.md) : navigateur isolé, intervention humaine, extraction IA dans la langue du compte, brouillon relu et provenance persistante. Il ne s’agit plus d’une proposition.
+
+## Préserver le Dashboard et Life AI
+
+Suivre l’[ADR 011](decisions/011-dashboard-life-ai.md) : le Dashboard assemble les cartes à partir du catalogue API ; une nouvelle application apparaît sans second catalogue. Reprendre `ApplicationPageProps` pour une Page. Tout démarrage transmis est transitoire, consommable une seule fois, protégé par les gardes de brouillon et l’idempotence serveur. L’application Life AI suit exactement le cycle d’activation commun. Réutiliser les fournisseurs et `structured.py` dans le socle pour une génération propre à un autre métier, sans importer Life AI. Ajouter les tests de routes imbriquées, de migration et de navigation concernés et documenter le comportement FR/EN avec captures.

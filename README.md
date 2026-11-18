@@ -1,6 +1,6 @@
 # LifeOS
 
-LifeOS réunit un assistant IA et des applications personnelles. L’accueil connecté propose une conversation avec documents/images/pages web, dictée relisible, historique et mémoire personnelle contrôlable ; l’assistant consulte et modifie les applications activées avec leurs règles et confirmations. Configurez fournisseur, modèle et token dans les réglages. [Guide de l’assistant](docs/assistant.md) · [API Assistant](docs/assistant-api.md).
+LifeOS réunit un **Dashboard** sur `/`, une rangée défilante d’applications activées et une carte pour démarrer une conversation. **Life AI** est une application autonome sur `/ai` : chat, historique, mémoire, sources et dictée. Le message saisi sur le Dashboard rejoint Life AI et est envoyé une fois lorsque le fournisseur est configuré ; sinon il reste en brouillon. [Guide Life AI](docs/assistant.md) · [API](docs/assistant-api.md) · [ADR 011](docs/decisions/011-dashboard-life-ai.md).
 
 Activez les applications qui vous sont utiles dans la bibliothèque, avec une connexion et un thème communs. La désactivation conserve les données et se révoque à tout moment. [Guide de la bibliothèque](docs/applications.md).
 
@@ -14,7 +14,7 @@ Les raccourcis se composent : « tous les mercredis toutes les trois semaines »
 
 ## Documentations séparées
 
-L’[annuaire FR](https://life.thibault-leveau.com/documentation/) et l’[annuaire EN](https://life.thibault-leveau.com/documentation/en/) donnent accès à sept guides indépendants : **Technique**, **Général**, **Tâches**, **Sport**, **Suivi**, **Objectifs OKR** et **Cook & Shop**. Chaque guide possède sa navigation et sa recherche, avec un lien vers la même page dans l’autre langue. Les guides utilisateur expliquent les fonctionnalités et présentent des captures réelles FR/EN sur des comptes fictifs. Les anciens liens restent valides.
+L’[annuaire FR](https://life.thibault-leveau.com/documentation/) et l’[annuaire EN](https://life.thibault-leveau.com/documentation/en/) donnent accès à huit guides indépendants : **Technique**, **Général**, **Life AI**, **Tâches**, **Sport**, **Suivi**, **Objectifs OKR** et **Cook & Shop**. Chaque guide possède sa navigation et sa recherche, avec un lien vers la même page dans l’autre langue. Les guides utilisateur expliquent les fonctionnalités et présentent des captures réelles FR/EN sur des comptes fictifs. Les anciens liens restent valides.
 
 Les sources françaises restent dans `docs/`, leurs traductions dans `docs/en/`. `mkdocs.yml` déclare les guides ; `scripts/documentation.py` limite navigation et recherche à chacun, dans la même compilation et image existantes. `make docs-screenshots` régénère les captures sur une base jetable ; voir [Tests](docs/tests.md#documentation-et-captures). Toute nouvelle page doit être classée et traduite.
 
@@ -26,7 +26,7 @@ FastAPI / Python 3.13 sert React / TypeScript, l'API et MkDocs depuis une image 
 | --- | --- |
 | `backend/src/life_app/core/` | Configuration, connexions et journaux |
 | `backend/src/life_app/apps/<id>/` | Manifeste, routes, modèles, contrats et services de chaque application |
-| `backend/src/life_app/platform/` | Connexion, bibliothèque, progression et assistant IA |
+| `backend/src/life_app/platform/` | Connexion, bibliothèque, progression et moteur IA partagé |
 | `backend/src/life_app/api/` | API versionnée et sondes |
 | `backend/src/life_app/migrations/` | Migrations versionnées incluses dans l'image |
 | `frontend/src/apps/<id>/` | Manifeste, page, types, API, composants et styles de chaque application |

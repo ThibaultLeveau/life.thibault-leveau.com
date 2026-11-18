@@ -16,6 +16,14 @@ Sign-in, library, language, appearance and progress.
 
 <div markdown>
 
+[Life AI](assistant.md)
+
+Conversations, memory, sources and dictation.
+
+</div>
+
+<div markdown>
+
 [Tasks](taches.md)
 
 Workspaces, lists, boards, agenda and recurring tasks.

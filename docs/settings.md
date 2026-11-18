@@ -17,7 +17,7 @@ Le **calendrier de progression** possède son propre fuseau IANA et les période
 
 ## Assistant IA
 
-La section Général comprend aussi l’encart **Assistant IA** : fournisseur OpenAI/Anthropic/Gemini, identifiant de modèle, token API et activation de la mémoire. Enregistrer précède **Tester la connexion**. Un champ token vide conserve la valeur ; sa suppression est explicite. Changer de fournisseur efface l’ancien token et le modèle. La mémoire se consulte et se corrige depuis le chat ou les réglages généraux. Voir le [guide Assistant](assistant.md) et son [API](assistant-api.md).
+La section Général comprend l’encart **Fournisseur IA** partagé avec Recettes : fournisseur OpenAI/Anthropic/Gemini, modèle et token API. Il reste accessible si Life AI est désactivée. Enregistrer précède **Tester la connexion**. Un champ token vide conserve la valeur ; sa suppression est explicite. Changer de fournisseur efface l’ancien token et le modèle. **Life AI** possède sa section : même fournisseur partagé, réglages de dictée et mémoire (activation, consultation, correction et oubli). Voir le [guide Life AI](assistant.md) et son [API](assistant-api.md).
 
 ## Une section par application
 
@@ -46,7 +46,8 @@ La page compose les API du socle et des applications, sans stockage métier dans
 | Préférences | Lecture / écriture |
 | --- | --- |
 | Thème et langue | `GET /api/v1/preferences`, `PUT /api/v1/preferences` (champs partiels) |
-| Assistant IA | `GET /api/v1/assistant/settings`, `PUT /api/v1/assistant/settings`, `POST /api/v1/assistant/settings/test` |
+| Fournisseur IA commun | `GET/PUT /api/v1/assistant/provider-settings`, `POST /api/v1/assistant/provider-settings/test` |
+| Life AI (active) | `GET/PUT /api/v1/assistant/settings`, `/assistant/memories`, `/assistant/transcription/settings` ; voir les méthodes dans l’API Life AI |
 | Progression | `GET /api/v1/progression/settings`, `PUT /api/v1/progression/settings` (`expected_version`) |
 | Agenda | `GET /api/v1/agenda/view`, `PUT /api/v1/agenda/view` |
 | Vue d’espace | `GET /api/v1/workspaces/{id}/view`, `PUT /api/v1/workspaces/{id}/view` |
@@ -59,3 +60,5 @@ Les mutations nécessitent session, origine autorisée et jeton CSRF. Les routes
 ![Réglages Sport : repos entre séries et jours d’utilisation.](assets/screenshots/fr/sport-settings.png){ loading=lazy }
 
 *Réglages Sport : repos entre séries et jours d’utilisation.*
+
+Life AI n’a pas de calendrier ou de quêtes propres. Sa section désactivée affiche uniquement son état et l’accès à la bibliothèque ; aucune donnée de conversation, mémoire ou dictée n’est chargée.

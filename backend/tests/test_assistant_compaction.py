@@ -8,10 +8,10 @@ import pytest
 from test_assistant import ScriptedSession, admitted
 from test_assistant import client as client
 
+from life_app.apps.life_ai import models as m
+from life_app.apps.life_ai.runtime import Runtime
 from life_app.core.database import utcnow
-from life_app.platform.assistant import models as m
 from life_app.platform.assistant.providers import ProviderError, Response
-from life_app.platform.assistant.runtime import Runtime
 
 
 def history(app, client, contents):
