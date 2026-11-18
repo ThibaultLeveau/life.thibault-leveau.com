@@ -232,6 +232,7 @@ def test_recipe_tools_match_http_scale_and_preserve_checks(client, invoke):
     )
     recipe_payload = {
         "title": "Rice for two",
+        "sections": [{"title": "Cook", "text": "Boil gently."}],
         "servings": 2,
         "items": [{"ingredient_id": ingredient["id"], "quantity": "100.25", "unit": "g"}],
     }
@@ -239,10 +240,17 @@ def test_recipe_tools_match_http_scale_and_preserve_checks(client, invoke):
     recipe = invoke(
         "recipes",
         "update_recipe",
-        {"id": recipe["id"], "payload": {**recipe_payload, "expected_version": recipe["version"]}},
+        {
+            "id": recipe["id"],
+            "payload": {
+                **{key: value for key, value in recipe_payload.items() if key != "sections"},
+                "expected_version": recipe["version"],
+            },
+        },
     )
     scaled = invoke("recipes", "get_recipe", {"id": recipe["id"], "servings": 3})
     assert scaled == get(client, f"/recipes/recipes/{recipe['id']}?servings=3")
+    assert scaled["sections"] == recipe_payload["sections"]
     assert Decimal(scaled["items"][0]["quantity"]) == Decimal("150.375")
     assert invoke("recipes", "list_recipes") == get(client, "/recipes/recipes")
     shopping = invoke("recipes", "create_list", {"payload": {"title": "Saturday"}})
@@ -365,6 +373,7 @@ def test_recipe_tools_match_http_scale_and_preserve_checks(client, invoke):
                 "title": "Imported rice",
                 "servings": 2,
                 "instructions": "Boil rice.",
+                "sections": [{"title": "Serve", "text": "Serve warm."}],
                 "items": [
                     {
                         "name": ingredient["name"],

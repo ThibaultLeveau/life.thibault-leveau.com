@@ -243,3 +243,9 @@ Lifecycle: reservation → ready unbound source → message attachment → remov
 `recipes_web_import_receipts` has composite key `(owner_id, import_id)`, composite foreign key `(recipe_id, owner_id)`, a SHA-256 fingerprint of the confirmed payload and `created_at`. The owner lock serializes saving; private ingredients, recipe, event and receipt commit together. The same identifier and content finds the existing recipe, including after editing or archiving; changed content with that identifier is rejected. Disabling never purges receipts, and backups include them with recipes.
 
 Drafts, original ingredient lines, page text, frames and cookies are not stored in PostgreSQL. Review allows useful notes to be retained in the instructions. Browser sessions stay in memory and ephemeral `/tmp`; closure, expiry and restart destroy them. See [API](recipes-api.md#web-import-and-ai-draft), [limits](configuration.md#private-recipes-import-browser) and [restoration](sauvegardes.md#recipe-web-imports).
+
+## Recipe sections
+
+Additive migration `0019_recipe_sections` adds `recipes_recipes.sections`, an ordered, non-null JSONB array, empty by default and limited to 50 elements by a SQL constraint. The domain validates closed `{title, text}` objects: title 1–160 characters, non-empty text, and a combined 20,000-character limit including general preparation. Updates replace the array within the existing transaction/version and store a snapshot in `recipes_events`. Omitting the field on update preserves sections. Sections have no separate business identifier; array position defines order. React keys are transient only.
+
+The migration leaves existing preparation, dates and historical events untouched. Archives, deactivation and serving calculations do not change these personal texts. PostgreSQL backups include sections, snapshots and import receipts. No business data is stored in the browser.

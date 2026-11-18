@@ -11,7 +11,7 @@ Toutes les routes exigent session et activation `recipes`. Le propriétaire vien
 | GET | `/ingredients?q=&offset=0&limit=30` | Recherche bilingue normalisée ; pagination 1–100, total |
 | POST | `/ingredients` | `{name, unit}` ; crée un ingrédient privé ou réutilise un nom exact connu, réponse 201 |
 | GET | `/recipes?archived=false&q=&offset=0&limit=24` | Recettes paginées, limite 100 |
-| POST | `/recipes` | `{title, servings, instructions, items}` ; réponse 201 |
+| POST | `/recipes` | `{title, servings, instructions, sections?, items}` ; réponse 201 |
 | GET | `/recipes/{id}?servings=4` | Recette, quantités recalculées et `base_servings` ; aucune écriture |
 | PUT | `/recipes/{id}` | Même entrée que POST + `expected_version` ; remplace la référence |
 | PUT | `/recipes/{id}/archive` | `{archived, expected_version}` |
@@ -128,3 +128,21 @@ Conserver `import_id` lors d’une nouvelle tentative du même enregistrement : 
 Erreurs : 401 session invalide, 403 CSRF/origine/application désactivée, 404 navigateur inaccessible, 409 langue/page/rejeu incompatible ou fournisseur non configuré, 422 contrat invalide ou aucune recette exploitable, 429 capacité/quota, 502 page ou fournisseur indisponible, 503 navigateur non configuré. La génération autorise une opération par compte, deux globalement et cinq tentatives par minute par compte ; ces quotas temporaires se réinitialisent au redémarrage. Les appels réseau libèrent les verrous SQL ; les droits et la langue sont revérifiés avant de retourner un résultat.
 
 Les fourchettes numériques renvoyées par l’IA sont normalisées à `null` pour les quantités et portions du brouillon, avec avertissement et lignes originales. Le contrat `/save` reste strict : seules des valeurs numériques complètes sont acceptées.
+
+## Sections de préparation
+
+`POST /recipes`, `PUT /recipes/{id}` et `POST /web-import/save` acceptent `sections`, une liste ordonnée de `{title, text}`. Les sorties recette (fiche, liste, portions, archives), les nouveaux instantanés d’événements et les capacités assistant exposent le même contenu. Le brouillon `/web-import/prepare` fournit `sections: []` ; la relecture permet de structurer son texte extrait avant sauvegarde.
+
+Contraintes : 0–50 sections, titre non vide de 160 caractères maximum, texte non vide ; 20 000 caractères maximum au total pour `instructions` et tous les `text` (hors titres). Les espaces de bord sont retirés selon les contrats existants ; les sauts de ligne intérieurs sont conservés. Champs inconnus, `null`, types et bornes invalides donnent 422. Les titres identiques sont autorisés, l’ordre du tableau est l’ordre d’affichage. Le numéro de version protège toute modification, déplacement ou suppression.
+
+À la création, omission de `sections` signifie `[]`. À la mise à jour, **omission conserve les sections actuelles** pour les clients existants ; envoyer le tableau complet pour remplacer/réordonner, ou `[]` pour toutes les retirer. La limite totale s’applique aussi aux sections conservées. `instructions` conserve sa signification et les anciennes recettes restent inchangées. L’archivage et la désactivation conservent les sections ; les anciens événements sans ce champ ne sont pas réécrits.
+
+Exemple de création (cookie et CSRF comme ci-dessus) :
+
+```bash
+curl -b cookies.txt -H "X-CSRF-Token: $CSRF" -H 'Content-Type: application/json' \
+  -d '{"title":"Riz et sauce","servings":2,"instructions":"Préparer les ingrédients.","sections":[{"title":"Cuisson","text":"Faire cuire le riz."},{"title":"Sauce","text":"Mélanger et servir."}],"items":[{"ingredient_id":"<UUID ingrédient>","quantity":"150","unit":"g"}]}' \
+  https://life.thibault-leveau.com/api/v1/recipes/recipes
+```
+
+Pour `web-import/save`, les sections participent au contrôle de rejeu ; changer leur contenu avec le même `import_id` donne 409. Les reçus antérieurs sans sections restent rejouables avec le champ omis ou vide. Sauvegarde/migration : [sections de préparation](sauvegardes.md#migration-0019-sections-de-preparation).

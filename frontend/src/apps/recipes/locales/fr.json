@@ -210,5 +210,18 @@
   "assistant_field_purchase": "Panier",
   "assistant_item_bought": "Acheté",
   "assistant_item_to_buy": "À acheter",
-  "assistant_item_in_cart": "{{quantity}} dans le panier"
+  "assistant_item_in_cart": "{{quantity}} dans le panier",
+  "section_split": "Scinder au curseur",
+  "sections_hint": "Placez le curseur au début d’un passage à déplacer, puis scindez-le en section. Chaque section possède son titre et son texte.",
+  "section_number": "Section {{count}}",
+  "section_title": "Titre de la section {{count}}",
+  "section_text": "Texte de la section {{count}}",
+  "section_up": "Monter la section {{count}}",
+  "section_down": "Descendre la section {{count}}",
+  "section_remove": "Retirer la section {{count}}",
+  "section_remove_confirm": "Retirer cette section et son texte du brouillon ?",
+  "section_add": "Ajouter une section",
+  "preparation_count": "{{count}} / 20 000 caractères de préparation",
+  "assistant_field_sections": "Sections de préparation",
+  "assistant_field_text": "Texte"
 }

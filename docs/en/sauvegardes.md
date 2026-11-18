@@ -221,3 +221,9 @@ Older catalogue writes remain compatible during this additive migration. No exis
 Migration 0018 adds `source_url`, `source_title`, `imported_at` to recipes and `recipes_web_import_receipts` (owner/import composite key, recipe/owner composite foreign key, content fingerprint and timestamp). PostgreSQL backups retain attribution, receipts and creation events; disabling/re-enabling Recipes preserves them. Replaying a restored import finds the existing recipe. Downgrade refuses to discard receipts.
 
 Browser pages, frames, cookies and profiles are transient and excluded from backups; stop `recipe-browser` before restoring, then restart it to invalidate in-memory leases too. Protect `.env.production` and its service token separately. Browsers have no persistent volume, SQL access or AI credentials.
+
+## Migration 0019 — Preparation sections
+
+Back up before `0019_recipe_sections`. Adding `recipes_recipes.sections` with default `[]` leaves existing preparation and events untouched. Older writes may continue during this additive migration; new sections require the new image. Do not resume editing with an older image that cannot display sections. Downgrade refuses any recipe containing sections to prevent text loss. No automatic downgrade or deletion occurs.
+
+The normal dump includes ordered sections, history and import receipts. Restoration checks compare all Recipes tables and assert that non-empty sections survive. On a disposable database, verify texts, titles, order, further editing, archives and deactivation/reactivation after restore. Old events keep their original shape; events created after migration include the complete array.

@@ -40,7 +40,9 @@ export function useMobileFormViewport() {
         return;
       const bounds = field.getBoundingClientRect();
       const dialog = field.closest("dialog");
-      const header = dialog?.querySelector(".dialog-header");
+      const header =
+        dialog?.querySelector(".dialog-header") ??
+        field.closest(".ui-scope")?.querySelector(".application-topbar");
       const actions = dialog?.querySelector(".dialog-actions");
       const visibleTop = Math.max(
         top + 16,
@@ -62,9 +64,28 @@ export function useMobileFormViewport() {
             Math.max(0, (visibleBottom - visibleTop - bounds.height) / 2);
           dialog.scrollTop += bounds.top - targetTop;
         } else {
-          field.scrollIntoView({
-            block: "center",
-            inline: "nearest",
+          // Preserve nested scroll containers used by other applications.
+          // Then compensate for the keyboard in document coordinates.
+          let parent = field.parentElement;
+          while (parent && parent !== document.scrollingElement) {
+            if (
+              /auto|scroll/.test(getComputedStyle(parent).overflowY) &&
+              parent.scrollHeight > parent.clientHeight
+            ) {
+              field.scrollIntoView({
+                block: "center",
+                inline: "nearest",
+                behavior: "instant",
+              });
+              break;
+            }
+            parent = parent.parentElement;
+          }
+          const targetTop =
+            visibleTop +
+            Math.max(0, (visibleBottom - visibleTop - bounds.height) / 2);
+          window.scrollBy({
+            top: field.getBoundingClientRect().top - targetTop,
             behavior: "instant",
           });
         }
@@ -81,8 +102,11 @@ export function useMobileFormViewport() {
     const onViewportChange = () => schedule(followingFocus);
     // Native scrolling may finish after focus/resize. Recheck the active field
     // then too, but stop following it as soon as the user scrolls deliberately.
-    const onDialogScroll = (event: Event) => {
-      if (event.target === document.activeElement?.closest("dialog"))
+    const onContainerScroll = (event: Event) => {
+      if (
+        event.target === document ||
+        event.target === document.activeElement?.closest("dialog")
+      )
         schedule(followingFocus);
     };
     const onManualScroll = () => {
@@ -98,7 +122,7 @@ export function useMobileFormViewport() {
     document.addEventListener("pointerdown", onPointerDown);
     document.addEventListener("touchmove", onManualScroll, { passive: true });
     document.addEventListener("wheel", onManualScroll, { passive: true });
-    document.addEventListener("scroll", onDialogScroll, true);
+    document.addEventListener("scroll", onContainerScroll, true);
     window.addEventListener("resize", onViewportChange);
     viewport?.addEventListener("resize", onViewportChange);
     viewport?.addEventListener("scroll", onViewportChange);
@@ -111,7 +135,7 @@ export function useMobileFormViewport() {
       document.removeEventListener("pointerdown", onPointerDown);
       document.removeEventListener("touchmove", onManualScroll);
       document.removeEventListener("wheel", onManualScroll);
-      document.removeEventListener("scroll", onDialogScroll, true);
+      document.removeEventListener("scroll", onContainerScroll, true);
       window.removeEventListener("resize", onViewportChange);
       viewport?.removeEventListener("resize", onViewportChange);
       viewport?.removeEventListener("scroll", onViewportChange);

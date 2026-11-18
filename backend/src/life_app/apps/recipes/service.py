@@ -175,6 +175,7 @@ def output(db, item, servings=None):
         return s.RecipeOutput(
             **common,
             instructions=item.instructions,
+            sections=item.sections,
             servings=servings or item.servings,
             base_servings=item.servings,
             source_url=item.source_url,
@@ -238,6 +239,7 @@ def create_recipe(db, user, payload, *, source=None):
         title=payload.title,
         servings=payload.servings,
         instructions=payload.instructions,
+        sections=[section.model_dump() for section in payload.sections],
     )
     db.add(item)
     db.flush()
@@ -264,7 +266,15 @@ def replace_recipe_items(db, user, item, groups):
 
 def update_recipe(db, user, item, payload):
     check(item, payload.expected_version)
+    sections = (
+        [section.model_dump() for section in payload.sections]
+        if "sections" in payload.model_fields_set
+        else item.sections
+    )
+    if len(payload.instructions) + sum(len(section["text"]) for section in sections) > 20000:
+        raise HTTPException(422, tr("preparation_too_long"))
     groups = grouped(db, user, payload.items)
+    item.sections = sections
     item.title, item.servings, item.instructions = (
         payload.title,
         payload.servings,

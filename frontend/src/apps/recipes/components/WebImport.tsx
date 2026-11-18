@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useApiResource } from "../../../platform/useApiResource";
+import { PreparationEditor } from "./PreparationEditor";
 import { ErrorMessage } from "../../../shared/ui/Dialog";
 import { Icon } from "../../../shared/ui/Icon";
 import { recipesApi, webImportApi } from "../api";
@@ -371,6 +372,7 @@ export function WebImport({
             <label htmlFor="recipe-web-text">{tr("web_paste_label")}</label>
             <textarea
               id="recipe-web-text"
+              className="recipes-preparation-input"
               rows={10}
               maxLength={60000}
               disabled={Boolean(busy)}
@@ -554,17 +556,11 @@ export function WebImport({
               <Icon name="plus" />
               {tr("web_add_ingredient")}
             </button>
-            <label className="recipes-web-instructions">
-              {tr("instructions")}
-              <textarea
-                rows={10}
-                maxLength={20000}
-                value={draft.instructions}
-                onChange={(event) =>
-                  setDraft({ ...draft, instructions: event.target.value })
-                }
-              />
-            </label>
+            <PreparationEditor
+              instructions={draft.instructions}
+              sections={draft.sections ?? []}
+              onChange={(value) => setDraft({ ...draft, ...value })}
+            />
             {draft.source_url && (
               <div className="recipes-web-source">
                 <span>{tr("web_source")}</span>

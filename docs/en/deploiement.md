@@ -336,3 +336,7 @@ Run `make docker-build` then `bash scripts/test-recipe-browser.sh` on a host sup
 After release, verify `org.opencontainers.image.revision` labels on all three containers, health checks, public HTTPS routes and the Recipes workflow. Private probes are `recipe-browser:8090/health` and `recipe-egress:3128/health`. Restarting discards open pages, never saved recipes. Diagnose failures through proxy health and quotas without logging pages, cookies, screenshots or secrets. Update Chromium and Playwright together and repeat these tests.
 
 Rollback requires all three service images at the same SHA and schema compatibility. To return to a version before ADR 010, use that version’s checkout and instructions, stop the two added services and explicitly check schema compatibility; never discard provenance or receipts. Data rollback is never automatic.
+
+## Deploying Recipes preparation sections
+
+After checks, review, CI and merge, use the normal procedure: backup followed by additive migration `0019_recipe_sections`. No new secret, service or setting. Verify the running SHA, Alembic revision, HTTPS probes, `/recipes`, OpenAPI and FR/EN guides. On a synthetic account, type long text on a mobile layout, split and title two sections, reorder, save/reload and verify the API; also check import review and an older recipe. Automated tests simulate the keyboard viewport; they do not replace physical testing of every iOS/Android keyboard. Record evidence and this limit in issue #105.

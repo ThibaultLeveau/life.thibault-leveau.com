@@ -228,3 +228,9 @@ Les anciennes écritures catalogue restent compatibles pendant la migration addi
 La migration 0018 ajoute `source_url`, `source_title`, `imported_at` aux recettes et `recipes_web_import_receipts` (clé composée propriétaire/import, lien composé recette/propriétaire, empreinte du contenu, date). Les sauvegardes PostgreSQL conservent provenance, reçus et événements de création ; désactiver/réactiver Recettes ne les modifie pas. Rejouer un import restauré retrouve la recette existante. Une rétrogradation avec des reçus refuse de perdre ces données.
 
 Les pages, captures, cookies et profils du navigateur sont temporaires et exclus des sauvegardes ; arrêter `recipe-browser` avant une restauration puis le relancer pour invalider aussi les baux en mémoire. Protéger séparément `.env.production` et son token de service. Le navigateur n’a aucun volume persistant, accès SQL ou token IA.
+
+## Migration 0019 — Sections de préparation
+
+Sauvegarder avant `0019_recipe_sections`. L’ajout de `recipes_recipes.sections` avec défaut `[]` ne réécrit ni préparation ni événements. Les écritures anciennes peuvent continuer pendant cette migration additive ; les nouvelles sections nécessitent la nouvelle image. Ne pas reprendre une ancienne image pour éditer des sections qu’elle ne sait pas afficher. Le downgrade refuse toute recette contenant des sections, afin de ne pas perdre de texte. Aucune rétrogradation ni suppression automatique.
+
+Le dump habituel comprend sections ordonnées, historique et reçus d’import. La recette de restauration compare les tables Recettes source/restaurées et vérifie la présence de sections non vides. Sur une base jetable, vérifier textes, titres, ordre, nouvelles modifications, archives et désactivation/réactivation après restauration. Les événements anciens restent sans sections ; ceux créés après migration conservent le tableau complet.

@@ -44,6 +44,10 @@ class Recipe(Base):
         UniqueConstraint("id", "owner_id"),
         CheckConstraint("version > 0 AND servings BETWEEN 1 AND 1000"),
         CheckConstraint("length(trim(title)) > 0"),
+        CheckConstraint(
+            "jsonb_typeof(sections) = 'array' AND jsonb_array_length(sections) <= 50",
+            name="ck_recipes_sections",
+        ),
         Index("ix_recipes_owner", "owner_id", "archived_at", "updated_at"),
     )
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
@@ -51,6 +55,7 @@ class Recipe(Base):
     title: Mapped[str] = mapped_column(String(160))
     servings: Mapped[int]
     instructions: Mapped[str] = mapped_column(String(20000), default="")
+    sections: Mapped[list[dict]] = mapped_column(JSONB, default=list, server_default="[]")
     source_url: Mapped[str | None] = mapped_column(String(2048))
     source_title: Mapped[str | None] = mapped_column(String(300))
     imported_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
