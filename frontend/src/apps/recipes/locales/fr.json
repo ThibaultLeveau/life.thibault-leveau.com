@@ -137,5 +137,18 @@
   "unit_short_ml": "ml",
   "unit_short_tsp": "c. à café",
   "unit_short_tbsp": "c. à soupe",
-  "unit_short_u": "u"
+  "unit_short_u": "u",
+  "assistant_field_servings": "Portions",
+  "assistant_field_base_servings": "Portions de la recette",
+  "assistant_field_instructions": "Préparation",
+  "assistant_field_items": "Ingrédients",
+  "assistant_field_quantity": "Quantité",
+  "assistant_field_purchased_quantity": "Quantité achetée",
+  "assistant_field_checked": "Acheté",
+  "assistant_field_category": "Rayon",
+  "assistant_field_occurred_at": "Date",
+  "assistant_field_recipe_version": "Version de la recette",
+  "assistant_field_snapshot": "État enregistré",
+  "assistant_value_kind_list": "Liste de courses",
+  "assistant_value_kind_template": "Modèle"
 }

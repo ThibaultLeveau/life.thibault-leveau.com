@@ -7,13 +7,13 @@ export function record(value: unknown): Record<string, unknown> {
 }
 export function text(value: unknown): string {
   return typeof value === "string"
-    ? value.slice(0, 1500)
+    ? value
     : typeof value === "number" && Number.isFinite(value)
       ? String(value)
       : "";
 }
 export function records(value: unknown): Record<string, unknown>[] {
-  return Array.isArray(value) ? value.slice(0, 8).map(record) : [];
+  return Array.isArray(value) ? value.map(record) : [];
 }
 export function hasEntity(value: unknown) {
   return Array.isArray(value)
@@ -44,4 +44,40 @@ export function date(value: unknown) {
         day: "numeric",
         month: "short",
       });
+}
+
+/** Numeric API values only: personal strings (titles, notes, IDs) stay untouched. */
+export function number(value: unknown, maximumFractionDigits = 6): string {
+  if (
+    typeof value !== "number" &&
+    !(typeof value === "string" && /^-?\d+(?:\.\d+)?$/.test(value))
+  )
+    return "";
+  const parsed = Number(value);
+  return Number.isFinite(parsed)
+    ? new Intl.NumberFormat(
+        formatLocale(),
+        parsed !== 0 && Math.abs(parsed) < 10 ** -maximumFractionDigits
+          ? { maximumSignificantDigits: 3 }
+          : { maximumFractionDigits },
+      ).format(Object.is(parsed, -0) ? 0 : parsed)
+    : "";
+}
+export function snippetValue(snippet: Snippet): unknown {
+  const data = record(snippet.data);
+  if (hasEntity(data.entity) || snippet.phase !== "preview") return data.entity;
+  const args = record(data.arguments);
+  return args.payload ?? args.body ?? args;
+}
+
+/** Adapt a flat translation catalogue to field labels without business imports. */
+export function prefixedLabels(
+  catalogue: Record<string, string>,
+  prefix: string,
+): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(catalogue)
+      .filter(([key]) => key.startsWith(prefix))
+      .map(([key, value]) => [key.slice(prefix.length), value]),
+  );
 }

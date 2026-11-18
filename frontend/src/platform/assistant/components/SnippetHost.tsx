@@ -9,7 +9,11 @@ import {
 import { formatLocale, tr } from "../../../shared/i18n";
 import { ErrorMessage } from "../../../shared/ui/Dialog";
 import { Icon, type IconName } from "../../../shared/ui/Icon";
-import { SnippetLine, SnippetSummary } from "../../../shared/ui/SnippetSummary";
+import {
+  SnippetLine,
+  SnippetSummary,
+  SnippetText,
+} from "../../../shared/ui/SnippetSummary";
 import { useApplications } from "../../applications/ApplicationProvider";
 import type { ApplicationModule } from "../../applications/definition";
 import { useApiAction } from "../../useApiResource";
@@ -71,12 +75,11 @@ export function SnippetHost({
   }, [snippet.id, action.busy, onBusy]);
   const module = modules.find((item) => item.id === snippet.application_id);
   const data = record(snippet.data);
+  const readOnly = snippet.phase === "result" && data.read_only === true;
   const targets = Array.isArray(data.targets)
-    ? data.targets.slice(0, 8).map(text).filter(Boolean)
+    ? data.targets.map(text).filter(Boolean)
     : [];
-  const changes = Array.isArray(data.changes)
-    ? data.changes.slice(0, 8).map(record)
-    : [];
+  const changes = Array.isArray(data.changes) ? data.changes.map(record) : [];
   if (!app) return <p className="muted">{tr("assistant_snippet_unknown")}</p>;
   async function synchronize() {
     try {
@@ -102,16 +105,12 @@ export function SnippetHost({
         <span className="assistant-snippet-phase">
           <Icon
             name={
-              data.read_only
-                ? "book"
-                : snippet.phase === "result"
-                  ? "check"
-                  : "edit"
+              readOnly ? "book" : snippet.phase === "result" ? "check" : "edit"
             }
             size={13}
           />
           {tr(
-            data.read_only
+            readOnly
               ? "assistant_snippet_read"
               : snippet.phase === "result"
                 ? "assistant_snippet_result"
@@ -124,27 +123,29 @@ export function SnippetHost({
           text(data.title) ||
           app.name}
       </h3>
-      {text(data.summary) && <p className="muted">{text(data.summary)}</p>}
-      {(data.effect === "archive" || data.effect === "restore") && (
-        <p className="muted small-text">
-          {tr(
-            data.effect === "archive"
-              ? "assistant_effect_archive"
-              : "assistant_effect_restore",
-          )}
-        </p>
-      )}
-      {!!targets.length && hasEntity(data.entity) && (
-        <p className="muted small-text">
-          {tr("assistant_targets", { names: targets.join(" · ") })}
-        </p>
-      )}
       {!app.enabled ? (
         <p className="muted">{tr("assistant_snippet_disabled")}</p>
       ) : snippet.schema_version !== 1 ? (
         <p className="muted">{tr("assistant_snippet_unknown")}</p>
       ) : (
         <>
+          {text(data.summary) && <p className="muted">{text(data.summary)}</p>}
+          {(data.effect === "archive" || data.effect === "restore") && (
+            <p className="muted small-text">
+              {tr(
+                data.effect === "archive"
+                  ? "assistant_effect_archive"
+                  : "assistant_effect_restore",
+              )}
+            </p>
+          )}
+          {!!targets.length && hasEntity(data.entity) && (
+            <p className="muted small-text">
+              <SnippetText>
+                {tr("assistant_targets", { names: targets.join(" · ") })}
+              </SnippetText>
+            </p>
+          )}
           {!!targets.length && !hasEntity(data.entity) && (
             <SnippetSummary icon={app.icon as IconName}>
               {targets.map((target, index) => (

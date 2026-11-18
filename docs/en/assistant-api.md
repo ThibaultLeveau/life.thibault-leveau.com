@@ -31,6 +31,8 @@ Omitting `api_token` preserves it; `null` deletes it; a string must contain 10â€
 
 Memory sources, dates and identifiers are assigned by the server. Messages contain `role`, `content`, `status`, `snippets`, `run_id` and creation time. Reply states are `running`, `complete`, `interrupted`, `failed`. Deleting a conversation cascades to its messages, runs, events and operations; the forgetting option separately controls memories.
 
+Version 1 snippets retain each operationâ€™s complete result in `data.entity`, the boolean `data.read_only` flag and, for previews, validated arguments. Reads, including discovery and LifeOS capabilities, remain in messages; their collapsed grouping is a frontend presentation. Confirmation replaces the same snippet ID in place. There is no SQL migration or confirmation contract change; business API pagination limits still apply. Decimal API quantities retain their precision; only their display is formatted.
+
 ## Streaming and idempotency
 
 The POST returns `text/event-stream`. Each event is a JSON object in a `data:` line followed by a blank line, with `type`, `run_id` and `sequence`. Types are `status` (progress text), `delta` (partial text), `message` (message and snippets to reconcile), `error` (code), and `done` (completion). Reconcile messages and cards by identifier instead of appending duplicates.

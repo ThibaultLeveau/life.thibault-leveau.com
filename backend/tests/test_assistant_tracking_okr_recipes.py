@@ -531,3 +531,44 @@ def test_removal_preview_names_the_removed_item_and_preserves_target_after_confi
     assert confirmed.json()["snippet"]["data"]["targets"] == targets
     details = get(client, f"/assistant/conversations/{conversation_id}")
     assert details["messages"][-1]["snippets"][0]["data"]["targets"] == targets
+
+
+def test_long_recipe_receipts_preserve_every_instruction_item_and_decimal(app, client):
+    app.state.settings.assistant_encryption_keys = SecretStr(Fernet.generate_key().decode())
+    configured = client.put(
+        "/api/v1/assistant/settings",
+        json={"provider": "openai", "model": "synthetic-model", "api_token": "synthetic-token"},
+    )
+    assert configured.status_code == 200
+    run_id, conversation_id = admitted(app, client)
+    ingredients = get(client, "/recipes/ingredients?limit=14")["items"]
+    instructions = "Une étape détaillée à conserver.\n" * 100 + "Dernière étape complète."
+    payload = {
+        "title": "Recette longue",
+        "servings": 2,
+        "instructions": instructions,
+        "items": [
+            {"ingredient_id": item["id"], "quantity": "1.250001", "unit": item["unit"]}
+            for item in ingredients
+        ],
+    }
+    preview = execution.execute(
+        app, run_id, 1, "recipes", "create_recipe", {"payload": payload}, propose=True
+    )
+    assert get(client, "/recipes/recipes")["total"] == 0
+    assert preview["snippet"]["data"]["entity"]["instructions"] == instructions
+    assert len(preview["snippet"]["data"]["entity"]["items"]) == 14
+    response = client.post(f"/api/v1/assistant/operations/{preview['operation_id']}/confirm")
+    assert response.status_code == 200, response.text
+    saved = response.json()["result"]
+    read = execution.execute(app, run_id, 2, "recipes", "get_recipe", {"id": saved["id"]})
+    assert read["snippet"]["data"]["entity"] == get(client, f"/recipes/recipes/{saved['id']}")
+    for card in get(client, f"/assistant/conversations/{conversation_id}")["messages"][-1][
+        "snippets"
+    ]:
+        assert card["data"]["entity"]["instructions"] == instructions
+        assert len(card["data"]["entity"]["items"]) == 14
+        assert all(
+            Decimal(item["quantity"]) == Decimal("1.250001")
+            for item in card["data"]["entity"]["items"]
+        )

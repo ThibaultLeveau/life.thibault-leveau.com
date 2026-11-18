@@ -318,3 +318,35 @@ def test_move_previews_name_current_object_and_destination_without_moving(app, c
     assert workspace["snippet"]["data"]["targets"] == ["Source", "Destination : Destination nommée"]
     assert client.get(f"/api/v1/tasks/{task['id']}").json() == task
     assert client.get(f"/api/v1/workspaces/{origin['id']}").json() == origin
+
+
+def test_all_reads_and_common_changes_survive_replay_and_confirmation(app, client):
+    run_id, conversation_id = admitted(app, client)
+    first = execution.execute(app, run_id, 1, "tasks", "list_workspaces", {})
+    second = execution.execute(app, run_id, 2, "lifeos", "applications", {})
+    preview = execution.execute(
+        app,
+        run_id,
+        3,
+        "tasks",
+        "create_workspace",
+        {"payload": {"name": "Aperçu complet"}},
+        propose=True,
+    )
+    last = execution.execute(
+        app, run_id, 4, "lifeos", "save_preferences", {"payload": {"theme": "dark"}}
+    )
+    endpoint = f"/api/v1/assistant/conversations/{conversation_id}"
+    before = client.get(endpoint).json()["messages"][-1]["snippets"]
+    expected = [receipt["operation_id"] for receipt in (first, second, preview, last)]
+    assert [card["id"] for card in before] == expected
+    assert [card["data"]["read_only"] for card in before] == [True, True, False, False]
+    confirmed = client.post(f"/api/v1/assistant/operations/{preview['operation_id']}/confirm")
+    assert confirmed.status_code == 200
+    after = client.get(endpoint).json()["messages"][-1]["snippets"]
+    assert [card["id"] for card in after] == expected
+    assert after[2]["phase"] == "result"
+    assert after[3]["data"]["entity"]["theme"] == "dark"
+    # Replaying the same operation does not duplicate any card or write.
+    execution.execute(app, run_id, 1, "tasks", "list_workspaces", {})
+    assert client.get(endpoint).json()["messages"][-1]["snippets"] == after

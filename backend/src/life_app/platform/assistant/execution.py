@@ -118,25 +118,15 @@ def snippet(operation, action, targets=None):
 
 def attach(db, run, card):
     message = db.get(m.Message, run.message_id)
-    if (
-        card.application_id == "lifeos"
-        and card.phase == "result"
-        and not any(item["id"] == str(card.id) for item in message.snippets)
-    ):
-        return
-    cards = [item for item in message.snippets if item["id"] != str(card.id)]
-    # Keep proposals and final changes; intermediate discovery reads need no growing wall.
-    if card.phase == "result":
-        cards = [
-            item
-            for item in cards
-            if not (
-                item["application_id"] == card.application_id
-                and item["phase"] == "result"
-                and item.get("data", {}).get("read_only")
-            )
+    serialized = card.model_dump(mode="json")
+    # Keep every bounded-run receipt, including common mutations and discovery reads.
+    # The UI groups reads separately; a confirmation replaces its proposal in place.
+    if any(item["id"] == str(card.id) for item in message.snippets):
+        message.snippets = [
+            serialized if item["id"] == str(card.id) else item for item in message.snippets
         ]
-    message.snippets = cards + [card.model_dump(mode="json")]
+    else:
+        message.snippets = [*message.snippets, serialized]
 
 
 def execute(app, run_id, step, scope, name, arguments, *, propose=False):

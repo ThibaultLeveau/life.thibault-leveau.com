@@ -137,5 +137,18 @@
   "unit_short_ml": "ml",
   "unit_short_tsp": "tsp",
   "unit_short_tbsp": "tbsp",
-  "unit_short_u": "u"
+  "unit_short_u": "u",
+  "assistant_field_servings": "Servings",
+  "assistant_field_base_servings": "Recipe servings",
+  "assistant_field_instructions": "Instructions",
+  "assistant_field_items": "Ingredients",
+  "assistant_field_quantity": "Quantity",
+  "assistant_field_purchased_quantity": "Purchased quantity",
+  "assistant_field_checked": "Purchased",
+  "assistant_field_category": "Category",
+  "assistant_field_occurred_at": "Date",
+  "assistant_field_recipe_version": "Recipe version",
+  "assistant_field_snapshot": "Saved state",
+  "assistant_value_kind_list": "Shopping list",
+  "assistant_value_kind_template": "Template"
 }

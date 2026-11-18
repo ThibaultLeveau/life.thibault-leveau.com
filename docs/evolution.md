@@ -109,6 +109,10 @@ Conserver les sept guides indépendants déclarés dans `mkdocs.yml` : Technique
 
 L’[ADR 007](decisions/007-reglages-generaux.md) permet un `Settings.tsx` optionnel dans chaque application, chargé à la demande par son manifeste. Implémenter `SettingsPanelProps` (`onDirty`, `onBusy`), nettoyer ces états au démontage et utiliser les API métier existantes. Ne pas importer la Page complète ni déplacer le métier dans le socle. Le shell fournit noms, activation et calendrier commun. Le lien Réglages ouvre `/settings?application=<id>` ; les réglages contextuels peuvent rester au niveau de leur objet avec un accès explicite depuis le panneau. Tester brouillons, erreurs, conflit, session, activation et navigation FR/EN/mobile.
 
+## Détails des snippets
+
+Un renderer conserve un résumé métier compact et utilise `platform/assistant/components/SnippetDetails` pour les données complètes du reçu (`snippetValue`). Ses libellés et adaptations de valeurs restent dans `apps/<id>/assistant/` ; le socle ne connaît aucun métier. Ne pas tronquer les données dans les helpers de lecture. Les textes longs utilisent `shared/ui/SnippetSummary` et son dépliage accessible. Tester listes longues, dernière ligne, texte au-delà de 1 500 caractères, zéro, booléens, petites décimales, pagination et modes FR/EN/mobile.
+
 ## Sources de l’assistant
 
 L’[ADR 009](decisions/009-sources-assistant.md) autorise les sources multimodales et la dictée dans `platform/assistant`. Toute extension respecte formats/budgets, propriétaire, CSRF, admission avant I/O, contrôles après traitement et données externes distinctes de la demande. Ajouter les blocs aux trois adaptateurs et les erreurs FR/EN ; ne pas introduire de téléchargement libre dans un outil métier. Les sources doivent survivre à l’historique et être supprimables via l’API. Couvrir parsing hostile, SSRF, idempotence, injection/confirmation, mémoire, compaction, annulation, quotas, migration/restauration et UI mobile/clavier. Un nouveau service, stockage ou élargissement des accès nécessite un nouvel accord explicite.
