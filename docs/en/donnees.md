@@ -226,7 +226,7 @@ PostgreSQL tests cover existing data, preservation, lossless downgrade without n
 
 ## Assistant sources and dictation
 
-`assistant_sources` stores owner, identifier, real name/type, SHA-256 digest, size, `BYTEA` content and extracted text, optional final URL, page count, creation/removal dates and conversation/message references. Binary/text load on demand. An unbound reservation immediately counts 10 MiB; only finalized sources can bind. Owner locks serialize admission and quotas. File and extracted content count toward the configurable 200 MiB quota; 2 active imports, 32 drafts and 2,000 sources also bound counts.
+`assistant_sources` stores owner, identifier, real name/type, SHA-256 digest, size, `BYTEA` content and extracted text, optional final URL, page count, creation/removal dates and conversation/message references. Binary/text load on demand. An unbound reservation immediately counts 10 MiB; only finalized sources can bind. Owner locks serialize admission and quotas. File and extracted content count toward the configurable 200 MiB quota; 2 active imports, 32 drafts and 2,000 non-removed sources also bound counts.
 
 Lifecycle: reservation → ready unbound source → message attachment → removed content. Errors delete reservations; abandoned reservations expire after five minutes and unsent sources after 24 hours, cleaned opportunistically during source operations. Bound sources do not expire. Removal retains metadata/checksum but erases binary/text; conversation/account deletion cascades. SQL constrains positive size/pages, known kind, paired message/conversation references and absent content after removal. The API revalidates owner, conversation, state and quotas; sources cannot transfer to a different message.
 

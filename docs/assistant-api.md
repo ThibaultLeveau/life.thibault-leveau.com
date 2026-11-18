@@ -87,9 +87,9 @@ Utiliser HTTPS en production. Les routes métier d’origine restent l’API de 
 | --- | --- |
 | `GET /sources/limits` | Formats, limites de fichiers/images/pages/texte, budget par message, quota configuré et durée des brouillons |
 | `POST /sources/files?filename=rapport.pdf` | Corps binaire brut, nom encodé dans la query ; métadonnées de source (201). Pas de multipart ni base64 |
-| `POST /sources/web` | JSON `{ "url": "https://example.org/article" }` ; instantané texte et métadonnées (201) |
+| `POST /sources/web` | JSON `{ "url": "https://example.org/article" }` ; instantané texte ou PDF natif selon le contenu, et métadonnées (201) |
 | `GET /sources/{id}` | Métadonnées accessibles au propriétaire uniquement |
-| `GET /sources/{id}/content` | Téléchargement authentifié en pièce jointe, `no-store` et `nosniff` ; jamais de HTML actif rendu dans LifeOS |
+| `GET /sources/{id}/content` | Téléchargement authentifié en pièce jointe, `no-store` et `nosniff` ; jamais de HTML actif rendu dans LifeOS. Une source retirée renvoie 410 |
 | `DELETE /sources/{id}` | Efface le contenu, conserve la trace si attachée ; 204. Refus 409 pendant une exécution de la conversation |
 | `GET /transcription/settings` | `provider`, `model`, `configured`, `token_hint`, `use_chat_provider` effectifs ; `custom_provider`, `custom_model`, `custom_configured`, `custom_token_hint` conservent le profil indépendant lorsque le chat est réutilisé ; jamais le token |
 | `PUT /transcription/settings` | Entrée partielle : `provider` OpenAI/Gemini, `model`, `api_token` ou null, `use_chat_provider` |
@@ -99,7 +99,7 @@ Utiliser HTTPS en production. Les routes métier d’origine restent l’API de 
 
 Les messages incluent `sources`, liste de métadonnées : `id`, `kind` (`file/web`), `name`, `media_type`, `size_bytes`, `sha256`, `url`, `page_count`, `created_at`, `removed_at`. Pas de binaire ou texte extrait dans la réponse d’historique. Les octets sont disponibles seulement via la route de contenu. Une source retirée ne redevient pas lisible lors d’une relecture d’événements.
 
-Erreurs avant traitement : 401/403 session/CSRF, 404 propriétaire ou référence, 409 source occupée/attachée/expirée ou quota de stockage/nombre, 413 volume, 422 format/contenu/adresse interdite, 429 imports simultanés/fréquence, 502 fournisseur/lecture distante, 503 chiffrement. La réponse HTTP contient un détail localisé ; les événements SSE du chat gardent leurs codes. Aucun détail brut de fournisseur, adresse réseau interne ou secret n’est exposé.
+Erreurs avant traitement : 401/403 session/CSRF, 404 propriétaire ou référence, 408 téléversement dépassant 30 secondes, 409 source occupée/attachée/expirée ou quota de stockage/nombre, 410 contenu retiré, 413 volume, 422 format/contenu/adresse interdite, 429 imports simultanés/fréquence, 502 fournisseur/lecture distante, 503 chiffrement. La réponse HTTP contient un détail localisé ; les événements SSE du chat gardent leurs codes. Aucun détail brut de fournisseur, adresse réseau interne ou secret n’est exposé.
 
 À insérer dans le bloc `with` du client authentifié de l’exemple précédent :
 

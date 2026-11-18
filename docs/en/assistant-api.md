@@ -87,9 +87,9 @@ Use HTTPS in production. Original business routes remain the reference API for o
 | --- | --- |
 | `GET /sources/limits` | Supported formats, file/image/page/text limits, message budget, configured storage quota and draft lifetime |
 | `POST /sources/files?filename=report.pdf` | Raw binary body, URL-encoded filename query; source metadata (201). No multipart/base64 |
-| `POST /sources/web` | JSON `{ "url": "https://example.org/article" }`; text snapshot and metadata (201) |
+| `POST /sources/web` | JSON `{ "url": "https://example.org/article" }`; text snapshot or native PDF depending on the content, and metadata (201) |
 | `GET /sources/{id}` | Owner-only metadata |
-| `GET /sources/{id}/content` | Authenticated attachment download with `no-store` and `nosniff`; never render active HTML on the LifeOS origin |
+| `GET /sources/{id}/content` | Authenticated attachment download with `no-store` and `nosniff`; never render active HTML on the LifeOS origin. Removed sources return 410 |
 | `DELETE /sources/{id}` | Erases content, retaining attached receipts; 204. Returns 409 during a conversation run |
 | `GET /transcription/settings` | Effective `provider`, `model`, `configured`, `token_hint`, `use_chat_provider`; `custom_provider`, `custom_model`, `custom_configured`, `custom_token_hint` preserve the independent profile while chat settings are reused; never the token |
 | `PUT /transcription/settings` | Partial input: OpenAI/Gemini `provider`, `model`, `api_token` or null, `use_chat_provider` |
@@ -99,7 +99,7 @@ Use HTTPS in production. Original business routes remain the reference API for o
 
 Messages include `sources` metadata: `id`, `kind` (`file/web`), `name`, `media_type`, `size_bytes`, `sha256`, `url`, `page_count`, `created_at`, `removed_at`. History never includes binaries or extracted text. Bytes are only available through the content route. Replaying events never makes a removed source readable again.
 
-Pre-processing errors: 401/403 session/CSRF, 404 ownership/reference, 409 busy/bound/expired source or storage/count quota, 413 size, 422 format/content/forbidden URL, 429 simultaneous imports/rate, 502 provider/remote reading, 503 encryption. HTTP errors contain localized details; chat SSE errors retain their codes. Raw provider details, internal addresses and secrets are not exposed.
+Pre-processing errors: 401/403 session/CSRF, 404 ownership/reference, 408 upload exceeding 30 seconds, 409 busy/bound/expired source or storage/count quota, 410 removed content, 413 size, 422 format/content/forbidden URL, 429 simultaneous imports/rate, 502 provider/remote reading, 503 encryption. HTTP errors contain localized details; chat SSE errors retain their codes. Raw provider details, internal addresses and secrets are not exposed.
 
 Insert inside the authenticated client’s `with` block in the previous example:
 
