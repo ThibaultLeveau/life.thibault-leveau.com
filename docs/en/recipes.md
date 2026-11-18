@@ -30,6 +30,8 @@ Choose **Shopping lists → New list** and give your list a name.
 
 In **Add an item**, type anything you need — detergent, AA batteries, flowers — and press **Enter** or **Add**. No catalogue selection or creation is required. The default is **1 piece**; adjust quantity and unit if needed. Suggestions are optional: select one to use a catalogue ingredient. Free items appear under **Other items**, keep their original name in either language and never create recipe ingredients.
 
+After a successful addition, the name field clears and regains focus as soon as it becomes available, ready for the next item. A failed addition keeps the draft.
+
 Free items with the same name (ignoring case, accents and repeated whitespace) and unit add up, retaining the first spelling. Different names, synonyms and plurals remain separate. Free items do not merge with catalogue ingredients of the same name. You can still add a free item if catalogue search is unavailable. Purchases, quantity edits, removal, completion, archives and templates work for both kinds of item.
 
 To add recipe ingredients, use **Import a recipe**, choose the recipe and serving count. You can also start from a recipe using **Add to a list**. Search and pagination reach older recipes and lists.

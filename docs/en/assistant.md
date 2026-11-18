@@ -28,6 +28,8 @@ Intermediate reads are grouped under **Consultations**, collapsed beneath the an
 
 Each card offers **View all details**: complete instructions, ingredients, exercises and set values, key results, tracking fields or preferences. The summary stays short; **Read full text** also expands long text directly in the card, without an inner scrollbar. Both controls can be collapsed again. Lists are no longer silently cut to three, five or eight items. Technical references remain available through the API.
 
+In a shopping card, the list title stays separate from its items. The summary shows up to five items with their quantity on the same line when space allows; only item rows have a purchase indicator. **View all details** keeps every item in a compact layout: name and quantity, purchase status, quantity in the basket and category. Templates use the same condensed layout, without purchase indicators in the summary. Dates and other receipt information remain available. These cards are snapshots; to check off items, open the application using the card link.
+
 Details cover the actual consulted result. When a search returns a page, the number received and the total are shown; the application link lets you continue browsing. Empty results have an explicit message. Disabled applications and unsupported card versions do not reveal their details.
 
 Numbers, dates and units follow the account language: for example **350 g** and **1.25 g** in English, **1,25 g** in French. Redundant trailing zeroes disappear while useful small quantities (up to Recipes’ six decimal places) remain visible. Formatting does not change saved values. Model instructions distinguish concise answers from complete proposed record content; review a proposal before confirming it.

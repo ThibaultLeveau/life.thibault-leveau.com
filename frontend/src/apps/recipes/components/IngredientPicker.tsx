@@ -31,6 +31,7 @@ export function IngredientPicker({
     [unit, setUnit] = useState<Unit>(onAddFree ? "u" : "g");
   const [touched, setTouched] = useState(false),
     [adding, setAdding] = useState(false),
+    [focusAfterAdd, setFocusAfterAdd] = useState(false),
     [error, setError] = useState("");
   const input = useRef<HTMLInputElement>(null),
     quantity = useRef<HTMLInputElement>(null),
@@ -55,6 +56,13 @@ export function IngredientPicker({
   );
   const action = useApiAction();
   const busy = action.busy || adding;
+  useEffect(() => {
+    // A frame can run before React reenables the fieldset. Focus only after
+    // that DOM update, including when the parent keeps the picker disabled.
+    if (!focusAfterAdd || busy || disabled) return;
+    input.current?.focus();
+    setFocusAfterAdd(false);
+  }, [focusAfterAdd, busy, disabled]);
   useDraft(touched, busy, draft);
   const choose = (item: Ingredient) => {
     setSelected(item);
@@ -100,9 +108,7 @@ export function IngredientPicker({
         setAmount("1");
         setUnit(onAddFree ? "u" : "g");
         setTouched(false);
-        requestAnimationFrame(() => {
-          if (alive.current) input.current?.focus();
-        });
+        setFocusAfterAdd(true);
       }
     } catch (e) {
       if (alive.current) setError((e as Error).message);

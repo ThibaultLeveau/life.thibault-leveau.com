@@ -6,27 +6,32 @@ import { detailLabels, detailValue } from "./detailLabels";
 import type { AssistantSnippetProps } from "../../../platform/assistant/types";
 import { entities, records, text } from "../../../platform/assistant/snippets";
 import { SnippetLine, SnippetSummary } from "../../../shared/ui/SnippetSummary";
+import { ShoppingItems } from "./ShoppingItems";
+import { isShoppingList, shoppingDetails } from "./shopping";
+import "./styles.css";
 export function Snippet({ snippet }: AssistantSnippetProps) {
+  const items = entities(snippet);
+  const shopping = items.some(isShoppingList);
   return (
-    <>
+    <div className={shopping ? "recipes-shopping-snippet" : undefined}>
       <SnippetSummary icon="cart">
-        {entities(snippet)
-          .slice(0, 3)
-          .map((item, i) => (
-            <div key={text(item.id) || i}>
-              <SnippetLine
-                title={text(item.title ?? item.name)}
-                detail={[
-                  typeof item.servings === "number"
-                    ? tr("for_people", { count: item.servings })
-                    : "",
-                  text(item.instructions),
-                ]
-                  .filter(Boolean)
-                  .join(" · ")}
-                done={item.kind === "list" ? !!item.completed_at : undefined}
-              />
-              {records(item.items)
+        {items.slice(0, 3).map((item, i) => (
+          <div key={text(item.id) || i}>
+            <SnippetLine
+              title={text(item.title ?? item.name)}
+              detail={[
+                typeof item.servings === "number"
+                  ? tr("for_people", { count: item.servings })
+                  : "",
+                text(item.instructions),
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            />
+            {isShoppingList(item) ? (
+              <ShoppingItems items={item.items} list={item.kind === "list"} />
+            ) : (
+              records(item.items)
                 .slice(0, 5)
                 .map((ingredient, j) => (
                   <SnippetLine
@@ -38,19 +43,18 @@ export function Snippet({ snippet }: AssistantSnippetProps) {
                     ]
                       .filter(Boolean)
                       .join(" ")}
-                    done={
-                      item.kind === "list"
-                        ? ingredient.checked === true
-                        : undefined
-                    }
                   />
-                ))}
-            </div>
-          ))}
+                ))
+            )}
+          </div>
+        ))}
       </SnippetSummary>
       <SnippetDetails
-        value={snippetValue(snippet)}
-        labels={detailLabels()}
+        value={shoppingDetails(snippetValue(snippet))}
+        labels={{
+          ...detailLabels(),
+          ...(shopping ? { items: tr("assistant_field_shopping_items") } : {}),
+        }}
         formatValue={(key, value, path) =>
           key === "unit" &&
           ["g", "mg", "l", "ml", "tsp", "tbsp", "u"].includes(String(value))
@@ -58,6 +62,6 @@ export function Snippet({ snippet }: AssistantSnippetProps) {
             : detailValue(key, value, path)
         }
       />
-    </>
+    </div>
   );
 }
