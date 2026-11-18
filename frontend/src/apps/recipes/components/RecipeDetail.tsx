@@ -118,8 +118,15 @@ export function RecipeDetail({
         <section className="recipes-panel">
           <h2>{tr("instructions")}</h2>
           <div className="recipes-instructions">
-            {recipe.instructions || tr("no_instructions")}
+            {recipe.instructions ||
+              (!recipe.sections.length && tr("no_instructions"))}
           </div>
+          {recipe.sections.map((section, index) => (
+            <section key={index} className="recipes-preparation-read">
+              <h3>{section.title}</h3>
+              <div className="recipes-instructions">{section.text}</div>
+            </section>
+          ))}
         </section>
       </div>
       {recipe.source_url && (

@@ -8,7 +8,14 @@ from uuid import UUID
 
 from pydantic import Field, field_validator, model_validator
 
-from life_app.apps.recipes.schemas import Contract, Quantity, Servings, Unit
+from life_app.apps.recipes.schemas import (
+    Contract,
+    Preparation,
+    PreparationSection,
+    Quantity,
+    Servings,
+    Unit,
+)
 
 
 def public_url(value):
@@ -172,6 +179,7 @@ class ImportDraft(Contract):
     title: str
     servings: int | None
     instructions: str
+    sections: list[PreparationSection] = Field(default_factory=list)
     items: list[DraftIngredient]
     warnings: list[str]
     source_url: str | None
@@ -185,12 +193,11 @@ class ImportIngredient(Contract):
     unit: Unit
 
 
-class ImportSave(Contract):
+class ImportSave(Preparation):
     import_id: UUID
     locale: Literal["fr", "en"]
     title: str = Field(min_length=1, max_length=160)
     servings: Servings
-    instructions: str = Field(max_length=20000)
     items: list[ImportIngredient] = Field(min_length=1, max_length=200)
     source_url: str | None = Field(default=None, max_length=2048)
     source_title: str = Field(default="", max_length=300)

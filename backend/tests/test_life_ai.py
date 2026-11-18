@@ -76,7 +76,7 @@ def test_life_ai_migration_preserves_data_and_explicit_activation(
     with engine.begin() as conn:
         config = migration_config()
         config.attributes["connection"] = conn
-        command.downgrade(config, "0018_recipe_web_import")
+        command.downgrade(config, "0019_recipe_sections")
         # A preference explicitly set by a prior compatible deployment wins over migration.
         conn.execute(
             text(
@@ -102,7 +102,7 @@ def test_life_ai_migration_preserves_data_and_explicit_activation(
     assert authenticated_client.get("/api/v1/assistant/conversations").json()["total"] == 1
     with pytest.raises(RuntimeError, match="Life AI disabled"), engine.begin() as conn:
         config.attributes["connection"] = conn
-        command.downgrade(config, "0018_recipe_web_import")
+        command.downgrade(config, "0019_recipe_sections")
     assert snapshot(engine, ASSISTANT_TABLES) == before
 
 

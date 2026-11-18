@@ -245,6 +245,12 @@ Transitions : réservation → source prête non liée → attachée à un messa
 
 Brouillons, lignes originales, texte de page, captures et cookies ne sont pas conservés dans PostgreSQL. La revue permet de reporter les notes utiles dans la préparation. Les sessions du navigateur restent en mémoire et dans son `/tmp` éphémère ; fermeture, expiration et redémarrage les détruisent. Voir [contrat API](recipes-api.md#import-web-et-brouillon-ia), [limites](configuration.md#navigateur-prive-dimport-recettes) et [restauration](sauvegardes.md#imports-web-de-recettes).
 
-## Migration 0019 : Life AI
+## Sections des recettes
 
-Les neuf tables `assistant_*` gardent leurs noms, clés, contraintes, dates et données. Leur ORM métier rejoint `apps/life_ai` ; `assistant_settings` reste partagé pour le fournisseur, avec ses colonnes de mémoire historiques gérées exclusivement par Life AI. `0019_life_ai` insère une préférence activée pour chaque compte présent, sans modifier les préférences explicites. Les nouveaux comptes héritent du défaut désactivé. Désactiver conserve conversations, messages, reçus, sources, souvenirs et paramètres ; aucun archivage ou effacement implicite. Le Dashboard ne crée aucune donnée persistante supplémentaire.
+La migration additive `0019_recipe_sections` ajoute `recipes_recipes.sections`, un tableau JSONB ordonné non nul, vide par défaut et limité à 50 éléments par contrainte SQL. Le domaine valide les objets fermés `{title, text}` : titre 1–160 caractères, texte non vide, 20 000 caractères au total avec la préparation générale. Chaque mise à jour remplace le tableau dans la transaction/version existante et conserve un instantané dans `recipes_events`. L’omission du champ dans une mise à jour préserve les sections. Les sections n’ont pas d’identifiant métier indépendant ; leur position dans le tableau fait foi. Les clés React sont seulement transitoires.
+
+Aucune modification des préparations, dates ou événements historiques à la migration. Archives, désactivation et recalcul des portions ne changent pas ces textes personnels. Les sauvegardes PostgreSQL incluent tableau, instantanés et reçus d’import. Aucune donnée métier n’est stockée dans le navigateur.
+
+## Migration 0020 : Life AI
+
+Les neuf tables `assistant_*` gardent leurs noms, clés, contraintes, dates et données. Leur ORM métier rejoint `apps/life_ai` ; `assistant_settings` reste partagé pour le fournisseur, avec ses colonnes de mémoire historiques gérées exclusivement par Life AI. `0020_life_ai` insère une préférence activée pour chaque compte présent, sans modifier les préférences explicites. Les nouveaux comptes héritent du défaut désactivé. Désactiver conserve conversations, messages, reçus, sources, souvenirs et paramètres ; aucun archivage ou effacement implicite. Le Dashboard ne crée aucune donnée persistante supplémentaire.

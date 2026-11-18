@@ -88,10 +88,32 @@ class ShoppingItemOutput(ItemOutput):
     ingredient_id: UUID | None
 
 
-class RecipeInput(Contract):
+class PreparationSection(Contract):
+    title: str = Field(min_length=1, max_length=160)
+    text: str = Field(min_length=1, max_length=20000)
+
+
+class Preparation(Contract):
+    instructions: str = Field("", max_length=20000)
+    sections: list[PreparationSection] = Field(
+        default_factory=list,
+        max_length=50,
+        description=(
+            "Ordered titled preparation sections. Omit on update to preserve existing "
+            "sections; [] clears them."
+        ),
+    )
+
+    @model_validator(mode="after")
+    def preparation_size(self):
+        if len(self.instructions) + sum(len(s.text) for s in self.sections) > 20000:
+            raise ValueError(tr("preparation_too_long"))
+        return self
+
+
+class RecipeInput(Preparation):
     title: str = Field(min_length=1, max_length=160)
     servings: Servings = 2
-    instructions: str = Field("", max_length=20000)
     items: list[ItemInput] = Field(min_length=1, max_length=200)
 
 
@@ -108,6 +130,7 @@ class RecipeOutput(Contract):
     servings: int
     base_servings: int
     instructions: str
+    sections: list[PreparationSection]
     version: int
     items: list[ItemOutput]
     created_at: datetime

@@ -316,7 +316,7 @@ def test_recurrence_migration_preserves_data_and_refuses_loss(client, engine):
     with pytest.raises(RuntimeError, match="Récurrences présentes"), engine.begin() as connection:
         config = migration_config()
         config.attributes["connection"] = connection
-        # Isolate the older recurrence loss guard from activations added by 0019.
+        # Isolate the older recurrence loss guard from activations added by 0020.
         # The transaction rolls back this test-only deletion with the refusal.
         connection.execute(
             text("DELETE FROM application_preferences WHERE application_id='life_ai'")

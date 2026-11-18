@@ -14,7 +14,7 @@ Home `/` becomes Dashboard: enabled applications in a single-row carousel and a 
 
 The shell supplies Pages with registry modules and an optional single-use launch. Draft text stays transient in React memory during navigation, never in URLs, `history.state`, localStorage or sessionStorage. Life AI fills the draft and sends when settings are ready. Consuming the launch and using a request identifier prevent resubmission on back/reload. Missing configuration or rejection preserves the draft; uncertain network results require checking history before another attempt. Draft and request guards also apply to browser back.
 
-Additive migration `0019_life_ai` enables existing accounts without overwriting explicit preferences. New accounts use the manifest's disabled default. No table move/rename or rewrite of published migrations. Downgrade refuses explicitly disabled Life AI preferences because older images ignore activation.
+Additive migration `0020_life_ai` enables existing accounts without overwriting explicit preferences. New accounts use the manifest's disabled default. No table move/rename or rewrite of published migrations. Downgrade refuses explicitly disabled Life AI preferences because older images ignore activation.
 
 Life AI awards no artificial points or quests for messages. Progression and action contracts stay optional; conversation, source, memory and provider controls do not become recursive model tools. Applications operated by the assistant retain their own progression rules.
 

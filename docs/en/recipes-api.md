@@ -128,3 +128,21 @@ Retain `import_id` when retrying the same save: same content → same recipe, ch
 Errors: 401 invalid session, 403 CSRF/origin/disabled application, 404 inaccessible browser, 409 language/page/replay conflict or unconfigured provider, 422 invalid input or no usable recipe, 429 capacity/rate limit, 502 website/provider unavailable, 503 browser unconfigured. Generation permits one operation per account, two globally and five attempts per minute per account; these transient quotas reset on restart. Network calls release SQL locks; access and language are checked again before returning data.
 
 Numeric ranges returned by the AI become `null` draft quantities or servings, with a warning and original lines retained. The `/save` contract remains strict: complete numeric values are required.
+
+## Preparation sections
+
+`POST /recipes`, `PUT /recipes/{id}` and `POST /web-import/save` accept `sections`, an ordered array of `{title, text}`. Recipe responses (detail, list, servings, archives), new event snapshots and assistant capabilities expose the same content. The `/web-import/prepare` draft provides `sections: []`; review lets you structure the extracted text before saving.
+
+Limits: 0–50 sections, a non-empty title up to 160 characters, and non-empty text; 20,000 characters total across `instructions` and all `text` fields, excluding titles. Leading/trailing whitespace is trimmed as in existing contracts; internal newlines remain intact. Unknown fields, `null`, invalid types or limits produce 422. Duplicate titles are allowed; array order determines display order. Version checks protect edits, reordering and removal.
+
+On creation, omitted `sections` means `[]`. On update, **omission preserves existing sections** for older clients. Send the complete array to replace/reorder, or `[]` to clear them. The total limit also includes preserved sections. `instructions` retains its meaning and old recipes remain intact. Archiving and deactivation retain sections; historical events without the field remain unchanged.
+
+Creation example (cookie and CSRF as above):
+
+```bash
+curl -b cookies.txt -H "X-CSRF-Token: $CSRF" -H 'Content-Type: application/json' \
+  -d '{"title":"Rice and sauce","servings":2,"instructions":"Prepare the ingredients.","sections":[{"title":"Cooking","text":"Cook the rice."},{"title":"Sauce","text":"Mix and serve."}],"items":[{"ingredient_id":"<ingredient UUID>","quantity":"150","unit":"g"}]}' \
+  https://life.thibault-leveau.com/api/v1/recipes/recipes
+```
+
+For `web-import/save`, sections participate in replay validation; changing them with the same `import_id` returns 409. Older receipts without sections remain replayable with the field omitted or empty. [Migration and backup](sauvegardes.md#migration-0019-preparation-sections).

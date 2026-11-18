@@ -870,3 +870,138 @@ def test_free_item_database_constraints_and_migration_history_guard(client, engi
                 conn.scalar(text("SELECT version_num FROM alembic_version"))
                 == ScriptDirectory.from_config(migration_config()).get_current_head()
             )
+
+
+def test_preparation_sections_lifecycle_and_legacy_update(client, app):
+    i = ingredient(client)
+    sections = [
+        {"title": "Sauce", "text": "Mélanger.\nRéserver."},
+        {"title": "Cuisson", "text": "Cuire."},
+    ]
+    r = recipe(client, i, sections=sections)
+    path = f"recipes/{r['id']}"
+    payload = {
+        "title": r["title"],
+        "servings": 2,
+        "instructions": r["instructions"],
+        "items": [{"ingredient_id": i["id"], "quantity": "125.1", "unit": "g"}],
+    }
+    assert r["sections"] == sections
+    assert client.get(f"/api/v1/{'recipes/' + path}?servings=4").json()["sections"] == sections
+    # An older client updates the original preparation without erasing sections.
+    updated = put(client, path, r, **payload)
+    assert updated["sections"] == sections
+    assert (
+        client.put(
+            f"/api/v1/recipes/{path}", json={**payload, "sections": [], "expected_version": 1}
+        ).status_code
+        == 409
+    )
+    changed = put(client, path, updated, **payload, sections=list(reversed(sections)))
+    archived = put(client, path + "/archive", changed, archived=True)
+    assert (
+        client.put(
+            f"/api/v1/recipes/{path}",
+            json={**payload, "sections": [], "expected_version": archived["version"]},
+        ).status_code
+        == 409
+    )
+    client.put("/api/v1/applications/recipes", json={"enabled": False})
+    assert client.get(f"/api/v1/recipes/{path}").status_code == 403
+    client.put("/api/v1/applications/recipes", json={"enabled": True})
+    assert client.get(f"/api/v1/recipes/{path}").json() == archived
+    restored = put(client, path + "/archive", archived, archived=False)
+    cleared = put(client, path, restored, **payload, sections=[])
+    assert cleared["sections"] == []
+    history = client.get(f"/api/v1/recipes/{path}/history").json()
+    assert any(event["snapshot"].get("sections") == sections for event in history)
+    assert any(event["snapshot"].get("sections") == list(reversed(sections)) for event in history)
+    with TestClient(app) as bob:
+        session = bob.post(
+            "/api/v1/auth/session", json={"username": "bob", "password": "synthetic-test-password"}
+        ).json()
+        bob.headers["X-CSRF-Token"] = session["csrf_token"]
+        bob.put("/api/v1/applications/recipes", json={"enabled": True})
+        assert bob.get(f"/api/v1/recipes/{path}").status_code == 404
+        assert (
+            bob.put(
+                f"/api/v1/recipes/{path}",
+                json={**payload, "sections": sections, "expected_version": cleared["version"]},
+            ).status_code
+            == 404
+        )
+
+
+@pytest.mark.parametrize(
+    "sections",
+    [
+        None,
+        {},
+        [{"title": " ", "text": "x"}],
+        [{"title": "x", "text": " "}],
+        [{"title": "x" * 161, "text": "x"}],
+        [{"title": "x", "text": "y" * 20001}],
+        [{"title": "x", "text": "x", "unknown": True}],
+        [{"title": "x", "text": "x"}] * 51,
+    ],
+)
+def test_invalid_preparation_sections_are_atomic(client, sections):
+    i = ingredient(client)
+    response = client.post(
+        "/api/v1/recipes/recipes",
+        json={
+            "title": "Invalid",
+            "sections": sections,
+            "items": [{"ingredient_id": i["id"], "quantity": "1", "unit": "g"}],
+        },
+    )
+    assert response.status_code == 422
+    assert client.get("/api/v1/recipes/recipes").json()["total"] == 0
+
+
+def test_preparation_total_bound_includes_preserved_sections(client):
+    i = ingredient(client)
+    r = recipe(
+        client, i, instructions="a" * 10000, sections=[{"title": "Part", "text": "b" * 10000}]
+    )
+    payload = {
+        "title": r["title"],
+        "instructions": "c" * 10001,
+        "items": [{"ingredient_id": i["id"], "quantity": "1", "unit": "g"}],
+        "expected_version": r["version"],
+    }
+    path = f"/api/v1/recipes/recipes/{r['id']}"
+    assert client.put(path, json=payload).status_code == 422
+    assert client.put(path, json={**payload, "sections": r["sections"]}).status_code == 422
+    assert client.get(path).json() == r
+
+
+def test_sections_migration_preserves_legacy_recipe_and_history(client, engine):
+    r = recipe(client, ingredient(client))
+    path = f"/api/v1/recipes/recipes/{r['id']}"
+    history = client.get(path + "/history").json()
+    with engine.begin() as conn:
+        config = migration_config()
+        config.attributes["connection"] = conn
+        command.downgrade(config, "0018_recipe_web_import")
+        assert conn.scalar(text("SELECT instructions FROM recipes_recipes")) == r["instructions"]
+        command.upgrade(config, "head")
+    assert client.get(path).json() == r
+    assert client.get(path + "/history").json() == history
+
+
+def test_sections_database_shape_and_downgrade_loss_guard(client, engine):
+    r = recipe(client, ingredient(client), sections=[{"title": "Sauce", "text": "Mixer."}])
+    for value in ("null", "{}", "[{}]"[:-1] + ",{}" * 50 + "]"):
+        with pytest.raises(DBAPIError), engine.begin() as conn:
+            conn.execute(
+                text("UPDATE recipes_recipes SET sections=CAST(:value AS jsonb)"), {"value": value}
+            )
+    with (
+        pytest.raises(RuntimeError, match="Cannot discard recipe preparation sections"),
+        engine.begin() as conn,
+    ):
+        config = migration_config()
+        config.attributes["connection"] = conn
+        command.downgrade(config, "0018_recipe_web_import")
+    assert client.get(f"/api/v1/recipes/recipes/{r['id']}").json() == r

@@ -249,8 +249,12 @@ def prepare(request, db, user, payload):
 def save(db, user, payload):
     if payload.locale != user.locale:
         raise HTTPException(409, tr("web_language_changed"))
+    # Keep pre-sections receipts replayable when the new optional field is empty.
+    fingerprint_data = payload.model_dump(mode="json")
+    if not payload.sections:
+        fingerprint_data.pop("sections")
     fingerprint = hashlib.sha256(
-        json.dumps(payload.model_dump(mode="json"), sort_keys=True, separators=(",", ":")).encode()
+        json.dumps(fingerprint_data, sort_keys=True, separators=(",", ":")).encode()
     ).hexdigest()
     receipt = db.get(m.WebImportReceipt, (user.id, payload.import_id))
     if receipt:
@@ -274,6 +278,7 @@ def save(db, user, payload):
             title=payload.title,
             servings=payload.servings,
             instructions=payload.instructions,
+            sections=payload.sections,
             items=items,
         ),
         source={

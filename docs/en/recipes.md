@@ -101,3 +101,11 @@ The draft is temporary until saved. Leaving, switching language or signing out f
 Some websites reject hosted browsers or human checks. Use **Paste recipe text** to copy ingredients and steps from your browser, with the same AI extraction and review. A page change during capture requires retrying. Provider errors, capacity limits and pages without recipes never create data. Imports consume your AI provider quota.
 
 Ranges such as “2–3 slices” or “¼–1 teaspoon” leave the quantity empty: choose a value during review. The original line is preserved and a warning highlights incomplete fields, without automatically choosing an average or an endpoint.
+
+## Preparation sections and mobile typing
+
+Keep the general preparation text and add up to **50 sections**, each with a title and text. **Add a section** creates an empty block. To divide existing text, place the cursor at the start of a passage and choose **Split at cursor**: everything from the cursor moves into a new section, where you enter a title. This also works within a section. The arrows reorder sections; removing a non-empty section asks for confirmation. Changes remain a draft until **Save**.
+
+The same controls are available when reviewing a web import. The recipe displays the general text followed by the ordered sections. Existing preparation text stays intact. Section titles allow 160 characters; all preparation texts together allow 20,000 characters, excluding titles. Each saved section requires a title and text; the general preparation remains optional.
+
+On mobile, the text field adapts to the space visible above the keyboard. Its height stays bounded and the text scrolls as the cursor advances. You can scroll back, edit a passage or deliberately scroll the page; further typing brings the active field back into view. Closing the keyboard or rotating the screen preserves the draft. Zoom remains available. A save error keeps your text so you can correct it or retry.

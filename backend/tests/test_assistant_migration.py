@@ -116,7 +116,7 @@ def test_assistant_migration_preserves_business_data_and_allows_empty_round_trip
     )
     assert completed.status_code == 200, completed.text
     assert client.put("/api/v1/preferences", json={"locale": "en", "theme": "dark"}).is_success
-    # Activation migration 0019 adds its own preferences; their preservation is
+    # Activation migration 0020 adds its own preferences; their preservation is
     # covered by test_life_ai_migration_preserves_data_and_explicit_activation.
     business_tables = [
         table

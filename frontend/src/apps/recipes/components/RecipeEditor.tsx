@@ -5,6 +5,7 @@ import { Icon } from "../../../shared/ui/Icon";
 import { recipesApi } from "../api";
 import { tr, unitLabel } from "../i18n";
 import { itemInput, type Item, type Recipe } from "../types";
+import { PreparationEditor } from "./PreparationEditor";
 import { IngredientPicker } from "./IngredientPicker";
 import { useDraft, type DraftProps } from "./common";
 
@@ -22,6 +23,7 @@ export function RecipeEditor({
     [title, setTitle] = useState(existing?.title ?? ""),
     [servings, setServings] = useState(String(existing?.base_servings ?? 2)),
     [instructions, setInstructions] = useState(existing?.instructions ?? ""),
+    [sections, setSections] = useState(existing?.sections ?? []),
     [items, setItems] = useState<Item[]>(existing?.items ?? []);
   const [pickerKey, setPickerKey] = useState(0),
     [dirty, setDirty] = useState(false),
@@ -44,6 +46,7 @@ export function RecipeEditor({
                 title,
                 servings: Number(servings),
                 instructions,
+                sections,
                 items: items.map(itemInput),
               },
               baseline,
@@ -140,20 +143,16 @@ export function RecipeEditor({
         }}
       />
       <fieldset disabled={action.busy || pickerBusy}>
-        <label>
-          {tr("instructions")}
-          <textarea
-            aria-label={tr("instructions")}
-            rows={8}
-            maxLength={20000}
-            placeholder={tr("instructions_hint")}
-            value={instructions}
-            onChange={(e) => {
-              setInstructions(e.target.value);
-              setDirty(true);
-            }}
-          />
-        </label>
+        <PreparationEditor
+          key={pickerKey}
+          instructions={instructions}
+          sections={sections}
+          onChange={(value) => {
+            setInstructions(value.instructions);
+            setSections(value.sections);
+            setDirty(true);
+          }}
+        />
         <ErrorMessage message={action.error} />
         {action.error && baseline && (
           <button
@@ -169,6 +168,7 @@ export function RecipeEditor({
                   setTitle(fresh.title);
                   setServings(String(fresh.base_servings));
                   setInstructions(fresh.instructions);
+                  setSections(fresh.sections);
                   setItems(fresh.items);
                   setDirty(false);
                   setPickerKey((key) => key + 1);
