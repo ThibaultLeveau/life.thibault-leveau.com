@@ -80,7 +80,7 @@ export function useConversation(
     }
   }, []);
   useEffect(() => {
-    if (created.current === id) {
+    if (id !== null && created.current === id) {
       created.current = null;
       return;
     }

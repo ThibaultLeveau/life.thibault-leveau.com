@@ -22,9 +22,25 @@ Life charge les outils de l’application concernée et consulte les objets avan
 
 Les actions simples explicitement demandées peuvent être enregistrées directement. Une proposition, une modification en lot ou une action destructive présente un **aperçu à confirmer**. Les cartes montrent de petites parties des applications : objet concerné, valeurs pertinentes, résultat ou lien vers l’application. Un aperçu n’est pas une modification enregistrée. La confirmation revalide les droits et les versions ; si l’objet a changé, demandez un nouvel aperçu.
 
+## Tableaux dans les messages
+
+Les messages affichent les tableaux Markdown en colonnes avec une ligne d’en-têtes, y compris dans les anciennes conversations. Le gras, le code en ligne et l’alignement des colonnes sont conservés. Sur petit écran, faites défiler un tableau large horizontalement à l’intérieur de sa zone ; au clavier, donnez-lui le focus avec Tab puis utilisez les flèches.
+
+Un tableau nécessite un en-tête et une ligne de séparation correspondante, par exemple :
+
+```text
+| Tâche | Détail |
+| --- | --- |
+| Rédiger mon profil | Parcours et exemples concrets. |
+```
+
+Utilisez `\|` pour une barre verticale dans une cellule. Tant que la séparation n’est pas valide pendant une réponse, le texte reste visible tel quel. Les blocs de code conservent leur contenu littéral. Cette mise en forme concerne seulement l’affichage : elle ne crée aucune tâche et ne modifie pas le message enregistré. Le HTML, les images et les liens des messages restent du texte inerte.
+
 ## Historique et interruptions
 
 Créez une conversation, retrouvez-la avec la recherche, renommez-la ou archivez-la. L’archive conserve ses messages et permet une restauration. Une conversation archivée doit être restaurée avant un nouveau message. La suppression est définitive pour la conversation et ses reçus ; elle propose séparément d’oublier les souvenirs qui en proviennent.
+
+Après confirmation et réussite de la suppression, vous revenez à l’accueil de l’assistant : la conversation et son brouillon quittent l’écran. Vous pouvez commencer une nouvelle conversation. En cas d’annulation ou d’échec, la conversation reste ouverte.
 
 La réponse apparaît progressivement. **Arrêter** interrompt les étapes suivantes ; les modifications déjà enregistrées restent visibles et ne sont pas annulées. Après une coupure, rechargez la conversation pour voir son état et les reçus enregistrés avant de demander une suite. Une interruption ne rejoue pas automatiquement des écritures. Une seule réponse peut être en cours par compte.
 
