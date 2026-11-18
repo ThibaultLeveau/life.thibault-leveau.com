@@ -1,18 +1,26 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useApiAction, useApiResource } from "../../../platform/useApiResource";
 import { ErrorMessage } from "../../../shared/ui/Dialog";
 import { Icon } from "../../../shared/ui/Icon";
 import { recipesApi } from "../api";
 import { tr, unitLabel } from "../i18n";
-import { units, type Ingredient, type Item, type Unit } from "../types";
+import {
+  units,
+  type FreeItemInput,
+  type Ingredient,
+  type Item,
+  type Unit,
+} from "../types";
 import { LoadState, Pager, useDraft, type DraftProps } from "./common";
 
 export function IngredientPicker({
   onAdd,
+  onAddFree,
   disabled = false,
   ...draft
 }: DraftProps & {
   onAdd: (item: Item) => Promise<boolean>;
+  onAddFree?: (item: FreeItemInput) => Promise<boolean>;
   disabled?: boolean;
 }) {
   const [q, setQ] = useState(""),
@@ -20,13 +28,14 @@ export function IngredientPicker({
     [offset, setOffset] = useState(0);
   const [selected, setSelected] = useState<Ingredient | null>(null),
     [amount, setAmount] = useState("1"),
-    [unit, setUnit] = useState<Unit>("g");
+    [unit, setUnit] = useState<Unit>(onAddFree ? "u" : "g");
   const [touched, setTouched] = useState(false),
     [adding, setAdding] = useState(false),
     [error, setError] = useState("");
   const input = useRef<HTMLInputElement>(null),
     quantity = useRef<HTMLInputElement>(null),
     alive = useRef(true);
+  const hintId = useId();
   useEffect(() => {
     alive.current = true;
     return () => {
@@ -62,32 +71,38 @@ export function IngredientPicker({
   );
   async function add() {
     if (busy || disabled) return;
-    if (!selected) {
+    if (!selected && !onAddFree) {
       setError(tr("choose_ingredient"));
       input.current?.focus();
       return;
     }
+    if (!input.current?.reportValidity() || !q.trim()) return;
     if (!quantity.current?.reportValidity()) return;
     setAdding(true);
     setError("");
     try {
-      const ok = await onAdd({
-        id: crypto.randomUUID(),
-        ingredient_id: selected.id,
-        name: selected.name,
-        category: selected.category,
-        quantity: amount,
-        unit,
-        position: 0,
-        purchased_quantity: "0",
-        checked: false,
-      });
+      const ok = selected
+        ? await onAdd({
+            id: crypto.randomUUID(),
+            ingredient_id: selected.id,
+            name: selected.name,
+            category: selected.category,
+            quantity: amount,
+            unit,
+            position: 0,
+            purchased_quantity: "0",
+            checked: false,
+          })
+        : await onAddFree!({ name: q.trim(), quantity: amount, unit });
       if (alive.current && ok) {
         setSelected(null);
         setQ("");
         setAmount("1");
+        setUnit(onAddFree ? "u" : "g");
         setTouched(false);
-        input.current?.focus();
+        requestAnimationFrame(() => {
+          if (alive.current) input.current?.focus();
+        });
       }
     } catch (e) {
       if (alive.current) setError((e as Error).message);
@@ -99,27 +114,37 @@ export function IngredientPicker({
     <div className="recipes-picker">
       <fieldset disabled={disabled || busy}>
         <label>
-          {tr("ingredient")}
+          {tr(onAddFree ? "shopping_item" : "ingredient")}
           <input
             ref={input}
             type="search"
             maxLength={120}
-            placeholder={tr("ingredient_hint")}
+            placeholder={tr(
+              onAddFree ? "shopping_item_hint" : "ingredient_hint",
+            )}
+            required={Boolean(onAddFree)}
+            aria-describedby={onAddFree ? hintId : undefined}
             autoComplete="off"
             value={q}
             onChange={(e) => {
               setQ(e.target.value);
+              if (selected && onAddFree) setUnit("u");
               setSelected(null);
               setTouched(true);
             }}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 e.preventDefault();
-                if (selected) void add();
+                if (selected || onAddFree) void add();
               }
             }}
           />
         </label>
+        {onAddFree && (
+          <p id={hintId} className="muted recipes-small">
+            {tr("free_item_hint")}
+          </p>
+        )}
         {!selected && q.trim() && (
           <div className="recipes-suggestions">
             <LoadState {...resource} />
@@ -185,13 +210,14 @@ export function IngredientPicker({
             className="primary-button"
             type="button"
             onClick={() => void add()}
-            disabled={!selected}
+            disabled={!selected && (!onAddFree || !q.trim())}
           >
             <Icon name="plus" />
             {busy ? tr("saving") : tr("add")}
           </button>
         </div>
-        {!selected &&
+        {!onAddFree &&
+          !selected &&
           q.trim() &&
           search === q &&
           !resource.loading &&
@@ -223,6 +249,7 @@ export function IngredientPicker({
               setQ("");
               setSelected(null);
               setAmount("1");
+              setUnit(onAddFree ? "u" : "g");
               setTouched(false);
               setError("");
             }}

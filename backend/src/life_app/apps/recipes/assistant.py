@@ -151,7 +151,8 @@ provider = ActionProvider(
         ),
         ActionDefinition(
             name="create_list",
-            description="Create a shopping list or reusable template with optional initial items.",
+            description="Create a shopping list or template with catalogue or free-text items. "
+            "Use name for any free item without creating an ingredient; defaults to 1 unit.",
             input_model=arguments("RecipesListCreate", payload=(s.ListInput, ...)),
             handler=lambda c, a: svc.output(c.db, svc.create_list(c.db, c.user, a.payload)),
             method="POST",
@@ -227,7 +228,9 @@ provider = ActionProvider(
         ),
         ActionDefinition(
             name="add_item",
-            description="Add an ingredient to a list, accumulating matching ingredient/unit rows.",
+            description="Add any shopping item using name, or a catalogue ingredient using "
+            "ingredient_id (exactly one). Defaults to 1 unit; matching identities/units add up. "
+            "Free items do not create catalogue ingredients.",
             input_model=arguments("RecipesItemAdd", id=(UUID, ...), payload=(s.AddItem, ...)),
             handler=lambda c, a: svc.output(
                 c.db,

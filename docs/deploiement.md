@@ -323,3 +323,10 @@ Sur un compte synthétique, vérifier import document/image, récupération d’
 ## Livraison de l’import de tâches
 
 Aucune migration ni nouveau stockage. Publier avec sauvegarde et procédure habituelles. Vérifier les budgets effectifs : les anciennes configurations explicites `LIFE_ASSISTANT_TIMEOUT_SECONDS=180` restent prioritaires ; les passer à 600 pour les demandes longues si aucun délai plus court n’est souhaité. Les plafonds par défaut sont 96 appels et 200 actions. Contrôler OpenAPI `/tasks/import`, import de dix tâches sur un compte synthétique, annulation complète d’un lot invalide et aperçu/confirmation IA. Les sauvegardes/restaurations existantes incluent tâches, événements et reçus sans nouvelle procédure.
+
+
+## Livraison des articles libres dans les courses
+
+Après validations, revue, CI et fusion, publier `main` avec `scripts/deploy.sh` : sauvegarde habituelle puis migration additive `0017_shopping_free_items`. Respecter les [limites du retour arrière](sauvegardes.md#migration-0017-articles-libres). Aucun secret, service ni configuration supplémentaire.
+
+Sur un compte synthétique, ajouter un article libre au clavier sans le catalogue, recharger, cumuler après achat, corriger la quantité, importer une recette, copier en modèle puis en liste, archiver/restaurer et désactiver/réactiver. Vérifier FR/EN, thèmes et mobile 320 px, erreurs et conservation des brouillons. Contrôler la version réellement exécutée, la révision, les sondes, `/recipes`, OpenAPI et guides FR/EN en HTTPS ; consigner sauvegarde, SHA et résultats dans l’issue #99.

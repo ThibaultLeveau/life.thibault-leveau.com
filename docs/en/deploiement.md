@@ -319,3 +319,10 @@ On a synthetic account verify file/image import, public-page reading, private UR
 ## Deploying task imports
 
 No migration or new storage. Use the normal backup and deployment procedure. Verify effective budgets: existing explicit `LIFE_ASSISTANT_TIMEOUT_SECONDS=180` settings still take precedence; raise them to 600 for longer requests unless a shorter deadline is intended. Default caps are 96 calls and 200 actions. Check OpenAPI `/tasks/import`, ten-task imports on a synthetic account, complete rollback of invalid batches and assistant preview/confirmation. Existing backups/restores include tasks, events and receipts without a new procedure.
+
+
+## Deploy free shopping items
+
+After validation, review, CI and merge, publish `main` with `scripts/deploy.sh`: standard backup followed by additive migration `0017_shopping_free_items`. Follow the [rollback limitations](sauvegardes.md#migration-0017-articles-libres). No new secret, service or configuration.
+
+Using a synthetic account, add a free item by keyboard without the catalogue, reload, add more after purchasing, edit quantity, import a recipe, copy to a template then a list, archive/restore and disable/re-enable. Check FR/EN, themes, 320 px mobile, errors and draft preservation. Verify the running commit, migration revision, probes, `/recipes`, OpenAPI and FR/EN guides over HTTPS; record backup, SHA and results in issue #99.

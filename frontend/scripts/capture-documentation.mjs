@@ -100,7 +100,8 @@ try {
       const recipe = await api('POST', '/recipes/recipes', { title: t('Riz aux tomates', 'Tomato rice'), servings: 2,
         instructions: t('Faire revenir les tomates dans l’huile. Ajouter le riz, couvrir d’eau et laisser mijoter.', 'Soften the tomatoes in the oil. Add the rice, cover with water and simmer.'),
         items: [{ ingredient_id: rice.id, quantity: '150', unit: 'g' }, { ingredient_id: tomato.id, quantity: '2', unit: 'u' }, { ingredient_id: oil.id, quantity: '1', unit: 'tbsp' }] });
-      let list = await api('POST', '/recipes/lists', { title: t('Courses du week-end', 'Weekend shopping') });
+      let list = await api('POST', '/recipes/lists', { title: t('Courses du week-end', 'Weekend shopping'),
+        items: [{ name: t('Piles rechargeables AA', 'Rechargeable AA batteries'), quantity: '4', unit: 'u' }] });
       list = await api('POST', `/recipes/lists/${list.id}/import`, { expected_version: list.version, recipe_id: recipe.id, recipe_version: recipe.version, servings: 4 });
       list = await api('PUT', `/recipes/lists/${list.id}/items/${list.items[0].id}/check`, { expected_version: list.version, checked: true });
       const template = await api('POST', `/recipes/lists/${list.id}/copy`, { expected_version: list.version, kind: 'template', title: t('Mes essentiels', 'My essentials') });

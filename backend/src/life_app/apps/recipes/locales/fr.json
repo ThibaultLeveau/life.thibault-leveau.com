@@ -3,7 +3,7 @@
   "not_found": "Élément introuvable.",
   "ingredient_not_found": "Un ingrédient est introuvable dans votre catalogue.",
   "limit": "La limite de votre catalogue est atteinte.",
-  "items_limit": "Une liste peut contenir au maximum 300 ingrédients et unités distincts.",
+  "items_limit": "Une liste peut contenir au maximum 300 articles et unités distincts.",
   "conflict": "Cet élément a changé. Rechargez-le avant de réessayer ; votre saisie reste affichée.",
   "read_only": "Restaurez ou rouvrez cet élément avant de le modifier.",
   "quantity_range": "Le calcul doit donner une quantité entre 0,000001 et 1 000 000 000.",
@@ -16,5 +16,7 @@
   "metric_imports": "Recettes utilisées pour les courses",
   "metric_imports_description": "Premier import de chaque couple liste/recette. Les imports dans un modèle sont exclus.",
   "metric_templates": "Modèles de courses préparés",
-  "metric_templates_description": "Première fois où chaque modèle contient un ingrédient, archives comprises."
+  "metric_templates_description": "Première fois où chaque modèle contient un article, archives comprises.",
+  "item_identity": "Indiquez soit un article libre (name), soit un ingrédient du catalogue (ingredient_id).",
+  "invalid_item_name": "Saisissez un nom d’article valide."
 }

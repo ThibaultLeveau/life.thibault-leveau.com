@@ -4,6 +4,7 @@ from uuid import uuid4
 
 import pytest
 from alembic import command
+from alembic.script import ScriptDirectory
 from cryptography.fernet import Fernet
 from sqlalchemy import inspect, select, text
 from sqlalchemy.exc import IntegrityError
@@ -75,7 +76,7 @@ def test_multimodal_data_prevents_lossy_downgrade(app, engine, kind):
     with engine.connect() as connection:
         assert (
             connection.scalar(text("SELECT version_num FROM alembic_version"))
-            == "0016_assistant_sources"
+            == ScriptDirectory.from_config(migration_config()).get_current_head()
         )
 
 

@@ -103,6 +103,13 @@ class ShoppingItem(Base):
             ["list_id", "owner_id"], ["recipes_lists.id", "recipes_lists.owner_id"]
         ),
         UniqueConstraint("list_id", "ingredient_id", "unit"),
+        UniqueConstraint("list_id", "normalized_name", "unit", name="uq_recipes_free_item"),
+        CheckConstraint(
+            "(ingredient_id IS NOT NULL AND name IS NULL AND normalized_name IS NULL) OR "
+            "(ingredient_id IS NULL AND name IS NOT NULL AND normalized_name IS NOT NULL "
+            "AND length(trim(name)) > 0 AND length(trim(normalized_name)) > 0)",
+            name="ck_recipes_item_identity",
+        ),
         CheckConstraint("quantity > 0 AND quantity <= 1000000000"),
         CheckConstraint("purchased_quantity >= 0 AND purchased_quantity <= quantity"),
         CheckConstraint("unit IN ('g','mg','l','ml','tsp','tbsp','u') AND position >= 0"),
@@ -110,7 +117,9 @@ class ShoppingItem(Base):
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     owner_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
     list_id: Mapped[UUID]
-    ingredient_id: Mapped[UUID] = mapped_column(ForeignKey("recipes_ingredients.id"))
+    ingredient_id: Mapped[UUID | None] = mapped_column(ForeignKey("recipes_ingredients.id"))
+    name: Mapped[str | None] = mapped_column(String(120))
+    normalized_name: Mapped[str | None] = mapped_column(String(240))
     quantity: Mapped[Decimal] = mapped_column(Numeric(18, 6))
     purchased_quantity: Mapped[Decimal] = mapped_column(Numeric(18, 6), default=Decimal(0))
     unit: Mapped[str] = mapped_column(String(4))

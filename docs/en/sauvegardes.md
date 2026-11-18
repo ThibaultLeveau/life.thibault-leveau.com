@@ -208,3 +208,10 @@ Additive migration `0016_assistant_sources` adds `assistant_sources`, `assistant
 Downgrade refuses any source (including removed receipts), dictation configuration or externally marked conversation to preserve data and confirmations. Old images do not recognize the revision. Do not drop tables to roll back; restore a compatible backup and image using the existing procedure.
 
 After restore, `restore-suffix.sql` revokes sessions, interrupts runs, invalidates previews, releases transcription leases and removes unfinished import reservations. Ready/bound sources, digests, metadata, extracted text, external marker and credentials remain intact. Verify integrity and authenticated downloads on a synthetic account. `life rotate-assistant-key <account> --dry-run`, then without the option, validates/re-encrypts both credentials atomically; one unreadable key aborts everything. Retain old keys needed for earlier dumps.
+
+
+## Migration 0017 — free shopping items {#migration-0017-articles-libres}
+
+`0017_shopping_free_items` extends existing shopping rows with an optional ingredient reference, a free name and its normalized key. Standard PostgreSQL backups preserve these fields alongside purchases, lists/templates, events and progression. Restore the six Recipes tables with the rest of the database using the transactional procedure. Container acceptance requires free items and compares every stored field after restoration.
+
+Older catalogue writes remain compatible during this additive migration. No existing names, identifiers, purchases or historical snapshots are rewritten. The old image understands neither the revision nor free items: do not restart it against the migrated database. Prefer a forward fix; otherwise stop writes and restore the previous dump together with its matching image. Downgrade refuses free items in current rows **or history**, even after removing the row. Without free items or historical traces, a round trip preserves catalogue data. No new secret, volume or service.

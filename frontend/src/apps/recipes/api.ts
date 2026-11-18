@@ -1,7 +1,7 @@
 import { api } from "../../platform/api";
 import type {
   Ingredient,
-  ItemInput,
+  ShoppingItemInput,
   Kind,
   PageResult,
   Recipe,
@@ -74,7 +74,7 @@ export const recipesApi = {
       kind,
       expected_version: item.version,
     }),
-  addItem: (list: ShoppingList, input: ItemInput) =>
+  addItem: (list: ShoppingList, input: ShoppingItemInput) =>
     api<ShoppingList>(`${root}/lists/${list.id}/items`, "POST", {
       ...input,
       expected_version: list.version,

@@ -4,6 +4,7 @@ from uuid import uuid4
 
 import pytest
 from alembic import command
+from alembic.script import ScriptDirectory
 from sqlalchemy import inspect, select, text
 from sqlalchemy.exc import IntegrityError
 
@@ -144,7 +145,7 @@ def test_each_assistant_table_prevents_lossy_downgrade(app, engine, table):
     with engine.connect() as connection:
         assert (
             connection.scalar(text("SELECT version_num FROM alembic_version"))
-            == "0016_assistant_sources"
+            == ScriptDirectory.from_config(migration_config()).get_current_head()
         )
     assert snapshot(engine, ASSISTANT_TABLES) == before
     migrate(engine, "upgrade", "head")

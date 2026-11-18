@@ -107,7 +107,11 @@ export function ImportDialog({
                   }}
                 >
                   <strong>{o.title}</strong>
-                  <span>{tr("items", { count: o.items.length })}</span>
+                  <span>
+                    {tr("kind" in o ? "shopping_items" : "items", {
+                      count: o.items.length,
+                    })}
+                  </span>
                 </button>
               ))}
           </div>
