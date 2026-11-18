@@ -21,6 +21,7 @@ export function MessageSnippets({
   onBusy: (id: string, busy: boolean) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const [consultationsExpanded, setConsultationsExpanded] = useState(false);
   // Only final reads are tucked away; malformed/unknown cards and previews stay visible.
   const consultations = snippets.filter(
     (item) =>
@@ -56,23 +57,27 @@ export function MessageSnippets({
         </button>
       )}
       {!!consultations.length && (
-        <details className="assistant-consultations">
+        <details
+          className="assistant-consultations"
+          onToggle={(event) => setConsultationsExpanded(event.currentTarget.open)}
+        >
           <summary>
             <Icon name="book" size={15} />
             {tr("assistant_consultations", { count: consultations.length })}
             <Icon name="down" size={14} />
           </summary>
-          {consultations.map((snippet) => (
-            <SnippetHost
-              key={snippet.id}
-              snippet={snippet}
-              modules={modules}
-              disabled={busy}
-              onChanged={onChanged}
-              beforeChange={beforeChange}
-              onBusy={onBusy}
-            />
-          ))}
+          {consultationsExpanded &&
+            consultations.map((snippet) => (
+              <SnippetHost
+                key={snippet.id}
+                snippet={snippet}
+                modules={modules}
+                disabled={busy}
+                onChanged={onChanged}
+                beforeChange={beforeChange}
+                onBusy={onBusy}
+              />
+            ))}
         </details>
       )}
     </>

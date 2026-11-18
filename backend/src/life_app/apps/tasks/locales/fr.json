@@ -211,5 +211,6 @@
   "integration_kind": "Type d’exercice",
   "batch_workspace_choices": "Choisissez une destination valide pour chaque espace du lot.",
   "batch_label_limit": "Une tâche ne peut pas porter plus de 100 étiquettes.",
-  "label_not_found": "Étiquette introuvable."
+  "label_not_found": "Étiquette introuvable.",
+  "task_import_too_large": "Le lot JSON doit contenir au maximum 200 000 caractères."
 }

@@ -928,3 +928,60 @@ test("une réponse en cours est récupérée après rechargement sans répéter 
     ),
   ).toHaveLength(0);
 });
+
+test("un aperçu d’import compact permet de consulter les dix tâches complètes avant confirmation", async ({
+  page,
+}) => {
+  const state = await fixture(page);
+  state.seed("import-ten", [
+    {
+      id: "import-preview",
+      application_id: "tasks",
+      kind: "import_tasks",
+      schema_version: 1,
+      phase: "preview",
+      operation_id: "operation-import",
+      data: {
+        title: "Importer des tâches",
+        targets: Array.from(
+          { length: 10 },
+          (_, i) => `Tâche importée ${i + 1} — Espace de destination`,
+        ),
+        entity: Array.from({ length: 10 }, (_, i) => ({
+          id: `preview-${i}`,
+          title: `Tâche importée ${i + 1}`,
+          description:
+            i === 9
+              ? "Description complète. ".repeat(100) + "FIN IMPORT COMPLET"
+              : `Description ${i + 1}`,
+        })),
+      },
+    },
+  ]);
+  await page.goto("/?conversation=import-ten");
+  await expect(page.locator(".assistant-snippet-line")).toHaveCount(3);
+  await expect(
+    page.getByRole("button", { name: "Confirmer ce changement" }),
+  ).toBeVisible();
+  const targetText = page
+    .locator(".assistant-snippet > p")
+    .filter({ hasText: "Éléments concernés" });
+  const targetToggle = targetText.getByRole("button", {
+    name: "Lire le texte complet",
+  });
+  await expect(targetToggle).toHaveAttribute("aria-expanded", "false");
+  await targetToggle.click();
+  await expect(targetText).toContainText(
+    "Tâche importée 10 — Espace de destination",
+  );
+  await page.locator(".assistant-snippet-details > summary").click();
+  const details = page.locator(".assistant-snippet-details-body");
+  await expect(
+    details.getByText("Tâche importée 10", { exact: true }),
+  ).toBeVisible();
+  await expect(details).toContainText("FIN IMPORT COMPLET");
+  await expect(details.locator(".assistant-detail-list > li")).toHaveCount(10);
+  expect(
+    state.requests.filter((request) => request.method !== "GET"),
+  ).toHaveLength(0);
+});

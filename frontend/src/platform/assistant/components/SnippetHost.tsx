@@ -9,7 +9,11 @@ import {
 import { formatLocale, tr } from "../../../shared/i18n";
 import { ErrorMessage } from "../../../shared/ui/Dialog";
 import { Icon, type IconName } from "../../../shared/ui/Icon";
-import { SnippetLine, SnippetSummary } from "../../../shared/ui/SnippetSummary";
+import {
+  SnippetLine,
+  SnippetSummary,
+  SnippetText,
+} from "../../../shared/ui/SnippetSummary";
 import { useApplications } from "../../applications/ApplicationProvider";
 import type { ApplicationModule } from "../../applications/definition";
 import { useApiAction } from "../../useApiResource";
@@ -137,7 +141,9 @@ export function SnippetHost({
           )}
           {!!targets.length && hasEntity(data.entity) && (
             <p className="muted small-text">
-              {tr("assistant_targets", { names: targets.join(" · ") })}
+              <SnippetText>
+                {tr("assistant_targets", { names: targets.join(" · ") })}
+              </SnippetText>
             </p>
           )}
           {!!targets.length && !hasEntity(data.entity) && (

@@ -455,3 +455,17 @@ Unknown fields, invalid timezone/application IDs, non-strict booleans, dates out
 ## General settings
 
 The HTML route `/settings` composes [existing preferences](settings.md#api-and-storage) without a new data endpoint. Its sections use account, progression, agenda/view, Sport, Tracking and OKR APIs. Contracts, validation, owners, CSRF, versions and backup rules remain unchanged. Legacy application URLs with `?tab=settings` redirect to `/settings?application=<id>`.
+
+## Task import
+
+`POST /api/v1/tasks/import` accepts `{ "tasks": [<TaskCreate>, …] }`: 1–100 objects using the exact `POST /tasks` fields (`workspace_id`, `title`, and optional `section_id`, `status_id`, `description`, `priority`, `due_date`, `recurrence`, `label_ids`). Normalized JSON is limited to 200,000 characters so receipts remain streamable. Returns **201** and the full tasks in input order. The default open status is resolved in each workspace; titles are not parsed for dates. The API accepts multiple workspaces belonging to the same owner.
+
+After logging in, replace `WORKSPACE_UUID` with an identifier from `GET /workspaces`:
+
+```bash
+curl -b cookies.txt -H "X-CSRF-Token: $CSRF" -H 'Content-Type: application/json' \
+  https://life.thibault-leveau.com/api/v1/tasks/import \
+  -d '{"tasks":[{"workspace_id":"WORKSPACE_UUID","title":"Write my profile","description":"Prepare and review the text"},{"workspace_id":"WORKSPACE_UUID","title":"Present my projects","priority":2}]}'
+```
+
+One transaction covers tasks, labels, events and progression: any error rolls back the whole batch. Errors: 401 without a session, 403 for invalid CSRF/origin or disabled application, 404 for inaccessible or cross-workspace/owner references, 409 for an archived destination, and 422 for invalid batch/fields/schedule. Lifecycle matches `POST /tasks`: initial versions, `created` and optional `completed` events, independent recurrence and history. There is no title deduplication or automatic route idempotency: repeating a successful request creates new tasks. The assistant uses its own receipts and idempotent confirmations.

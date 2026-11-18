@@ -26,7 +26,10 @@ class Settings(BaseSettings):
     database_url: SecretStr | None = None
     session_hours: int = Field(default=168, ge=1, le=720)
     assistant_encryption_keys: SecretStr | None = None
-    assistant_timeout_seconds: int = Field(default=180, ge=10, le=600)
+    assistant_timeout_seconds: int = Field(default=600, ge=10, le=600)
+
+    assistant_max_model_calls: int = Field(default=96, ge=1, le=256)
+    assistant_max_actions: int = Field(default=200, ge=1, le=1000)
 
     @field_validator("database_url")
     @classmethod

@@ -226,6 +226,28 @@ def structure_precondition(context, payload):
     return snapshot(state)
 
 
+def import_precondition(context, payload):
+    """Freeze destination metadata, including the implicit default open status."""
+    db, user = context.db, context.user
+    state = []
+    for workspace_id in sorted({item.workspace_id for item in payload.payload.tasks}):
+        space = svc.workspace(db, user, workspace_id, active=True)
+        entry = {"workspace": s.WorkspaceOutput.model_validate(space).model_dump(mode="json")}
+        for name, model, schema in (
+            ("sections", m.Section, s.SectionOutput),
+            ("statuses", m.Status, s.StatusOutput),
+            ("labels", m.Label, s.LabelOutput),
+        ):
+            entry[name] = [
+                schema.model_validate(item).model_dump(mode="json")
+                for item in db.scalars(
+                    select(model).where(model.workspace_id == workspace_id).order_by(model.id)
+                )
+            ]
+        state.append(entry)
+    return snapshot(state)
+
+
 provider = ActionProvider(
     actions=(
         action(
@@ -556,6 +578,22 @@ provider = ActionProvider(
             payload=(s.TaskCreate, ...),
         ),
         action(
+            "import_tasks",
+            "Créer de 1 à 100 tâches en un lot atomique, avec aperçu à confirmer. "
+            "À privilégier pour créer plusieurs tâches / Import multiple tasks atomically.",
+            "POST",
+            "/tasks/import",
+            lambda c, p: svc.import_tasks(c.db, c.user, p.payload),
+            list[s.TaskOutput],
+            confirmation=True,
+            precondition=import_precondition,
+            preview_targets=lambda c, p: [
+                f"{svc.workspace(c.db, c.user, item.workspace_id).name} › {item.title}"
+                for item in p.payload.tasks
+            ],
+            payload=(s.TaskImport, ...),
+        ),
+        action(
             "bulk_tasks",
             "Lot atomique : déplacer, planifier, résoudre, archiver, etc. / Atomic task batch.",
             "POST",
@@ -696,6 +734,7 @@ provider = provider.with_labels(
         "save_view": ("Modifier l’affichage", "Change view preferences"),
         "list_tasks": ("Rechercher les tâches", "Search tasks"),
         "create_task": ("Créer une tâche", "Create a task"),
+        "import_tasks": ("Importer des tâches", "Import tasks"),
         "bulk_tasks": ("Modifier plusieurs tâches", "Change multiple tasks"),
         "duplicate_task": ("Dupliquer une tâche", "Duplicate a task"),
         "get_task": ("Détails de la tâche", "Task details"),

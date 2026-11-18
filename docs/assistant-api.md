@@ -82,3 +82,9 @@ with httpx.Client(base_url="http://127.0.0.1:8100/api/v1", timeout=240) as clien
 ```
 
 Utiliser HTTPS en production. Les routes métier d’origine restent l’API de référence pour les objets, indépendamment de toute génération IA. Voir [contrats des applications](evolution.md), [données](donnees.md) et [restauration](sauvegardes.md#migration-0015-assistant).
+
+## Import et délégations de Tâches
+
+La capacité `tasks.import_tasks` correspond à `POST /tasks/import`, arguments `{ "payload": { "tasks": [<TaskCreate>, …] } }`. Elle exige toujours un aperçu à confirmer, même avec `propose=false`. L’aperçu contient toutes les tâches et destinations ; il ne persiste aucune création. La confirmation revalide propriétaire, activation et empreinte des métadonnées de destination (espaces, sections, statuts, étiquettes), puis exécute atomiquement les mêmes services que l’API. Un changement de destination depuis l’aperçu entraîne 409. Le reçu évite toute double création lors d’une confirmation répétée ou concurrente.
+
+Chaque appel `delegate_<application>` instancie un spécialiste neuf, y compris plusieurs appels pour la même application. Les dépendances utilisent uniquement les identifiants des résultats confirmés ; les identifiants simulés des aperçus ne sont pas transmis comme objets créés. Les budgets globaux configurables sont partagés ; le plafonnement local est de 24 échanges par spécialiste et 16 pour le coordinateur. Voir [Configuration](configuration.md).

@@ -2,7 +2,7 @@
 
 ## AI assistant delivery
 
-After validation, review, CI and merge, publish clean `main` using `scripts/deploy.sh`. Backup precedes additive migration `0015_assistant`. Configure `LIFE_ASSISTANT_ENCRYPTION_KEYS` in protected `.env.production` and back up this keyring independently before saving provider tokens. `LIFE_ASSISTANT_TIMEOUT_SECONDS` defaults to 180 seconds. HTTP/encryption dependencies join the existing image; no new service, volume, DNS or proxy is introduced. Verify outbound HTTPS to all three providers and progressive streaming through Caddy.
+After validation, review, CI and merge, publish clean `main` using `scripts/deploy.sh`. Backup precedes additive migration `0015_assistant`. Configure `LIFE_ASSISTANT_ENCRYPTION_KEYS` in protected `.env.production` and back up this keyring independently before saving provider tokens. `LIFE_ASSISTANT_TIMEOUT_SECONDS` defaults to 600 seconds. HTTP/encryption dependencies join the existing image; no new service, volume, DNS or proxy is introduced. Verify outbound HTTPS to all three providers and progressive streaming through Caddy.
 
 Users configure provider, model and token in settings; never invent credentials, place them in versioned files or expose them in logs. Without real credentials, verify the interface and configuration errors and explicitly record that live provider access was not validated. Fake-provider tests do not prove access to a provider account.
 
@@ -309,3 +309,7 @@ On an isolated synthetic account, verify list/grid per format, search/return, pr
 After checks, self-review, CI and merge, publish with `scripts/deploy.sh` and its normal backup. No new SQL migration, dependency or variable (`0013_recipe_units`). Respect [image compatibility](sauvegardes.md#score-sport-v2). For the affected account, run `POST /api/v1/sport/scores/backfill` after deployment, record the repaired count and confirm a second call returns zero. This targeted repair must not modify other accounts.
 
 On a synthetic account, verify first partial session, entirely omitted exercise, empty session (0), relative difficulty for weight/distance/pace, references, history/statistics, FR/EN, 320 px and keyboard. Check API `score_details`, frozen references, next-session suggestions and preserved results. Verify actual SHA, probes, OpenAPI, `/sport` and FR/EN guides over HTTPS; record backup, repair and results in the issue.
+
+## Deploying task imports
+
+No migration or new storage. Use the normal backup and deployment procedure. Verify effective budgets: existing explicit `LIFE_ASSISTANT_TIMEOUT_SECONDS=180` settings still take precedence; raise them to 600 for longer requests unless a shorter deadline is intended. Default caps are 96 calls and 200 actions. Check OpenAPI `/tasks/import`, ten-task imports on a synthetic account, complete rollback of invalid batches and assistant preview/confirmation. Existing backups/restores include tasks, events and receipts without a new procedure.

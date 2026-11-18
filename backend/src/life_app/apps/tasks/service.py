@@ -588,6 +588,14 @@ def create_task(db, user, payload, *, copying=False):
     return item
 
 
+def import_tasks(db, user, payload):
+    """Create the whole batch with the same rules and events as individual tasks.
+
+    The caller owns the transaction; previews and failures roll back every item.
+    """
+    return outputs(db, [create_task(db, user, item) for item in payload.tasks])
+
+
 def patch_task(db, user, item, payload):
     check_version(item, payload.expected_version)
     values = payload.model_dump(exclude_unset=True, exclude={"expected_version"})
