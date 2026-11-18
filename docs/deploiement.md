@@ -324,9 +324,16 @@ Sur un compte synthétique, vérifier import document/image, récupération d’
 
 Aucune migration ni nouveau stockage. Publier avec sauvegarde et procédure habituelles. Vérifier les budgets effectifs : les anciennes configurations explicites `LIFE_ASSISTANT_TIMEOUT_SECONDS=180` restent prioritaires ; les passer à 600 pour les demandes longues si aucun délai plus court n’est souhaité. Les plafonds par défaut sont 96 appels et 200 actions. Contrôler OpenAPI `/tasks/import`, import de dix tâches sur un compte synthétique, annulation complète d’un lot invalide et aperçu/confirmation IA. Les sauvegardes/restaurations existantes incluent tâches, événements et reçus sans nouvelle procédure.
 
+
+## Livraison des articles libres dans les courses
+
+Après validations, revue, CI et fusion, publier `main` avec `scripts/deploy.sh` : sauvegarde habituelle puis migration additive `0017_shopping_free_items`. Respecter les [limites du retour arrière](sauvegardes.md#migration-0017-articles-libres). Aucun secret, service ni configuration supplémentaire.
+
+Sur un compte synthétique, ajouter un article libre au clavier sans le catalogue, recharger, cumuler après achat, corriger la quantité, importer une recette, copier en modèle puis en liste, archiver/restaurer et désactiver/réactiver. Vérifier FR/EN, thèmes et mobile 320 px, erreurs et conservation des brouillons. Contrôler la version réellement exécutée, la révision, les sondes, `/recipes`, OpenAPI et guides FR/EN en HTTPS ; consigner sauvegarde, SHA et résultats dans l’issue #99.
+
 ## Services d’import Recettes (ADR 010)
 
-Avant le premier déploiement de cette version, ajouter le secret `LIFE_RECIPE_BROWSER_TOKEN` dans `.env.production` (droits 600), et les IP publiques supplémentaires du VPS dans `LIFE_RECIPE_DENIED_IPS` si nécessaire. Le script construit désormais trois images portant le même SHA : `local/life`, `local/life-recipe-browser` et `local/life-recipe-egress`. Leurs variables Compose sont `LIFE_IMAGE`, `LIFE_BROWSER_IMAGE`, `LIFE_RECIPE_EGRESS_IMAGE`. Le script sauvegarde PostgreSQL, applique la migration additive 0017 et attend les sondes des trois services. Aucun port du navigateur ou du proxy n’est publié ; conserver les réseaux `recipe-control` et `recipe-outbound` internes.
+Avant le premier déploiement de cette version, ajouter le secret `LIFE_RECIPE_BROWSER_TOKEN` dans `.env.production` (droits 600), et les IP publiques supplémentaires du VPS dans `LIFE_RECIPE_DENIED_IPS` si nécessaire. Le script construit désormais trois images portant le même SHA : `local/life`, `local/life-recipe-browser` et `local/life-recipe-egress`. Leurs variables Compose sont `LIFE_IMAGE`, `LIFE_BROWSER_IMAGE`, `LIFE_RECIPE_EGRESS_IMAGE`. Le script sauvegarde PostgreSQL, applique la migration additive 0018 et attend les sondes des trois services. Aucun port du navigateur ou du proxy n’est publié ; conserver les réseaux `recipe-control` et `recipe-outbound` internes.
 
 Exécuter `make docker-build` puis `bash scripts/test-recipe-browser.sh` sur un hôte autorisant les espaces de noms non privilégiés avant publication. Le test utilise un site factice sur un réseau Docker interne et vérifie la sandbox Chromium active, l’intervention humaine, les cookies, les propriétaires, les versions de page et les refus réseau. Ne jamais ajouter `--no-sandbox`, `privileged`, un montage Docker ou un port DevTools. Le profil seccomp provient de Playwright 1.64.1, avec `chroot` autorisé dans l’espace de noms utilisateur sans ajouter de capacité au conteneur.
 

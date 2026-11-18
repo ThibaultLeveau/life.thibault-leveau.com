@@ -3,7 +3,7 @@
   "not_found": "Item not found.",
   "ingredient_not_found": "An ingredient could not be found in your catalogue.",
   "limit": "Your catalogue limit has been reached.",
-  "items_limit": "A list can contain at most 300 distinct ingredient and unit pairs.",
+  "items_limit": "A list can contain at most 300 distinct item and unit pairs.",
   "conflict": "This item has changed. Reload it before trying again; your input is still displayed.",
   "read_only": "Restore or reopen this item before editing it.",
   "quantity_range": "The calculation must give a quantity between 0.000001 and 1,000,000,000.",
@@ -16,7 +16,7 @@
   "metric_imports": "Recipes used for shopping",
   "metric_imports_description": "First import of each list/recipe pair. Imports into templates are excluded.",
   "metric_templates": "Shopping templates prepared",
-  "metric_templates_description": "First time each template contains an ingredient, including archives.",
+  "metric_templates_description": "First time each template contains an item, including archives.",
   "web_unavailable": "The import browser is unavailable. You can paste the recipe text.",
   "web_invalid_url": "Enter a public HTTP or HTTPS address without credentials.",
   "web_session_expired": "The browsing session has ended. Open the page again.",
@@ -29,5 +29,7 @@
   "web_truncated": "The page is long: some text was not sent. Check that the recipe is complete.",
   "web_import_conflict": "This import was already saved with different content. Open the saved recipe.",
   "web_cancelled": "Import cancelled.",
-  "web_uncertain_measurements": "Some servings, quantities or units need your review. Complete the empty fields using the original lines; ranges are not replaced with an arbitrary value."
+  "web_uncertain_measurements": "Some servings, quantities or units need your review. Complete the empty fields using the original lines; ranges are not replaced with an arbitrary value.",
+  "item_identity": "Provide either a free item (name) or a catalogue ingredient (ingredient_id).",
+  "invalid_item_name": "Enter a valid item name."
 }

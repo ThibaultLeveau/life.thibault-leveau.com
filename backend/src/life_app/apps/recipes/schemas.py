@@ -3,7 +3,9 @@ from decimal import Decimal
 from typing import Annotated, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, StrictBool
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, model_validator
+
+from life_app.apps.recipes.messages import tr
 
 Unit = Literal["g", "mg", "l", "ml", "tsp", "tbsp", "u"]
 Kind = Literal["list", "template"]
@@ -60,6 +62,32 @@ class ItemOutput(ItemInput):
     checked: bool = False
 
 
+class ShoppingItemInput(Contract):
+    """Exactly one of ingredient_id (catalogue) or name (free item), with optional amount/unit."""
+
+    ingredient_id: UUID | None = Field(
+        None, description="Catalogue reference. Supply either ingredient_id or name, never both."
+    )
+    name: str | None = Field(
+        None,
+        min_length=1,
+        max_length=120,
+        description="Free item stored only in the list, without creating a catalogue ingredient.",
+    )
+    quantity: Quantity = Decimal(1)
+    unit: Unit = "u"
+
+    @model_validator(mode="after")
+    def item_identity(self):
+        if (self.ingredient_id is None) == (self.name is None):
+            raise ValueError(tr("item_identity"))
+        return self
+
+
+class ShoppingItemOutput(ItemOutput):
+    ingredient_id: UUID | None
+
+
 class RecipeInput(Contract):
     title: str = Field(min_length=1, max_length=160)
     servings: Servings = 2
@@ -97,7 +125,7 @@ class RecipePage(Contract):
 class ListInput(Contract):
     title: str = Field(min_length=1, max_length=160)
     kind: Kind = "list"
-    items: list[ItemInput] = Field(default_factory=list, max_length=300)
+    items: list[ShoppingItemInput] = Field(default_factory=list, max_length=300)
 
 
 class ListUpdate(Version):
@@ -114,7 +142,7 @@ class ListOutput(Contract):
     title: str
     kind: Kind
     version: int
-    items: list[ItemOutput]
+    items: list[ShoppingItemOutput]
     created_at: datetime
     updated_at: datetime
     completed_at: datetime | None
@@ -128,7 +156,7 @@ class ListPage(Contract):
     limit: int
 
 
-class AddItem(ItemInput, Version):
+class AddItem(ShoppingItemInput, Version):
     pass
 
 

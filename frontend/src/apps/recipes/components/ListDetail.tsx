@@ -4,7 +4,12 @@ import { ErrorMessage } from "../../../shared/ui/Dialog";
 import { Icon } from "../../../shared/ui/Icon";
 import { recipesApi } from "../api";
 import { dateLabel, number, tr, unitLabel } from "../i18n";
-import { itemInput, type Item, type Kind, type ShoppingList } from "../types";
+import {
+  itemInput,
+  type ShoppingItem,
+  type Kind,
+  type ShoppingList,
+} from "../types";
 import { IngredientPicker } from "./IngredientPicker";
 import { ImportDialog } from "./ImportDialog";
 import { History, NameDialog, useDraft, type DraftProps } from "./common";
@@ -62,7 +67,7 @@ export function ListDetail({
       setModal(value);
     }
   }
-  function row(item: Item) {
+  function row(item: ShoppingItem) {
     const Row = list.kind === "template" ? "div" : "label";
     const remaining =
       Math.round(
@@ -300,7 +305,7 @@ export function ListDetail({
             </label>
           )}
           {!list.items.length && (
-            <p className="recipes-empty-inline">{tr("no_ingredients")}</p>
+            <p className="recipes-empty-inline">{tr("no_shopping_items")}</p>
           )}
           {shop && list.items.length > 0 && remainingItems.length === 0 && (
             <p className="recipes-complete-message">
@@ -350,11 +355,16 @@ export function ListDetail({
         </section>
         {editable && (
           <aside className="recipes-add-panel">
-            <h2>{tr("ingredients")}</h2>
+            <h2>{tr("add_shopping_item")}</h2>
             <IngredientPicker
               disabled={action.busy || modalBusy}
               onDirty={onPickerDirty}
               onBusy={onPickerBusy}
+              onAddFree={async (item) => {
+                const value = await recipesApi.addItem(list, item);
+                onChanged(value);
+                return true;
+              }}
               onAdd={async (item) => {
                 const value = await recipesApi.addItem(list, itemInput(item));
                 onChanged(value);

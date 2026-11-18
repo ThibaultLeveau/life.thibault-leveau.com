@@ -3,7 +3,7 @@ import type { Unit } from "./types";
 import fr from "./locales/fr.json";
 import en from "./locales/en.json";
 export const resources = { fr, en };
-export type MessageKey = keyof typeof fr | "items" | "for_people";
+export type MessageKey = keyof typeof fr | "items" | "shopping_items" | "for_people";
 i18next.addResourceBundle("fr", "recipes", fr);
 i18next.addResourceBundle("en", "recipes", en);
 export function tr(key: MessageKey, values?: Record<string, unknown>): string {

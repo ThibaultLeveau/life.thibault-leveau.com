@@ -320,9 +320,16 @@ On a synthetic account verify file/image import, public-page reading, private UR
 
 No migration or new storage. Use the normal backup and deployment procedure. Verify effective budgets: existing explicit `LIFE_ASSISTANT_TIMEOUT_SECONDS=180` settings still take precedence; raise them to 600 for longer requests unless a shorter deadline is intended. Default caps are 96 calls and 200 actions. Check OpenAPI `/tasks/import`, ten-task imports on a synthetic account, complete rollback of invalid batches and assistant preview/confirmation. Existing backups/restores include tasks, events and receipts without a new procedure.
 
+
+## Deploy free shopping items
+
+After validation, review, CI and merge, publish `main` with `scripts/deploy.sh`: standard backup followed by additive migration `0017_shopping_free_items`. Follow the [rollback limitations](sauvegardes.md#migration-0017-articles-libres). No new secret, service or configuration.
+
+Using a synthetic account, add a free item by keyboard without the catalogue, reload, add more after purchasing, edit quantity, import a recipe, copy to a template then a list, archive/restore and disable/re-enable. Check FR/EN, themes, 320 px mobile, errors and draft preservation. Verify the running commit, migration revision, probes, `/recipes`, OpenAPI and FR/EN guides over HTTPS; record backup, SHA and results in issue #99.
+
 ## Recipes import services (ADR 010)
 
-Before first deployment, add `LIFE_RECIPE_BROWSER_TOKEN` to `.env.production` (mode 600) and any additional VPS public IPs to `LIFE_RECIPE_DENIED_IPS`. The deployment script now builds three images with the same SHA: `local/life`, `local/life-recipe-browser`, `local/life-recipe-egress`. Their Compose variables are `LIFE_IMAGE`, `LIFE_BROWSER_IMAGE`, `LIFE_RECIPE_EGRESS_IMAGE`. It backs up PostgreSQL, applies additive migration 0017 and waits for all service health checks. Browser/proxy ports are never published; keep `recipe-control` and `recipe-outbound` internal.
+Before first deployment, add `LIFE_RECIPE_BROWSER_TOKEN` to `.env.production` (mode 600) and any additional VPS public IPs to `LIFE_RECIPE_DENIED_IPS`. The deployment script now builds three images with the same SHA: `local/life`, `local/life-recipe-browser`, `local/life-recipe-egress`. Their Compose variables are `LIFE_IMAGE`, `LIFE_BROWSER_IMAGE`, `LIFE_RECIPE_EGRESS_IMAGE`. It backs up PostgreSQL, applies additive migration 0018 and waits for all service health checks. Browser/proxy ports are never published; keep `recipe-control` and `recipe-outbound` internal.
 
 Run `make docker-build` then `bash scripts/test-recipe-browser.sh` on a host supporting unprivileged user namespaces before release. The test uses a synthetic website on an internal Docker network and checks the active Chromium sandbox, human interaction, cookies, ownership, page versions and network denials. Never add `--no-sandbox`, privileged mode, a Docker mount or a DevTools port. The seccomp profile comes from Playwright 1.64.1, with `chroot` allowed inside the user namespace without adding container capabilities.
 

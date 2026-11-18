@@ -23,6 +23,15 @@ export interface Item extends ItemInput {
   purchased_quantity: string;
   checked: boolean;
 }
+export interface FreeItemInput {
+  name: string;
+  quantity: string;
+  unit: Unit;
+}
+export type ShoppingItemInput = ItemInput | FreeItemInput;
+export interface ShoppingItem extends Omit<Item, "ingredient_id"> {
+  ingredient_id: string | null;
+}
 export interface RecipeInput {
   title: string;
   servings: number;
@@ -46,7 +55,7 @@ export interface ShoppingList {
   title: string;
   kind: Kind;
   version: number;
-  items: Item[];
+  items: ShoppingItem[];
   created_at: string;
   updated_at: string;
   completed_at: string | null;

@@ -21,7 +21,7 @@ All routes require session and recipes activation. Owner comes from session. Mut
 | GET | `/lists/{id}` | List/template and all items |
 | PUT | `/lists/{id}` | `{title,expected_version}` |
 | POST | `/lists/{id}/copy` | `{title,kind,expected_version}` → new object, 201 |
-| POST | `/lists/{id}/items` | `{ingredient_id,quantity,unit,expected_version}`, add/combine |
+| POST | `/lists/{id}/items` | `{name,quantity?,unit?,expected_version}` or `{ingredient_id,quantity?,unit?,expected_version}`, add/combine |
 | PUT | `/lists/{id}/items/{item_id}` | `{quantity,expected_version}`, replace total |
 | DELETE | `/lists/{id}/items/{item_id}` | Body `{expected_version}`, return list |
 | PUT | `/lists/{id}/items/{item_id}/check` | `{checked,expected_version}`, lists only |
@@ -30,17 +30,31 @@ All routes require session and recipes activation. Owner comes from session. Mut
 | PUT | `/lists/{id}/archive` | `{archived,expected_version}` |
 | GET | `/lists/{id}/history?offset=0&limit=30` | Immutable history, max 100 |
 
-Items contain ingredient UUID, decimal quantity and unit g/mg/l/ml/tsp/tbsp/u. Responses encode decimals as **strings** without precision loss. Prefer decimal strings with a dot; numeric JSON is also accepted except booleans/non-finite values. Outputs add ID, localized name, category, position, purchased_quantity and checked. Personal names remain intact. Ingredients also expose name_fr, name_en, builtin and suggested unit.
+Recipe items contain ingredient UUID, decimal quantity and unit g/mg/l/ml/tsp/tbsp/u. Responses encode decimals as **strings** without precision loss. Prefer decimal strings with a dot; numeric JSON is also accepted except booleans/non-finite values. Outputs add ID, localized name, category, position, purchased_quantity and checked. Personal names remain intact. Ingredients also expose name_fr, name_en, builtin and suggested unit.
 
 mg = milligrams, ml = millilitres, tsp = teaspoons, tbsp = tablespoons. API unit identifiers are language-independent. Example: `{"ingredient_id":"<UUID>","quantity":"0.5","unit":"tsp"}`. Different units never convert/combine, including g/mg or l/ml.
 
 Recipes include dates, version, displayed servings, base_servings, method and ingredients. Lists add kind/completed_at/archived_at; templates have no completion date. Search returns `{items,total,offset,limit}`. Objects sort stably by last update then identifier.
 
+For lists and templates, each `items` entry and `POST /lists/{id}/items` accept **exactly one** of `ingredient_id` (accessible UUID) or `name` (free item, 1–120 characters after trimming). The other field may be absent or null. Defaults are `quantity: "1"` and `unit: "u"`. Minimal example: `{"name":"AA batteries","expected_version":1}`. Free outputs have `ingredient_id: null`, the personal name and `category: "other"`. No ingredient is created. Empty or oversized normalized names (over 240 characters), both identities or neither identity return **422**.
+
+Free items combine by `(normalized name, unit)`, separately from catalogue ingredients even with the same name. Normalization ignores case, accents, repeated whitespace and œ/æ ligatures; the first spelling is retained. Copies, purchases, history and activation changes preserve free names. Assistant capabilities `create_list` and `add_item` use this same contract.
+
+### Add a purchase without the catalogue
+
+```bash
+curl -b cookies.txt -H "X-CSRF-Token: $CSRF" -H 'Content-Type: application/json' \
+  -d '{"name":"AA batteries","quantity":"4","unit":"u","expected_version":1}' \
+  'https://life.thibault-leveau.com/api/v1/recipes/lists/<list UUID>/items'
+```
+
+Use the current list version and the returned version for your next mutation. Creating a list with `{"title":"Home","items":[{"name":"Detergent"},{"name":"AA batteries","quantity":"4"}]}` also works without catalogue requests.
+
 ## Calculations and lifecycle {#calculs-et-cycle-de-vie}
 
 The server combines by `(ingredient_id,unit)` and scales quantity × requested servings / reference servings, rounded half-up to six decimals. Final quantities must remain 0.000001–1,000,000,000. Errors roll back the entire transaction. Additions preserve purchased amounts; checked means purchased equals total. Checking sets purchased to total; unchecking sets zero. Editing total caps purchased at that total.
 
-Recipes accept 1–200 lines and 1–1,000 integer servings; lists accept 0–300 ingredient/unit pairs. Recipe duplicates combine on save. Title length 1–160; method at most 20,000; ingredient name 1–120. Per-owner limits: 2,000 recipes, 2,000 lists/templates, 3,000 personal ingredients.
+Recipes accept 1–200 lines and 1–1,000 integer servings; lists accept 0–300 item/unit pairs. Recipe duplicates combine on save. Title length 1–160; method at most 20,000; ingredient or free item name 1–120. Per-owner limits: 2,000 recipes, 2,000 lists/templates, 3,000 personal ingredients.
 
 Completion requires a non-empty fully purchased list. Reopening preserves purchases; previous finish dates remain in events. Archives block ordinary edits. Copies of completed/archived sources are allowed and reset purchases/completion/archive. Copying uses the exact requested source version and creates no mutable link. No recipe/list/template DELETE is exposed.
 

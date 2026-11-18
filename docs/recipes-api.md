@@ -21,7 +21,7 @@ Toutes les routes exigent session et activation `recipes`. Le propriétaire vien
 | GET | `/lists/{id}` | Liste/modèle et toutes ses lignes |
 | PUT | `/lists/{id}` | `{title, expected_version}` |
 | POST | `/lists/{id}/copy` | `{title, kind, expected_version}` ; nouvelle liste/modèle, réponse 201 |
-| POST | `/lists/{id}/items` | `{ingredient_id, quantity, unit, expected_version}` ; ajoute/cumule |
+| POST | `/lists/{id}/items` | `{name, quantity?, unit?, expected_version}` ou `{ingredient_id, quantity?, unit?, expected_version}` ; ajoute/cumule |
 | PUT | `/lists/{id}/items/{item_id}` | `{quantity, expected_version}` ; remplace la quantité totale |
 | DELETE | `/lists/{id}/items/{item_id}` | Corps `{expected_version}` ; retire une ligne, retourne la liste |
 | PUT | `/lists/{id}/items/{item_id}/check` | `{checked, expected_version}` ; listes seulement |
@@ -30,17 +30,31 @@ Toutes les routes exigent session et activation `recipes`. Le propriétaire vien
 | PUT | `/lists/{id}/archive` | `{archived, expected_version}` |
 | GET | `/lists/{id}/history?offset=0&limit=30` | Historique immuable, limite 100 |
 
-`items` contient `{ingredient_id: UUID, quantity: decimal, unit: "g"|"mg"|"l"|"ml"|"tsp"|"tbsp"|"u"}`. Les réponses encodent les décimaux en **chaînes**, sans perte de précision. Envoyer de préférence des chaînes décimales à point. Les entrées JSON numériques sont également acceptées, sauf booléens et valeurs non finies. Les sorties ajoutent `id`, `name` localisé, `category`, `position`, `purchased_quantity` et `checked`. Les noms personnels restent intacts. La fiche ingrédient fournit aussi `name_fr`, `name_en`, `builtin` et l’unité suggérée.
+Dans une recette, `items` contient `{ingredient_id: UUID, quantity: decimal, unit: "g"|"mg"|"l"|"ml"|"tsp"|"tbsp"|"u"}`. Les réponses encodent les décimaux en **chaînes**, sans perte de précision. Envoyer de préférence des chaînes décimales à point. Les entrées JSON numériques sont également acceptées, sauf booléens et valeurs non finies. Les sorties ajoutent `id`, `name` localisé, `category`, `position`, `purchased_quantity` et `checked`. Les noms personnels restent intacts. La fiche ingrédient fournit aussi `name_fr`, `name_en`, `builtin` et l’unité suggérée.
 
 `mg` désigne les milligrammes, `ml` les millilitres, `tsp` les cuillères à café et `tbsp` les cuillères à soupe. Ces identifiants API restent identiques en FR/EN. Exemple de ligne : `{"ingredient_id":"<UUID>","quantity":"0.5","unit":"tsp"}`. Les unités différentes ne sont jamais converties ni cumulées entre elles, même g/mg et l/ml.
 
 Les recettes fournissent leurs dates, `version`, `servings` affiché, `base_servings`, préparation et ingrédients. Les listes ajoutent `kind`, `completed_at`, `archived_at`. Un modèle n’a pas de date de fin. Les résultats de recherche sont `{items, total, offset, limit}`. L’ordre est stable ; les objets sont triés par dernière modification puis identifiant.
 
+Pour les listes et modèles, chaque entrée `items` et `POST /lists/{id}/items` acceptent **exactement un** des champs `ingredient_id` (UUID accessible) ou `name` (article libre, 1–120 caractères après retrait des espaces de bord). L’autre champ peut être omis ou nul. `quantity` vaut `"1"` et `unit` vaut `"u"` par défaut. Exemple minimal : `{"name":"Piles AA","expected_version":1}`. Les sorties libres ont `ingredient_id: null`, le nom personnel et `category: "other"`. Aucun ingrédient n’est créé. Les noms normalisés vides ou dépassant 240 caractères, les deux identités simultanées et l’absence d’identité sont refusés avec **422**.
+
+Les articles libres se cumulent par `(nom normalisé, unit)`, indépendamment des ingrédients du catalogue, même homonymes. La normalisation ignore casse, accents, espaces répétés et ligatures œ/æ ; le premier libellé reste affiché. Copies, achats, événements et désactivation préservent ces noms. Les capacités assistant `create_list` et `add_item` utilisent le même contrat.
+
+### Ajouter un achat sans catalogue
+
+```bash
+curl -b cookies.txt -H "X-CSRF-Token: $CSRF" -H 'Content-Type: application/json' \
+  -d '{"name":"Piles AA","quantity":"4","unit":"u","expected_version":1}' \
+  'https://life.thibault-leveau.com/api/v1/recipes/lists/<UUID liste>/items'
+```
+
+Utiliser la version courante de la liste ; la réponse fournit la version à employer pour la mutation suivante. Une création de liste avec `{"title":"Maison","items":[{"name":"Lessive"},{"name":"Piles AA","quantity":"4"}]}` fonctionne également sans appel au catalogue.
+
 ## Calculs et cycle de vie
 
 Le serveur additionne par `(ingredient_id, unit)` et calcule `quantité × portions demandées / portions de référence`, arrondi à six décimales, demi vers le haut. Chaque quantité finale doit rester entre 0,000001 et 1 000 000 000. Toute erreur annule la transaction entière. Un ajout conserve la quantité déjà achetée ; `checked` signifie que l’acheté égale le total. Cocher affecte l’acheté au total, décocher à zéro. Modifier le total plafonne l’acheté à ce total.
 
-Une recette accepte 1–200 lignes et 1–1 000 portions entières. Une liste accepte 0–300 couples ingrédient/unité. Les doublons de recette sont cumulés à l’enregistrement. Titres : 1–160 caractères ; préparation : 20 000 ; noms d’ingrédient : 1–120. Quotas par propriétaire : 2 000 recettes, 2 000 listes/modèles et 3 000 ingrédients personnels.
+Une recette accepte 1–200 lignes et 1–1 000 portions entières. Une liste accepte 0–300 couples article/unité. Les doublons de recette sont cumulés à l’enregistrement. Titres : 1–160 caractères ; préparation : 20 000 ; noms d’ingrédient ou d’article libre : 1–120. Quotas par propriétaire : 2 000 recettes, 2 000 listes/modèles et 3 000 ingrédients personnels.
 
 Terminer exige une liste non vide entièrement achetée. Réouvrir préserve les achats. Les dates de fins précédentes restent dans les événements. Les archives bloquent les modifications ordinaires ; la copie d’une source terminée ou archivée reste possible et vide toujours l’acheté, la fin et l’archive. La copie prend la version exacte demandée et n’entretient aucun lien mutable avec sa source. Aucun DELETE de recette/liste/modèle n’est exposé.
 

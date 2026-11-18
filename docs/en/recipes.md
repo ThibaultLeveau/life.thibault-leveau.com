@@ -22,11 +22,17 @@ The supplied database contains **301 ingredients and everyday items** across pro
 
 Search and select an ingredient, then enter a quantity and unit: **g** for grams, **mg** for milligrams, **l** for litres, **ml** for millilitres, **tsp** for teaspoons, **tbsp** for tablespoons and **u** for individual items. The default unit is a suggestion; you can change it. Enter 250 ml or 0.5 tsp directly, and 1,000 g for 1 kg.
 
-For an unknown name, **Create “…” in my catalogue** creates a private ingredient with your chosen unit and selects it. Personal names stay unchanged in both languages and are invisible to other users. An exact existing French or English name reuses the same identity. Search does not automatically merge synonyms or singular/plural names: choose an existing ingredient to combine its quantities correctly.
+In the recipe editor, for an unknown name, **Create “…” in my catalogue** creates a private ingredient with your chosen unit and selects it. Personal names stay unchanged in both languages and are invisible to other users. An exact existing French or English name reuses the same identity. Search does not automatically merge synonyms or singular/plural names: choose an existing ingredient to combine its quantities correctly.
 
 ## Prepare a shopping list
 
-Choose **Shopping lists → New list**. Add items manually or **Import a recipe**, choose the recipe and serving count. You can also start from a recipe using **Add to a list**. Search and pagination reach older recipes and lists.
+Choose **Shopping lists → New list** and give your list a name.
+
+In **Add an item**, type anything you need — detergent, AA batteries, flowers — and press **Enter** or **Add**. No catalogue selection or creation is required. The default is **1 piece**; adjust quantity and unit if needed. Suggestions are optional: select one to use a catalogue ingredient. Free items appear under **Other items**, keep their original name in either language and never create recipe ingredients.
+
+Free items with the same name (ignoring case, accents and repeated whitespace) and unit add up, retaining the first spelling. Different names, synonyms and plurals remain separate. Free items do not merge with catalogue ingredients of the same name. You can still add a free item if catalogue search is unavailable. Purchases, quantity edits, removal, completion, archives and templates work for both kinds of item.
+
+To add recipe ingredients, use **Import a recipe**, choose the recipe and serving count. You can also start from a recipe using **Add to a list**. Search and pagination reach older recipes and lists.
 
 Imports add quantities. Two imports of 200 g combine into one 400 g row. Only the same ingredient identity and unit combine; different units remain separate, including g/mg and l/ml. There is no automatic conversion, including for spoons. Repeating an import deliberately adds another portion; replaying the same stale version is rejected.
 
@@ -52,7 +58,7 @@ A network connection is required. Failed saves are shown as errors, not successf
 
 ## Templates and previous lists
 
-Build a template manually from **My templates → New template**, or choose **Save as template** on an existing list. Ingredients and recipe imports work the same way. **Create a list** copies a template with no checked purchases.
+Build a template manually from **My templates → New template**, or choose **Save as template** on an existing list. Free items, catalogue ingredients and recipe imports work the same way. **Create a list** copies a template with no checked purchases.
 
 **Reuse this list** also works on previous or archived lists. Copies are independent and never change their source. Templates have no purchase state or completion date. Recipes, templates and lists use the same ingredient identities.
 

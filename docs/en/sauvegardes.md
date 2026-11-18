@@ -209,8 +209,15 @@ Downgrade refuses any source (including removed receipts), dictation configurati
 
 After restore, `restore-suffix.sql` revokes sessions, interrupts runs, invalidates previews, releases transcription leases and removes unfinished import reservations. Ready/bound sources, digests, metadata, extracted text, external marker and credentials remain intact. Verify integrity and authenticated downloads on a synthetic account. `life rotate-assistant-key <account> --dry-run`, then without the option, validates/re-encrypts both credentials atomically; one unreadable key aborts everything. Retain old keys needed for earlier dumps.
 
+
+## Migration 0017 — free shopping items {#migration-0017-articles-libres}
+
+`0017_shopping_free_items` extends existing shopping rows with an optional ingredient reference, a free name and its normalized key. Standard PostgreSQL backups preserve these fields alongside purchases, lists/templates, events and progression. Restore the six Recipes tables with the rest of the database using the transactional procedure. Container acceptance requires free items and compares every stored field after restoration.
+
+Older catalogue writes remain compatible during this additive migration. No existing names, identifiers, purchases or historical snapshots are rewritten. The old image understands neither the revision nor free items: do not restart it against the migrated database. Prefer a forward fix; otherwise stop writes and restore the previous dump together with its matching image. Downgrade refuses free items in current rows **or history**, even after removing the row. Without free items or historical traces, a round trip preserves catalogue data. No new secret, volume or service.
+
 ## Recipe web imports
 
-Migration 0017 adds `source_url`, `source_title`, `imported_at` to recipes and `recipes_web_import_receipts` (owner/import composite key, recipe/owner composite foreign key, content fingerprint and timestamp). PostgreSQL backups retain attribution, receipts and creation events; disabling/re-enabling Recipes preserves them. Replaying a restored import finds the existing recipe. Downgrade refuses to discard receipts.
+Migration 0018 adds `source_url`, `source_title`, `imported_at` to recipes and `recipes_web_import_receipts` (owner/import composite key, recipe/owner composite foreign key, content fingerprint and timestamp). PostgreSQL backups retain attribution, receipts and creation events; disabling/re-enabling Recipes preserves them. Replaying a restored import finds the existing recipe. Downgrade refuses to discard receipts.
 
 Browser pages, frames, cookies and profiles are transient and excluded from backups; stop `recipe-browser` before restoring, then restart it to invalidate in-memory leases too. Protect `.env.production` and its service token separately. Browsers have no persistent volume, SQL access or AI credentials.

@@ -601,3 +601,38 @@ def test_long_recipe_receipts_preserve_every_instruction_item_and_decimal(app, c
             Decimal(item["quantity"]) == Decimal("1.250001")
             for item in card["data"]["entity"]["items"]
         )
+
+
+def test_assistant_free_shopping_items_match_http(client, invoke):
+    shopping = invoke(
+        "recipes",
+        "create_list",
+        {
+            "payload": {"title": "Maison", "items": [{"name": "Piles", "quantity": "4"}]},
+        },
+    )
+    shopping = invoke(
+        "recipes",
+        "add_item",
+        {
+            "id": shopping["id"],
+            "payload": {"name": "Lessive", "expected_version": shopping["version"]},
+        },
+    )
+    assert shopping == get(client, f"/recipes/lists/{shopping['id']}")
+    assert [item["name"] for item in shopping["items"]] == ["Piles", "Lessive"]
+    assert all(item["ingredient_id"] is None for item in shopping["items"])
+    copied = invoke(
+        "recipes",
+        "copy_list",
+        {
+            "id": shopping["id"],
+            "payload": {
+                "title": "Maison modèle",
+                "kind": "template",
+                "expected_version": shopping["version"],
+            },
+        },
+    )
+    assert copied == get(client, f"/recipes/lists/{copied['id']}")
+    assert get(client, "/recipes/ingredients")["total"] == 301

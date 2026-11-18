@@ -403,7 +403,7 @@ def test_import_migration_preserves_manual_recipes_on_empty_round_trip(client, a
         with engine.begin() as connection:
             config = migration_config()
             config.attributes["connection"] = connection
-            command.downgrade(config, "0016_assistant_sources")
+            command.downgrade(config, "0017_shopping_free_items")
             assert "source_url" not in {
                 c["name"] for c in inspect(connection).get_columns("recipes_recipes")
             }
@@ -429,7 +429,7 @@ def test_receipts_prevent_lossy_migration_and_enforce_owner_fk(client, app, engi
     with pytest.raises(RuntimeError, match="Cannot discard"), engine.begin() as connection:
         config = migration_config()
         config.attributes["connection"] = connection
-        command.downgrade(config, "0016_assistant_sources")
+        command.downgrade(config, "0017_shopping_free_items")
     assert client.post(ROOT + "/save", json=payload).json() == recipe
     with pytest.raises(IntegrityError), app.state.sessions() as db, db.begin():
         bob = db.scalar(select(User).where(User.username == "bob"))

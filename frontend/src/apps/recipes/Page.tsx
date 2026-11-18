@@ -456,7 +456,9 @@ export function Page() {
                       </span>
                       <h2>{item.title}</h2>
                       <p>
-                        {tr("items", { count: item.items.length })}
+                        {tr("kind" in item ? "shopping_items" : "items", {
+                          count: item.items.length,
+                        })}
                         {"servings" in item && item.instructions
                           ? ` · ${item.instructions.slice(0, 85)}`
                           : ""}

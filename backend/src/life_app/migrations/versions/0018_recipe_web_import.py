@@ -3,8 +3,8 @@
 import sqlalchemy as sa
 from alembic import op
 
-revision = "0017_recipe_web_import"
-down_revision = "0016_assistant_sources"
+revision = "0018_recipe_web_import"
+down_revision = "0017_shopping_free_items"
 branch_labels = None
 depends_on = None
 

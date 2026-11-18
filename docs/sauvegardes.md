@@ -216,8 +216,15 @@ Le downgrade refuse toute source (même retirée), configuration de dictée ou c
 
 Après restauration, `restore-suffix.sql` révoque les sessions, interrompt les tours, invalide les aperçus, libère les baux de transcription et supprime les réservations d’import inachevées. Sources prêtes/attachées, empreintes, métadonnées, extraits, marqueur externe et credentials restent inchangés. Vérifier leur intégrité et téléchargement authentifié sur compte synthétique. `life rotate-assistant-key <compte> --dry-run`, puis sans cette option, valide/rechiffre les deux credentials dans une transaction ; une clé illisible annule l’ensemble. Conserver les anciennes clés nécessaires aux dumps antérieurs.
 
+
+## Migration 0017 — articles libres {#migration-0017-articles-libres}
+
+`0017_shopping_free_items` étend uniquement les lignes de courses existantes : référence d’ingrédient facultative, nom libre et clé normalisée. La sauvegarde PostgreSQL habituelle conserve ces champs avec les achats, listes/modèles, événements et progression. Restaurer les six tables Recettes avec le reste de la base selon la procédure transactionnelle ; le test conteneur exige des articles libres et compare tous les champs après restauration.
+
+Les anciennes écritures catalogue restent compatibles pendant la migration additive. Aucun nom, identifiant, achat ou instantané historique n’est réécrit. L’ancienne image ne reconnaît ni la révision ni les lignes libres : ne pas la relancer sur la base migrée. Préférer une correction en avant ; sinon arrêter les écritures et restaurer ensemble le dump antérieur et son image. Le downgrade refuse tout article libre courant **ou présent dans l’historique**, même après retrait de la ligne. Sans article libre ni trace historique, l’aller-retour conserve les données catalogue. Aucun nouveau secret, volume ou service.
+
 ## Imports web de recettes
 
-La migration 0017 ajoute `source_url`, `source_title`, `imported_at` aux recettes et `recipes_web_import_receipts` (clé composée propriétaire/import, lien composé recette/propriétaire, empreinte du contenu, date). Les sauvegardes PostgreSQL conservent provenance, reçus et événements de création ; désactiver/réactiver Recettes ne les modifie pas. Rejouer un import restauré retrouve la recette existante. Une rétrogradation avec des reçus refuse de perdre ces données.
+La migration 0018 ajoute `source_url`, `source_title`, `imported_at` aux recettes et `recipes_web_import_receipts` (clé composée propriétaire/import, lien composé recette/propriétaire, empreinte du contenu, date). Les sauvegardes PostgreSQL conservent provenance, reçus et événements de création ; désactiver/réactiver Recettes ne les modifie pas. Rejouer un import restauré retrouve la recette existante. Une rétrogradation avec des reçus refuse de perdre ces données.
 
 Les pages, captures, cookies et profils du navigateur sont temporaires et exclus des sauvegardes ; arrêter `recipe-browser` avant une restauration puis le relancer pour invalider aussi les baux en mémoire. Protéger séparément `.env.production` et son token de service. Le navigateur n’a aucun volume persistant, accès SQL ou token IA.
