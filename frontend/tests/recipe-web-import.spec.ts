@@ -64,7 +64,8 @@ for (const [locale, theme, width] of [
     let id = "",
       documentVersion = 1,
       closed = 0,
-      interacted = false;
+      interacted = false,
+      frameRequests = 0;
     const source = () => ({
       id,
       url: "https://example.com/lemon-pasta",
@@ -80,6 +81,13 @@ for (const [locale, theme, width] of [
       "**/api/v1/recipes/web-import/sessions**",
       async (route) => {
         const request = route.request();
+        if (request.method() === "GET" && ++frameRequests === 1) {
+          await route.fulfill({
+            status: 502,
+            json: { detail: "Temporary browser interruption" },
+          });
+          return;
+        }
         if (request.method() === "DELETE") {
           closed++;
           await route.fulfill({ status: 204 });
@@ -167,6 +175,10 @@ for (const [locale, theme, width] of [
     await expect(
       page.getByRole("button", { name: t.web_keyboard, exact: true }),
     ).toBeFocused();
+    await expect
+      .poll(() => frameRequests, { timeout: 10000 })
+      .toBeGreaterThan(1);
+    await expect(page.getByRole("alert")).toHaveCount(0);
     await page
       .getByRole("button", { name: t.web_import_action, exact: true })
       .click();

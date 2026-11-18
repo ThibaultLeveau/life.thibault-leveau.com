@@ -1104,9 +1104,7 @@
 }
 .recipes-web-review-heading h2 {
   margin: 0 0 6px;
-  font:
-    500 25px/1.25 Georgia,
-    serif;
+  font: 550 25px/1.25 var(--font-sans);
 }
 .recipes-web-review-heading p {
   margin: 0;

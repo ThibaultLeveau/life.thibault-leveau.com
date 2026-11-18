@@ -11,6 +11,13 @@ RECIPE = '''<!doctype html><html><head><title>Lemon pasta</title>
 
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
+        if self.path == '/hang':
+            body = b'<html><title>Blocked script</title><script>setTimeout(()=>{while(true){}},500)</script></html>'
+            self.send_response(200)
+            self.send_header('Content-Length', str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
         if self.path == '/redirect':
             self.send_response(302)
             self.send_header('Location', 'http://169.254.169.254/latest/meta-data/')

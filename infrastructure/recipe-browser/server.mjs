@@ -153,10 +153,20 @@ async function exclusive(session, action) {
     release = resolve;
   });
   await previous;
+  let deadline;
   try {
     if (session.closed) fail(404, "session_expired");
-    return await action();
+    return await Promise.race([
+      action(),
+      new Promise((_, reject) => {
+        deadline = setTimeout(() => {
+          void close(session);
+          reject(new Failure(502, "page_unavailable"));
+        }, 15_000);
+      }),
+    ]);
   } finally {
+    clearTimeout(deadline);
     session.pending--;
     release();
   }

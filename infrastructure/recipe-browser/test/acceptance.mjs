@@ -155,6 +155,23 @@ await call(
   {},
   { user: secondOwner, status: 404 },
 );
+// A hostile main thread cannot keep a capture or a browser slot indefinitely.
+const started = Date.now();
+const hanging = await call(
+  "/sessions",
+  opening(undefined, "http://recipe.test/hang"),
+  { status: [201, 502] },
+);
+if (hanging.id) {
+  await new Promise((resolve) => setTimeout(resolve, 700));
+  await call(
+    "/sessions/" + hanging.id + "/source",
+    { document: hanging.document },
+    { status: 502 },
+  );
+  await call("/sessions/" + hanging.id + "/frame", {}, { status: 404 });
+}
+assert.ok(Date.now() - started < 30_000);
 console.log(
   "Sandbox, human intervention, same-page capture, cookies, owner/login isolation, stale page, quotas, SSRF and closure verified.",
 );

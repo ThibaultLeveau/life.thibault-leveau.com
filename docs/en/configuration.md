@@ -67,3 +67,5 @@ Personal dictation settings use `/assistant/transcription/settings` and require 
 Compose limits the browser service to two browsers, 2 CPUs/2 GiB RAM, 256 processes, 512 MiB memory-backed `/tmp` and 256 MiB shared memory; the proxy has 0.5 CPU/128 MiB. Browsers run unprivileged, without direct Internet access or persistent data, using the versioned seccomp sandbox profile. Leases last 20 seconds (up to 60 seconds during opening), idle expiry is 10 minutes, absolute expiry is 30 minutes or the LifeOS login expiry. Authenticated requests renew leases; images alone do not extend idle time. Capture bounds visible text and Recipe metadata to 60,000 characters each, with truncation warnings. The proxy limits 64 connections, 16 MiB per direction, 30 seconds idle and 120 seconds per tunnel.
 
 Browser openings are limited to five per minute per account, twenty globally. Pending launches/closures retain their capacity slot until the browser is actually destroyed, even after request cancellation.
+
+Each browser command, including DOM capture, has a 15-second deadline: a website blocking its JavaScript closes its session. File choosers and downloads are cancelled.

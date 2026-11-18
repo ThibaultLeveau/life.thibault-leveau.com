@@ -189,7 +189,8 @@ export function WebImport({
     [draft, setDraft] = useState<RecipeImportDraft>(),
     [busy, setBusy] = useState<"opening" | "preparing" | "saving" | null>(null),
     [browserBusy, setBrowserBusy] = useState(false),
-    [error, setError] = useState("");
+    [error, setError] = useState(""),
+    [browserError, setBrowserError] = useState("");
   const alive = useRef(true),
     pending = useRef(false),
     controller = useRef<AbortController | undefined>(undefined),
@@ -240,6 +241,7 @@ export function WebImport({
     if (id) void webImportApi.close(id).catch(() => {});
   }
   function openPage() {
+    setBrowserError("");
     closeBrowser();
     const id = crypto.randomUUID();
     session.current = id;
@@ -344,9 +346,12 @@ export function WebImport({
               key={frame.id}
               initial={frame}
               disabled={Boolean(busy)}
-              onFrame={setFrame}
+              onFrame={(value) => {
+                setFrame(value);
+                setBrowserError("");
+              }}
               onError={(message, expired) => {
-                setError(message);
+                setBrowserError(message);
                 if (expired) closeBrowser();
               }}
               onPending={setBrowserBusy}
@@ -375,7 +380,7 @@ export function WebImport({
             />
             <p className="muted recipes-small">{tr("web_paste_hint")}</p>
           </details>
-          <ErrorMessage message={error} />
+          <ErrorMessage message={error || (!paste ? browserError : "")} />
           {busy && (
             <div className="recipes-web-loading" role="status">
               <span aria-hidden="true" />
