@@ -56,10 +56,22 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       accept(null);
       setError(tr("your_session_has_expired_sign_in_again"));
     };
+    const syncAssistantPreferences = (event: Event) => {
+      const preferences = (
+        event as CustomEvent<Pick<Session, "theme" | "locale">>
+      ).detail;
+      if (current.current && preferences)
+        accept({ ...current.current, ...preferences });
+    };
+    window.addEventListener("life-assistant-changed", syncAssistantPreferences);
     window.addEventListener("life-session-expired", expired);
     return () => {
       controller.abort();
       window.removeEventListener("life-session-expired", expired);
+      window.removeEventListener(
+        "life-assistant-changed",
+        syncAssistantPreferences,
+      );
     };
   }, [accept]);
   async function changePreferences(

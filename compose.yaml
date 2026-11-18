@@ -40,6 +40,8 @@ services:
       LIFE_LOG_LEVEL: INFO
       LIFE_DATABASE_URL: ${LIFE_DATABASE_URL:?Set the PostgreSQL connection URL in .env.production}
       LIFE_SESSION_HOURS: ${LIFE_SESSION_HOURS:-168}
+      LIFE_ASSISTANT_ENCRYPTION_KEYS: ${LIFE_ASSISTANT_ENCRYPTION_KEYS:-}
+      LIFE_ASSISTANT_TIMEOUT_SECONDS: ${LIFE_ASSISTANT_TIMEOUT_SECONDS:-180}
     depends_on:
       db:
         condition: service_healthy

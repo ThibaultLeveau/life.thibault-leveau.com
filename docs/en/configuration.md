@@ -10,11 +10,17 @@ Pydantic Settings prioritizes process variables over `.env`. Run local commands 
 | `LIFE_PUBLIC_BASE_URL` | `http://localhost:8100` | Allowed origin for browser writes |
 | `LIFE_DATABASE_URL` | absent | `postgresql+psycopg://user:password@host:port/database` |
 | `LIFE_SESSION_HOURS` | `168` | Fixed session lifetime, 1–720 hours; no automatic extension |
+| `LIFE_ASSISTANT_ENCRYPTION_KEYS` | absent | Comma-separated Fernet keys; first key encrypts new AI tokens |
+| `LIFE_ASSISTANT_TIMEOUT_SECONDS` | `180` | Maximum AI turn duration, 10–600 seconds |
 | `LIFE_LOG_LEVEL` | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL` |
 | `LIFE_FRONTEND_DIR` | `frontend/dist` | Frontend artifacts; relative paths resolve from the repository root |
 | `LIFE_DOCUMENTATION_DIR` | `site` | MkDocs artifacts; relative paths resolve from the repository root |
 
 Without a database URL, `/api/v1/health` and public files remain available; private features and `/api/v1/health/ready` return 503. The probe checks database readiness; startup does not migrate it. Incompatible SQL URLs are rejected.
+
+Without a valid AI keyring, saving or decrypting provider tokens is unavailable; applications and probes remain usable. Generate a key with `uv run python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'` in a private terminal, store it in protected `.env.production` and back it up separately from database dumps. Never use an example key or a key printed in public logs. Older keys support decryption and [rotation](sauvegardes.md#migration-0015-assistant).
+
+Provider, model and user token are account preferences managed through the [Assistant API](assistant-api.md), not frontend variables. Adapters only use predefined OpenAI, Anthropic and Gemini HTTPS hosts; arbitrary provider URLs are not accepted. Outbound access to these providers must be available from the web container.
 
 `LIFE_PUBLIC_BASE_URL` must be the exact origin with no subpath: `http://localhost:5173` in development, `https://life.thibault-leveau.com` in production. It configures neither DNS nor Caddy. Vite’s proxy avoids CORS; no general CORS policy is opened. In development/test, the backend’s own origin is also accepted.
 

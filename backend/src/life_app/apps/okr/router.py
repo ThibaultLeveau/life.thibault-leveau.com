@@ -1,9 +1,7 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Query
-from sqlalchemy import Integer, select
 
-from life_app.apps.okr import models as m
 from life_app.apps.okr import schemas as s
 from life_app.apps.okr import service as svc
 from life_app.core.database import Database
@@ -61,18 +59,7 @@ def history(
     offset: int = Query(0, ge=0),
     limit: int = Query(30, ge=1, le=100),
 ):
-    svc.owned(db, user, id)
-    return db.scalars(
-        select(m.Event)
-        .where(m.Event.objective_id == id, m.Event.owner_id == user.id)
-        .order_by(
-            m.Event.snapshot["version"].astext.cast(Integer).desc(),
-            m.Event.occurred_at.desc(),
-            m.Event.id,
-        )
-        .offset(offset)
-        .limit(limit)
-    ).all()
+    return svc.history(db, user, id, offset, limit)
 
 
 @router.get("/achievements", response_model=s.AchievementPage)

@@ -1,5 +1,7 @@
 # API reference
 
+The [Assistant API](assistant-api.md) covers provider/token settings, conversations, streaming, receipts and confirmations, memory and capability discovery. Business routes below remain available independently of the assistant and share their rules with its tools.
+
 Every interface business feature uses `/api/v1`. Exact schemas, required fields and responses are available in [OpenAPI](https://life.thibault-leveau.com/api/openapi.json) and [Swagger UI](https://life.thibault-leveau.com/api/docs) for the deployed commit. Private routes require a session; there is no public registration.
 
 ## Session and protections {#session-et-protections}

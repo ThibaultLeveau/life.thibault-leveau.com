@@ -1,6 +1,8 @@
 # LifeOS
 
-LifeOS réunit des applications personnelles dans une bibliothèque. Activez celles qui vous sont utiles : l’accueil affiche vos applications activées, avec une connexion et un thème communs. La désactivation conserve les données et se révoque à tout moment. [Guide de la bibliothèque](docs/applications.md).
+LifeOS réunit un assistant IA et des applications personnelles. L’accueil connecté propose une conversation, un historique et une mémoire personnelle contrôlable ; l’assistant consulte et modifie les applications activées avec leurs règles et confirmations. Configurez fournisseur, modèle et token dans les réglages. [Guide de l’assistant](docs/assistant.md) · [API Assistant](docs/assistant-api.md).
+
+Activez les applications qui vous sont utiles dans la bibliothèque, avec une connexion et un thème communs. La désactivation conserve les données et se révoque à tout moment. [Guide de la bibliothèque](docs/applications.md).
 
 Un espace personnel pour organiser ses tâches : espaces et sous-espaces, sections, listes à cocher et kanban en glisser-déposer, avec thèmes clair et sombre. Une vue **À venir** réunit les échéances de tous les espaces, avec périodes configurables et dates en langage humain. Les sections forment les listes et les **lignes** du tableau ; les statuts deviennent ses colonnes.
 
@@ -24,7 +26,7 @@ FastAPI / Python 3.13 sert React / TypeScript, l'API et MkDocs depuis une image 
 | --- | --- |
 | `backend/src/life_app/core/` | Configuration, connexions et journaux |
 | `backend/src/life_app/apps/<id>/` | Manifeste, routes, modèles, contrats et services de chaque application |
-| `backend/src/life_app/platform/` | Connexion, bibliothèque et activations personnelles |
+| `backend/src/life_app/platform/` | Connexion, bibliothèque, progression et assistant IA |
 | `backend/src/life_app/api/` | API versionnée et sondes |
 | `backend/src/life_app/migrations/` | Migrations versionnées incluses dans l'image |
 | `frontend/src/apps/<id>/` | Manifeste, page, types, API, composants et styles de chaque application |
@@ -91,4 +93,4 @@ Les [réussites](docs/progression.md) proposent **60 quêtes par application**, 
 
 [Recettes & Liste de courses](docs/recipes.md) propose un catalogue de **301 ingrédients FR/EN**, vos ingrédients privés, des recettes à portions ajustables, le cumul des ingrédients, des listes et modèles réutilisables et un mode magasin mobile/ordinateur. Ses quatre métriques et **60 quêtes** sont disponibles dans Suivi. Toutes les opérations disposent de leur [API](docs/recipes-api.md). L’application est désactivée par défaut.
 
-Les [réglages généraux](docs/settings.md) réunissent les préférences du compte et de chaque application. Le menu du nom sur l’accueil propose Réglages et Déconnexion ; les liens Réglages des applications ouvrent leur section directement.
+Les [réglages généraux](docs/settings.md) réunissent les préférences du compte et de chaque application. La navigation de l’accueil propose Réglages ; son footer commun contient le compte et la déconnexion. Depuis la bibliothèque, le menu du nom ouvre aussi les réglages. Les liens Réglages des applications ouvrent leur section directement.

@@ -2,6 +2,12 @@
 
 ## Vue d'ensemble
 
+L’[ADR 008](decisions/008-assistant-ia.md), approuvé dans l’issue #85, étend ce monolithe avec `platform/assistant`. L’accueil connecté compose le chat, son historique et la mémoire personnelle. PostgreSQL conserve ces données et les reçus d’actions ; aucun service d’agents, file ou stockage vectoriel n’est ajouté.
+
+Le coordinateur appelle seulement les spécialistes utiles : cinq spécialistes métier et un spécialiste `lifeos` pour le socle. Les manifestes exposent 118 capacités métier ; `platform/assistant/common.py` fournit 11 capacités de bibliothèque/activation, préférences, progression et intégrations. Chaque application possède `assistant.py` et fournit `ActionProvider` via son manifeste ; les capacités réutilisent schémas, propriétaires, versions, événements et progression du métier. Le socle découvre les contrats injectés sans importer les applications. Les snippets utilisent des renderers React métier chargés par le registre frontend, avec données structurées versionnées et aucun code généré exécuté.
+
+La requête de message libère son verrou propriétaire avant l’appel fournisseur. Chaque action ouvre une transaction courte, revalide session/activation/version et enregistre mutation et reçu ensemble. Les aperçus simulent l’action dans un savepoint annulé ; la confirmation exécute la proposition validée, sous contrôle de version. Les historiques de conversation, résumés et souvenirs sont distincts. Voir [API Assistant](assistant-api.md), [données](donnees.md#assistant-ia) et [configuration](configuration.md).
+
 Life conserve le monorepo FastAPI / React / MkDocs. Un processus Uvicorn sert l'API, le frontend compilé et la documentation. PostgreSQL 17 est le seul service de données ajouté, conformément à l'[ADR 002](decisions/002-gestion-taches.md).
 
 ![Flux de production : navigateur, Caddy, application puis PostgreSQL privé.](assets/diagrams/production.svg)

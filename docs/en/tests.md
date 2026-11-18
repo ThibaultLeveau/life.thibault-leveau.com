@@ -137,3 +137,13 @@ Sport chart geometry checks explicitly wait for the points to render after navig
 `sport-mobile.spec.ts` measures initial content at 320 × 568, 390 × 664 and 430 × 780 in French/light and English/dark: at least two complete rows on the smallest phone and three on larger formats, search/filter access, list/grid switching, the first plot, first exercise inputs, first sets and visible settings input. It verifies a picker that does not summon the keyboard on opening, focus restoration, copy/archive/undo and positioning actions, complete measurement details after compact previews, preserved collapsed values and saving with a 360 px reduced viewport. Touch landscape at 844 × 390 keeps mobile preferences.
 
 Existing Sport scenarios explicitly open compact menus and options while retaining persistence, conflict, validation and preservation assertions. Shared navigation/settings tests cover the other applications. Screenshots finish animations before capture; browser emulation does not constitute physical-device testing.
+
+## AI assistant
+
+The `test_assistant*.py` suites cover private routes, memory and history, atomic receipts, confirmations and adapters for all five applications. Contract tests compare capabilities against HTTP routes; domain tests verify ownership, versions, archives, history and that adapters do not commit. The `lifeos` specialist also exposes shared library, preferences, progression and integration operations.
+
+`test_assistant_memory.py` checks explicit FR/EN refusals, sensitivity guards independent of the model flag and stopping after automatic correction. `test_assistant_compaction.py` checks complete-message batches, split oversized messages, the last message actually covered and preservation after interruption.
+
+`test_assistant_migration.py` checks business data preservation through migration 0015, SQL constraints, the three idempotence keys and downgrade refusal for each of the seven populated tables. `test_assistant_key_rotation.py` checks rotation/dry-run, wrong-key failure without loss and restoration: interrupted replies, invalidated previews, preserved completed receipts and memories, and revoked sessions. Container tests compare all seven tables after dump/restore and decrypt a strictly synthetic token.
+
+`test_assistant_providers.py` uses simulated HTTP responses for OpenAI, Anthropic and Gemini. These suites never contact a real provider and do not prove account access, model availability or real-request behavior. Real-provider validation is separate and must be recorded explicitly; never infer it from passing simulated tests. The `assistant.spec.ts` journeys exercise the interface with synthetic data. Results of commands actually executed belong in the delivery issue and pull request.

@@ -20,6 +20,7 @@ cleanup() {
 trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
+assistant_test_key=$(docker run --rm "$image" python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())')
 
 docker network create --internal "$network" >/dev/null
 docker network create "$http_network" >/dev/null
@@ -34,7 +35,8 @@ for attempt in $(seq 1 40); do
 done
 url="postgresql+psycopg://life:synthetic-application-password@$db:5432/life"
 run_app() {
-  docker run --rm --network "$network" -e LIFE_DATABASE_URL="$url" "$image" "$@"
+  docker run --rm --network "$network" -e LIFE_DATABASE_URL="$url" \
+    -e LIFE_ASSISTANT_ENCRYPTION_KEYS="$assistant_test_key" "$image" "$@"
 }
 run_app life migrate
 printf '%s\n' synthetic-browser-password | docker run --rm -i --network "$network" \
@@ -43,6 +45,7 @@ printf '%s\n' synthetic-browser-password | docker run --rm -i --network "$networ
 docker create --name "$web" --network "$network" --read-only --tmpfs /tmp:rw,size=16m \
   --cap-drop ALL --security-opt no-new-privileges:true \
   -e LIFE_DATABASE_URL="$url" -e LIFE_ENVIRONMENT=test \
+  -e LIFE_ASSISTANT_ENCRYPTION_KEYS="$assistant_test_key" \
   -p 127.0.0.1::8000 "$image" >/dev/null
 docker network connect "$http_network" "$web"
 docker start "$web" >/dev/null
@@ -95,6 +98,55 @@ result = request('/applications/tasks', {'enabled': False}, 'PUT', {'X-CSRF-Toke
 assert result['enabled'] is False
 preferences = request('/preferences', {'locale': 'en'}, 'PUT', {'X-CSRF-Token': session['csrf_token']})
 assert preferences['locale'] == 'en'
+assistant_settings = request('/assistant/settings', {
+    'provider': 'openai', 'model': 'synthetic-model',
+    'api_token': 'synthetic-provider-token-for-backup',
+}, 'PUT', headers)
+assert assistant_settings['configured'] and 'api_token' not in assistant_settings
+request('/assistant/conversations', {'title': 'Assistant restore fixture'}, headers=headers)
+request('/assistant/memories', {
+    'content': 'I work on a synthetic restoration project.', 'category': 'projects',
+}, headers=headers)
+PY
+
+# Persist interrupted work and successful receipts without contacting an AI provider.
+docker run --rm -i --network "$network" -e LIFE_DATABASE_URL="$url" \
+  -e LIFE_ASSISTANT_ENCRYPTION_KEYS="$assistant_test_key" "$image" python - <<'PY'
+from uuid import uuid4
+from sqlalchemy import create_engine, select
+from sqlalchemy.orm import Session
+from life_app.core.config import get_settings
+from life_app.platform.assistant import models as m
+from life_app.platform.auth.models import LoginSession, User
+
+engine = create_engine(get_settings().database_url.get_secret_value())
+with Session(engine) as db, db.begin():
+    user = db.scalar(select(User).where(User.username == 'browser-test'))
+    conversation = db.scalar(select(m.Conversation).where(
+        m.Conversation.user_id == user.id, m.Conversation.title == 'Assistant restore fixture'))
+    source = m.Message(user_id=user.id, conversation_id=conversation.id, role='user',
+                       content='I work on a synthetic restoration project.')
+    reply = m.Message(user_id=user.id, conversation_id=conversation.id, role='assistant',
+                      content='Synthetic partial response.', status='running')
+    db.add_all([source, reply])
+    db.flush()
+    login = db.scalar(select(LoginSession).where(LoginSession.user_id == user.id).limit(1))
+    run = m.Run(user_id=user.id, conversation_id=conversation.id, message_id=reply.id,
+                request_id=uuid4(), request_hash='0' * 64, memory_version=1,
+                session_hash=login.token_hash)
+    db.add(run)
+    db.flush()
+    reply.run_id = run.id
+    memory = db.scalar(select(m.Memory).where(m.Memory.user_id == user.id).limit(1))
+    memory.source_conversation_id = conversation.id
+    memory.source_message_id = source.id
+    memory.source_excerpt = source.content
+    for step, status in ((1, 'preview'), (2, 'complete')):
+        db.add(m.Operation(user_id=user.id, run_id=run.id, step=step,
+            application_id='tasks', action='synthetic', arguments={'example': True},
+            argument_hash=str(step) * 64, status=status, result={'saved': status == 'complete'}))
+    db.add(m.RunEvent(run_id=run.id, sequence=1, data={'type': 'status', 'text': 'Synthetic'}))
+engine.dispose()
 PY
 
 # Restore into a separate throwaway database; never destroy the source under test.
@@ -171,6 +223,20 @@ for progression_table in progression_settings progression_activity progression_r
   restored_progression=$(docker exec "$db" psql -U life -d life_restored -Atc "$progression_query")
   [[ "$source_progression" != '[]' && "$source_progression" == "$restored_progression" ]]
 done
+# Assistant data survives except for intentionally interrupted runs and invalidated previews.
+for assistant_table in assistant_settings assistant_conversations assistant_messages assistant_memories assistant_runs assistant_operations assistant_run_events; do
+  expected_expression='to_jsonb(t)'
+  case "$assistant_table" in
+    assistant_messages) expected_expression="CASE WHEN status = 'running' THEN to_jsonb(t) || '{\"status\":\"interrupted\"}'::jsonb ELSE to_jsonb(t) END" ;;
+    assistant_runs) expected_expression="CASE WHEN status = 'running' THEN to_jsonb(t) || '{\"status\":\"interrupted\",\"cancelled\":true}'::jsonb ELSE to_jsonb(t) END" ;;
+    assistant_operations) expected_expression="CASE WHEN status = 'preview' THEN to_jsonb(t) || '{\"status\":\"failed\"}'::jsonb ELSE to_jsonb(t) END" ;;
+  esac
+  assistant_order=id
+  if [[ "$assistant_table" == assistant_settings ]]; then assistant_order=user_id; fi
+  source_assistant=$(docker exec "$db" psql -U life -d life -Atc "SELECT coalesce(jsonb_agg($expected_expression ORDER BY $assistant_order), '[]'::jsonb) FROM $assistant_table t")
+  restored_assistant=$(docker exec "$db" psql -U life -d life_restored -Atc "SELECT coalesce(jsonb_agg(to_jsonb(t) ORDER BY $assistant_order), '[]'::jsonb) FROM $assistant_table t")
+  [[ "$source_assistant" != '[]' && "$source_assistant" == "$restored_assistant" ]]
+done
 [[ $(docker exec "$db" psql -U life -d life_restored -Atc 'SELECT count(*) FROM login_sessions') == 0 ]]
 [[ -z $(docker exec "$db" psql -U life -d life_restored -Atc "SELECT to_regclass('public.obsolete_data')") ]]
 docker exec "$db" psql -U life -d life_restored -c 'CREATE TABLE rollback_marker (id integer)' >/dev/null
@@ -186,6 +252,21 @@ fi
 url="postgresql+psycopg://life:synthetic-application-password@$db:5432/life_restored"
 echo 'Vérification des migrations et de l’immuabilité après restauration…'
 run_app life migrate
+run_app life rotate-assistant-key browser-test --dry-run
+run_app python -c '
+from sqlalchemy import create_engine, select
+from sqlalchemy.orm import Session
+from life_app.core.config import get_settings
+from life_app.platform.assistant import credentials
+from life_app.platform.assistant.models import AssistantSettings
+from life_app.platform.auth.models import User
+settings = get_settings()
+engine = create_engine(settings.database_url.get_secret_value())
+with Session(engine) as db:
+    user = db.scalar(select(User).where(User.username == "browser-test"))
+    assert credentials.decrypt(settings, db.get(AssistantSettings, user.id)) == "synthetic-provider-token-for-backup"
+engine.dispose()
+'
 if docker exec "$db" psql -U life -d life_restored --set ON_ERROR_STOP=1 -c "UPDATE task_events SET kind = 'updated'" >"$temporary/immutable-check" 2>&1; then
   echo 'Le journal restauré doit rester immuable.' >&2
   exit 1

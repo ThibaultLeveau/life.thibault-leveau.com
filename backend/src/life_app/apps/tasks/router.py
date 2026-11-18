@@ -2,15 +2,10 @@ from datetime import date
 from typing import Annotated, Literal
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, Query
-from sqlalchemy import delete, func, select
+from fastapi import APIRouter, Query
 
-from life_app.apps.tasks import models as m
 from life_app.apps.tasks import schemas as s
 from life_app.apps.tasks import service as svc
-from life_app.apps.tasks.messages import tr
-from life_app.apps.tasks.recurrence import Recurrence, dates, describe
-from life_app.apps.tasks.scheduling import parse_schedule
 from life_app.core.database import Database
 from life_app.platform.auth.service import CurrentUser
 
@@ -39,11 +34,7 @@ def parse_scheduling(payload: s.ScheduleParseInput, user: CurrentUser):
     conservé. status=none pour du texte littéral ; incomplete/invalid avec diagnostic
     français sans appliquer de calendrier partiel. recognized expose l’aperçu et la règle.
     """
-    try:
-        Recurrence.valid_timezone(payload.timezone)
-    except ValueError as error:
-        raise HTTPException(422, str(error)) from error
-    return parse_schedule(payload.text, payload.today, payload.timezone)
+    return svc.parse_scheduling(payload)
 
 
 @router.post("/scheduling/preview", response_model=s.SchedulePreviewOutput)
@@ -53,25 +44,7 @@ def preview_scheduling(payload: s.SchedulePreviewInput, user: CurrentUser):
     En mode completion, aperçu indicatif supposant chaque résolution à l’échéance.
     Les dates inexistantes sont sautées selon RFC 5545. Fin inclusive et exclusions.
     """
-    rule = payload.recurrence
-    after = payload.after or rule.start_date
-    upcoming = dates(
-        rule,
-        after,
-        inclusive=True,
-        limit=payload.limit,
-        completed=payload.completed,
-        anchor=after if rule.mode == "completion" else None,
-    )
-    if not upcoming:
-        raise HTTPException(
-            422, tr("these_settings_produce_no_occurrences_check_the_days_and_end_date")
-        )
-    return s.SchedulePreviewOutput(
-        label=describe(rule),
-        dates=upcoming,
-        explanation=tr("preview_completion") if rule.mode == "completion" else tr("preview_fixed"),
-    )
+    return svc.preview_scheduling(payload)
 
 
 @router.get("/agenda/view", response_model=s.AgendaSettings)
@@ -110,14 +83,7 @@ def agenda_tasks(
 
 @router.get("/workspaces", response_model=list[s.WorkspaceOutput])
 def workspaces(user: CurrentUser, db: Database, archived: bool = False):
-    return db.scalars(
-        select(m.Workspace)
-        .where(
-            m.Workspace.owner_id == user.id,
-            m.Workspace.archived_at.is_not(None) if archived else m.Workspace.archived_at.is_(None),
-        )
-        .order_by(m.Workspace.position, m.Workspace.id)
-    ).all()
+    return svc.list_workspaces(db, user, archived)
 
 
 @router.post("/workspaces", response_model=s.WorkspaceOutput, status_code=201)
@@ -133,8 +99,7 @@ def create_workspace(payload: s.WorkspaceCreate, user: CurrentUser, db: Database
 @router.put("/workspaces/order", status_code=204)
 def reorder_workspaces(payload: s.Reorder, user: CurrentUser, db: Database):
     """Donner l'ordre complet des espaces du propriétaire, archives incluses."""
-    items = db.scalars(select(m.Workspace).where(m.Workspace.owner_id == user.id)).all()
-    svc.reorder(db, items, payload.ids)
+    svc.reorder_workspaces(db, user, payload)
     db.commit()
 
 
@@ -157,38 +122,18 @@ def patch_workspace(workspace_id: UUID, payload: s.WorkspacePatch, user: Current
 
 @router.get("/workspaces/{workspace_id}/sections", response_model=list[s.SectionOutput])
 def sections(workspace_id: UUID, user: CurrentUser, db: Database, archived: bool = False):
-    svc.workspace(db, user, workspace_id)
-    return db.scalars(
-        select(m.Section)
-        .where(
-            m.Section.workspace_id == workspace_id,
-            m.Section.archived_at.is_not(None) if archived else m.Section.archived_at.is_(None),
-        )
-        .order_by(m.Section.position, m.Section.id)
-    ).all()
+    return svc.list_sections(db, user, workspace_id, archived)
 
 
 @router.post("/workspaces/{workspace_id}/sections", response_model=s.SectionOutput, status_code=201)
 def create_section(workspace_id: UUID, payload: s.SectionCreate, user: CurrentUser, db: Database):
-    svc.workspace(db, user, workspace_id, active=True)
-    item = m.Section(
-        workspace_id=workspace_id,
-        **payload.model_dump(),
-        position=svc.next_position(db, m.Section, m.Section.workspace_id == workspace_id),
-    )
-    db.add(item)
-    return committed(db, item, s.SectionOutput)
+    return committed(db, svc.create_section(db, user, workspace_id, payload), s.SectionOutput)
 
 
 @router.put("/workspaces/{workspace_id}/sections/order", status_code=204)
 def reorder_sections(workspace_id: UUID, payload: s.Reorder, user: CurrentUser, db: Database):
     """Donner l'ordre complet des sections de l'espace, archives incluses."""
-    svc.workspace(db, user, workspace_id, active=True)
-    svc.reorder(
-        db,
-        db.scalars(select(m.Section).where(m.Section.workspace_id == workspace_id)).all(),
-        payload.ids,
-    )
+    svc.reorder_sections(db, user, workspace_id, payload)
     db.commit()
 
 
@@ -196,42 +141,24 @@ def reorder_sections(workspace_id: UUID, payload: s.Reorder, user: CurrentUser, 
 def patch_section(
     workspace_id: UUID, section_id: UUID, payload: s.SectionPatch, user: CurrentUser, db: Database
 ):
-    svc.workspace(db, user, workspace_id, active=True)
-    item = svc.member(db, m.Section, section_id, workspace_id)
-    svc.patch_entity(item, payload)
-    return committed(db, item, s.SectionOutput)
+    return committed(
+        db, svc.update_section(db, user, workspace_id, section_id, payload), s.SectionOutput
+    )
 
 
 @router.get("/workspaces/{workspace_id}/statuses", response_model=list[s.StatusOutput])
 def statuses(workspace_id: UUID, user: CurrentUser, db: Database):
-    svc.workspace(db, user, workspace_id)
-    return db.scalars(
-        select(m.Status)
-        .where(m.Status.workspace_id == workspace_id)
-        .order_by(m.Status.position, m.Status.id)
-    ).all()
+    return svc.list_statuses(db, user, workspace_id)
 
 
 @router.post("/workspaces/{workspace_id}/statuses", response_model=s.StatusOutput, status_code=201)
 def create_status(workspace_id: UUID, payload: s.StatusCreate, user: CurrentUser, db: Database):
-    svc.workspace(db, user, workspace_id, active=True)
-    item = m.Status(
-        workspace_id=workspace_id,
-        **payload.model_dump(),
-        position=svc.next_position(db, m.Status, m.Status.workspace_id == workspace_id),
-    )
-    db.add(item)
-    return committed(db, item, s.StatusOutput)
+    return committed(db, svc.create_status(db, user, workspace_id, payload), s.StatusOutput)
 
 
 @router.put("/workspaces/{workspace_id}/statuses/order", status_code=204)
 def reorder_statuses(workspace_id: UUID, payload: s.Reorder, user: CurrentUser, db: Database):
-    svc.workspace(db, user, workspace_id, active=True)
-    svc.reorder(
-        db,
-        db.scalars(select(m.Status).where(m.Status.workspace_id == workspace_id)).all(),
-        payload.ids,
-    )
+    svc.reorder_statuses(db, user, workspace_id, payload)
     db.commit()
 
 
@@ -239,10 +166,9 @@ def reorder_statuses(workspace_id: UUID, payload: s.Reorder, user: CurrentUser, 
 def patch_status(
     workspace_id: UUID, status_id: UUID, payload: s.StatusPatch, user: CurrentUser, db: Database
 ):
-    svc.workspace(db, user, workspace_id, active=True)
-    item = svc.member(db, m.Status, status_id, workspace_id)
-    svc.patch_status(db, item, payload)
-    return committed(db, item, s.StatusOutput)
+    return committed(
+        db, svc.update_status(db, user, workspace_id, status_id, payload), s.StatusOutput
+    )
 
 
 @router.delete("/workspaces/{workspace_id}/statuses/{status_id}", status_code=204)
@@ -254,72 +180,43 @@ def delete_status(
     replacement_id: UUID | None = None,
 ):
     """Retirer un statut ; réaffecter ses tâches à un statut du même type si utilisé."""
-    svc.workspace(db, user, workspace_id, active=True)
-    svc.remove_status(db, svc.member(db, m.Status, status_id, workspace_id), replacement_id)
+    svc.delete_status(db, user, workspace_id, status_id, replacement_id)
     db.commit()
 
 
 @router.get("/workspaces/{workspace_id}/labels", response_model=list[s.LabelOutput])
 def labels(workspace_id: UUID, user: CurrentUser, db: Database):
-    svc.workspace(db, user, workspace_id)
-    return db.scalars(
-        select(m.Label)
-        .where(m.Label.workspace_id == workspace_id)
-        .order_by(m.Label.name, m.Label.id)
-    ).all()
+    return svc.list_labels(db, user, workspace_id)
 
 
 @router.post("/workspaces/{workspace_id}/labels", response_model=s.LabelOutput, status_code=201)
 def create_label(workspace_id: UUID, payload: s.LabelCreate, user: CurrentUser, db: Database):
-    svc.workspace(db, user, workspace_id, active=True)
-    item = m.Label(workspace_id=workspace_id, **payload.model_dump())
-    db.add(item)
-    return committed(db, item, s.LabelOutput)
+    return committed(db, svc.create_label(db, user, workspace_id, payload), s.LabelOutput)
 
 
 @router.put("/workspaces/{workspace_id}/labels/{label_id}", response_model=s.LabelOutput)
 def update_label(
     workspace_id: UUID, label_id: UUID, payload: s.LabelCreate, user: CurrentUser, db: Database
 ):
-    svc.workspace(db, user, workspace_id, active=True)
-    item = svc.member(db, m.Label, label_id, workspace_id)
-    svc.patch_entity(item, payload)
-    return committed(db, item, s.LabelOutput)
+    return committed(db, svc.update_label(db, user, workspace_id, label_id, payload), s.LabelOutput)
 
 
 @router.delete("/workspaces/{workspace_id}/labels/{label_id}", status_code=204)
 def delete_label(workspace_id: UUID, label_id: UUID, user: CurrentUser, db: Database):
-    svc.workspace(db, user, workspace_id, active=True)
-    item = svc.member(db, m.Label, label_id, workspace_id)
-    db.execute(delete(m.TaskLabel).where(m.TaskLabel.label_id == item.id))
-    view = db.get(m.ViewPreference, workspace_id)
-    if view and view.settings.get("label_id") == str(item.id):
-        view.settings = {**view.settings, "label_id": None}
-    db.delete(item)
+    svc.delete_label(db, user, workspace_id, label_id)
     db.commit()
 
 
 @router.get("/workspaces/{workspace_id}/view", response_model=s.ViewSettings)
 def view(workspace_id: UUID, user: CurrentUser, db: Database):
-    svc.workspace(db, user, workspace_id)
-    item = db.get(m.ViewPreference, workspace_id)
-    return s.ViewSettings.model_validate(item.settings if item else {})
+    return svc.view_settings(db, user, workspace_id)
 
 
 @router.put("/workspaces/{workspace_id}/view", response_model=s.ViewSettings)
 def update_view(workspace_id: UUID, payload: s.ViewSettings, user: CurrentUser, db: Database):
-    svc.workspace(db, user, workspace_id)
-    if payload.status_id:
-        svc.member(db, m.Status, payload.status_id, workspace_id)
-    if payload.label_id:
-        svc.member(db, m.Label, payload.label_id, workspace_id)
-    item = db.get(m.ViewPreference, workspace_id)
-    if item is None:
-        item = m.ViewPreference(workspace_id=workspace_id)
-        db.add(item)
-    item.settings = payload.model_dump(mode="json")
+    result = svc.save_view_settings(db, user, workspace_id, payload)
     db.commit()
-    return payload
+    return result
 
 
 @router.get("/tasks", response_model=s.TaskPage)
@@ -464,15 +361,4 @@ def events(
     offset: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=200),
 ):
-    svc.task(db, user, task_id)
-    query = select(m.TaskEvent).where(m.TaskEvent.task_id == task_id)
-    total = db.scalar(select(func.count()).select_from(query.subquery()))
-    items = db.scalars(
-        query.order_by(m.TaskEvent.occurred_at, m.TaskEvent.id).offset(offset).limit(limit)
-    ).all()
-    return s.EventPage(
-        items=[s.EventOutput.model_validate(item) for item in items],
-        total=total,
-        offset=offset,
-        limit=limit,
-    )
+    return svc.task_events(db, user, task_id, offset, limit)

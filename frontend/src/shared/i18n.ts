@@ -20,3 +20,11 @@ export function documentationPath(page = "") {
   const prefix = i18next.resolvedLanguage === "en" ? "en/" : "";
   return `/documentation/${prefix}${page ? `${page}/` : ""}`;
 }
+
+/** Public error codes may also arrive inside SSE events and validation details. */
+export function errorMessage(message: string): string {
+  const code = /assistant\.([a-z_]+)/.exec(message)?.[1];
+  if (!code) return message;
+  const key = `assistant_error_${code}`;
+  return key in resources.fr ? tr(key as MessageKey) : tr("assistant_error");
+}

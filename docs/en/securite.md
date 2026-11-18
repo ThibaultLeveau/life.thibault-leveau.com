@@ -18,7 +18,7 @@ Schemas reject unknown fields and bound sizes, colors, priorities and pagination
 
 Business responses, including errors, use `Cache-Control: no-store`. Validation omits submitted values; SQL errors omit parameters. Uvicorn access logs remove query strings to avoid keeping search text. Application code does not log bodies, passwords, cookies or tokens. Access logs can still contain IPs and path UUIDs; protect Caddy and Docker logs too.
 
-Ordinary UPDATE/DELETE cannot change the task journal. It retains contextual names needed for statistics but not old titles/descriptions. Archiving is not erasure; no permanent purge is delivered. See [Data](donnees.md).
+Ordinary UPDATE/DELETE cannot change the task journal. It retains contextual names needed for statistics but not old titles/descriptions. Business archiving is not erasure; no permanent task purge is delivered. See [Data](donnees.md).
 
 ## Infrastructure {#infrastructure}
 
@@ -39,3 +39,11 @@ After a leak, revoke affected access, rotate secrets and investigate actual expo
 ## Disabled applications {#applications-desactivees}
 
 Activation belongs to the session account. Server composition applies it to every business router in addition to owner checks; hiding a frontend card is not authorization. Toggles require CSRF/origin checks and use the user lock. They expose no other account’s data and delete nothing. Private catalogue responses use `Cache-Control: no-store`. Public shell HTML contains no private data.
+
+## Assistant, providers and memory
+
+Assistant routes are private, with CSRF on writes. Tools never receive an owner chosen by the model: execution uses the session account, checks activation and domain permissions, and stores the receipt in the mutation's transaction. The user lock is released before provider network calls. Proposals and destructive operations require server-enforced confirmation.
+
+The provider receives context useful to the turn: messages, summaries, memories and tool results. External content and application text remain untrusted data; model instructions do not replace server controls. Generated HTML, JavaScript and arbitrary provider URLs are never executed. Cards are known React components from the registry.
+
+The provider token is encrypted in an envelope binding account, provider and token. `LIFE_ASSISTANT_ENCRYPTION_KEYS` stays on the server, outside the dump; losing the keyring prevents token decryption. Messages and memories remain private plaintext data in PostgreSQL, like business records: token encryption does not encrypt the whole database. Local deletion cannot retract data already sent to a provider. Old dumps may still contain forgotten memories; apply retention and the [restore and rotation procedure](sauvegardes.md#migration-0015-assistant).

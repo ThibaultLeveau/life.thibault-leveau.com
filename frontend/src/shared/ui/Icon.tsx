@@ -1,4 +1,10 @@
 const paths = {
+  sparkles:
+    "M12 3l2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5zM20 2v4M18 4h4",
+  message: "M4 4h16v12H9l-5 4V4zM8 8h8M8 12h5",
+  stop: "M6 6h12v12H6z",
+  memory:
+    "M9 18V7a3 3 0 1 0-6 0 4 4 0 0 0 0 7 3 3 0 0 0 6 4M15 18V7a3 3 0 1 1 6 0 4 4 0 0 1 0 7 3 3 0 0 1-6 4M9 9h6M9 15h6",
   ruler: "m3 16 13-13 5 5L8 21zM13 6l2 2M10 9l2 2M7 12l2 2M4 15l2 2",
   dumbbell: "m6 4 14 14M4 6l2-2 4 4-2 2zM14 16l2-2 4 4-2 2zM2 8l6-6M16 22l6-6",
   timer:

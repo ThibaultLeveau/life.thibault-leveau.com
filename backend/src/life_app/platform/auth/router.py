@@ -66,8 +66,7 @@ def preferences(user: CurrentUser):
 @router.put("/preferences", response_model=Preferences)
 def set_preferences(payload: Preferences, request: Request, user: CurrentUser, db: Database):
     """Update supplied preferences only; omitted fields retain their stored values."""
-    for key, value in payload.model_dump(exclude_unset=True).items():
-        setattr(user, key, value)
+    service.save_preferences(user, payload)
     db.commit()
     request.state.locale = user.locale
     return user

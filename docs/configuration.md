@@ -10,11 +10,17 @@ Pydantic Settings charge les variables du processus avant `.env`. Les commandes 
 | `LIFE_PUBLIC_BASE_URL` | `http://localhost:8100` | Origine autorisée pour les écritures depuis le navigateur |
 | `LIFE_DATABASE_URL` | absente | URL `postgresql+psycopg://utilisateur:motdepasse@hôte:port/base` |
 | `LIFE_SESSION_HOURS` | `168` | Durée fixe des sessions, de 1 à 720 heures ; pas de prolongation automatique |
+| `LIFE_ASSISTANT_ENCRYPTION_KEYS` | absente | Trousseau de clés Fernet séparées par des virgules ; première clé active pour les tokens IA |
+| `LIFE_ASSISTANT_TIMEOUT_SECONDS` | `180` | Durée maximale d’un tour IA, de 10 à 600 secondes |
 | `LIFE_LOG_LEVEL` | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL` |
 | `LIFE_FRONTEND_DIR` | `frontend/dist` | Artefacts frontend ; chemin relatif à la racine du dépôt |
 | `LIFE_DOCUMENTATION_DIR` | `site` | Artefacts MkDocs ; chemin relatif à la racine du dépôt |
 
 Sans URL de base, la sonde `/health` et les fichiers publics restent utilisables ; les fonctions privées et `/health/ready` répondent 503. La disponibilité de la base est contrôlée par la sonde, sans migration au démarrage. Une URL SQL incompatible est refusée.
+
+Sans trousseau IA valide, l’enregistrement ou la lecture des tokens chiffrés est indisponible ; les applications et sondes restent utilisables. Générer une clé avec `uv run python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'` dans un terminal privé, la placer dans `.env.production` protégé et la sauvegarder séparément des dumps. Ne pas employer une clé d’exemple ni une valeur générée dans un journal public. Les anciennes clés servent au déchiffrement et à la [rotation](sauvegardes.md#migration-0015-assistant).
+
+Le fournisseur, le modèle et le token utilisateur se règlent via l’[API Assistant](assistant-api.md), pas dans des variables frontend. Les adaptateurs utilisent uniquement les hôtes HTTPS OpenAI, Anthropic et Gemini prédéfinis ; aucune URL de fournisseur arbitraire n’est acceptée. Le trafic sortant vers ces fournisseurs doit être disponible depuis le conteneur web.
 
 `LIFE_PUBLIC_BASE_URL` doit être l'origine exacte, sans sous-chemin : `http://localhost:5173` en développement, `https://life.thibault-leveau.com` en production. Elle ne configure ni DNS ni Caddy. Le proxy Vite permet d'éviter CORS ; aucune politique CORS générale n'est ouverte. En développement/test, l'origine du backend lui-même est également acceptée.
 

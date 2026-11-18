@@ -2,7 +2,6 @@ from datetime import date, timedelta
 from uuid import UUID
 
 from fastapi import APIRouter, Query
-from sqlalchemy import select
 
 from life_app.apps.sport import models as m
 from life_app.apps.sport import schemas as s
@@ -69,20 +68,13 @@ def get_exercise(exercise_id: str, user: CurrentUser, db: Database):
 
 @router.post("/exercises", response_model=s.ExerciseOutput, status_code=201)
 def create_exercise(payload: s.ExerciseInput, user: CurrentUser, db: Database):
-    item = m.Exercise(owner_id=user.id, **payload.model_dump())
-    db.add(item)
-    return commit(db, item, svc.exercise_output)
+    return commit(db, svc.create_exercise(db, user, payload), svc.exercise_output)
 
 
 @router.put("/exercises/{exercise_id}", response_model=s.ExerciseOutput)
 def update_exercise(exercise_id: UUID, payload: s.ExerciseUpdate, user: CurrentUser, db: Database):
     """Modifier un exercice ; conserver les instantanés des programmes et entraînements."""
-    item = svc.owned(db, m.Exercise, user, exercise_id)
-    svc.version(item, payload.expected_version)
-    for key, value in payload.model_dump(exclude={"expected_version"}).items():
-        setattr(item, key, value)
-    svc.touch(item)
-    return commit(db, item, svc.exercise_output)
+    return commit(db, svc.update_exercise(db, user, exercise_id, payload), svc.exercise_output)
 
 
 @router.put("/exercises/{exercise_id}/archive", response_model=s.ExerciseOutput)
@@ -125,30 +117,13 @@ def get_workout(workout_id: UUID, user: CurrentUser, db: Database):
 @router.post("/workouts", response_model=s.WorkoutOutput, status_code=201)
 def create_workout(payload: s.WorkoutInput, user: CurrentUser, db: Database):
     """Créer un programme avec 1 à 50 exercices et au maximum 300 séries."""
-    item = m.Workout(
-        owner_id=user.id,
-        name=payload.name,
-        competition_date=payload.competition_date,
-        context=payload.context,
-        notes=payload.notes,
-        entries=svc.snapshot(db, user, payload.entries),
-    )
-    db.add(item)
-    return commit(db, item, svc.workout_output)
+    return commit(db, svc.create_workout(db, user, payload), svc.workout_output)
 
 
 @router.put("/workouts/{workout_id}", response_model=s.WorkoutOutput)
 def update_workout(workout_id: UUID, payload: s.WorkoutUpdate, user: CurrentUser, db: Database):
     """Modifier un programme : nom, notes et exercices ordonnés ; entraînements inchangés."""
-    item = svc.owned(db, m.Workout, user, workout_id)
-    svc.version(item, payload.expected_version)
-    item.name, item.notes = payload.name, payload.notes
-    item.competition_date = payload.competition_date
-    if "context" in payload.model_fields_set:
-        item.context = payload.context
-    item.entries = svc.snapshot(db, user, payload.entries)
-    svc.touch(item)
-    return commit(db, item, svc.workout_output)
+    return commit(db, svc.update_workout(db, user, workout_id, payload), svc.workout_output)
 
 
 @router.post("/workouts/{workout_id}/duplicate", response_model=s.WorkoutOutput, status_code=201)
@@ -183,10 +158,7 @@ def sessions(
 
 @router.get("/sessions/active", response_model=s.TrainingOutput | None)
 def current_session(user: CurrentUser, db: Database):
-    item = db.scalar(
-        select(m.Training).where(m.Training.owner_id == user.id, m.Training.status == "active")
-    )
-    return svc.training_output(item) if item else None
+    return svc.current_session(db, user)
 
 
 @router.post("/scores/backfill", response_model=s.ScoreBackfill)
@@ -281,19 +253,7 @@ def finish_session(session_id: UUID, payload: s.SessionFinish, user: CurrentUser
 
 @router.get("/measurements", response_model=list[s.MeasurementOutput])
 def measurements(user: CurrentUser, db: Database, archived: bool = False):
-    return [
-        svc.measurement_output(i)
-        for i in db.scalars(
-            select(m.Measurement)
-            .where(
-                m.Measurement.owner_id == user.id,
-                m.Measurement.archived_at.is_not(None)
-                if archived
-                else m.Measurement.archived_at.is_(None),
-            )
-            .order_by(m.Measurement.measured_on.desc(), m.Measurement.id)
-        )
-    ]
+    return svc.measurements(db, user, archived)
 
 
 @router.get("/measurements/{measurement_id}", response_model=s.MeasurementOutput)

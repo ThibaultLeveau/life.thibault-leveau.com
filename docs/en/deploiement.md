@@ -1,5 +1,15 @@
 # Deployment
 
+## AI assistant delivery
+
+After validation, review, CI and merge, publish clean `main` using `scripts/deploy.sh`. Backup precedes additive migration `0015_assistant`. Configure `LIFE_ASSISTANT_ENCRYPTION_KEYS` in protected `.env.production` and back up this keyring independently before saving provider tokens. `LIFE_ASSISTANT_TIMEOUT_SECONDS` defaults to 180 seconds. HTTP/encryption dependencies join the existing image; no new service, volume, DNS or proxy is introduced. Verify outbound HTTPS to all three providers and progressive streaming through Caddy.
+
+Users configure provider, model and token in settings; never invent credentials, place them in versioned files or expose them in logs. Without real credentials, verify the interface and configuration errors and explicitly record that live provider access was not validated. Fake-provider tests do not prove access to a provider account.
+
+On a synthetic account, check FR/EN Home/history, token save/masking/removal, sourced memory then correction/forgetting/disable, reads and writes in every application, preview/confirmation/conflict, conversation archive/restore, interruption and reload without duplicated writes. Check mid-turn application disablement and session expiry, direct applications, themes, keyboard, reduced motion and 320 px mobile. Test [restoration and rotation](sauvegardes.md#migration-0015-assistant) on a disposable database.
+
+Compare the running image SHA and Alembic revision; verify probes, `/`, `/settings`, `/applications`, all five application routes, OpenAPI, `/documentation/assistant/`, `/documentation/en/assistant/` and both API references over HTTPS. Record backup, SHA, revision and results in issue #85; never report an unexecuted check as successful.
+
 ## Principle {#principe}
 
 VPS deployment completes every change, including documentation and AGENTS.md. After review, successful CI and merge, publish the latest validated main without waiting for another deployment request. Verify the running version/public routes and record results in the issue. Report production blockers explicitly; merging alone is not delivery.

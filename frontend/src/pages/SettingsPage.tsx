@@ -24,6 +24,8 @@ import { tr } from "../shared/i18n";
 import "../platform/progression/styles.css";
 import "../shared/styles/navigation.css";
 import "./settings.css";
+import { AssistantSettingsPanel } from "../platform/assistant/AssistantSettings";
+import { MemoryManager } from "../platform/assistant/MemoryManager";
 
 const sectionFromUrl = () =>
   new URLSearchParams(location.search).get("application") || "general";
@@ -45,20 +47,22 @@ export function SettingsPage({ modules }: { modules: ApplicationModule[] }) {
   const guards = useMemo(
     () =>
       Object.fromEntries(
-        ["account", "application", "progression"].map((key) => [
-          key,
-          {
-            onDirty: (value: boolean) => {
-              if (value) dirty.current.add(key);
-              else dirty.current.delete(key);
+        ["account", "application", "progression", "assistant", "memory"].map(
+          (key) => [
+            key,
+            {
+              onDirty: (value: boolean) => {
+                if (value) dirty.current.add(key);
+                else dirty.current.delete(key);
+              },
+              onBusy: (value: boolean) => {
+                if (value) pending.current.add(key);
+                else pending.current.delete(key);
+                setBusy(pending.current.size > 0);
+              },
             },
-            onBusy: (value: boolean) => {
-              if (value) pending.current.add(key);
-              else pending.current.delete(key);
-              setBusy(pending.current.size > 0);
-            },
-          },
-        ]),
+          ],
+        ),
       ) as Record<string, SettingsPanelProps>,
     [],
   );
@@ -194,6 +198,11 @@ export function SettingsPage({ modules }: { modules: ApplicationModule[] }) {
           {section === "general" ? (
             <div key="general" className="settings-panels">
               <AccountSettings {...guards.account} permit={permit} />
+              <AssistantSettingsPanel {...guards.assistant} />
+              <section className="settings-card" id="assistant-memory">
+                <h3>{tr("assistant_memory")}</h3>
+                <MemoryManager {...guards.memory} />
+              </section>
               <div className="settings-card">
                 <ProgressionSettings scope="general" {...guards.progression} />
               </div>

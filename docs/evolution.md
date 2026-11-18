@@ -1,5 +1,13 @@
 # Faire évoluer LifeOS
 
+## Capacités de l’assistant
+
+L’[ADR 008](decisions/008-assistant-ia.md) approuve le contrat optionnel `ApplicationDefinition.actions`. Pour exposer une application à l’assistant, créer `apps/<id>/assistant.py` et un `ActionProvider(actions=(...))`. Chaque `ActionDefinition` fournit un nom stable, une description, un modèle d’entrée fermé, un handler, méthode/chemin HTTP correspondant, modèle de sortie, indicateur de mutation et éventuelle confirmation. Les arguments réunissent paramètres de chemin/requête et `payload` typé par les schémas métier existants. Le handler appelle les services du domaine sans `commit` : le dispatcher possède la transaction et le reçu.
+
+Toute route métier doit posséder une capacité ou une exclusion technique explicite testée. Les lots, archives et suppressions exigent un aperçu. Une opération sans version métier doit fournir une précondition suffisante pour détecter les changements depuis cet aperçu. Les règles présentes seulement dans un routeur doivent être extraites dans le service et partagées avec l’API ; ne pas appeler directement les fonctions HTTP ni ajouter un accès inter-applications. Enregistrer le fournisseur dans le manifeste existant, puis tester couverture des routes, parité des sorties, propriétaires, application désactivée, conflits et rollback.
+
+Le manifeste frontend peut fournir un renderer `Snippet` chargé à la demande, appartenant au domaine. Il reçoit un snippet versionné et des callbacks ; le shell injecte les renderers au chat. Les cartes montrent une proposition ou un résultat de reçu serveur, jamais une confirmation inventée par le modèle. Réutiliser les composants/tokens existants, vérifier clavier, FR/EN, thèmes et 320 px. Voir le [guide](assistant.md) et l’[API](assistant-api.md).
+
 ## État disponible
 
 LifeOS possède un socle commun, une bibliothèque avec activation par compte et les applications **Tâches**, **Sport**, **Suivi**, **Objectifs OKR** et **Recettes & Liste de courses**. Ménage et plantes restent des pistes futures. L’[ADR 003](decisions/003-applications-lifeos.md) décrit l’organisation approuvée ; les ADR précédents conservent l’historique du socle et de la persistance.

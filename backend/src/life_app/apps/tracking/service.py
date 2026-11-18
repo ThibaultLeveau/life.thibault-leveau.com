@@ -25,6 +25,15 @@ def settings(db, user):
     return db.get(m.TrackingSettings, user.id) or s.Settings()
 
 
+def save_settings(db, user, payload):
+    item = db.get(m.TrackingSettings, user.id)
+    if item is None:
+        item = m.TrackingSettings(owner_id=user.id)
+        db.add(item)
+    item.timezone = payload.timezone
+    return payload
+
+
 def owned(db, user, id):
     item = db.scalar(select(m.Tracker).where(m.Tracker.id == id, m.Tracker.owner_id == user.id))
     if item is None:
@@ -58,6 +67,16 @@ def trackers(db, user, archived=False):
         )
         .order_by(m.Tracker.position, m.Tracker.created_at, m.Tracker.id)
     ).all()
+
+
+def order_trackers(db, user, payload):
+    items = trackers(db, user)
+    if len(set(payload.ids)) != len(payload.ids) or set(payload.ids) != {i.id for i in items}:
+        raise HTTPException(422, tr("invalid"))
+    positions = {id: i for i, id in enumerate(payload.ids)}
+    for item in items:
+        item.position = positions[item.id]
+    return sorted(items, key=lambda item: item.position)
 
 
 def ensure_capacity(db, user):
@@ -300,6 +319,19 @@ def get_occurrence(db, user, item, day):
     if result is None:
         raise HTTPException(404, tr("inactive"))
     return result, entry
+
+
+def history(db, user, id, day, offset, limit):
+    _, entry = get_occurrence(db, user, owned(db, user, id), day)
+    if entry is None:
+        return []
+    return db.scalars(
+        select(m.EntryRevision)
+        .where(m.EntryRevision.entry_id == entry.id)
+        .order_by(m.EntryRevision.version.desc())
+        .offset(offset)
+        .limit(limit)
+    ).all()
 
 
 def source_values(db, user, definitions, occurrence, day):

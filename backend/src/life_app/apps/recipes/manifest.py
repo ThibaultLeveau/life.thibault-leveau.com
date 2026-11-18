@@ -1,3 +1,4 @@
+from life_app.apps.recipes.assistant import provider as actions
 from life_app.apps.recipes.integrations import provider as metrics
 from life_app.apps.recipes.progression import provider as progression
 from life_app.apps.recipes.router import router
@@ -10,6 +11,7 @@ application = ApplicationDefinition(
     path="/recipes",
     icon="book",
     router=router,
+    actions=actions,
     metrics=metrics,
     progression=progression,
     translations={

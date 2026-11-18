@@ -61,9 +61,15 @@ export function ApplicationSidebar({
       if (event.key !== "Tab") return;
       const items = Array.from(
         sidebar.querySelectorAll<HTMLElement>(
-          "button:not(:disabled), a[href], select:not(:disabled)",
+          'button:not(:disabled), a[href], input:not(:disabled):not([type="hidden"]), textarea:not(:disabled), select:not(:disabled), [tabindex], [contenteditable="true"]',
         ),
-      ).filter((item) => item.getClientRects().length);
+      ).filter(
+        (item) =>
+          item.tabIndex >= 0 &&
+          !item.matches(":disabled") &&
+          !item.closest("[inert]") &&
+          item.getClientRects().length,
+      );
       const index = items.indexOf(document.activeElement as HTMLElement);
       if (event.shiftKey && index <= 0) {
         event.preventDefault();

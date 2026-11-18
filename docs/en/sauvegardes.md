@@ -1,5 +1,30 @@
 # Backups, migrations and restoration
 
+## Migration 0015: assistant {#migration-0015-assistant}
+
+`0015_assistant` adds seven `assistant_*` tables without rewriting application data. Dumps preserve settings, encrypted tokens, conversations, messages, summaries, memory sources, runs, events and receipts. `LIFE_ASSISTANT_ENCRYPTION_KEYS` stays outside the dump and image: keep an independently protected copy associated with backup and commit references. Conversation and memory text do not use the encryption reserved for tokens; protect dumps like other private data.
+
+The restore suffix marks `running` runs/messages as `interrupted`, invalidates `preview` proposals as `failed`, then revokes all restored sessions. `complete` receipts remain unchanged. Old runs/proposals must never resume writes after restoration; inspect receipts and make a new request if needed. Restoring an old dump can reintroduce conversations, memories or credentials deleted since: disclose this during recovery, repeat necessary forgetting and replace affected tokens. Forgetting in Life does not purge historical backups or copies already sent to the provider.
+
+On a restored copy, use the matching historical key, test decryption with synthetic credentials, compare memories/messages/receipts, and verify no active runs and no restored login sessions remain. A lost key cannot be reconstructed from the dump: enter a new token in settings. Application, conversation and memory recovery remain possible. Checking dump format alone does not prove these properties.
+
+Previous images do not recognize `0015_assistant`. Downgrade refuses if any new table contains data, including settings; never delete records to bypass this guard. Prefer a forward fix or explicit restoration of a compatible dump/image with its keys.
+
+### Encryption rotation
+
+Generate a new Fernet key in a private terminal. Set the protected keyring to `new,old`: the first encrypts and the others allow decryption. Keep an independent backup of the new keyring. Using the published image, inspect and re-encrypt the explicitly selected account:
+
+```bash
+export LIFE_IMAGE=$(cat .deployment/current-image)
+docker compose --env-file .env.production run --rm --no-deps web \
+  life rotate-assistant-key thibault --dry-run
+docker compose --env-file .env.production run --rm --no-deps web \
+  life rotate-assistant-key thibault
+docker compose --env-file .env.production up -d --no-build --wait web
+```
+
+The command locks the account, validates its user/provider envelope and re-encrypts within one transaction. Dry-run changes nothing; failure preserves ciphertext. It prints neither token nor key and calls no provider. Verify decryption with the new key alone on an isolated copy before removing the old active key. Retain older keys in protected archives as long as matching backups must remain restorable. This rotation neither replaces nor revokes the provider's token.
+
 ## Back up {#sauvegarder}
 
 From the server repository root, with `.env.production` configured and PostgreSQL running:

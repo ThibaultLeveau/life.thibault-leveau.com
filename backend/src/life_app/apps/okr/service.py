@@ -23,6 +23,21 @@ def owned(db, user, id):
     return item
 
 
+def history(db, user, id, offset, limit):
+    owned(db, user, id)
+    return db.scalars(
+        select(m.Event)
+        .where(m.Event.objective_id == id, m.Event.owner_id == user.id)
+        .order_by(
+            m.Event.snapshot["version"].astext.cast(Integer).desc(),
+            m.Event.occurred_at.desc(),
+            m.Event.id,
+        )
+        .offset(offset)
+        .limit(limit)
+    ).all()
+
+
 def settings(db, user):
     value = db.get(m.OkrSettings, user.id)
     timezone = value.timezone if value else "Europe/Paris"

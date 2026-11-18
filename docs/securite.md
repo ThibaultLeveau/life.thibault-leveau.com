@@ -18,7 +18,7 @@ Les schémas rejettent les champs inconnus et bornent tailles, couleurs, priorit
 
 Les réponses métier, y compris les erreurs, portent `Cache-Control: no-store`. Les erreurs de validation n'incluent pas les valeurs saisies ; les erreurs SQL ne renvoient pas leurs paramètres. Les logs Uvicorn retirent la query string afin de ne pas conserver le texte recherché. Les corps, mots de passe, cookies et jetons ne sont pas journalisés par le code applicatif. Les logs d'accès peuvent encore contenir IP et UUID de chemins ; protéger aussi les journaux Caddy/Docker.
 
-Le journal de tâches est immuable pour les UPDATE/DELETE ordinaires. Il conserve les noms de contexte nécessaires aux statistiques, mais pas les anciens titres/descriptions. Les archives ne constituent pas un effacement des données ; aucune purge définitive n'est livrée. Voir [Données](donnees.md).
+Le journal de tâches est immuable pour les UPDATE/DELETE ordinaires. Il conserve les noms de contexte nécessaires aux statistiques, mais pas les anciens titres/descriptions. Les archives métier ne constituent pas un effacement des données ; aucune purge définitive des tâches n'est livrée. Voir [Données](donnees.md).
 
 ## Infrastructure
 
@@ -39,3 +39,11 @@ En cas de fuite, révoquer les accès concernés, changer les secrets et examine
 ## Applications désactivées
 
 L’activation appartient au compte de la session. Le serveur applique ce contrôle à chaque routeur métier lors de l’assemblage, en plus des contrôles de propriétaire existants ; masquer la carte frontend n’est pas une autorisation. Les bascules exigent CSRF/origine et utilisent le verrou utilisateur. Elles ne rendent accessibles aucune donnée d’un autre compte et ne suppriment rien. Les réponses privées du catalogue utilisent `Cache-Control: no-store`. Le HTML public du shell ne contient aucune donnée privée.
+
+## Assistant, fournisseurs et mémoire
+
+Les routes de l’assistant sont privées, avec CSRF sur les écritures. Les outils ne reçoivent jamais un propriétaire choisi par le modèle : chaque exécution utilise le compte de la session, vérifie activation et droits métier et conserve le reçu dans la même transaction que l’écriture. Le verrou utilisateur est libéré avant les appels réseau au fournisseur. Les propositions et actions destructives exigent une confirmation contrôlée côté serveur.
+
+Le fournisseur reçoit le contexte utile au tour : messages, résumés, souvenirs et résultats d’outils. Les contenus externes et textes métier restent des données non fiables ; les consignes du modèle ne remplacent pas les contrôles serveur. Aucun HTML, JavaScript ou URL de fournisseur arbitraire généré n’est exécuté. Les cartes sont des composants React connus du registre.
+
+Le token fournisseur est chiffré avec une enveloppe qui lie compte, fournisseur et token. Le trousseau `LIFE_ASSISTANT_ENCRYPTION_KEYS` reste côté serveur et hors du dump ; sa perte empêche de déchiffrer les tokens. Les messages et souvenirs sont des données privées en clair dans PostgreSQL, comme les données métier : le chiffrement du token ne chiffre pas toute la base. Une suppression locale ne retire pas les données déjà transmises au fournisseur. Les anciens dumps peuvent encore contenir un souvenir oublié ; appliquer la rétention et la [procédure de restauration et rotation](sauvegardes.md#migration-0015-assistant).

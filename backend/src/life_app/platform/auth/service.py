@@ -102,6 +102,13 @@ def check_login_limit(db, request: Request, username: str) -> None:
         )
 
 
+def save_preferences(user, payload):
+    """Apply only supplied preferences for HTTP and assistant callers alike."""
+    for key, value in payload.model_dump(exclude_unset=True).items():
+        setattr(user, key, value)
+    return user
+
+
 def login(db, request: Request, username: str, password: str):
     check_origin(request)
     username = username.strip().casefold()
