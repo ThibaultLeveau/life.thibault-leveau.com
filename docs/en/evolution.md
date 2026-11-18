@@ -112,3 +112,7 @@ Keep the seven independent guides declared in `mkdocs.yml`: Technical, General, 
 ## Snippet details
 
 A renderer keeps a compact business summary and uses `platform/assistant/components/SnippetDetails` for complete receipt content (`snippetValue`). Labels and value formatting stay in `apps/<id>/assistant/`; the platform knows no business module. Do not truncate data in reading helpers. Long texts use the accessible disclosure in `shared/ui/SnippetSummary`. Test long lists, the final item, text beyond 1,500 characters, zero, booleans, small decimals, pagination and FR/EN/mobile modes.
+
+## Assistant sources
+
+[ADR 009](decisions/009-sources-assistant.md) authorizes multimodal sources and dictation within `platform/assistant`. Extensions must preserve formats/budgets, ownership, CSRF, admission before I/O, post-processing revalidation and separation of sources from direct instructions. Add blocks to all three adapters and FR/EN errors; never add unrestricted fetching to business tools. Sources must survive history and support API deletion. Cover hostile parsing, SSRF, idempotency, injection/confirmation, memory, compaction, cancellation, quotas, migration/restore and mobile/keyboard UI. New services, storage or broader access require a new explicit agreement.

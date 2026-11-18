@@ -153,7 +153,10 @@ def execute(app, run_id, step, scope, name, arguments, *, propose=False):
             }
         context = ActionContext(db, user, app.state.applications)
         condition = action.precondition(context, payload) if action.precondition else None
-        preview = action.mutating and (action.confirmation or propose)
+        # External references can inject instructions into later turns too. The
+        # persistent conversation flag, not the model's arguments, is authoritative.
+        external_context = db.get(m.Conversation, run.conversation_id).external_context
+        preview = action.mutating and (action.confirmation or propose or external_context)
         targets = action.preview_targets(context, payload) if action.preview_targets else None
         if preview:
             # Validate ownership and all business rules, then discard simulated writes.

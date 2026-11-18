@@ -51,10 +51,19 @@ async function responseFor(
       headers: {
         "Accept-Language": i18next.language,
         ...(streaming ? { Accept: "text/event-stream" } : {}),
-        ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
+        ...(body instanceof Blob
+          ? { "Content-Type": body.type || "application/octet-stream" }
+          : body !== undefined
+            ? { "Content-Type": "application/json" }
+            : {}),
         ...(csrf ? { "X-CSRF-Token": csrf } : {}),
       },
-      body: body === undefined ? undefined : JSON.stringify(body),
+      body:
+        body === undefined
+          ? undefined
+          : body instanceof Blob
+            ? body
+            : JSON.stringify(body),
     });
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError")

@@ -16,7 +16,7 @@ Life conserve le monorepo FastAPI / React / MkDocs. Un processus Uvicorn sert l'
 
 Caddy termine TLS et transmet à `life-web:8000` sur `multisite_proxy`. Le service web rejoint aussi le réseau Compose interne `database`. PostgreSQL ne rejoint pas le réseau du proxy, ne publie aucun port hôte et conserve ses données dans `postgres_data`. Le rôle applicatif est propriétaire de sa base, sans droits d'administration du cluster.
 
-Seul `web` rejoint également le bridge Compose `egress` (`life_egress` en production), non interne, pour résoudre les hôtes des fournisseurs et établir les connexions HTTPS sortantes de l’assistant. `database` et le réseau existant `multisite_proxy` restent internes ; aucun port hôte ni service supplémentaire n’est ajouté. Les trois hôtes autorisés sont fixés par les adaptateurs applicatifs ; le bridge ne constitue pas un filtre réseau par domaine.
+Seul `web` rejoint également le bridge Compose `egress` (`life_egress` en production), non interne, pour résoudre les hôtes des fournisseurs et établir les connexions HTTPS sortantes de l’assistant. `database` et le réseau existant `multisite_proxy` restent internes ; aucun port hôte ni service supplémentaire n’est ajouté. Les hôtes des fournisseurs sont fixés par les adaptateurs applicatifs ; le lecteur de pages publiques de l’ADR 009 contrôle séparément ses destinations ; le bridge ne constitue pas un filtre réseau par domaine.
 
 En développement, Vite, FastAPI et MkDocs disposent de serveurs distincts ; le proxy Vite maintient une origine unique. `compose.dev.yaml` fournit un PostgreSQL local indépendant de la production.
 
@@ -69,7 +69,7 @@ Les verrous uv/npm sont versionnés. Les images portent le SHA complet des sourc
 
 ## Limites choisies
 
-L'application reste personnelle : pas de partage d'espaces, inscription publique, SSO, synchronisation temps réel, pièces jointes ou synchronisation hors ligne. Sport fournit ses statistiques internes ; Suivi exploite les événements de Tâches et les résultats Sport via des fournisseurs de métriques injectés. Aucun temps d’écran n’est collecté. La recherche est une recherche SQL de sous-chaîne, et le frontend charge toutes les tâches de la vue : des volumes importants nécessiteront pagination visuelle/indexation après mesure.
+L'application reste personnelle : pas de partage d'espaces, inscription publique, SSO, synchronisation temps réel ou synchronisation hors ligne. Sport fournit ses statistiques internes ; Suivi exploite les événements de Tâches et les résultats Sport via des fournisseurs de métriques injectés. Aucun temps d’écran n’est collecté. La recherche est une recherche SQL de sous-chaîne, et le frontend charge toutes les tâches de la vue : des volumes importants nécessiteront pagination visuelle/indexation après mesure.
 
 Les récurrences restent dans `apps/tasks` : `recurrence.py` valide et calcule les dates calendaires avec python-dateutil ; `scheduling.py` analyse les expressions françaises ou anglaises selon le compte. La résolution avance la tâche dans la transaction existante, sans ordonnanceur ni service supplémentaire. Le frontend demande l’analyse et l’aperçu à l’API et ne conserve que le brouillon transitoire.
 
@@ -120,3 +120,9 @@ Les sept guides FR/EN partagent la compilation MkDocs et le service statique exi
 ## Réglages généraux
 
 L’[ADR 007](decisions/007-reglages-generaux.md), approuvé dans l’issue #76, étend le manifeste frontend avec un panneau `Settings` optionnel. Le shell compose `/settings` à partir du registre existant et du catalogue serveur. Les formulaires métier restent dans leurs applications, les préférences communes dans leurs modules actuels. Les panneaux signalent brouillons/écritures et ne sont montés que pour les applications activées. Aucune table, API ni infrastructure supplémentaire. [Guide](settings.md).
+
+## Sources multimodales et dictée
+
+L’[ADR 009](decisions/009-sources-assistant.md), approuvé dans l’issue #89, étend `platform/assistant` : sources privées PostgreSQL, blocs fournisseur typés, extraction bornée et transcription transitoire. Aucun nouveau service, stockage objet ou base vectorielle. Le lecteur web ajoute uniquement des connexions HTTP/HTTPS vers des pages publiques explicitement importées ; validation DNS/IP et redirections, connexion à l’adresse publique vérifiée et nom TLS conservé. Les adaptateurs IA gardent leurs hôtes fixes.
+
+PDF/images/XML et pages sont traités dans des processus jetables limités en CPU, mémoire et durée ; aucun HTML externe exécuté. L’admission réserve le quota avant lecture, hors transaction pendant l’I/O, puis revalide session et propriétaire. La demande directe reste séparée des sources : le marquage `external_context` force les aperçus de mutation et désactive la mémoire automatique, y compris dans les suivis. Aucun résumé externe persistant ; contexte récent et lectures de sources par identifiant restent bornés. Voir [données](donnees.md), [API](assistant-api.md) et [sauvegardes](sauvegardes.md#migration-0016-sources-et-dictee).

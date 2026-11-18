@@ -310,6 +310,12 @@ After checks, self-review, CI and merge, publish with `scripts/deploy.sh` and it
 
 On a synthetic account, verify first partial session, entirely omitted exercise, empty session (0), relative difficulty for weight/distance/pace, references, history/statistics, FR/EN, 320 px and keyboard. Check API `score_details`, frozen references, next-session suggestions and preserved results. Verify actual SHA, probes, OpenAPI, `/sport` and FR/EN guides over HTTPS; record backup, repair and results in the issue.
 
+## Deliver AI sources, images, dictation and web reading
+
+After checks, review, CI and merge, deploy validated `main` with `scripts/deploy.sh`, backup and migration `0016_assistant_sources`. Locked Pillow, pypdf and defusedxml dependencies join the existing image; no new service or volume. Quota defaults apply unless configured. The previous process can continue text-only writes during this additive migration, but old images must not resume after delivery.
+
+On a synthetic account verify file/image import, public-page reading, private URL and invalid format rejection, source-only and text-plus-source messages, history/removal, drafts after errors, mandatory action confirmations and no automatic memory. Verify dictation settings, microphone refusal, stop/cancel and editable text; if no real provider credential is available, record the limitation and distinguish mocked tests from real transcription. Check FR/EN, themes, 320 px/keyboard, actual running version, health, HTTPS routes, OpenAPI and guides. Verify source restoration and public egress from the running image. Record backup, SHA, revision and evidence in issue #89.
+
 ## Deploying task imports
 
 No migration or new storage. Use the normal backup and deployment procedure. Verify effective budgets: existing explicit `LIFE_ASSISTANT_TIMEOUT_SECONDS=180` settings still take precedence; raise them to 600 for longer requests unless a shorter deadline is intended. Default caps are 96 calls and 200 actions. Check OpenAPI `/tasks/import`, ten-task imports on a synthetic account, complete rollback of invalid batches and assistant preview/confirmation. Existing backups/restores include tasks, events and receipts without a new procedure.

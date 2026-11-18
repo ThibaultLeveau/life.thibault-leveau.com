@@ -2,6 +2,7 @@ import { tr } from "../../../shared/i18n";
 import { Icon } from "../../../shared/ui/Icon";
 import type { ApplicationModule } from "../../applications/definition";
 import type { Message } from "../types";
+import { MessageSources } from "./Sources";
 import { MessageText } from "./MessageText";
 import { MessageSnippets } from "./MessageSnippets";
 export function MessageList({
@@ -43,6 +44,14 @@ export function MessageList({
               {message.role === "assistant" ? "LifeOS" : tr("assistant_you")}
             </span>
             <MessageText content={message.content} />
+            {!!message.sources?.length && (
+              <MessageSources
+                sources={message.sources}
+                busy={busy}
+                onChanged={onChanged}
+                onBusy={onBusy}
+              />
+            )}
             <MessageSnippets
               snippets={message.snippets ?? []}
               modules={modules}

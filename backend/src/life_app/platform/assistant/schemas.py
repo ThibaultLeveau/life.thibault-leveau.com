@@ -4,9 +4,10 @@ from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, SecretStr, field_validator
+from pydantic import BaseModel, ConfigDict, Field, SecretStr, field_validator, model_validator
 
 from life_app.platform.assistant.messages import tr
+from life_app.platform.assistant.source_schemas import SourceOutput
 
 
 class Input(BaseModel):
@@ -75,6 +76,7 @@ class MessageOutput(BaseModel):
     content: str
     status: Literal["complete", "running", "interrupted", "failed"]
     snippets: list[Snippet]
+    sources: list[SourceOutput] = Field(default_factory=list)
     run_id: UUID | None
     created_at: datetime
 
@@ -86,8 +88,17 @@ class ConversationDetail(BaseModel):
 
 
 class SendMessage(Input):
-    content: str = Field(min_length=1, max_length=12000)
+    content: str = Field(default="", max_length=12000)
+    source_ids: list[UUID] = Field(default_factory=list, max_length=4)
     request_id: UUID
+
+    @model_validator(mode="after")
+    def nonempty_message(self):
+        if not self.content and not self.source_ids:
+            raise ValueError(tr("empty_message"))
+        if len(set(self.source_ids)) != len(self.source_ids):
+            raise ValueError(tr("source_context_limit"))
+        return self
 
 
 class MemoryInput(Input):

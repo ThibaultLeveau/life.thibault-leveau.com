@@ -223,3 +223,13 @@ Events preserve UTC time/full snapshot and block UPDATE/DELETE. Composite refere
 Lists compute last_used_at from sessions without extra storage. Duplication creates a program without moving/copying history. Completion-only awarded_xp derives from the progression journal write, not another column or counter. The progression API remains the permanent source of XP. Archiving/disabling preserves all new preferences and data.
 
 PostgreSQL tests cover existing data, preservation, lossless downgrade without new data and refusal of data loss. See [backup and rollback](sauvegardes.md#migration-0014-finition-sport).
+
+## Assistant sources and dictation
+
+`assistant_sources` stores owner, identifier, real name/type, SHA-256 digest, size, `BYTEA` content and extracted text, optional final URL, page count, creation/removal dates and conversation/message references. Binary/text load on demand. An unbound reservation immediately counts 10 MiB; only finalized sources can bind. Owner locks serialize admission and quotas. File and extracted content count toward the configurable 200 MiB quota; 2 active imports, 32 drafts and 2,000 non-removed sources also bound counts.
+
+Lifecycle: reservation → ready unbound source → message attachment → removed content. Errors delete reservations; abandoned reservations expire after five minutes and unsent sources after 24 hours, cleaned opportunistically during source operations. Bound sources do not expire. Removal retains metadata/checksum but erases binary/text; conversation/account deletion cascades. SQL constrains positive size/pages, known kind, paired message/conversation references and absent content after removal. The API revalidates owner, conversation, state and quotas; sources cannot transfer to a different message.
+
+`assistant_conversations.external_context` remains true after any source use, including removal: confirmation remains mandatory and automatic memory stays disabled. Existing generated replies may quote removed sources; delete the conversation to also remove that history. Existing memories remain independent.
+
+`assistant_transcription_settings` only stores provider/model preference, optional separate encrypted credential, masked suffix, chat-reuse choice, transient lease and hourly counter. Neither audio nor transcripts are stored. Text becomes persistent only when sent as a message. The lease serializes uploads/transcriptions and expires after a crash; restoration clears it. Keyring rotation atomically re-encrypts chat and dictation credentials for the named account.

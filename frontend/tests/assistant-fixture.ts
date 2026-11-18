@@ -1,6 +1,8 @@
-import { type Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
 import type {
   AssistantSettings,
+  AssistantSource,
+  TranscriptionSettings,
   Conversation,
   Memory,
   Message,
@@ -114,6 +116,18 @@ export async function fixture(page: Page) {
     string,
     { conversation: Conversation; messages: Message[] }
   >();
+  const sources = new Map<string, AssistantSource>();
+  let transcriptionSettings: TranscriptionSettings = {
+    provider: "openai",
+    model: "gpt-transcribe",
+    configured: true,
+    token_hint: null,
+    use_chat_provider: true,
+    custom_provider: null,
+    custom_model: "",
+    custom_configured: false,
+    custom_token_hint: null,
+  };
   const requests: { path: string; method: string; body: any; csrf?: string }[] =
     [];
   let count = 0;
@@ -152,7 +166,11 @@ export async function fixture(page: Page) {
     const url = new URL(request.url());
     const path = url.pathname.replace("/api/v1", "");
     const method = request.method();
-    const body = request.postData() ? request.postDataJSON() : undefined;
+    const body = request.postData()
+      ? request.headers()["content-type"]?.includes("application/json")
+        ? request.postDataJSON()
+        : request.postDataBuffer()
+      : undefined;
     requests.push({
       path,
       method,
@@ -193,6 +211,78 @@ export async function fixture(page: Page) {
         exclude_weekends: {},
         version: 1,
       });
+    if (path === "/assistant/sources/limits")
+      return json({
+        max_sources: 4,
+        max_file_bytes: 10485760,
+        max_image_bytes: 5242880,
+        max_total_bytes: 20971520,
+        max_pdf_pages: 50,
+        accepted_extensions: [
+          ".pdf",
+          ".txt",
+          ".md",
+          ".png",
+          ".jpg",
+          ".jpeg",
+          ".webp",
+          ".docx",
+          ".csv",
+        ],
+        accepted_media_types: [],
+      });
+    if (
+      path === "/assistant/sources/files" ||
+      path === "/assistant/sources/web"
+    ) {
+      const source: AssistantSource = {
+        id: `source-${sources.size + 1}`,
+        kind: path.endsWith("/web") ? "web" : "file",
+        name: url.searchParams.get("filename") || "Article de test",
+        media_type: request.headers()["content-type"] || "text/html",
+        size_bytes: body?.length || 100,
+        sha256: "synthetic",
+        url: body?.url ?? null,
+        created_at: now,
+        removed_at: null,
+        page_count: null,
+      };
+      sources.set(source.id, source);
+      return json(source, 201);
+    }
+    if (/^\/assistant\/sources\/[^/]+$/.test(path)) {
+      const source = sources.get(path.split("/").at(-1)!);
+      if (!source) return json({ detail: "Missing" }, 404);
+      if (method === "DELETE") {
+        source.removed_at = now;
+        return route.fulfill({ status: 204 });
+      }
+      return json(source);
+    }
+    if (path === "/assistant/transcription/settings") {
+      if (method === "PUT") {
+        transcriptionSettings.use_chat_provider = body.use_chat_provider;
+        if (body.provider)
+          transcriptionSettings.custom_provider = body.provider;
+        if (body.model !== undefined)
+          transcriptionSettings.custom_model = body.model;
+        if (body.api_token !== undefined)
+          transcriptionSettings.custom_configured = body.api_token !== null;
+      }
+      const useChat = transcriptionSettings.use_chat_provider;
+      return json({
+        ...transcriptionSettings,
+        provider: useChat
+          ? settings.provider
+          : transcriptionSettings.custom_provider,
+        model: useChat ? "gpt-transcribe" : transcriptionSettings.custom_model,
+        configured: useChat
+          ? settings.configured && settings.provider !== "anthropic"
+          : transcriptionSettings.custom_configured,
+      });
+    }
+    if (path === "/assistant/transcription")
+      return json({ text: "Un texte dicté." });
     if (path === "/assistant/settings") {
       if (method === "PUT") {
         settings = {
@@ -273,6 +363,9 @@ export async function fixture(page: Page) {
             id: `question-${count}`,
             role: "user",
             content: body.content,
+            sources: (body.source_ids ?? []).map((id: string) =>
+              sources.get(id),
+            ),
             status: "complete",
             snippets: [],
             created_at: now,
@@ -340,6 +433,7 @@ export async function fixture(page: Page) {
   });
   return {
     session,
+    sources,
     requests,
     seed,
     conversations,

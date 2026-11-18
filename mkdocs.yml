@@ -142,3 +142,4 @@ extra:
             - {file: decisions/006-progression-applications.md, fr: ADR 006 · Progression commune, en: ADR 006 · Shared progression}
             - {file: decisions/007-reglages-generaux.md, fr: ADR 007 · Réglages généraux, en: ADR 007 · General settings}
             - {file: decisions/008-assistant-ia.md, fr: ADR 008 · Assistant IA, en: ADR 008 · AI assistant}
+            - {file: decisions/009-sources-assistant.md, fr: ADR 009 · Sources et dictée, en: ADR 009 · Sources and dictation}
