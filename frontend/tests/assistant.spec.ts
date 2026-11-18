@@ -961,3 +961,32 @@ test("une réponse en cours est récupérée après rechargement sans répéter 
     ),
   ).toHaveLength(0);
 });
+
+test("un aperçu d’import affiche les dix tâches avant confirmation", async ({
+  page,
+}) => {
+  const state = await fixture(page);
+  state.seed("import-ten", [
+    {
+      id: "import-preview",
+      application_id: "tasks",
+      kind: "import_tasks",
+      schema_version: 1,
+      phase: "preview",
+      operation_id: "operation-import",
+      data: {
+        title: "Importer des tâches",
+        entity: Array.from({ length: 10 }, (_, i) => ({
+          id: `preview-${i}`,
+          title: `Tâche importée ${i + 1}`,
+          description: `Description ${i + 1}`,
+        })),
+      },
+    },
+  ]);
+  await page.goto("/?conversation=import-ten");
+  await expect(
+    page.getByText("Tâche importée 10", { exact: true }),
+  ).toBeVisible();
+  await expect(page.locator(".assistant-snippet-line")).toHaveCount(10);
+});

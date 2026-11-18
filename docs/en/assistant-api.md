@@ -80,3 +80,9 @@ with httpx.Client(base_url="http://127.0.0.1:8100/api/v1", timeout=240) as clien
 ```
 
 Use HTTPS in production. Original business routes remain the reference API for objects, independently of AI generation. See [application contracts](evolution.md), [data](donnees.md) and [restoration](sauvegardes.md#migration-0015-assistant).
+
+## Tasks imports and delegation
+
+The `tasks.import_tasks` capability maps to `POST /tasks/import`, with arguments `{ "payload": { "tasks": [<TaskCreate>, …] } }`. It always requires a preview and confirmation, even with `propose=false`. The preview contains every task and destination and persists no creations. Confirmation rechecks ownership, activation and a fingerprint of destination metadata (workspaces, sections, statuses, labels), then atomically runs the same services as the API. Changed destination metadata returns 409. The receipt prevents duplicate creation on repeated or concurrent confirmation.
+
+Every `delegate_<application>` call creates a fresh specialist, including repeated calls for the same application. Dependencies use only identifiers from confirmed results; simulated preview identifiers are not passed as created objects. Configurable global budgets are shared; local limits are 24 exchanges per specialist and 16 for the coordinator. See [Configuration](configuration.md).

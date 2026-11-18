@@ -147,3 +147,16 @@ export interface AgendaPage extends Page<Task> {
   start_date: string;
   end_date: string;
 }
+
+export type TaskImportItem = Pick<Task, "title" | "workspace_id"> &
+  Partial<
+    Pick<
+      Task,
+      | "description"
+      | "section_id"
+      | "priority"
+      | "due_date"
+      | "recurrence"
+      | "label_ids"
+    >
+  > & { status_id?: string | null };

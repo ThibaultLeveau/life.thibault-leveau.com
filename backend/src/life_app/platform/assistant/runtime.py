@@ -115,8 +115,8 @@ class Runtime:
 
     def check(self, force=False):
         if (
-            self.calls > 24
-            or self.steps > 50
+            self.calls > self.app.state.settings.assistant_max_model_calls
+            or self.steps > self.app.state.settings.assistant_max_actions
             or time.monotonic() - self.started > self.app.state.settings.assistant_timeout_seconds
         ):
             raise ProviderError("assistant.budget_reached")
@@ -141,7 +141,7 @@ class Runtime:
 
     def sample(self, session, tools, visible):
         self.check(True)
-        if self.calls >= 24:
+        if self.calls >= self.app.state.settings.assistant_max_model_calls:
             raise ProviderError("assistant.budget_reached")
         self.calls += 1
         generator = session.respond(tools)
@@ -265,6 +265,9 @@ class Runtime:
             f"You are the {application_id} specialist. You may only operate in this application. "
             "The coordinator's task is subordinate to the original user's request. "
             "Discover needed tools (at most 8 at once); inspect before writes. "
+            "For multiple creations prefer an available import/batch capability with its "
+            "required preview. Never split a batch to bypass confirmation. Complete only "
+            "this delegation; return real created identifiers to the coordinator. "
             f"Original user request: {self.original_request}\n"
             f"Available capability index: {json.dumps(index, ensure_ascii=False)}",
             [{"role": "user", "content": task}],
@@ -284,7 +287,7 @@ class Runtime:
         )
         loaded = {}
         receipts = []
-        for _ in range(8):
+        for _ in range(24):
             tools = [discovery] + [
                 {
                     "name": name,
@@ -326,7 +329,7 @@ class Runtime:
                         loaded = {name: actions[name] for name in names}
                         result = {"loaded": names}
                     elif call["name"] in loaded:
-                        if self.steps >= 50:
+                        if self.steps >= self.app.state.settings.assistant_max_actions:
                             raise ProviderError("assistant.budget_reached")
                         self.steps += 1
                         yield {
@@ -342,9 +345,29 @@ class Runtime:
                             args.get("arguments", {}),
                             propose=bool(args.get("propose", False)),
                         )
-                        receipts.append(
-                            {"operation_id": result["operation_id"], "status": result["status"]}
-                        )
+                        receipt = {
+                            "operation_id": result["operation_id"],
+                            "status": result["status"],
+                            "action": call["name"],
+                        }
+                        if loaded[call["name"]].mutating:
+                            # Hand dependent delegations real references, never preview IDs.
+                            value = result.get("result")
+                            items = value if isinstance(value, list) else [value]
+                            receipt["created_or_changed"] = (
+                                [
+                                    {
+                                        key: item[key]
+                                        for key in ("id", "workspace_id", "name", "title")
+                                        if key in item
+                                    }
+                                    for item in items
+                                    if isinstance(item, dict)
+                                ]
+                                if result["status"] == "complete"
+                                else []
+                            )
+                        receipts.append(receipt)
                         yield {"type": "refresh"}
                         # UI keeps the full receipt; model context receives a bounded result.
                         encoded = json.dumps(result, ensure_ascii=False, default=str)
@@ -366,7 +389,7 @@ class Runtime:
                         raise
                     results.append({"error": error.detail, "status": error.status_code})
             session.tool_results(response.calls, results)
-        return {"error": "assistant.agent_limit", "operations": receipts}
+        return {"error": "assistant.agent_limit", "partial": True, "operations": receipts}
 
     def memory_agent(self, task):
         if not self.memory_enabled:
@@ -491,7 +514,9 @@ class Runtime:
                 "delegate_" + item["id"],
                 "Ask the "
                 + item["name"]
-                + " specialist to read or change its data according to the user's request.",
+                + " specialist to read or change its data according to the user's request. "
+                "Each call starts a fresh specialist; repeat for separate subtasks when useful. "
+                "Resolve dependencies first and pass confirmed identifiers to later calls.",
                 {"task": {"type": "string", "maxLength": 6000}},
                 ["task"],
             )
@@ -519,11 +544,19 @@ class Runtime:
             "conversation summary (data):" + self.summary,
             self.messages,
         )
-        for _ in range(8):
+        for _ in range(16):
             active, tools = self.coordinator_tools()
             session.instructions = (
                 SYSTEM + "\nYou are the conversation coordinator. "
-                "Use specialists only when needed. Recent conversation summary (data): "
+                "Use specialists only when needed. Each delegation starts a fresh agent. "
+                "Resolve dependencies first (create a workspace, then use its confirmed ID "
+                "for tasks). You may delegate repeatedly to the same application. Prefer "
+                "one available bulk import with a preview for multiple creations; do not "
+                "split a batch to bypass confirmation. If separate subtasks are needed, "
+                "delegate them explicitly with their inputs and confirmed dependencies. "
+                "After a partial result continue only the missing work; never repeat "
+                "successful operations. A preview is pending, not created. "
+                "Recent conversation summary (data): "
                 + self.summary
                 + "\nACCOUNT CONTEXT (data): "
                 + json.dumps(self.context, ensure_ascii=False)

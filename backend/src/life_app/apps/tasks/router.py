@@ -263,6 +263,30 @@ def create_task(payload: s.TaskCreate, user: CurrentUser, db: Database):
 
 
 @router.post(
+    "/tasks/import",
+    response_model=list[s.TaskOutput],
+    status_code=201,
+    responses={
+        401: {"description": "Session requise."},
+        403: {"description": "Application désactivée ou CSRF/origine invalide."},
+        404: {"description": "Destination ou référence inaccessible."},
+        409: {"description": "Destination archivée ; import entièrement annulé."},
+        422: {"description": "Lot ou tâche invalide ; import entièrement annulé."},
+    },
+)
+def import_tasks(payload: s.TaskImport, user: CurrentUser, db: Database):
+    """Créer atomiquement 1 à 100 tâches, dans l’ordre fourni.
+
+    Mêmes champs, contrôles de destination et événements que POST /tasks.
+    Aucune déduplication par titre : deux entrées identiques créent deux tâches.
+    Toute erreur annule toutes les créations et leurs événements.
+    """
+    result = svc.import_tasks(db, user, payload)
+    db.commit()
+    return result
+
+
+@router.post(
     "/tasks/bulk",
     response_model=list[s.TaskOutput],
     responses={

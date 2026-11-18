@@ -29,7 +29,7 @@ def invoke(app, application_id, name, data=None, *, username="alice", commit=Tru
         return serialized
 
 
-@pytest.mark.parametrize("application_id,route_count", [("tasks", 36), ("sport", 31)])
+@pytest.mark.parametrize("application_id,route_count", [("tasks", 37), ("sport", 31)])
 def test_capabilities_cover_every_http_operation_with_closed_inputs(application_id, route_count):
     app = next(item for item in APPLICATIONS if item.id == application_id)
     routes = {(method, route.path) for route in app.router.routes for method in route.methods}
@@ -48,6 +48,7 @@ def test_capabilities_cover_every_http_operation_with_closed_inputs(application_
             or action.name
             in {
                 "bulk_tasks",
+                "import_tasks",
                 "finish_session",
                 "repair_scores",
             }
