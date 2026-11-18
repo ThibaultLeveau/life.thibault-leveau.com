@@ -393,7 +393,7 @@ export function WebImport({
             <p className="muted recipes-small">
               {tr("web_provider_hint")}{" "}
               <a
-                href="/settings"
+                href="/settings#assistant-settings"
                 onClick={(event) => {
                   if (busy || ((url || text) && !window.confirm(tr("unsaved"))))
                     event.preventDefault();
