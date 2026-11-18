@@ -2595,3 +2595,27 @@ button.task-load-more,
     grid-row: 1 / 3;
   }
 }
+
+.task-import-action {
+  display: flex;
+  justify-content: flex-end;
+  margin-block: 12px;
+}
+.task-import-form textarea {
+  min-height: 180px;
+  resize: vertical;
+}
+.task-import-preview {
+  max-height: 300px;
+  overflow: auto;
+  padding-inline-start: 24px;
+  overflow-wrap: anywhere;
+}
+.task-import-preview li {
+  margin-block: 8px;
+}
+.task-import-preview pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}

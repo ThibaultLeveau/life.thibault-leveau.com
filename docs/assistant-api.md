@@ -125,3 +125,9 @@ print(transcript.json()["text"])  # Relire avant tout envoi au chat.
 ```
 
 Les champs `custom_provider`, `custom_model`, `custom_configured` et `custom_token_hint` décrivent séparément la configuration indépendante conservée, même lorsque `use_chat_provider=true`. Ils permettent de revenir à celle-ci sans écraser son modèle ni son credential. Aucun secret n’est retourné.
+
+## Import et délégations de Tâches
+
+La capacité `tasks.import_tasks` correspond à `POST /tasks/import`, arguments `{ "payload": { "tasks": [<TaskCreate>, …] } }`. Elle exige toujours un aperçu à confirmer, même avec `propose=false`. L’aperçu contient toutes les tâches et destinations ; il ne persiste aucune création. La confirmation revalide propriétaire, activation et empreinte des métadonnées de destination (espaces, sections, statuts, étiquettes), puis exécute atomiquement les mêmes services que l’API. Un changement de destination depuis l’aperçu entraîne 409. Le reçu évite toute double création lors d’une confirmation répétée ou concurrente.
+
+Chaque appel `delegate_<application>` instancie un spécialiste neuf, y compris plusieurs appels pour la même application. Les dépendances utilisent uniquement les identifiants des résultats confirmés ; les identifiants simulés des aperçus ne sont pas transmis comme objets créés. Les budgets globaux configurables sont partagés ; le plafonnement local est de 24 échanges par spécialiste et 16 pour le coordinateur. Voir [Configuration](configuration.md).

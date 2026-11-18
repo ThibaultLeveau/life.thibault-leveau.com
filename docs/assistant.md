@@ -85,3 +85,9 @@ Les sources multimodales sont disponibles selon les limites ci-dessus. Aucune na
 Le chat utilise les thèmes clair/sombre/système, les langues FR/EN et la navigation commune. Sur mobile, ouvrez le menu pour retrouver historique et bibliothèque. Tab et Maj+Tab parcourent les commandes, Échap ferme les dialogues ; la préférence système de réduction des animations est respectée. Les données privées disparaissent à la déconnexion ou à l’expiration de session.
 
 Toutes ces opérations disposent de leur [API indépendante](assistant-api.md). Voir aussi les [réglages](settings.md) et les [règles de sauvegarde](sauvegardes.md#migration-0015-assistant).
+
+## Créer plusieurs tâches
+
+Demandez par exemple « Crée un espace Portfolio et prépare ces dix tâches… ». Le coordinateur peut déléguer la création de l’espace, puis transmettre son identifiant confirmé au spécialiste Tâches. Une nouvelle délégation peut réutiliser le même spécialiste pour une autre sous-tâche ; les délégations sont exécutées en séquence dans le processus existant. Pour plusieurs créations, l’assistant privilégie **Importer des tâches** : un lot de 1 à 100 tâches, avec un aperçu complet puis une confirmation. L’aperçu ne crée encore aucune tâche ; la confirmation enregistre tout le lot ou rien. Ne confirmez pas plusieurs propositions identiques.
+
+Les budgets par défaut sont de 96 appels modèle, 200 actions métier et 600 secondes pour une réponse. Chaque spécialiste dispose de 24 échanges maximum et le coordinateur de 16 ; l’administrateur peut réduire les budgets globaux dans la configuration. Ces garde-fous évitent les boucles et les coûts sans borne ; ils ne représentent pas une limite au nombre de tâches stockées. Un fournisseur lent peut encore dépasser le délai. Après interruption, les actions déjà enregistrées sont conservées et ne doivent pas être recréées.

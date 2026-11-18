@@ -125,3 +125,9 @@ print(transcript.json()["text"])  # Review before sending to chat.
 ```
 
 `custom_provider`, `custom_model`, `custom_configured` and `custom_token_hint` separately describe the saved independent configuration, including while `use_chat_provider=true`. Clients can switch back without replacing its model or credential. No secret is returned.
+
+## Tasks imports and delegation
+
+The `tasks.import_tasks` capability maps to `POST /tasks/import`, with arguments `{ "payload": { "tasks": [<TaskCreate>, …] } }`. It always requires a preview and confirmation, even with `propose=false`. The preview contains every task and destination and persists no creations. Confirmation rechecks ownership, activation and a fingerprint of destination metadata (workspaces, sections, statuses, labels), then atomically runs the same services as the API. Changed destination metadata returns 409. The receipt prevents duplicate creation on repeated or concurrent confirmation.
+
+Every `delegate_<application>` call creates a fresh specialist, including repeated calls for the same application. Dependencies use only identifiers from confirmed results; simulated preview identifiers are not passed as created objects. Configurable global budgets are shared; local limits are 24 exchanges per specialist and 16 for the coordinator. See [Configuration](configuration.md).

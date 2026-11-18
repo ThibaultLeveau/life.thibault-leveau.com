@@ -277,3 +277,11 @@ Les préférences sont réunies dans les [réglages généraux](settings.md). Le
 ![Ouvrir Réglages pour adapter les préférences et les jours d’utilisation de cette application.](assets/screenshots/fr/tasks-settings.png){ loading=lazy }
 
 *Ouvrir Réglages pour adapter les préférences et les jours d’utilisation de cette application.*
+
+## Importer plusieurs tâches
+
+Dans un espace, choisissez **Importer des tâches**. Collez une tâche par ligne (les lignes vides sont ignorées), ou sélectionnez JSON et collez un tableau d’objets contenant `title` et les autres champs de création de l’[API](api.md#import-de-taches). Choisissez éventuellement une section. L’import accepte 1 à 100 tâches et le champ de collage 200 000 caractères. Les titres sont littéraux : « demain » reste dans le titre ; utilisez `due_date` et `recurrence` en JSON pour planifier.
+
+**Vérifier l’import** présente la destination, le nombre et toutes les entrées ; **Modifier le lot** permet de corriger avant de confirmer. Un `section_id` JSON explicite remplace la section choisie ; `workspace_id`, s’il est présent, doit correspondre à l’espace affiché. La validation serveur reste l’autorité pour les dates, statuts, étiquettes et références. Une tâche invalide annule tout le lot ; le brouillon reste disponible pour correction. Les titres identiques créent des tâches distinctes. Aucun import ni nouvel envoi n’est relancé automatiquement après erreur réseau : vérifiez la liste avant de réessayer si la réponse a été perdue.
+
+Chaque tâche reçoit son identifiant, ses dates, sa version et son historique habituels. Désactiver/réactiver Tâches et sauvegarder/restaurer préservent ces tâches comme les créations unitaires. Aucun fichier ou stockage navigateur permanent n’est ajouté.
