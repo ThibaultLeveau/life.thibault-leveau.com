@@ -321,5 +321,6 @@
   "assistant_dictation_save": "Save dictation settings",
   "assistant_dictation_delete_token": "Delete dictation key",
   "assistant_dictation_retry": "Retry transcription",
-  "assistant_source_ready": "Ready to send"
+  "assistant_source_ready": "Ready to send",
+  "assistant_table": "Message table — horizontal scrolling"
 }

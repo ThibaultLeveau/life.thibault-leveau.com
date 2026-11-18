@@ -2,6 +2,12 @@
 
 React, TypeScript and Vite retain the existing toolchain. `App.tsx` assembles shared login, Home `/`, the `/applications` library and registered Pages without another router or general fallback. Without a workspace, `/tasks` opens the global agenda (`?view=agenda`). `?space=<UUID>` identifies an active workspace; server authorization remains authoritative.
 
+## Assistant message formatting
+
+`platform/assistant/components/MessageText.tsx` renders paragraphs, bold text, inline/fenced code and pipe tables using React text nodes. Header and separator column counts must match; outer pipes are optional, `\|` escapes a pipe, and colons control alignment. Missing row cells are padded; rows with surplus cells stay literal to avoid hiding content. Lines without a pipe end a table. Fences (including unfinished ones) keep table examples as code. This is a bounded formatter, not a complete Markdown engine; it never injects HTML or loads message images/links.
+
+Tables use semantic column headers and a focusable, localized scrolling region with existing theme tokens. The original API `content` stays unchanged in PostgreSQL: streaming and history use the same renderer, with no new setting, dependency, migration or backup procedure. `assistant.spec.ts` covers rendering, malformed input, SSE chunks, security, FR/EN themes, keyboard scrolling and 320 px layout.
+
 ## Shared application navigation {#navigation-commune-des-applications}
 
 Tasks, Sport, Tracking, OKR and Recipes compose `ApplicationSidebar` and `ApplicationTopbar` from `shared/ui/ApplicationNavigation.tsx`. `shared/styles/navigation.css` owns styling: 252 px desktop sidebar, 66 px top bar (64 px mobile), identical links and visual states. Applications supply name, icon, breadcrumb and business links without overriding the frame.

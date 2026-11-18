@@ -321,5 +321,6 @@
   "assistant_dictation_save": "Enregistrer la dictée",
   "assistant_dictation_delete_token": "Supprimer la clé de dictée",
   "assistant_dictation_retry": "Réessayer la transcription",
-  "assistant_source_ready": "Prêt à envoyer"
+  "assistant_source_ready": "Prêt à envoyer",
+  "assistant_table": "Tableau du message — défilement horizontal"
 }
