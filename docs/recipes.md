@@ -28,6 +28,8 @@ Dans l’éditeur de recette, si le nom n’existe pas, **Créer « … » dans 
 
 Dans **Listes de courses → Nouvelle liste**, donnez un nom à votre liste. Dans **Ajouter un article**, saisissez ce dont vous avez besoin : « Lessive », « Piles AA », « Fleurs »… Appuyez sur **Entrée** ou **Ajouter** : aucune sélection ni création dans le catalogue n’est nécessaire. Par défaut, l’ajout correspond à **1 pièce** ; ajustez quantité et unité si besoin. Les suggestions restent facultatives : sélectionnez-en une pour utiliser un ingrédient du catalogue. Les articles libres apparaissent dans **Autres articles** et leur nom reste identique en français et en anglais.
 
+Après un ajout réussi, le champ de nom se vide et récupère le focus dès qu’il est de nouveau disponible, pour saisir directement l’article suivant. Un échec conserve la saisie.
+
 Un article libre ne crée pas d’ingrédient personnel et n’apparaît pas dans le catalogue des recettes. Les articles libres de même nom (casse, accents et espaces répétés ignorés) et même unité s’additionnent, en conservant le premier libellé. Des noms différents, synonymes ou pluriels restent distincts. Ils ne fusionnent pas avec un ingrédient du catalogue portant le même nom. Une recherche catalogue indisponible n’empêche pas d’ajouter un article libre.
 
 Pour compléter les courses, choisissez **Importer une recette**, la recette et le nombre de personnes. Vous pouvez aussi partir d’une recette avec **Ajouter à une liste**. La recherche et la pagination permettent de retrouver des listes et recettes plus anciennes.

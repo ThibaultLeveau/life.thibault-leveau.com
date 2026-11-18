@@ -84,6 +84,7 @@ async function addIngredient(
   await picker.getByLabel("Unité", { exact: true }).selectOption(unit);
   await picker.getByRole("button", { name: "Ajouter", exact: true }).click();
   await expect(picker.getByRole("searchbox")).toHaveValue("");
+  await expect(picker.getByRole("searchbox")).toBeFocused();
 }
 async function currentList(
   page: Page,
@@ -646,6 +647,7 @@ for (const locale of ["fr", "en"] as const) {
     );
     await input.press("Enter");
     await expect(input).toHaveValue("");
+    await expect(input).toBeFocused();
     await expect(row.getByRole("checkbox")).not.toBeChecked();
     list = await currentList(page, list.id);
     expect(Number(list.items[0].quantity)).toBe(2);
@@ -665,6 +667,7 @@ for (const locale of ["fr", "en"] as const) {
       .getByRole("button", { name: en ? "Add" : "Ajouter", exact: true })
       .click();
     await expect(input).toHaveValue("");
+    await expect(input).toBeFocused();
     await page.unroute(/\/api\/v1\/recipes\/ingredients\?/);
     await page.reload();
     await expect(row).toBeVisible();
