@@ -65,7 +65,7 @@ async function addIngredient(
   custom = false,
 ) {
   const picker = page.locator(".recipes-picker");
-  await picker.getByLabel("Ingrédient ou article", { exact: true }).fill(name);
+  await picker.getByRole("searchbox").fill(name);
   if (custom) {
     await picker.getByLabel("Unité", { exact: true }).selectOption(unit);
     await picker
@@ -83,9 +83,7 @@ async function addIngredient(
   await picker.getByLabel("Quantité", { exact: true }).fill(amount);
   await picker.getByLabel("Unité", { exact: true }).selectOption(unit);
   await picker.getByRole("button", { name: "Ajouter", exact: true }).click();
-  await expect(
-    picker.getByLabel("Ingrédient ou article", { exact: true }),
-  ).toHaveValue("");
+  await expect(picker.getByRole("searchbox")).toHaveValue("");
 }
 async function currentList(
   page: Page,
@@ -135,7 +133,12 @@ test("recette, catalogue bilingue, ingrédient inconnu et portions calculées", 
   expect(recipe.items).toHaveLength(6);
   expect(recipe.base_servings).toBe(2);
   expect(recipe.items.map((item) => item.unit)).toEqual([
-    "g", "u", "tsp", "ml", "mg", "tbsp",
+    "g",
+    "u",
+    "tsp",
+    "ml",
+    "mg",
+    "tbsp",
   ]);
   await page.reload();
   await expect(page.locator(".recipes-ingredient-list")).toContainText(
@@ -146,7 +149,9 @@ test("recette, catalogue bilingue, ingrédient inconnu et portions calculées", 
   );
   await page.getByLabel("Nombre de personnes", { exact: true }).fill("6");
   await expect(
-    page.locator(".recipes-ingredient-list").getByText("450 g", { exact: true }),
+    page
+      .locator(".recipes-ingredient-list")
+      .getByText("450 g", { exact: true }),
   ).toBeVisible();
   expect(
     (
@@ -181,6 +186,10 @@ test("liste, import, cumul exact, achats partiels et fin des courses", async ({
     page.getByRole("heading", { name: listName, exact: true }),
   ).toBeVisible();
   await addIngredient(page, "Riz basmati", "50", "g");
+  const freeInput = page.locator(".recipes-picker").getByRole("searchbox");
+  await freeInput.fill(`Piles AA ${stamp}`);
+  await freeInput.press("Enter");
+  await expect(freeInput).toHaveValue("");
   await page
     .getByRole("button", { name: "Importer une recette", exact: true })
     .click();
@@ -199,7 +208,10 @@ test("liste, import, cumul exact, achats partiels et fin des courses", async ({
       )
     ).json()
   ).items[0];
-  expect(shopping.items).toHaveLength(6);
+  expect(shopping.items).toHaveLength(7);
+  expect(
+    shopping.items.find((i) => i.name === `Piles AA ${stamp}`)?.ingredient_id,
+  ).toBeNull();
   expect(
     Number(shopping.items.find((i) => i.name === "Riz basmati")!.quantity),
   ).toBe(350);
@@ -362,7 +374,7 @@ test("erreur réseau visible, reprise, clavier et désactivation sans perte", as
 
   // A second device wins: reject the stale checkbox, then explicitly discard
   // the local ingredient draft when reloading the current server version.
-  const pending = page.getByLabel("Ingrédient ou article", { exact: true });
+  const pending = page.locator(".recipes-picker").getByRole("searchbox");
   await pending.fill("Brouillon non enregistré");
   const renamed = await page.request.put(
     `/api/v1/recipes/lists/${shopping.id}`,
@@ -566,3 +578,155 @@ test("import depuis une recette et commandes de liste par API/interface", async 
   ).toBeVisible();
   shopping = await currentList(page);
 });
+
+for (const locale of ["fr", "en"] as const) {
+  test(`articles libres ${locale} : ajout clavier, erreur, achats et modèles`, async ({
+    page,
+  }, info) => {
+    const en = locale === "en";
+    await page.request.put("/api/v1/preferences", {
+      headers,
+      data: { locale, theme: en ? "dark" : "light" },
+    });
+    const name = `Piles rechargeables ${locale} ${stamp}`;
+    const created = await page.request.post("/api/v1/recipes/lists", {
+      headers,
+      data: { title: `Articles libres ${locale} ${stamp}` },
+    });
+    expect(created.ok()).toBeTruthy();
+    let list: ShoppingList = await created.json();
+    const before = await (
+      await page.request.get("/api/v1/recipes/ingredients")
+    ).json();
+    await page.setViewportSize({ width: en ? 320 : 1280, height: 900 });
+    await page.goto(`/recipes?tab=lists&id=${list.id}`);
+    const picker = page.locator(".recipes-picker");
+    const input = picker.getByRole("searchbox", {
+      name: en ? "Item" : "Article",
+      exact: true,
+    });
+    await expect(
+      picker.getByLabel(en ? "Unit" : "Unité", { exact: true }),
+    ).toHaveValue("u");
+    await expect(
+      picker.getByLabel(en ? "Quantity" : "Quantité", { exact: true }),
+    ).toHaveValue("1");
+    await input.fill(name);
+    await input.press("Enter");
+    await expect(input).toHaveValue("");
+    await expect(input).toBeFocused();
+    const row = page
+      .locator(".recipes-shopping-item")
+      .filter({ hasText: name });
+    await expect(row).toBeVisible();
+    list = await currentList(page, list.id);
+    expect(list.items[0].ingredient_id).toBeNull();
+    expect(Number(list.items[0].quantity)).toBe(1);
+    await row.getByRole("checkbox").focus();
+    await page.keyboard.press("Space");
+    await expect(row.getByRole("checkbox")).toBeChecked();
+
+    // A failed addition keeps the draft; retrying adds only once and keeps the purchase.
+    await page.route(
+      /\/api\/v1\/recipes\/lists\/[^/]+\/items$/,
+      (route) =>
+        route.fulfill({
+          status: 503,
+          contentType: "application/json",
+          body: JSON.stringify({ detail: "synthetic outage" }),
+        }),
+      { times: 1 },
+    );
+    await input.fill(name);
+    await input.press("Enter");
+    await expect(picker.getByRole("alert")).toBeVisible();
+    await expect(input).toHaveValue(name);
+    expect(Number((await currentList(page, list.id)).items[0].quantity)).toBe(
+      1,
+    );
+    await input.press("Enter");
+    await expect(input).toHaveValue("");
+    await expect(row.getByRole("checkbox")).not.toBeChecked();
+    list = await currentList(page, list.id);
+    expect(Number(list.items[0].quantity)).toBe(2);
+    expect(Number(list.items[0].purchased_quantity)).toBe(1);
+    expect(
+      (await (await page.request.get("/api/v1/recipes/ingredients")).json())
+        .total,
+    ).toBe(before.total);
+
+    // Catalogue search failure must not make an arbitrary shopping item impossible.
+    await page.route(/\/api\/v1\/recipes\/ingredients\?/, (route) =>
+      route.fulfill({ status: 503 }),
+    );
+    await input.fill(`Savon ${stamp}`);
+    await expect(picker.getByRole("alert")).toBeVisible();
+    await picker
+      .getByRole("button", { name: en ? "Add" : "Ajouter", exact: true })
+      .click();
+    await expect(input).toHaveValue("");
+    await page.unroute(/\/api\/v1\/recipes\/ingredients\?/);
+    await page.reload();
+    await expect(row).toBeVisible();
+    await noOverflow(page);
+    await page.screenshot({
+      path: info.outputPath(`free-items-${locale}.png`),
+      fullPage: true,
+    });
+    await row
+      .getByRole("button", {
+        name: `${en ? "Edit" : "Modifier"} · ${name}`,
+        exact: true,
+      })
+      .click();
+    await row
+      .getByLabel(en ? "Quantity" : "Quantité", { exact: true })
+      .fill("4");
+    await row
+      .getByRole("button", { name: en ? "Save" : "Enregistrer", exact: true })
+      .click();
+    await expect(row.locator(".recipes-item-edit")).toHaveCount(0);
+    expect(Number((await currentList(page, list.id)).items[0].quantity)).toBe(
+      4,
+    );
+
+    const templateTitle = `Articles libres modèle ${locale} ${stamp}`;
+    await page
+      .getByRole("button", {
+        name: en ? "Save as template" : "Enregistrer comme modèle",
+        exact: true,
+      })
+      .click();
+    await page
+      .getByRole("dialog")
+      .getByLabel(en ? "Name" : "Nom", { exact: true })
+      .fill(templateTitle);
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: en ? "Save" : "Enregistrer", exact: true })
+      .click();
+    await expect(
+      page.getByRole("heading", { name: templateTitle, exact: true }),
+    ).toBeVisible();
+    const saved = (
+      await (
+        await page.request.get(
+          `/api/v1/recipes/lists?kind=template&q=${encodeURIComponent(templateTitle)}`,
+        )
+      ).json()
+    ).items[0];
+    expect(saved.items).toHaveLength(2);
+    expect(saved.items[0].name).toBe(name);
+    expect(
+      saved.items.every(
+        (item: { ingredient_id: string | null; checked: boolean }) =>
+          item.ingredient_id === null && !item.checked,
+      ),
+    ).toBeTruthy();
+    // Leave data for the real database dump/restore acceptance check.
+    await page.request.put("/api/v1/preferences", {
+      headers,
+      data: { locale: "fr", theme: "light" },
+    });
+  });
+}

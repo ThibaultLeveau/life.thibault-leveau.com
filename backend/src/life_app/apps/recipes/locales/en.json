@@ -3,7 +3,7 @@
   "not_found": "Item not found.",
   "ingredient_not_found": "An ingredient could not be found in your catalogue.",
   "limit": "Your catalogue limit has been reached.",
-  "items_limit": "A list can contain at most 300 distinct ingredient and unit pairs.",
+  "items_limit": "A list can contain at most 300 distinct item and unit pairs.",
   "conflict": "This item has changed. Reload it before trying again; your input is still displayed.",
   "read_only": "Restore or reopen this item before editing it.",
   "quantity_range": "The calculation must give a quantity between 0.000001 and 1,000,000,000.",
@@ -16,5 +16,7 @@
   "metric_imports": "Recipes used for shopping",
   "metric_imports_description": "First import of each list/recipe pair. Imports into templates are excluded.",
   "metric_templates": "Shopping templates prepared",
-  "metric_templates_description": "First time each template contains an ingredient, including archives."
+  "metric_templates_description": "First time each template contains an item, including archives.",
+  "item_identity": "Provide either a free item (name) or a catalogue ingredient (ingredient_id).",
+  "invalid_item_name": "Enter a valid item name."
 }

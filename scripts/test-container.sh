@@ -230,6 +230,8 @@ for okr_table in okr_objectives okr_events okr_settings; do
   restored_okr=$(docker exec "$db" psql -U life -d life_restored -Atc "$okr_query")
   [[ "$source_okr" != '[]' && "$source_okr" == "$restored_okr" ]]
 done
+# Free shopping items are real persisted data, independent of the ingredient catalogue.
+[[ $(docker exec "$db" psql -U life -d life_restored -Atc 'SELECT count(*) FROM recipes_list_items WHERE ingredient_id IS NULL AND name IS NOT NULL AND normalized_name IS NOT NULL') -gt 0 ]]
 # All recipe quantities, purchase states, templates, ingredients and history survive intact.
 for recipes_table in recipes_ingredients recipes_recipes recipes_recipe_items recipes_lists recipes_list_items recipes_events; do
   recipes_query="SELECT coalesce(jsonb_agg(to_jsonb(t) ORDER BY to_jsonb(t)::text), '[]'::jsonb) FROM $recipes_table t"

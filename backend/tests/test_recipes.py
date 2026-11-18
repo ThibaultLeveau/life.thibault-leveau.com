@@ -567,3 +567,306 @@ def test_unit_migration_preserves_old_data_and_constraints(client, engine):
     for table in ["recipes_recipe_items", "recipes_list_items"]:
         with pytest.raises(IntegrityError), engine.begin() as conn:
             conn.execute(text(f"UPDATE {table} SET position=-1"))
+
+
+def test_free_items_mixed_with_catalogue_and_recipes(client):
+    catalogue = client.get("/api/v1/recipes/ingredients").json()["total"]
+    rice = client.get("/api/v1/recipes/ingredients?q=riz%20basmati").json()["items"][0]
+    obj = shopping(
+        client,
+        items=[
+            {"name": "  Lessive  "},
+            {"name": "Piles AA", "quantity": "4"},
+            {"name": "Léssive", "quantity": "2"},
+            {"name": "Lessive", "quantity": "0.5", "unit": "l"},
+            {"name": rice["name"]},
+            {"ingredient_id": rice["id"], "quantity": "10", "unit": "u"},
+        ],
+    )
+    assert len(obj["items"]) == 5
+    free = obj["items"][0]
+    assert free["ingredient_id"] is None and free["name"] == "Lessive"
+    assert free["category"] == "other" and free["unit"] == "u"
+    assert Decimal(free["quantity"]) == 3
+    assert client.get("/api/v1/recipes/ingredients").json()["total"] == catalogue
+    obj = put(client, f"lists/{obj['id']}/items/{free['id']}/check", obj, checked=True)
+    obj = post(
+        client,
+        f"lists/{obj['id']}/items",
+        {
+            "expected_version": obj["version"],
+            "name": "LESSIVE",
+            "quantity": "2",
+        },
+    )
+    assert obj["items"][0]["id"] == free["id"]
+    assert Decimal(obj["items"][0]["quantity"]) == 5
+    assert Decimal(obj["items"][0]["purchased_quantity"]) == 3
+    assert not obj["items"][0]["checked"]
+    r = recipe(client, rice, items=[{"ingredient_id": rice["id"], "quantity": "2", "unit": "u"}])
+    obj = post(
+        client,
+        f"lists/{obj['id']}/import",
+        {
+            "expected_version": obj["version"],
+            "recipe_id": r["id"],
+            "recipe_version": r["version"],
+            "servings": 2,
+        },
+    )
+    assert len(obj["items"]) == 5
+    assert Decimal(obj["items"][-1]["quantity"]) == 12
+    assert Decimal(obj["items"][-2]["quantity"]) == 1  # Same name, independent free item.
+    obj = put(client, f"lists/{obj['id']}/items/{free['id']}", obj, quantity="2")
+    assert Decimal(obj["items"][0]["purchased_quantity"]) == 2
+    client.put("/api/v1/preferences", json={"locale": "en"})
+    translated = client.get(f"/api/v1/recipes/lists/{obj['id']}").json()
+    assert translated["items"][0] == obj["items"][0]
+    assert translated["items"][-2]["name"] == rice["name"]
+    assert translated["items"][-1]["name"] == rice["name_en"]
+    assert client.get("/api/v1/recipes/ingredients").json()["total"] == catalogue
+
+
+def test_free_items_full_lifecycle_and_history(client):
+    obj = shopping(client, items=[{"name": "Piles"}, {"name": "Savon"}])
+    for line in obj["items"]:
+        obj = put(client, f"lists/{obj['id']}/items/{line['id']}/check", obj, checked=True)
+    obj = put(client, f"lists/{obj['id']}/complete", obj, completed=True)
+    xp = client.get("/api/v1/progression/recipes").json()["xp"]
+    obj = put(client, f"lists/{obj['id']}/complete", obj, completed=False)
+    obj = put(client, f"lists/{obj['id']}/complete", obj, completed=True)
+    assert client.get("/api/v1/progression/recipes").json()["xp"] == xp
+    obj = put(client, f"lists/{obj['id']}/archive", obj, archived=True)
+    template = post(
+        client,
+        f"lists/{obj['id']}/copy",
+        {
+            "title": "Maison",
+            "kind": "template",
+            "expected_version": obj["version"],
+        },
+    )
+    copy = post(
+        client,
+        f"lists/{template['id']}/copy",
+        {
+            "title": "Semaine prochaine",
+            "expected_version": template["version"],
+        },
+    )
+    for target in (template, copy):
+        assert [(i["name"], i["ingredient_id"], i["quantity"]) for i in target["items"]] == [
+            (i["name"], i["ingredient_id"], i["quantity"]) for i in obj["items"]
+        ]
+        assert all(
+            not i["checked"] and Decimal(i["purchased_quantity"]) == 0 for i in target["items"]
+        )
+        assert target["archived_at"] is None and target["completed_at"] is None
+    client.put("/api/v1/applications/recipes", json={"enabled": False})
+    assert client.get(f"/api/v1/recipes/lists/{obj['id']}").status_code == 403
+    assert (
+        client.post(
+            f"/api/v1/recipes/lists/{copy['id']}/items",
+            json={
+                "expected_version": copy["version"],
+                "name": "Interdit",
+            },
+        ).status_code
+        == 403
+    )
+    client.put("/api/v1/applications/recipes", json={"enabled": True})
+    assert client.get(f"/api/v1/recipes/lists/{obj['id']}").json() == obj
+    restored = put(client, f"lists/{obj['id']}/archive", obj, archived=False)
+    assert restored["items"] == obj["items"] and restored["completed_at"] == obj["completed_at"]
+    removed = client.request(
+        "DELETE",
+        f"/api/v1/recipes/lists/{copy['id']}/items/{copy['items'][0]['id']}",
+        json={
+            "expected_version": copy["version"],
+        },
+    )
+    assert removed.status_code == 200 and len(removed.json()["items"]) == 1
+    history = client.get(f"/api/v1/recipes/lists/{copy['id']}/history").json()
+    assert history[-1]["snapshot"]["items"][0]["name"] == "Piles"
+    assert history[0]["snapshot"]["items"][0]["name"] == "Savon"
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {},
+        {"name": ""},
+        {"name": "   "},
+        {"name": "x" * 121},
+        {"name": "\u0301"},
+        {"name": "Piles", "ingredient_id": str(uuid4())},
+        {"name": "Piles", "quantity": "0"},
+        {"name": "Piles", "quantity": "0.0000001"},
+        {"name": "Piles", "quantity": "NaN"},
+        {"name": "Piles", "quantity": True},
+        {"name": "Piles", "unit": "kg"},
+        {"name": "Piles", "owner_id": str(uuid4())},
+    ],
+)
+def test_free_item_validation_is_atomic(client, payload):
+    obj = shopping(client, items=[{"name": "Conservé"}])
+    response = client.post(
+        f"/api/v1/recipes/lists/{obj['id']}/items",
+        json={
+            "expected_version": obj["version"],
+            **payload,
+        },
+    )
+    assert response.status_code == 422, response.text
+    assert client.get(f"/api/v1/recipes/lists/{obj['id']}").json() == obj
+    assert (
+        client.post(
+            "/api/v1/recipes/lists",
+            json={
+                "title": "Invalide",
+                "items": [{"name": "Valide"}, payload],
+            },
+        ).status_code
+        == 422
+    )
+    assert client.get("/api/v1/recipes/lists").json()["total"] == 1
+
+
+def test_free_items_limits_conflicts_and_recipe_contract(client):
+    obj = shopping(client, items=[{"name": "Piles", "quantity": "1000000000"}])
+    for payload, status in [
+        ({"name": "Piles", "expected_version": obj["version"]}, 422),
+        ({"name": "Autre", "expected_version": obj["version"] + 1}, 409),
+    ]:
+        assert (
+            client.post(f"/api/v1/recipes/lists/{obj['id']}/items", json=payload).status_code
+            == status
+        )
+    assert client.get(f"/api/v1/recipes/lists/{obj['id']}").json() == obj
+    full = shopping(client, items=[{"name": f"Article {i}"} for i in range(300)])
+    assert (
+        client.post(
+            f"/api/v1/recipes/lists/{full['id']}/items",
+            json={
+                "name": "En trop",
+                "expected_version": full["version"],
+            },
+        ).status_code
+        == 422
+    )
+    same = post(
+        client,
+        f"lists/{full['id']}/items",
+        {"name": "Article 0", "expected_version": full["version"]},
+    )
+    assert len(same["items"]) == 300 and Decimal(same["items"][0]["quantity"]) == 2
+    assert (
+        client.post(
+            "/api/v1/recipes/recipes",
+            json={
+                "title": "Recette",
+                "items": [{"name": "Piles", "quantity": "1", "unit": "u"}],
+            },
+        ).status_code
+        == 422
+    )
+
+
+def test_free_item_access_controls_and_concurrent_additions(client, app):
+    from concurrent.futures import ThreadPoolExecutor
+
+    obj = shopping(client, items=[{"name": "Piles"}])
+    with TestClient(app) as bob:
+        session = bob.post(
+            "/api/v1/auth/session", json={"username": "bob", "password": "synthetic-test-password"}
+        )
+        bob.headers["X-CSRF-Token"] = session.json()["csrf_token"]
+        bob.put("/api/v1/applications/recipes", json={"enabled": True})
+        assert bob.get(f"/api/v1/recipes/lists/{obj['id']}").status_code == 404
+        assert (
+            bob.post(
+                f"/api/v1/recipes/lists/{obj['id']}/items",
+                json={
+                    "name": "Piles",
+                    "expected_version": obj["version"],
+                },
+            ).status_code
+            == 404
+        )
+        own = shopping(bob, items=[{"name": "Piles"}])
+        assert (
+            bob.put(
+                f"/api/v1/recipes/lists/{own['id']}/items/{obj['items'][0]['id']}",
+                json={
+                    "quantity": "3",
+                    "expected_version": own["version"],
+                },
+            ).status_code
+            == 404
+        )
+    with TestClient(app) as guest:
+        guest.cookies.update(dict(client.cookies))
+        assert (
+            guest.post(
+                f"/api/v1/recipes/lists/{obj['id']}/items",
+                json={
+                    "name": "Piles",
+                    "expected_version": obj["version"],
+                },
+            ).status_code
+            == 403
+        )
+
+    def once(_):
+        with TestClient(app) as other:
+            other.cookies.update(client.cookies)
+            return other.post(
+                f"/api/v1/recipes/lists/{obj['id']}/items",
+                headers={
+                    "X-CSRF-Token": client.headers["X-CSRF-Token"],
+                },
+                json={"name": "Piles", "expected_version": obj["version"]},
+            ).status_code
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        assert sorted(pool.map(once, range(2))) == [200, 409]
+    assert (
+        Decimal(client.get(f"/api/v1/recipes/lists/{obj['id']}").json()["items"][0]["quantity"])
+        == 2
+    )
+
+
+def test_free_item_database_constraints_and_migration_history_guard(client, engine):
+    obj = shopping(client, items=[{"name": "Piles"}])
+    rice = ingredient(client)
+    for statement in (
+        "UPDATE recipes_list_items SET name=NULL",
+        "UPDATE recipes_list_items SET normalized_name=NULL",
+        "UPDATE recipes_list_items SET name=' '",
+        "UPDATE recipes_list_items SET normalized_name=' '",
+        f"UPDATE recipes_list_items SET ingredient_id='{rice['id']}'",
+        """INSERT INTO recipes_list_items
+        SELECT gen_random_uuid(), owner_id, list_id, ingredient_id, quantity,
+        purchased_quantity, unit, position + 1, name, normalized_name FROM recipes_list_items""",
+    ):
+        with pytest.raises(IntegrityError), engine.begin() as conn:
+            conn.execute(text(statement))
+    for history_only in (False, True):
+        if history_only:
+            response = client.request(
+                "DELETE",
+                f"/api/v1/recipes/lists/{obj['id']}/items/{obj['items'][0]['id']}",
+                json={
+                    "expected_version": obj["version"],
+                },
+            )
+            assert response.status_code == 200
+        with pytest.raises(RuntimeError, match="Free shopping items exist"), engine.begin() as conn:
+            config = migration_config()
+            config.attributes["connection"] = conn
+            command.downgrade(config, "0016_assistant_sources")
+        with engine.connect() as conn:
+            assert (
+                conn.scalar(text("SELECT version_num FROM alembic_version"))
+                == ScriptDirectory.from_config(migration_config()).get_current_head()
+            )

@@ -22,11 +22,15 @@ Le catalogue livré contient **301 ingrédients et articles courants**, avec un 
 
 Dans une recette, une liste ou un modèle, recherchez puis sélectionnez un ingrédient. Choisissez la quantité et l’une des sept unités : **g** (grammes), **mg** (milligrammes), **l** (litres), **ml** (millilitres), **c. à café** (cuillère à café), **c. à soupe** (cuillère à soupe), **u** (pièces/articles). Le catalogue suggère une unité mais vous pouvez en choisir une autre. Vous pouvez saisir directement 250 ml ou 0,5 cuillère à café ; pour 1 kg, saisissez 1 000 g.
 
-Si le nom n’existe pas, **Créer « … » dans mon catalogue** l’ajoute directement, avec l’unité choisie, puis le sélectionne. Cet ingrédient est privé : les autres comptes ne le voient pas. Son nom personnel reste identique dans les deux langues ; aucune traduction automatique n’est appliquée. Un nom exact déjà connu dans l’une des langues réutilise son identité, même si l’appel est répété. La recherche reste une recherche de sous-chaîne, sans rapprochement automatique des synonymes ou des pluriels : sélectionnez l’ingrédient existant pour qu’il se cumule correctement.
+Dans l’éditeur de recette, si le nom n’existe pas, **Créer « … » dans mon catalogue** l’ajoute directement, avec l’unité choisie, puis le sélectionne. Cet ingrédient est privé : les autres comptes ne le voient pas. Son nom personnel reste identique dans les deux langues ; aucune traduction automatique n’est appliquée. Un nom exact déjà connu dans l’une des langues réutilise son identité, même si l’appel est répété. La recherche reste une recherche de sous-chaîne, sans rapprochement automatique des synonymes ou des pluriels : sélectionnez l’ingrédient existant pour qu’il se cumule correctement.
 
 ## Préparer les courses
 
-Dans **Listes de courses → Nouvelle liste**, donnez un nom à votre liste. Ajoutez des articles à la main ou choisissez **Importer une recette**, la recette et le nombre de personnes. Vous pouvez aussi partir d’une recette avec **Ajouter à une liste**. La recherche et la pagination permettent de retrouver des listes et recettes plus anciennes.
+Dans **Listes de courses → Nouvelle liste**, donnez un nom à votre liste. Dans **Ajouter un article**, saisissez ce dont vous avez besoin : « Lessive », « Piles AA », « Fleurs »… Appuyez sur **Entrée** ou **Ajouter** : aucune sélection ni création dans le catalogue n’est nécessaire. Par défaut, l’ajout correspond à **1 pièce** ; ajustez quantité et unité si besoin. Les suggestions restent facultatives : sélectionnez-en une pour utiliser un ingrédient du catalogue. Les articles libres apparaissent dans **Autres articles** et leur nom reste identique en français et en anglais.
+
+Un article libre ne crée pas d’ingrédient personnel et n’apparaît pas dans le catalogue des recettes. Les articles libres de même nom (casse, accents et espaces répétés ignorés) et même unité s’additionnent, en conservant le premier libellé. Des noms différents, synonymes ou pluriels restent distincts. Ils ne fusionnent pas avec un ingrédient du catalogue portant le même nom. Une recherche catalogue indisponible n’empêche pas d’ajouter un article libre.
+
+Pour compléter les courses, choisissez **Importer une recette**, la recette et le nombre de personnes. Vous pouvez aussi partir d’une recette avec **Ajouter à une liste**. La recherche et la pagination permettent de retrouver des listes et recettes plus anciennes.
 
 Chaque import **ajoute** les quantités. Deux imports de 200 g du même ingrédient donnent une ligne de 400 g. La même identité et la même unité s’additionnent ; les unités différentes restent séparées, même g/mg et l/ml. Aucune conversion automatique n’est appliquée, y compris pour les cuillères. Relancer volontairement un import ajoute une seconde portion ; en cas de double envoi de la même version, le serveur refuse le second envoi avec un conflit.
 
@@ -52,7 +56,7 @@ Une connexion réseau est nécessaire. Une erreur ne présente jamais un achat c
 
 ## Modèles et anciennes listes
 
-Dans **Mes modèles → Nouveau modèle**, composez vos indispensables avec les mêmes ingrédients et imports. Depuis une liste, active ou passée, **Enregistrer comme modèle** crée un modèle indépendant. Depuis un modèle, **Créer une liste** reprend tous ses ingrédients et quantités, sans achats cochés.
+Dans **Mes modèles → Nouveau modèle**, composez vos indispensables avec des articles libres, des ingrédients du catalogue et des imports de recettes. Depuis une liste, active ou passée, **Enregistrer comme modèle** crée un modèle indépendant. Depuis un modèle, **Créer une liste** reprend tous ses articles et quantités, sans achats cochés.
 
 **Réutiliser cette liste** fonctionne également sur une ancienne liste, y compris archivée. La copie ne modifie jamais sa source et reste indépendante de ses futures modifications. Les modèles ne portent pas de cases achetées ni de date de fin. Le catalogue d’ingrédients reste commun à vos recettes, modèles et listes.
 

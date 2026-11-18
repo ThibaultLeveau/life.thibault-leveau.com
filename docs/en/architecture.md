@@ -111,6 +111,8 @@ Frontend `platform/progression` supplies API client, settings and the badge inje
 
 `apps/recipes` follows ADRs 003–006 with no new cross-cutting contract: manifest, business logic, metrics and progression providers compose through existing registries. `0012_recipes` adds six tables for supplied/private ingredients, recipes/items, lists/templates/items and events. The bilingual 301-ingredient catalogue is fixed in migration data. PostgreSQL stores quantities as `NUMERIC(18,6)`; services calculate with `Decimal`. No browser business storage or external service. Shared boundaries remain unchanged. [Guide](recipes.md), [API](recipes-api.md).
 
+Shopping lists and templates also accept free items through `0017_shopping_free_items`, with a personal name and optional catalogue reference. This stays within the existing `apps/recipes` models, schemas and services, with no new storage or cross-application contract change; recipes retain structured ingredients.
+
 ## Separate documentation guides
 
 The seven FR/EN guides share the existing MkDocs build and static server. `mkdocs.yml` assigns pages to guides; `scripts/documentation.py` supplies navigation, previous/next links and search indexes scoped to each guide and language. The language link opens the equivalent page; an explicit link returns to the directory. Existing source paths and URLs remain stable, with technical translations under `docs/en/`. No service, storage or business boundary changes.

@@ -144,14 +144,17 @@ def output(db, item, servings=None):
     factor = Decimal(servings) / item.servings if servings else Decimal(1)
     items = []
     for line in lines:
-        ingredient = catalogue[line.ingredient_id]
+        ingredient = catalogue.get(line.ingredient_id)
         purchased = getattr(line, "purchased_quantity", Decimal(0))
+        item_type = s.ItemOutput if isinstance(item, m.Recipe) else s.ShoppingItemOutput
         items.append(
-            s.ItemOutput(
+            item_type(
                 id=line.id,
                 ingredient_id=line.ingredient_id,
-                name=ingredient.name_en if locale() == "en" else ingredient.name_fr,
-                category=ingredient.category,
+                name=(ingredient.name_en if locale() == "en" else ingredient.name_fr)
+                if ingredient
+                else line.name,
+                category=ingredient.category if ingredient else "other",
                 quantity=quantity(line.quantity * factor),
                 unit=line.unit,
                 position=line.position,
@@ -278,24 +281,42 @@ def template_ready(db, user, item):
             event(db, user, item, "template_ready", key)
 
 
-def merge_items(db, user, item, groups):
+def merge_items(db, user, item, items):
+    # Validate catalogue ownership before mutating; free names never create ingredients.
+    grouped(db, user, [line for line in items if line.ingredient_id is not None])
+    groups = {}
+    for line in items:
+        identity = line.ingredient_id
+        if identity is None:
+            identity = normalize(line.name)
+            if not identity or len(identity) > 240:
+                raise HTTPException(422, tr("invalid_item_name"))
+        key = (identity, line.unit)
+        if key in groups:
+            groups[key] = groups[key].model_copy(
+                update={"quantity": quantity(groups[key].quantity + line.quantity)}
+            )
+        else:
+            groups[key] = line
     current = rows(db, item)
-    indexed = {(line.ingredient_id, line.unit): line for line in current}
+    indexed = {(line.ingredient_id or line.normalized_name, line.unit): line for line in current}
     if len(indexed.keys() | groups.keys()) > 300:
         raise HTTPException(422, tr("items_limit"))
     position = max((line.position for line in current), default=-1) + 1
-    for key, amount in groups.items():
+    for key, incoming in groups.items():
         line = indexed.get(key)
         if line:
-            line.quantity = quantity(line.quantity + amount)
+            line.quantity = quantity(line.quantity + incoming.quantity)
         else:
             db.add(
                 m.ShoppingItem(
                     owner_id=user.id,
                     list_id=item.id,
-                    ingredient_id=key[0],
+                    ingredient_id=incoming.ingredient_id,
+                    name=incoming.name,
+                    normalized_name=key[0] if incoming.ingredient_id is None else None,
                     unit=key[1],
-                    quantity=amount,
+                    quantity=incoming.quantity,
                     position=position,
                 )
             )
@@ -305,11 +326,10 @@ def merge_items(db, user, item, groups):
 
 def create_list(db, user, payload):
     enforce_limit(db, user, m.ShoppingList)
-    groups = grouped(db, user, payload.items)
     item = m.ShoppingList(owner_id=user.id, title=payload.title, kind=payload.kind)
     db.add(item)
     db.flush()
-    merge_items(db, user, item, groups)
+    merge_items(db, user, item, payload.items)
     event(db, user, item, "list_created")
     template_ready(db, user, item)
     return item
@@ -324,8 +344,11 @@ def copy_list(db, user, source, payload):
             title=payload.title,
             kind=payload.kind,
             items=[
-                s.ItemInput(
-                    ingredient_id=line.ingredient_id, quantity=line.quantity, unit=line.unit
+                s.ShoppingItemInput(
+                    ingredient_id=line.ingredient_id,
+                    name=line.name,
+                    quantity=line.quantity,
+                    unit=line.unit,
                 )
                 for line in rows(db, source)
             ],
@@ -344,7 +367,7 @@ def update_list(db, user, item, payload):
 
 def add_item(db, user, item, payload):
     check(item, payload.expected_version)
-    merge_items(db, user, item, grouped(db, user, [payload]))
+    merge_items(db, user, item, [payload])
     touch(item)
     db.flush()
     event(db, user, item, "item_added")
@@ -377,8 +400,17 @@ def import_recipe(db, user, item, payload):
     recipe = owned(db, user, m.Recipe, payload.recipe_id)
     check(recipe, payload.recipe_version)
     scaled = output(db, recipe, payload.servings)
-    groups = {(line.ingredient_id, line.unit): line.quantity for line in scaled.items}
-    merge_items(db, user, item, groups)
+    merge_items(
+        db,
+        user,
+        item,
+        [
+            s.ShoppingItemInput(
+                ingredient_id=line.ingredient_id, quantity=line.quantity, unit=line.unit
+            )
+            for line in scaled.items
+        ],
+    )
     touch(item)
     db.flush()
     event(
