@@ -21,6 +21,7 @@ import {
 import { Dialog } from "../../shared/ui/Dialog";
 import { Icon } from "../../shared/ui/Icon";
 import { MoveDialog } from "./components/MoveDialog";
+import { ImportTasksDialog } from "./components/ImportTasksDialog";
 import { TaskEditor } from "./components/TaskEditor";
 import { TaskViews } from "./components/TaskViews";
 import {
@@ -65,10 +66,12 @@ function TasksPage() {
   const { session } = useSession();
   const completion = useTaskCompletion(today);
   const [chooseWorkspace, setChooseWorkspace] = useState(false);
+  const [importing, setImporting] = useState(false);
   function navigate(view: TaskLocation, id = "") {
     if (!navigation.navigate(view, id)) return false;
     sync.dismissNotice();
     setSidebarOpen(false);
+    setImporting(false);
     setEditor(null);
     setMoving(null);
     setShowFilters(false);
@@ -133,6 +136,7 @@ function TasksPage() {
     if (!navigation.route.fromHistory) return;
     sync.dismissNotice();
     completion.clear();
+    setImporting(false);
     setEditor(null);
     setMoving(null);
     setSettingsTab(null);
@@ -866,6 +870,15 @@ function TasksPage() {
                   </button>
                 </div>
               )}
+              <div className="task-import-action">
+                <button
+                  className="secondary-button"
+                  disabled={loading}
+                  onClick={() => setImporting(true)}
+                >
+                  {tr("import_tasks")}
+                </button>
+              </div>
               <div className="task-summary">
                 <span>
                   {loading
@@ -980,6 +993,14 @@ function TasksPage() {
           )}
         </div>
       </main>
+      {importing && workspace && (
+        <ImportTasksDialog
+          key={workspace.id}
+          workspace={workspace}
+          sections={sections}
+          onClose={() => setImporting(false)}
+        />
+      )}
       {chooseWorkspace && (
         <Dialog
           title={tr("choose_task_workspace")}

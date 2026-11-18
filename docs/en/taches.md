@@ -125,3 +125,11 @@ Preferences are grouped in [General settings](settings.md). An application’s S
 ![Open Settings to adjust this application’s preferences and usage days.](../assets/screenshots/en/tasks-settings.png){ loading=lazy }
 
 *Open Settings to adjust this application’s preferences and usage days.*
+
+## Importing multiple tasks
+
+In a workspace, choose **Import tasks**. Paste one task per line (blank lines are ignored), or select JSON and paste an array of objects containing `title` and other [API creation fields](api.md#task-import). Optionally select a section. Imports accept 1–100 tasks and the paste field accepts 200,000 characters. Titles are literal: “tomorrow” stays in the title; use JSON `due_date` and `recurrence` to schedule tasks.
+
+**Review import** shows the destination, count and every entry; **Edit batch** returns to editing before confirmation. An explicit JSON `section_id` overrides the selected section; `workspace_id`, if supplied, must match the displayed workspace. Server validation remains authoritative for dates, statuses, labels and references. An invalid task cancels the entire batch; the draft remains available for correction. Identical titles create separate tasks. Imports are never automatically retried after network errors: check the task list before trying again if the response was lost.
+
+Each task receives its normal identifier, dates, version and history. Disabling/re-enabling Tasks and backing up/restoring preserve imported tasks just like individual creations. No permanent browser storage or uploaded file store is added.

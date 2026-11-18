@@ -437,7 +437,7 @@ def test_model_budget_stops_before_starting_an_extra_provider_request(app, clien
 
     run_id, _ = admitted(app, client)
     runtime = Runtime(app, run_id)
-    runtime.calls = 24
+    runtime.calls = app.state.settings.assistant_max_model_calls
 
     class NeverCalled:
         def respond(self, tools):

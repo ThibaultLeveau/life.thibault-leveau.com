@@ -454,3 +454,17 @@ L’application `recipes` fournit le catalogue d’ingrédients bilingue, les re
 ## Réglages généraux
 
 La route HTML `/settings` compose les [préférences existantes](settings.md#api-et-conservation) sans nouvel endpoint de données. Les sections utilisent les API de compte, progression, agenda/vues, Sport, Suivi et OKR ; les contrats, validations, propriétaires, CSRF, versions et règles de sauvegarde restent inchangés. Les anciennes URL HTML applicatives `?tab=settings` redirigent vers `/settings?application=<id>`.
+
+## Import de tâches
+
+`POST /api/v1/tasks/import` accepte `{ "tasks": [<TaskCreate>, …] }` : de 1 à 100 objets utilisant exactement les champs de `POST /tasks` (`workspace_id`, `title`, et facultativement `section_id`, `status_id`, `description`, `priority`, `due_date`, `recurrence`, `label_ids`). Le JSON normalisé est limité à 200 000 caractères pour garder les reçus diffusables. Retour **201**, tableau des tâches complètes dans l’ordre d’entrée. Le statut ouvert par défaut est résolu dans chaque espace ; aucune détection de dates dans les titres. Plusieurs espaces du même propriétaire sont autorisés par l’API.
+
+Exemple après connexion, en remplaçant `ESPACE_UUID` par un identifiant renvoyé par `GET /workspaces` :
+
+```bash
+curl -b cookies.txt -H "X-CSRF-Token: $CSRF" -H 'Content-Type: application/json' \
+  https://life.thibault-leveau.com/api/v1/tasks/import \
+  -d '{"tasks":[{"workspace_id":"ESPACE_UUID","title":"Rédiger mon profil","description":"Préparer puis relire le texte"},{"workspace_id":"ESPACE_UUID","title":"Présenter mes projets","priority":2}]}'
+```
+
+Une transaction couvre tâches, étiquettes, événements et progression : toute erreur annule tout le lot. Erreurs : 401 sans session, 403 sans CSRF/origine valide ou application désactivée, 404 référence inaccessible ou hors espace/propriétaire, 409 destination archivée, 422 lot/champ/calendrier invalide. Même cycle de vie que `POST /tasks` : versions initiales, événements `created` et éventuellement `completed`, récurrences et historique indépendants. Pas de déduplication par titre ni d’idempotence automatique de cette route : répéter une requête réussie crée de nouvelles tâches. L’assistant utilise ses propres reçus et confirmations idempotentes.

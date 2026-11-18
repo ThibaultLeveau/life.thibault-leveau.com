@@ -11,7 +11,9 @@ Pydantic Settings charge les variables du processus avant `.env`. Les commandes 
 | `LIFE_DATABASE_URL` | absente | URL `postgresql+psycopg://utilisateur:motdepasse@hôte:port/base` |
 | `LIFE_SESSION_HOURS` | `168` | Durée fixe des sessions, de 1 à 720 heures ; pas de prolongation automatique |
 | `LIFE_ASSISTANT_ENCRYPTION_KEYS` | absente | Trousseau de clés Fernet séparées par des virgules ; première clé active pour les tokens IA |
-| `LIFE_ASSISTANT_TIMEOUT_SECONDS` | `180` | Durée maximale d’un tour IA, de 10 à 600 secondes |
+| `LIFE_ASSISTANT_TIMEOUT_SECONDS` | `600` | Durée maximale d’un tour IA, de 10 à 600 secondes |
+| `LIFE_ASSISTANT_MAX_MODEL_CALLS` | `96` | Appels modèle par tour, 1–256 ; budget partagé par coordinateur, spécialistes et résumés |
+| `LIFE_ASSISTANT_MAX_ACTIONS` | `200` | Actions métier par tour, 1–1 000 ; un import compte comme une action |
 | `LIFE_LOG_LEVEL` | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL` |
 | `LIFE_FRONTEND_DIR` | `frontend/dist` | Artefacts frontend ; chemin relatif à la racine du dépôt |
 | `LIFE_DOCUMENTATION_DIR` | `site` | Artefacts MkDocs ; chemin relatif à la racine du dépôt |

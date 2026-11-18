@@ -128,6 +128,17 @@ class TaskCreate(Schema):
     label_ids: list[UUID] = Field(default_factory=list, max_length=100)
 
 
+class TaskImport(Schema):
+    tasks: list[TaskCreate] = Field(min_length=1, max_length=100)
+
+    @model_validator(mode="after")
+    def bounded_import(self):
+        # Keep receipts/previews comfortably within the existing streaming envelope.
+        if len(self.model_dump_json(exclude_unset=True)) > 200000:
+            raise ValueError(tr("task_import_too_large"))
+        return self
+
+
 class TaskPatch(Patch):
     expected_version: int = Field(ge=1)
     section_id: UUID | None = None

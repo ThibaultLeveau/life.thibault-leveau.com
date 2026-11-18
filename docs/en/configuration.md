@@ -11,7 +11,9 @@ Pydantic Settings prioritizes process variables over `.env`. Run local commands 
 | `LIFE_DATABASE_URL` | absent | `postgresql+psycopg://user:password@host:port/database` |
 | `LIFE_SESSION_HOURS` | `168` | Fixed session lifetime, 1–720 hours; no automatic extension |
 | `LIFE_ASSISTANT_ENCRYPTION_KEYS` | absent | Comma-separated Fernet keys; first key encrypts new AI tokens |
-| `LIFE_ASSISTANT_TIMEOUT_SECONDS` | `180` | Maximum AI turn duration, 10–600 seconds |
+| `LIFE_ASSISTANT_TIMEOUT_SECONDS` | `600` | Maximum AI turn duration, 10–600 seconds |
+| `LIFE_ASSISTANT_MAX_MODEL_CALLS` | `96` | Model calls per turn, 1–256; shared by coordinator, specialists and summaries |
+| `LIFE_ASSISTANT_MAX_ACTIONS` | `200` | Business actions per turn, 1–1,000; imports count as one action |
 | `LIFE_LOG_LEVEL` | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL` |
 | `LIFE_FRONTEND_DIR` | `frontend/dist` | Frontend artifacts; relative paths resolve from the repository root |
 | `LIFE_DOCUMENTATION_DIR` | `site` | MkDocs artifacts; relative paths resolve from the repository root |
