@@ -28,5 +28,6 @@
   "web_no_recipe": "No single usable recipe was found. Check the page or paste the recipe you want.",
   "web_truncated": "The page is long: some text was not sent. Check that the recipe is complete.",
   "web_import_conflict": "This import was already saved with different content. Open the saved recipe.",
-  "web_cancelled": "Import cancelled."
+  "web_cancelled": "Import cancelled.",
+  "web_uncertain_measurements": "Some servings, quantities or units need your review. Complete the empty fields using the original lines; ranges are not replaced with an arbitrary value."
 }

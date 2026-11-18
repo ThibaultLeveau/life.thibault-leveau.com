@@ -112,3 +112,5 @@ The draft contains `import_id`, `locale`, `title`, `servings`, `instructions`, `
 Retain `import_id` when retrying the same save: same content → same recipe, changed content → 409. A new import uses a new UUID. The language must still match the account (409 otherwise). Recipes expose `source_url`, `source_title`, `imported_at`, also included in their creation event.
 
 Errors: 401 invalid session, 403 CSRF/origin/disabled application, 404 inaccessible browser, 409 language/page/replay conflict or unconfigured provider, 422 invalid input or no usable recipe, 429 capacity/rate limit, 502 website/provider unavailable, 503 browser unconfigured. Generation permits one operation per account, two globally and five attempts per minute per account; these transient quotas reset on restart. Network calls release SQL locks; access and language are checked again before returning data.
+
+Numeric ranges returned by the AI become `null` draft quantities or servings, with a warning and original lines retained. The `/save` contract remains strict: complete numeric values are required.

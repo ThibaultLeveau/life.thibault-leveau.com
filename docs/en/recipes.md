@@ -91,3 +91,5 @@ Review the draft: edit the title, servings, quantities, units and steps. Origina
 The draft is temporary until saved. Leaving, switching language or signing out follows the usual draft protections. Browsing expires after 10 minutes without interaction, 30 minutes maximum, or loss of the connection to LifeOS. Website cookies belong only to that session and are discarded. The server allows two browsers at once, one per account.
 
 Some websites reject hosted browsers or human checks. Use **Paste recipe text** to copy ingredients and steps from your browser, with the same AI extraction and review. A page change during capture requires retrying. Provider errors, capacity limits and pages without recipes never create data. Imports consume your AI provider quota.
+
+Ranges such as “2–3 slices” or “¼–1 teaspoon” leave the quantity empty: choose a value during review. The original line is preserved and a warning highlights incomplete fields, without automatically choosing an average or an endpoint.

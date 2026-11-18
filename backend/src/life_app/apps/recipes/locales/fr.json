@@ -28,5 +28,6 @@
   "web_no_recipe": "Aucune recette unique et exploitable n’a été trouvée. Vérifiez la page ou collez la recette souhaitée.",
   "web_truncated": "La page est longue : une partie de son texte n’a pas été transmise. Vérifiez que la recette est complète.",
   "web_import_conflict": "Cet import a déjà été enregistré avec un contenu différent. Ouvrez la recette enregistrée.",
-  "web_cancelled": "Import annulé."
+  "web_cancelled": "Import annulé.",
+  "web_uncertain_measurements": "Certaines portions, quantités ou unités sont à préciser. Complétez les champs vides en consultant les lignes originales ; les fourchettes ne sont pas remplacées par une valeur arbitraire."
 }

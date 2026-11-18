@@ -1,5 +1,6 @@
 """Contracts for the explicit, review-before-save web import workflow."""
 
+import re
 from datetime import datetime
 from typing import Literal
 from urllib.parse import urlsplit
@@ -121,12 +122,25 @@ class ImportPrepare(Contract):
         return self
 
 
+# A range has no faithful scalar value. Keep it in source_text for human review.
+_RANGE_NUMBER = r"(?:\d+(?:[.,]\d+)?|\d+/\d+|[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞])"
+_MEASUREMENT_RANGE = re.compile(rf"\s*{_RANGE_NUMBER}\s*(?:[-–—]|to|à)\s*{_RANGE_NUMBER}\s*")
+
+
+def uncertain_range(value):
+    if isinstance(value, str) and _MEASUREMENT_RANGE.fullmatch(value):
+        return None
+    return value
+
+
 class ExtractedIngredient(Contract):
     name: str = Field(min_length=1, max_length=120)
     source_text: str = Field(min_length=1, max_length=1000)
     quantity: Quantity | None
     unit: Unit | None
     note: str = Field(default="", max_length=500)
+
+    _quantity = field_validator("quantity", mode="before")(uncertain_range)
 
 
 class ExtractedRecipe(Contract):
@@ -136,6 +150,8 @@ class ExtractedRecipe(Contract):
     instructions: str = Field(max_length=20000)
     items: list[ExtractedIngredient] = Field(max_length=200)
     warnings: list[str] = Field(default_factory=list, max_length=20)
+
+    _servings = field_validator("servings", mode="before")(uncertain_range)
 
     @field_validator("warnings")
     @classmethod

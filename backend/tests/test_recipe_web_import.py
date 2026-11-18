@@ -170,6 +170,43 @@ def test_bad_model_output_cannot_trigger_actions_or_create_recipe(client, app):
     assert client.get("/api/v1/recipes/recipes").json()["total"] == 0
 
 
+@pytest.mark.parametrize("locale, warning", [("fr", "champs vides"), ("en", "empty fields")])
+def test_ai_ranges_remain_editable_unknowns_without_guessing_or_loosening_save(
+    client, app, locale, warning
+):
+    client.put("/api/v1/preferences", json={"locale": locale})
+    app.state.extracted = {
+        **EXTRACTED,
+        "servings": "2–3",
+        "items": [
+            {"name": "Bread", "source_text": "2–3 slices bread", "quantity": "2–3", "unit": "u"},
+            {
+                "name": "Cinnamon",
+                "source_text": "¼–1 tsp cinnamon",
+                "quantity": "¼–1",
+                "unit": "tsp",
+            },
+            {"name": "Salt", "source_text": "1/2 tsp salt", "quantity": "0.5", "unit": "tsp"},
+        ],
+        "warnings": [],
+    }
+    response = prepare(client)
+    assert response.status_code == 200, response.text
+    draft = response.json()
+    assert draft["servings"] is None
+    assert [item["quantity"] for item in draft["items"]] == [None, None, "0.5"]
+    assert draft["items"][0]["source_text"] == "2–3 slices bread"
+    assert draft["items"][1]["source_text"] == "¼–1 tsp cinnamon"
+    assert any(warning in value for value in draft["warnings"])
+    assert client.get("/api/v1/recipes/recipes").json()["total"] == 0
+    payload = {**saved_payload(draft), "servings": 2}
+    payload["items"][0]["quantity"] = "2–3"
+    assert client.post(ROOT + "/save", json=payload).status_code == 422
+    assert client.get("/api/v1/recipes/recipes").json()["total"] == 0
+    payload["items"][0]["quantity"] = "2"
+    assert client.post(ROOT + "/save", json=payload).status_code == 201
+
+
 def test_browser_identity_lease_and_page_version_are_forwarded(client, app):
     identifier = str(uuid4())
     requests = []
