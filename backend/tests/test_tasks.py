@@ -1456,7 +1456,12 @@ def test_simultaneous_bulk_and_single_write_are_serialized(client, app):
         assert [event["kind"] for event in history(client, saved[0])] == ["created"]
 
 
-def test_extended_bulk_lifecycle_preserves_recurrences_history_and_sources(client):
+def test_extended_bulk_lifecycle_preserves_recurrences_history_and_sources(client, monkeypatch):
+    from datetime import UTC, datetime
+
+    from life_app.apps.tasks import service
+
+    monkeypatch.setattr(service, "utcnow", lambda: datetime(2026, 11, 17, 12, tzinfo=UTC))
     space, _ = create_space(client)
     plain = create_task(client, space)
     recurring = create_task(
