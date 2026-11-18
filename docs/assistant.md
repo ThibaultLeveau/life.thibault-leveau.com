@@ -26,6 +26,8 @@ Les actions simples explicitement demandées peuvent être enregistrées directe
 
 Créez une conversation, retrouvez-la avec la recherche, renommez-la ou archivez-la. L’archive conserve ses messages et permet une restauration. Une conversation archivée doit être restaurée avant un nouveau message. La suppression est définitive pour la conversation et ses reçus ; elle propose séparément d’oublier les souvenirs qui en proviennent.
 
+Après confirmation et réussite de la suppression, vous revenez à l’accueil de l’assistant : la conversation et son brouillon quittent l’écran. Vous pouvez commencer une nouvelle conversation. En cas d’annulation ou d’échec, la conversation reste ouverte.
+
 La réponse apparaît progressivement. **Arrêter** interrompt les étapes suivantes ; les modifications déjà enregistrées restent visibles et ne sont pas annulées. Après une coupure, rechargez la conversation pour voir son état et les reçus enregistrés avant de demander une suite. Une interruption ne rejoue pas automatiquement des écritures. Une seule réponse peut être en cours par compte.
 
 Une réponse peut être partielle si le fournisseur refuse le token, manque de quota, répond trop lentement ou si une validation métier échoue. Un texte de succès sans reçu confirmé ne constitue pas une preuve d’écriture. Les cartes distinguent propositions et résultats ; vous pouvez vérifier l’objet dans son application.

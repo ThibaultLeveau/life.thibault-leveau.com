@@ -429,8 +429,108 @@ test("chat : contrat SSE, cinq snippets, confirmation, historique et actions", a
     .click();
   await expect(page).toHaveURL(/\/$/);
   expect(data.conversations.size).toBe(0);
+  await expect(page.locator(".assistant-welcome h1")).toBeVisible();
+  await expect(page.locator(".assistant-message")).toHaveCount(0);
+  await expect(page.locator(".assistant-history-item")).toHaveCount(0);
+  await expect(
+    page.getByLabel("Votre message", { exact: true }),
+  ).toHaveValue("");
+  await expect(page).toHaveTitle("Assistant · LifeOS");
+  await page
+    .getByLabel("Votre message", { exact: true })
+    .fill("Une nouvelle demande.");
+  await page
+    .getByRole("button", { name: "Envoyer le message", exact: true })
+    .click();
+  await expect(page).toHaveURL(/conversation=new-2/);
+  await expect(
+    page.getByText("Une nouvelle demande.", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Aide-moi à préparer ma semaine.", { exact: true }),
+  ).toHaveCount(0);
   expect(errors).toEqual([]);
 });
+
+for (const locale of ["fr", "en"] as const) {
+  test(`suppression ${locale} : annulation, échec puis retour à l’accueil sans brouillon`, async ({
+    page,
+  }) => {
+    const data = await fixture(page);
+    data.session.locale = locale;
+    data.seed("conversation-1", []);
+    if (locale === "en")
+      await page.setViewportSize({ width: 320, height: 800 });
+    const labels =
+      locale === "fr"
+        ? {
+            remove: "Supprimer la conversation",
+            cancel: "Annuler",
+            message: "Votre message",
+          }
+        : {
+            remove: "Delete conversation",
+            cancel: "Cancel",
+            message: "Your message",
+          };
+    await page.goto("/?conversation=conversation-1");
+    const composer = page.getByLabel(labels.message, { exact: true });
+    await composer.fill("Un brouillon dans la conversation supprimée");
+    const remove = page.getByRole("button", {
+      name: labels.remove,
+      exact: true,
+    });
+    const dialog = page.getByRole("dialog");
+    await remove.click();
+    await dialog
+      .getByRole("button", { name: labels.cancel, exact: true })
+      .click();
+    await expect(page).toHaveURL(/conversation=conversation-1/);
+    await expect(page.locator(".assistant-message")).toHaveCount(2);
+    expect(
+      data.requests.filter((request) => request.method === "DELETE"),
+    ).toHaveLength(0);
+
+    let fail = true;
+    await page.route(
+      "**/api/v1/assistant/conversations/conversation-1?**",
+      async (route) => {
+        if (route.request().method() === "DELETE" && fail)
+          return route.fulfill({
+            status: 503,
+            json: { detail: "Suppression indisponible" },
+          });
+        return route.fallback();
+      },
+    );
+    await remove.click();
+    await dialog
+      .getByRole("button", { name: labels.remove, exact: true })
+      .click();
+    await expect(dialog.getByRole("alert")).toBeVisible();
+    await expect(page).toHaveURL(/conversation=conversation-1/);
+    await expect(page.locator(".assistant-message")).toHaveCount(2);
+    await expect(composer).toHaveValue(
+      "Un brouillon dans la conversation supprimée",
+    );
+    expect(data.conversations.has("conversation-1")).toBe(true);
+
+    fail = false;
+    await dialog
+      .getByRole("button", { name: labels.remove, exact: true })
+      .click();
+    await expect(dialog).toHaveCount(0);
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.locator(".assistant-welcome h1")).toBeVisible();
+    await expect(page.locator(".assistant-message")).toHaveCount(0);
+    await expect(composer).toHaveValue("");
+    await expect(composer).toBeEnabled();
+    expect(data.conversations.size).toBe(0);
+    await page.reload();
+    await expect(page.locator(".assistant-welcome h1")).toBeVisible();
+    await expect(page.locator(".assistant-message")).toHaveCount(0);
+  });
+}
 
 test("aperçu d'archivage : cible réelle, reçu conservé si la synchronisation échoue", async ({
   page,

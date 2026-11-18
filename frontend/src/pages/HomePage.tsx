@@ -473,6 +473,10 @@ export function HomePage({ modules }: { modules: ApplicationModule[] }) {
                       "/",
                     );
                     setId(null);
+                    setDraft("");
+                    setVisible(40);
+                    setAtBottom(true);
+                    follow.current = true;
                   } else void chat.refresh();
                 },
               );
