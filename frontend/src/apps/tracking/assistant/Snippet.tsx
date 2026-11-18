@@ -49,8 +49,9 @@ export function Snippet({ snippet }: AssistantSnippetProps) {
                               ? "assistant_value_yes"
                               : "assistant_value_no",
                           )
-                        : number(values[text(field.id)]) ||
-                          text(values[text(field.id)]),
+                        : typeof values[text(field.id)] === "number"
+                          ? number(values[text(field.id)])
+                          : text(values[text(field.id)]),
                       text(field.unit),
                     ]
                       .filter(Boolean)

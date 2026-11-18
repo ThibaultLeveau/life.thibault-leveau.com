@@ -55,9 +55,12 @@ export function number(value: unknown, maximumFractionDigits = 6): string {
     return "";
   const parsed = Number(value);
   return Number.isFinite(parsed)
-    ? new Intl.NumberFormat(formatLocale(), { maximumFractionDigits }).format(
-        parsed,
-      )
+    ? new Intl.NumberFormat(
+        formatLocale(),
+        parsed !== 0 && Math.abs(parsed) < 10 ** -maximumFractionDigits
+          ? { maximumSignificantDigits: 3 }
+          : { maximumFractionDigits },
+      ).format(Object.is(parsed, -0) ? 0 : parsed)
     : "";
 }
 export function snippetValue(snippet: Snippet): unknown {

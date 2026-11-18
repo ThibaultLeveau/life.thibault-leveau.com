@@ -15,5 +15,20 @@ export function detailValue(
   path: readonly string[],
 ): string | undefined {
   if (path.includes("values")) return undefined;
+  if (
+    key === "category" &&
+    [
+      "produce",
+      "fresh",
+      "protein",
+      "pantry",
+      "seasoning",
+      "drinks",
+      "frozen",
+      "household",
+      "other",
+    ].includes(String(value))
+  )
+    return messages()[String(value)];
   return messages()[`assistant_value_${key}_${String(value)}`];
 }

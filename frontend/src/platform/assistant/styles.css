@@ -912,7 +912,13 @@
   white-space: pre-wrap;
 }
 .assistant-detail-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
+  column-gap: 16px;
   margin: 0;
+}
+.assistant-detail-fields > .is-wide {
+  grid-column: 1 / -1;
 }
 .assistant-detail-fields > div {
   padding: 6px 0;

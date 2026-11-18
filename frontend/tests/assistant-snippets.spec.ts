@@ -70,7 +70,12 @@ const cards: Snippet[] = [
     servings: 2,
     instructions: longText,
     items: [
-      ...rows.map(({ name, quantity, unit }) => ({ name, quantity, unit })),
+      ...rows.map(({ name, quantity, unit }) => ({
+        name,
+        quantity,
+        unit,
+        category: "produce",
+      })),
       { name: "Épice précise", quantity: "0.000001", unit: "mg" },
       { name: "Cuillère finale", quantity: "0.500000", unit: "tbsp" },
     ],
@@ -126,17 +131,17 @@ test("les consultations sont repliées, toutes les confirmations restent visible
   expect(data.requests.filter((item) => item.method !== "GET")).toHaveLength(0);
 });
 
-test("chaque renderer montre tous ses détails : FR/EN, trois thèmes, bureau et 320 px", async ({
-  page,
-}, info) => {
-  test.setTimeout(180_000);
-  const data = await fixture(page);
-  const errors: string[] = [];
-  page.on("pageerror", (error) => errors.push(error.message));
-  data.seed("conversation-1", cards);
-  for (const locale of ["fr", "en"])
-    for (const theme of ["light", "dark", "system"])
-      for (const width of [320, 1440]) {
+for (const locale of ["fr", "en"])
+  for (const theme of ["light", "dark", "system"])
+    for (const width of [320, 1440])
+      test(`détails des six snippets : ${locale}, ${theme}, ${width} px`, async ({
+        page,
+      }, info) => {
+        test.setTimeout(90_000);
+        const data = await fixture(page);
+        const errors: string[] = [];
+        page.on("pageerror", (error) => errors.push(error.message));
+        data.seed("conversation-1", cards);
         data.session.locale = locale;
         data.session.theme = theme;
         await page.emulateMedia({
@@ -171,6 +176,9 @@ test("chaque renderer montre tous ses détails : FR/EN, trois thèmes, bureau et
           if (index === 4) {
             await expect(snippet).not.toContainText("350.000000");
             await expect(details).toContainText("Cuillère finale");
+            await expect(details).toContainText(
+              locale === "fr" ? "Fruits & légumes" : "Fruit & vegetables",
+            );
             await expect(details).toContainText(
               locale === "fr" ? "0,000001" : "0.000001",
             );
@@ -214,9 +222,8 @@ test("chaque renderer montre tous ses détails : FR/EN, trois thèmes, bureau et
           await expect(details).toHaveCount(0);
           await expect(toggle).toBeFocused();
         }
-      }
-  expect(errors).toEqual([]);
-});
+        expect(errors).toEqual([]);
+      });
 
 test("le texte long se déplie sans scroll imbriqué et reste intégral après rechargement", async ({
   page,
@@ -295,15 +302,24 @@ test("les champs personnels conservent leurs libellés par objet et leurs valeur
   data.seed("conversation-1", [
     card("tracking", [
       {
+        id: "reference-technique-masquee",
         definition: {
           name: "Matin",
           fields: [
+            { id: "current", label: "Code personnel", kind: "note" },
             { id: "energy", label: "Énergie du matin" },
             { id: "id", label: "Mon nombre" },
             { id: "constructor", label: "Mon choix" },
           ],
         },
-        values: { energy: 0, id: 7, constructor: "Personnel" },
+        values: {
+          energy: 0,
+          id: 7,
+          constructor: "Personnel",
+          current: "007",
+          due_date: "2026-11-18",
+          tiny: 0.0000001,
+        },
       },
       {
         definition: {
@@ -317,6 +333,8 @@ test("les champs personnels conservent leurs libellés par objet et leurs valeur
   await page.goto("/?conversation=conversation-1");
   await page.locator(".assistant-snippet-details > summary").click();
   const details = page.locator(".assistant-snippet-details-body");
+  await expect(page.locator(".assistant-snippet-summary")).toContainText("007");
+  await expect(details).toContainText("0,0000001");
   await expect(
     details.getByText("Énergie du matin", { exact: true }),
   ).toHaveCount(2);
@@ -324,6 +342,7 @@ test("les champs personnels conservent leurs libellés par objet et leurs valeur
     details.getByText("Énergie du soir", { exact: true }),
   ).toHaveCount(2);
   await expect(details.getByText("7", { exact: true })).toBeVisible();
+  await expect(details).not.toContainText("reference-technique-masquee");
   await expect(details.getByText("Personnel", { exact: true })).toBeVisible();
   await expect(details.getByText("007", { exact: true })).toBeVisible();
   await expect(details.getByText("2026-11-18", { exact: true })).toBeVisible();

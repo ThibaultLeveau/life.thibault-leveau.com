@@ -13,10 +13,8 @@ const metadata = new Set([
   "position",
   "offset",
   "limit",
-  "builtin",
   "icon",
   "path",
-  "color",
   "name_fr",
   "name_en",
   "server_now",
@@ -137,16 +135,23 @@ export function SnippetDetails({
               names.set(definition.id, definition.label);
           }
       }
+      const fieldMap = key === "values" || key === "sources";
       const entries = Object.entries(object).filter(
-        ([field, child]) =>
-          (key === "values" || names.has(field) || !isMetadata(field)) &&
-          populated(child),
+        ([field, child]) => (fieldMap || !isMetadata(field)) && populated(child),
       );
       return entries.length ? (
         <dl className="assistant-detail-fields">
           {entries.map(([field, child]) => (
-            <div key={field}>
-              <dt>{label(field, names)}</dt>
+            <div
+              key={field}
+              className={
+                typeof child === "object" ||
+                (typeof child === "string" && child.length > 80)
+                  ? "is-wide"
+                  : undefined
+              }
+            >
+              <dt>{label(field, fieldMap ? names : new Map())}</dt>
               <dd>{render(child, field, [...path, field], names)}</dd>
             </div>
           ))}
@@ -159,15 +164,12 @@ export function SnippetDetails({
   }
   const page = record(value);
   const emptyPage =
-    Array.isArray(page.items) &&
-    !page.items.length &&
-    !page.title &&
-    !page.name;
+    Array.isArray(page.items) && !page.items.length && !page.title && !page.name;
   if (!populated(value) || emptyPage)
     return <p className="muted small-text">{tr("assistant_details_empty")}</p>;
   const collection = Array.isArray(value)
     ? value
-    : Object.values(page).find(Array.isArray);
+    : Object.values(page).find((item) => Array.isArray(item) && item.length > 0);
   return (
     <details
       className="assistant-snippet-details"

@@ -373,5 +373,7 @@
   "assistant_lifeos_field_earned_at": "Obtenu le",
   "assistant_lifeos_field_ratio": "Avancement",
   "assistant_lifeos_field_recorded_at": "Enregistré le",
-  "assistant_lifeos_field_imported": "Importé"
+  "assistant_lifeos_field_imported": "Importé",
+  "assistant_field_color": "Couleur",
+  "assistant_field_builtin": "Prédéfini"
 }
