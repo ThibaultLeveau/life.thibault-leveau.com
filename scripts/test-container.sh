@@ -110,14 +110,23 @@ request('/assistant/memories', {
 }, headers=headers)
 PY
 
+# Read-only runtime, real parsers and HTTP admission; no paid provider is contacted.
+python3 scripts/test-assistant-sources.py "$LIFE_E2E_URL" "$temporary/source-fixtures.json"
+
 # Persist interrupted work and successful receipts without contacting an AI provider.
 docker run --rm -i --network "$network" -e LIFE_DATABASE_URL="$url" \
-  -e LIFE_ASSISTANT_ENCRYPTION_KEYS="$assistant_test_key" "$image" python - <<'PY'
-from uuid import uuid4
+  -e LIFE_ASSISTANT_ENCRYPTION_KEYS="$assistant_test_key" \
+  -v "$temporary/source-fixtures.json:/tmp/source-fixtures.json:ro" "$image" python - <<'PY'
+import json
+from datetime import timedelta
+from pathlib import Path
+from uuid import UUID, uuid4
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 from life_app.core.config import get_settings
-from life_app.platform.assistant import models as m
+from life_app.core.database import utcnow
+from life_app.platform.assistant import models as m, sources
+from life_app.platform.assistant.transcription_models import TranscriptionSettings
 from life_app.platform.auth.models import LoginSession, User
 
 engine = create_engine(get_settings().database_url.get_secret_value())
@@ -131,6 +140,17 @@ with Session(engine) as db, db.begin():
                       content='Synthetic partial response.', status='running')
     db.add_all([source, reply])
     db.flush()
+    fixtures = json.loads(Path('/tmp/source-fixtures.json').read_text())
+    attachment = db.get(m.Source, UUID(fixtures['txt']['id']))
+    sources.attach_to_message([attachment], source)
+    conversation.external_context = True
+    # Ready drafts and erased originals remain, unfinished reservations are discarded on restore.
+    sources.reserve(db, user, get_settings(), kind='file', name='restore-pending.txt')
+    transcription = db.get(TranscriptionSettings, user.id)
+    transcription.lease_id = uuid4()
+    transcription.lease_until = utcnow() + timedelta(minutes=5)
+    transcription.period_start = utcnow()
+    transcription.requests = 3
     login = db.scalar(select(LoginSession).where(LoginSession.user_id == user.id).limit(1))
     run = m.Run(user_id=user.id, conversation_id=conversation.id, message_id=reply.id,
                 request_id=uuid4(), request_hash='0' * 64, memory_version=1,
@@ -225,16 +245,19 @@ for progression_table in progression_settings progression_activity progression_r
   [[ "$source_progression" != '[]' && "$source_progression" == "$restored_progression" ]]
 done
 # Assistant data survives except for intentionally interrupted runs and invalidated previews.
-for assistant_table in assistant_settings assistant_conversations assistant_messages assistant_memories assistant_runs assistant_operations assistant_run_events; do
+for assistant_table in assistant_settings assistant_conversations assistant_messages assistant_memories assistant_runs assistant_operations assistant_run_events assistant_sources assistant_transcription_settings; do
   expected_expression='to_jsonb(t)'
+  assistant_filter=''
   case "$assistant_table" in
     assistant_messages) expected_expression="CASE WHEN status = 'running' THEN to_jsonb(t) || '{\"status\":\"interrupted\"}'::jsonb ELSE to_jsonb(t) END" ;;
     assistant_runs) expected_expression="CASE WHEN status = 'running' THEN to_jsonb(t) || '{\"status\":\"interrupted\",\"cancelled\":true}'::jsonb ELSE to_jsonb(t) END" ;;
     assistant_operations) expected_expression="CASE WHEN status = 'preview' THEN to_jsonb(t) || '{\"status\":\"failed\"}'::jsonb ELSE to_jsonb(t) END" ;;
+    assistant_sources) assistant_filter='WHERE message_id IS NOT NULL OR data IS NOT NULL OR removed_at IS NOT NULL' ;;
+    assistant_transcription_settings) expected_expression="to_jsonb(t) || '{\"lease_id\":null,\"lease_until\":null}'::jsonb" ;;
   esac
   assistant_order=id
-  if [[ "$assistant_table" == assistant_settings ]]; then assistant_order=user_id; fi
-  source_assistant=$(docker exec "$db" psql -U life -d life -Atc "SELECT coalesce(jsonb_agg($expected_expression ORDER BY $assistant_order), '[]'::jsonb) FROM $assistant_table t")
+  if [[ "$assistant_table" == assistant_settings || "$assistant_table" == assistant_transcription_settings ]]; then assistant_order=user_id; fi
+  source_assistant=$(docker exec "$db" psql -U life -d life -Atc "SELECT coalesce(jsonb_agg($expected_expression ORDER BY $assistant_order), '[]'::jsonb) FROM $assistant_table t $assistant_filter")
   restored_assistant=$(docker exec "$db" psql -U life -d life_restored -Atc "SELECT coalesce(jsonb_agg(to_jsonb(t) ORDER BY $assistant_order), '[]'::jsonb) FROM $assistant_table t")
   [[ "$source_assistant" != '[]' && "$source_assistant" == "$restored_assistant" ]]
 done
@@ -259,14 +282,48 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 from life_app.core.config import get_settings
 from life_app.platform.assistant import credentials
-from life_app.platform.assistant.models import AssistantSettings
+from life_app.platform.assistant.models import AssistantSettings, Conversation, Source
+from life_app.platform.assistant.transcription_models import TranscriptionSettings
 from life_app.platform.auth.models import User
+from life_app.main import create_app
+from fastapi.testclient import TestClient
+import hashlib
 settings = get_settings()
 engine = create_engine(settings.database_url.get_secret_value())
 with Session(engine) as db:
     user = db.scalar(select(User).where(User.username == "browser-test"))
     assert credentials.decrypt(settings, db.get(AssistantSettings, user.id)) == "synthetic-provider-token-for-backup"
+    transcription = db.get(TranscriptionSettings, user.id)
+    assert credentials.decrypt(settings, transcription) == "synthetic-transcription-token-for-backup"
+    assert transcription.lease_id is None and transcription.lease_until is None
+    assert transcription.requests == 3 and not transcription.use_chat_provider
+    conversation = db.scalar(select(Conversation).where(
+        Conversation.user_id == user.id, Conversation.title == "Assistant restore fixture"))
+    assert conversation.external_context is True
+    rows = list(db.scalars(select(Source).where(Source.user_id == user.id)))
+    assert not any(row.name == "restore-pending.txt" for row in rows)
+    imported = [row for row in rows if row.name in {
+        "restore-source.txt", "restore-source.png", "restore-source.pdf"}]
+    assert len(imported) == 3
+    expected = {}
+    for row in imported:
+        assert hashlib.sha256(row.data).hexdigest() == row.sha256
+        expected[str(row.id)] = row.data
+    assert any(row.message_id is None for row in imported)
+    assert any(row.message_id is not None for row in imported)
+    removed = next(row for row in rows if row.name == "restore-removed.txt")
+    assert removed.removed_at is not None and removed.data is None and removed.extracted_text is None
+    removed_id = str(removed.id)
 engine.dispose()
+with TestClient(create_app(settings), base_url=str(settings.public_base_url)) as client:
+    login = client.post("/api/v1/auth/session", json={
+        "username": "browser-test", "password": "synthetic-browser-password"})
+    assert login.status_code == 200, login.text
+    for id, data in expected.items():
+        response = client.get(f"/api/v1/assistant/sources/{id}/content")
+        assert response.status_code == 200 and response.content == data
+        assert response.headers["Content-Disposition"].startswith("attachment;")
+    assert client.get(f"/api/v1/assistant/sources/{removed_id}/content").status_code == 410
 '
 if docker exec "$db" psql -U life -d life_restored --set ON_ERROR_STOP=1 -c "UPDATE task_events SET kind = 'updated'" >"$temporary/immutable-check" 2>&1; then
   echo 'Le journal restauré doit rester immuable.' >&2

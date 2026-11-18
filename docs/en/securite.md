@@ -47,3 +47,11 @@ Assistant routes are private, with CSRF on writes. Tools never receive an owner 
 The provider receives context useful to the turn: messages, summaries, memories and tool results. External content and application text remain untrusted data; model instructions do not replace server controls. Generated HTML, JavaScript and arbitrary provider URLs are never executed. Cards are known React components from the registry.
 
 The provider token is encrypted in an envelope binding account, provider and token. `LIFE_ASSISTANT_ENCRYPTION_KEYS` stays on the server, outside the dump; losing the keyring prevents token decryption. Messages and memories remain private plaintext data in PostgreSQL, like business records: token encryption does not encrypt the whole database. Local deletion cannot retract data already sent to a provider. Old dumps may still contain forgotten memories; apply retention and the [restore and rotation procedure](sauvegardes.md#migration-0015-assistant).
+
+## Documents, dictation and external pages
+
+Sources stay private, bounded and separate from direct instructions. API admission reserves quota and checks ownership before/after processing. Documents run in CPU/memory/time-limited subprocesses with actual type/structure validation. Downloads are authenticated attachments with `nosniff`, `no-store` and sandbox CSP. PDF scripts, macros, embedded objects and dangerous XML are rejected; imported files never execute.
+
+The web reader validates every URL, DNS address and redirect; private, local, reserved and IPv6 transition destinations are rejected. Sockets connect to the validated IP while retaining original Host/SNI and certificate validation. Compressed/decompressed bodies and deadlines are bounded; no authentication, cookies, proxy environment or JavaScript. The model receives no arbitrary HTTP tool.
+
+External sources cannot authorize business writes: the server enforces previews in the affected conversation and disables automatic memory. Dictation transcribes without tools/actions; users review text before sending. A separate token uses the existing keyring. These are application controls, not claims of universal malware detection or model-answer accuracy.

@@ -864,3 +864,114 @@
   min-height: 44px;
   margin-bottom: 12px;
 }
+
+.assistant-composer-tools {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.assistant-composer-tools .icon-button,
+.assistant-source .icon-button {
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.assistant-composer-bottom > .assistant-model-label {
+  margin-left: auto;
+  overflow: hidden;
+}
+.assistant-sources {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px;
+  display: grid;
+  gap: 8px;
+  width: 100%;
+}
+.assistant-source {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  min-width: 0;
+  border: 1px solid var(--ui-border);
+  border-radius: 12px;
+  padding: 7px 8px;
+  background: var(--ui-paper);
+}
+.assistant-source > svg {
+  flex-shrink: 0;
+  color: var(--ui-muted);
+}
+.assistant-source > div {
+  min-width: 0;
+  flex: 1;
+}
+.assistant-source-name {
+  display: block;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.assistant-source small {
+  display: block;
+  color: var(--ui-muted);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+.assistant-source .form-error {
+  font-size: 12px;
+  margin: 4px 0;
+}
+.assistant-message-sources {
+  margin-top: 12px;
+}
+.assistant-source-url {
+  max-height: 4em;
+  overflow: auto;
+}
+.assistant-dictation {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding-top: 10px;
+  font-size: 12px;
+}
+.assistant-dictation > span {
+  flex: 1;
+  min-width: 140px;
+}
+.assistant-dictation :is(button) {
+  min-height: 44px;
+}
+.assistant-transcription-settings {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--ui-border);
+}
+.assistant-transcript-overflow {
+  width: 100%;
+  resize: vertical;
+  margin-bottom: 12px;
+}
+@media (max-width: 480px) {
+  .assistant-composer-bottom {
+    gap: 4px;
+  }
+  .assistant-composer-bottom .assistant-model-label {
+    display: none;
+  }
+  .assistant-composer-tools {
+    margin-right: auto;
+  }
+  .assistant-source {
+    gap: 3px;
+    padding: 5px;
+  }
+  .assistant-message.is-user:has(.assistant-sources) {
+    max-width: 100%;
+    padding: 12px;
+  }
+}

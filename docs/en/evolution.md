@@ -108,3 +108,7 @@ Keep the seven independent guides declared in `mkdocs.yml`: Technical, General, 
 ## Settings panel
 
 [ADR 007](decisions/007-reglages-generaux.md) allows an optional `Settings.tsx` in each application, loaded lazily through its manifest. Implement `SettingsPanelProps` (`onDirty`, `onBusy`), clear these states on unmount and use existing business APIs. Do not import the whole Page or move business logic into the platform. The shell supplies names, activation and the common calendar. Settings links open `/settings?application=<id>`; contextual settings can remain on their objects with an explicit panel link. Test drafts, errors, conflicts, sessions, activation and FR/EN/mobile navigation.
+
+## Assistant sources
+
+[ADR 009](decisions/009-sources-assistant.md) authorizes multimodal sources and dictation within `platform/assistant`. Extensions must preserve formats/budgets, ownership, CSRF, admission before I/O, post-processing revalidation and separation of sources from direct instructions. Add blocks to all three adapters and FR/EN errors; never add unrestricted fetching to business tools. Sources must survive history and support API deletion. Cover hostile parsing, SSRF, idempotency, injection/confirmation, memory, compaction, cancellation, quotas, migration/restore and mobile/keyboard UI. New services, storage or broader access require a new explicit agreement.

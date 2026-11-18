@@ -1,6 +1,6 @@
 # LifeOS
 
-LifeOS réunit un assistant IA et des applications personnelles. L’accueil connecté propose une conversation, un historique et une mémoire personnelle contrôlable ; l’assistant consulte et modifie les applications activées avec leurs règles et confirmations. Configurez fournisseur, modèle et token dans les réglages. [Guide de l’assistant](docs/assistant.md) · [API Assistant](docs/assistant-api.md).
+LifeOS réunit un assistant IA et des applications personnelles. L’accueil connecté propose une conversation avec documents/images/pages web, dictée relisible, historique et mémoire personnelle contrôlable ; l’assistant consulte et modifie les applications activées avec leurs règles et confirmations. Configurez fournisseur, modèle et token dans les réglages. [Guide de l’assistant](docs/assistant.md) · [API Assistant](docs/assistant-api.md).
 
 Activez les applications qui vous sont utiles dans la bibliothèque, avec une connexion et un thème communs. La désactivation conserve les données et se révoque à tout moment. [Guide de la bibliothèque](docs/applications.md).
 

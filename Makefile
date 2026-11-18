@@ -20,8 +20,8 @@ dev-docs:
 	uv run --group docs mkdocs serve --dev-addr 127.0.0.1:8101
 
 check:
-	uv run ruff check backend scripts/documentation.py
-	uv run ruff format --check backend scripts/documentation.py
+	uv run ruff check backend scripts/documentation.py scripts/test-assistant-sources.py
+	uv run ruff format --check backend scripts/documentation.py scripts/test-assistant-sources.py
 	npm --prefix frontend run typecheck
 	node --check frontend/scripts/capture-documentation.mjs
 	@for script in scripts/*.sh infrastructure/postgres/*.sh; do bash -n "$$script" || exit; done

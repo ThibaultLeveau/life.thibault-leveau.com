@@ -17,7 +17,7 @@ All routes use `/api/v1/assistant`. The shared session identifies the owner; mut
 | `GET /conversations/{id}` | Conversation and messages; `offset=0`, `limit=100` (1–200), `has_more` |
 | `PATCH /conversations/{id}` | Nonempty `title` and/or boolean `archived` |
 | `DELETE /conversations/{id}` | Delete (204); `forget_memories=false` preserves sourced memories |
-| `POST /conversations/{id}/messages` | `{ "content": "…", "request_id": "UUID" }`; 1–12,000 characters; SSE stream |
+| `POST /conversations/{id}/messages` | `{ "content": "…", "request_id": "UUID" }`; text and sources; see below; SSE stream |
 | `GET /runs/{id}/events` | Replay persisted events after `after=0`; starts no action |
 | `POST /runs/{id}/cancel` | Stop subsequent steps; `{ "ok": true }` |
 | `POST /operations/{id}/confirm` | Confirm the saved operation; returns status, result and snippet |
@@ -80,6 +80,51 @@ with httpx.Client(base_url="http://127.0.0.1:8100/api/v1", timeout=240) as clien
 ```
 
 Use HTTPS in production. Original business routes remain the reference API for objects, independently of AI generation. See [application contracts](evolution.md), [data](donnees.md) and [restoration](sauvegardes.md#migration-0015-assistant).
+
+## Sources and transcription
+
+| Route | Contract |
+| --- | --- |
+| `GET /sources/limits` | Supported formats, file/image/page/text limits, message budget, configured storage quota and draft lifetime |
+| `POST /sources/files?filename=report.pdf` | Raw binary body, URL-encoded filename query; source metadata (201). No multipart/base64 |
+| `POST /sources/web` | JSON `{ "url": "https://example.org/article" }`; text snapshot or native PDF depending on the content, and metadata (201) |
+| `GET /sources/{id}` | Owner-only metadata |
+| `GET /sources/{id}/content` | Authenticated attachment download with `no-store` and `nosniff`; never render active HTML on the LifeOS origin. Removed sources return 410 |
+| `DELETE /sources/{id}` | Erases content, retaining attached receipts; 204. Returns 409 during a conversation run |
+| `GET /transcription/settings` | Effective `provider`, `model`, `configured`, `token_hint`, `use_chat_provider`; `custom_provider`, `custom_model`, `custom_configured`, `custom_token_hint` preserve the independent profile while chat settings are reused; never the token |
+| `PUT /transcription/settings` | Partial input: OpenAI/Gemini `provider`, `model`, `api_token` or null, `use_chat_provider` |
+| `POST /transcription?filename=voice.webm` | Raw WAV/WebM/OGG/MP3/MP4/M4A audio, up to 10 MiB; `{ "text": "…" }` up to 12,000 characters, creates no message |
+
+`SendMessage` accepts `source_ids: UUID[]` (default `[]`, maximum four) and `content` of 0–12,000 characters. At least nonempty text or a source is required. Sources must be ready, unexpired, owner-scoped and unbound to another message. Binding and run admission are atomic. The request fingerprint includes the ordered source IDs; identical replay returns saved receipts even after source removal. Reusing an UUID with different text, conversation or sources returns 409.
+
+Messages include `sources` metadata: `id`, `kind` (`file/web`), `name`, `media_type`, `size_bytes`, `sha256`, `url`, `page_count`, `created_at`, `removed_at`. History never includes binaries or extracted text. Bytes are only available through the content route. Replaying events never makes a removed source readable again.
+
+Pre-processing errors: 401/403 session/CSRF, 404 ownership/reference, 408 upload exceeding 30 seconds, 409 busy/bound/expired source or storage/count quota, 410 removed content, 413 size, 422 format/content/forbidden URL, 429 simultaneous imports/rate, 502 provider/remote reading, 503 encryption. HTTP errors contain localized details; chat SSE errors retain their codes. Raw provider details, internal addresses and secrets are not exposed.
+
+Insert inside the authenticated client’s `with` block in the previous example:
+
+```python
+from pathlib import Path
+from uuid import uuid4
+
+source = client.post("/assistant/sources/files", params={"filename": "report.pdf"},
+                     content=Path("report.pdf").read_bytes(),
+                     headers={"Content-Type": "application/pdf"})
+source.raise_for_status()
+page = client.post("/assistant/sources/web", json={"url": "https://example.org/"})
+page.raise_for_status()
+response = client.post(f"/assistant/conversations/{conversation_id}/messages", json={
+    "content": "Summarize these sources without changing my data.",
+    "source_ids": [source.json()["id"], page.json()["id"]], "request_id": str(uuid4()),
+})
+response.raise_for_status()  # Also inspect SSE events and final state.
+transcript = client.post("/assistant/transcription", params={"filename": "voice.wav"},
+                         content=Path("voice.wav").read_bytes())
+transcript.raise_for_status()
+print(transcript.json()["text"])  # Review before sending to chat.
+```
+
+`custom_provider`, `custom_model`, `custom_configured` and `custom_token_hint` separately describe the saved independent configuration, including while `use_chat_provider=true`. Clients can switch back without replacing its model or credential. No secret is returned.
 
 ## Tasks imports and delegation
 

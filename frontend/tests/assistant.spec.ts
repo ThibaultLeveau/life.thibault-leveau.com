@@ -1,6 +1,8 @@
 import { expect, test, type Page } from "@playwright/test";
 import type {
   AssistantSettings,
+  AssistantSource,
+  TranscriptionSettings,
   Conversation,
   Memory,
   Message,
@@ -114,6 +116,18 @@ async function fixture(page: Page) {
     string,
     { conversation: Conversation; messages: Message[] }
   >();
+  const sources = new Map<string, AssistantSource>();
+  let transcriptionSettings: TranscriptionSettings = {
+    provider: "openai",
+    model: "gpt-transcribe",
+    configured: true,
+    token_hint: null,
+    use_chat_provider: true,
+    custom_provider: null,
+    custom_model: "",
+    custom_configured: false,
+    custom_token_hint: null,
+  };
   const requests: { path: string; method: string; body: any; csrf?: string }[] =
     [];
   let count = 0;
@@ -152,7 +166,11 @@ async function fixture(page: Page) {
     const url = new URL(request.url());
     const path = url.pathname.replace("/api/v1", "");
     const method = request.method();
-    const body = request.postData() ? request.postDataJSON() : undefined;
+    const body = request.postData()
+      ? request.headers()["content-type"]?.includes("application/json")
+        ? request.postDataJSON()
+        : request.postDataBuffer()
+      : undefined;
     requests.push({
       path,
       method,
@@ -193,6 +211,78 @@ async function fixture(page: Page) {
         exclude_weekends: {},
         version: 1,
       });
+    if (path === "/assistant/sources/limits")
+      return json({
+        max_sources: 4,
+        max_file_bytes: 10485760,
+        max_image_bytes: 5242880,
+        max_total_bytes: 20971520,
+        max_pdf_pages: 50,
+        accepted_extensions: [
+          ".pdf",
+          ".txt",
+          ".md",
+          ".png",
+          ".jpg",
+          ".jpeg",
+          ".webp",
+          ".docx",
+          ".csv",
+        ],
+        accepted_media_types: [],
+      });
+    if (
+      path === "/assistant/sources/files" ||
+      path === "/assistant/sources/web"
+    ) {
+      const source: AssistantSource = {
+        id: `source-${sources.size + 1}`,
+        kind: path.endsWith("/web") ? "web" : "file",
+        name: url.searchParams.get("filename") || "Article de test",
+        media_type: request.headers()["content-type"] || "text/html",
+        size_bytes: body?.length || 100,
+        sha256: "synthetic",
+        url: body?.url ?? null,
+        created_at: now,
+        removed_at: null,
+        page_count: null,
+      };
+      sources.set(source.id, source);
+      return json(source, 201);
+    }
+    if (/^\/assistant\/sources\/[^/]+$/.test(path)) {
+      const source = sources.get(path.split("/").at(-1)!);
+      if (!source) return json({ detail: "Missing" }, 404);
+      if (method === "DELETE") {
+        source.removed_at = now;
+        return route.fulfill({ status: 204 });
+      }
+      return json(source);
+    }
+    if (path === "/assistant/transcription/settings") {
+      if (method === "PUT") {
+        transcriptionSettings.use_chat_provider = body.use_chat_provider;
+        if (body.provider)
+          transcriptionSettings.custom_provider = body.provider;
+        if (body.model !== undefined)
+          transcriptionSettings.custom_model = body.model;
+        if (body.api_token !== undefined)
+          transcriptionSettings.custom_configured = body.api_token !== null;
+      }
+      const useChat = transcriptionSettings.use_chat_provider;
+      return json({
+        ...transcriptionSettings,
+        provider: useChat
+          ? settings.provider
+          : transcriptionSettings.custom_provider,
+        model: useChat ? "gpt-transcribe" : transcriptionSettings.custom_model,
+        configured: useChat
+          ? settings.configured && settings.provider !== "anthropic"
+          : transcriptionSettings.custom_configured,
+      });
+    }
+    if (path === "/assistant/transcription")
+      return json({ text: "Un texte dicté." });
     if (path === "/assistant/settings") {
       if (method === "PUT") {
         settings = {
@@ -273,6 +363,9 @@ async function fixture(page: Page) {
             id: `question-${count}`,
             role: "user",
             content: body.content,
+            sources: (body.source_ids ?? []).map((id: string) =>
+              sources.get(id),
+            ),
             status: "complete",
             snippets: [],
             created_at: now,
@@ -340,6 +433,7 @@ async function fixture(page: Page) {
   });
   return {
     session,
+    sources,
     requests,
     seed,
     conversations,
@@ -432,9 +526,9 @@ test("chat : contrat SSE, cinq snippets, confirmation, historique et actions", a
   await expect(page.locator(".assistant-welcome h1")).toBeVisible();
   await expect(page.locator(".assistant-message")).toHaveCount(0);
   await expect(page.locator(".assistant-history-item")).toHaveCount(0);
-  await expect(
-    page.getByLabel("Votre message", { exact: true }),
-  ).toHaveValue("");
+  await expect(page.getByLabel("Votre message", { exact: true })).toHaveValue(
+    "",
+  );
   await expect(page).toHaveTitle("Assistant · LifeOS");
   await page
     .getByLabel("Votre message", { exact: true })
@@ -476,6 +570,19 @@ for (const locale of ["fr", "en"] as const) {
     await page.goto("/?conversation=conversation-1");
     const composer = page.getByLabel(labels.message, { exact: true });
     await composer.fill("Un brouillon dans la conversation supprimée");
+    await page.locator('input[type="file"]').setInputFiles({
+      name: "draft.txt",
+      mimeType: "text/plain",
+      buffer: Buffer.from(
+        "Pièce jointe du brouillon à conserver en cas d’échec",
+      ),
+    });
+    const attached = page.locator(".assistant-composer .assistant-source");
+    await expect(attached.getByRole("status")).toHaveText(
+      locale === "fr" ? "Prêt à envoyer" : "Ready to send",
+    );
+    const source = [...data.sources.values()][0];
+    expect(source.removed_at).toBeNull();
     const remove = page.getByRole("button", {
       name: labels.remove,
       exact: true,
@@ -487,6 +594,7 @@ for (const locale of ["fr", "en"] as const) {
       .click();
     await expect(page).toHaveURL(/conversation=conversation-1/);
     await expect(page.locator(".assistant-message")).toHaveCount(2);
+    await expect(attached).toContainText("draft.txt");
     expect(
       data.requests.filter((request) => request.method === "DELETE"),
     ).toHaveLength(0);
@@ -514,6 +622,15 @@ for (const locale of ["fr", "en"] as const) {
       "Un brouillon dans la conversation supprimée",
     );
     expect(data.conversations.has("conversation-1")).toBe(true);
+    await expect(attached).toContainText("draft.txt");
+    expect(source.removed_at).toBeNull();
+    expect(
+      data.requests.filter(
+        (request) =>
+          request.method === "DELETE" &&
+          request.path === `/assistant/sources/${source.id}`,
+      ),
+    ).toHaveLength(0);
 
     fail = false;
     await dialog
@@ -525,6 +642,15 @@ for (const locale of ["fr", "en"] as const) {
     await expect(page.locator(".assistant-message")).toHaveCount(0);
     await expect(composer).toHaveValue("");
     await expect(composer).toBeEnabled();
+    await expect(attached).toHaveCount(0);
+    await expect.poll(() => source.removed_at).toBe(now);
+    expect(
+      data.requests.filter(
+        (request) =>
+          request.method === "DELETE" &&
+          request.path === `/assistant/sources/${source.id}`,
+      ),
+    ).toHaveLength(1);
     expect(data.conversations.size).toBe(0);
     await page.reload();
     await expect(page.locator(".assistant-welcome h1")).toBeVisible();
@@ -713,9 +839,9 @@ test("réglages : secret à écriture seule, brouillons et mémoire modifiable",
   await panel
     .getByLabel("Nouvelle clé API", { exact: true })
     .fill("a-key-for-the-previous-provider");
-  await panel.getByLabel("Fournisseur").selectOption("anthropic");
+  await panel.getByLabel(/^Fournisseur/).selectOption("anthropic");
   await expect(panel.locator('input[type="password"]')).toHaveValue("");
-  await panel.getByLabel("Fournisseur").selectOption("openai");
+  await panel.getByLabel(/^Fournisseur/).selectOption("openai");
   await panel.getByLabel("Modèle", { exact: true }).fill("test-model");
   await panel
     .getByLabel("Nouvelle clé API", { exact: true })
@@ -1275,6 +1401,509 @@ test("une réponse en cours est récupérée après rechargement sans répéter 
     data.requests.filter(
       (request) =>
         request.path.endsWith("/messages") && request.method === "POST",
+    ),
+  ).toHaveLength(0);
+});
+
+test("sources : fichier et page web sans texte, historique, retrait et CSRF", async ({
+  page,
+}) => {
+  const data = await fixture(page);
+  await page.goto("/");
+  await page.locator('input[type="file"]').setInputFiles({
+    name: "notes.txt",
+    mimeType: "text/plain",
+    buffer: Buffer.from("Une note à lire"),
+  });
+  await expect(page.getByLabel("Retirer la source notes.txt")).toBeVisible();
+  await expect(page.getByText("Préparation en cours…")).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "Ajouter une page web", exact: true })
+    .click();
+  await page
+    .getByLabel("Adresse de la page web")
+    .fill("https://example.com/article");
+  await page.getByRole("button", { name: "Lire la page", exact: true }).click();
+  await expect(
+    page.getByLabel("Retirer la source https://example.com/article"),
+  ).toBeVisible();
+  const send = page.getByRole("button", { name: "Envoyer le message" });
+  await expect(send).toBeEnabled();
+  await send.click();
+  await expect(page.getByLabel("Télécharger notes.txt")).toBeVisible();
+  const write = data.requests.find((request) =>
+    request.path.endsWith("/messages"),
+  )!;
+  expect(write.body.content).toBe("");
+  expect(write.body.source_ids).toHaveLength(2);
+  expect(
+    data.requests
+      .filter((request) => request.method === "POST")
+      .every((request) => request.csrf === "csrf-assistant-test"),
+  ).toBe(true);
+  await page.reload();
+  await expect(page.getByLabel("Télécharger notes.txt")).toBeVisible();
+  page.once("dialog", (dialog) => dialog.accept());
+  await page.getByLabel("Supprimer le contenu de notes.txt").click();
+  await expect(
+    page.getByText("Contenu supprimé", { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByLabel("Télécharger notes.txt")).toHaveCount(0);
+});
+
+test("sources : limites, brouillon protégé, refus d’admission et nouvelle tentative", async ({
+  page,
+}) => {
+  const data = await fixture(page);
+  data.seed("conversation-1", []);
+  await page.goto("/?conversation=conversation-1");
+  await page.locator('input[type="file"]').setInputFiles({
+    name: "script.exe",
+    mimeType: "application/octet-stream",
+    buffer: Buffer.from("rejected"),
+  });
+  await expect(
+    page.getByText("Ce format de fichier n’est pas accepté."),
+  ).toBeVisible();
+  expect(data.sources.size).toBe(0);
+  await page.locator('input[type="file"]').setInputFiles({
+    name: "note.txt",
+    mimeType: "text/plain",
+    buffer: Buffer.from("Une note"),
+  });
+  await expect(
+    page.getByRole("button", { name: "Envoyer le message" }),
+  ).toBeEnabled();
+  page.once("dialog", (dialog) => dialog.dismiss());
+  await page
+    .getByRole("button", { name: "Nouvelle conversation", exact: true })
+    .click();
+  await expect(page.getByLabel("Retirer la source note.txt")).toBeVisible();
+  let attempts = 0;
+  await page.route(
+    "**/api/v1/assistant/conversations/conversation-1/messages",
+    async (route) => {
+      attempts++;
+      await route.fulfill({
+        status: 422,
+        json: { detail: "Admission refusée" },
+      });
+    },
+  );
+  await page.getByRole("button", { name: "Envoyer le message" }).click();
+  await expect(page.getByText("Admission refusée")).toBeVisible();
+  await expect(page.getByLabel("Retirer la source note.txt")).toBeVisible();
+  expect(attempts).toBe(1);
+  await page.unroute(
+    "**/api/v1/assistant/conversations/conversation-1/messages",
+  );
+  await page.getByRole("button", { name: "Envoyer le message" }).click();
+  await expect(page.getByLabel("Télécharger note.txt")).toBeVisible();
+  expect(
+    data.requests.filter(
+      (request) => request.path === "/assistant/sources/files",
+    ),
+  ).toHaveLength(1);
+});
+
+test("sources : annulation d’une préparation tardive et réessai après erreur", async ({
+  page,
+}) => {
+  await fixture(page);
+  let release: () => void = () => {};
+  let preparing = false;
+  await page.route("**/api/v1/assistant/sources/files?**", async (route) => {
+    preparing = true;
+    await new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    await route
+      .fulfill({ status: 503, json: { detail: "Unavailable" } })
+      .catch(() => {});
+  });
+  await page.goto("/");
+  await page.locator('input[type="file"]').setInputFiles({
+    name: "late.txt",
+    mimeType: "text/plain",
+    buffer: Buffer.from("Late"),
+  });
+  await expect.poll(() => preparing).toBe(true);
+  await page.getByLabel("Retirer la source late.txt").click();
+  release();
+  await expect(page.getByText("late.txt", { exact: true })).toHaveCount(0);
+  await page.unroute("**/api/v1/assistant/sources/files?**");
+  let failed = true;
+  await page.route("**/api/v1/assistant/sources/files?**", async (route) => {
+    if (failed) {
+      failed = false;
+      return route.fulfill({ status: 503, json: { detail: "Unavailable" } });
+    }
+    return route.fallback();
+  });
+  await page.locator('input[type="file"]').setInputFiles({
+    name: "retry.txt",
+    mimeType: "text/plain",
+    buffer: Buffer.from("Retry"),
+  });
+  await page.getByLabel("Réessayer la source retry.txt").click();
+  await expect(
+    page.getByRole("button", { name: "Envoyer le message" }),
+  ).toBeEnabled();
+});
+
+async function fakeRecorder(
+  page: Page,
+  mode: "ready" | "denied" | "pending" = "ready",
+) {
+  await page.addInitScript((mode) => {
+    const state = window as any;
+    state.stoppedTracks = 0;
+    const stream = {
+      getTracks: () => [
+        {
+          stop: () => {
+            state.stoppedTracks++;
+          },
+        },
+      ],
+    };
+    Object.defineProperty(navigator, "mediaDevices", {
+      configurable: true,
+      value: {
+        getUserMedia: () =>
+          mode === "denied"
+            ? Promise.reject(new DOMException("Denied", "NotAllowedError"))
+            : mode === "pending"
+              ? new Promise((resolve) => {
+                  state.resolveMicrophone = () => resolve(stream);
+                })
+              : Promise.resolve(stream),
+      },
+    });
+    class Recorder {
+      static isTypeSupported(type: string) {
+        return type === "audio/mp4";
+      }
+      state = "inactive";
+      mimeType = "audio/mp4";
+      ondataavailable: any;
+      onstop: any;
+      onerror: any;
+      start() {
+        this.state = "recording";
+      }
+      stop() {
+        this.state = "inactive";
+        queueMicrotask(() => {
+          this.ondataavailable?.({
+            data: new Blob(["recorded audio"], { type: this.mimeType }),
+          });
+          this.onstop?.();
+        });
+      }
+    }
+    state.MediaRecorder = Recorder;
+  }, mode);
+}
+
+test("dictée : format négocié, texte existant préservé, envoi manuel et pistes arrêtées", async ({
+  page,
+}) => {
+  const data = await fixture(page);
+  await fakeRecorder(page);
+  await page.goto("/");
+  const composer = page.getByLabel("Votre message", { exact: true });
+  await composer.fill("Mon brouillon");
+  await page.getByLabel("Dicter un texte", { exact: true }).click();
+  await expect(page.getByText(/Dictée en cours/)).toBeVisible();
+  await composer.fill("Mon brouillon complété");
+  await page.getByRole("button", { name: "Terminer la dictée" }).click();
+  await expect(composer).toHaveValue("Mon brouillon complété Un texte dicté.");
+  expect(
+    data.requests.filter((request) => request.path.endsWith("/messages")),
+  ).toHaveLength(0);
+  expect(
+    data.requests.find((request) => request.path === "/assistant/transcription")
+      ?.csrf,
+  ).toBe("csrf-assistant-test");
+  expect(await page.evaluate(() => (window as any).stoppedTracks)).toBe(1);
+  await expect(
+    page.getByRole("button", { name: "Envoyer le message" }),
+  ).toBeEnabled();
+});
+
+test("dictée : permission refusée, annulation de permission tardive et transcription obsolète", async ({
+  page,
+}) => {
+  await fixture(page);
+  await fakeRecorder(page, "pending");
+  await page.goto("/");
+  await page.getByLabel("Dicter un texte", { exact: true }).click();
+  await expect(
+    page.getByText("Autorisez le microphone dans votre navigateur."),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Annuler", exact: true }).click();
+  await page.evaluate(() => (window as any).resolveMicrophone());
+  await expect
+    .poll(() => page.evaluate(() => (window as any).stoppedTracks))
+    .toBe(1);
+  await expect(page.getByText(/Dictée en cours/)).toHaveCount(0);
+  await fakeRecorder(page, "denied");
+  await page.reload();
+  await page.getByLabel("Dicter un texte", { exact: true }).click();
+  await expect(
+    page.getByText(/L’accès au microphone a été refusé/),
+  ).toBeVisible();
+  await fakeRecorder(page);
+  await page.reload();
+  let release: () => void = () => {};
+  await page.route("**/api/v1/assistant/transcription?**", async (route) => {
+    await new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    await route.fulfill({ json: { text: "Réponse tardive" } }).catch(() => {});
+  });
+  await page.getByLabel("Dicter un texte", { exact: true }).click();
+  await page.getByRole("button", { name: "Terminer la dictée" }).click();
+  await expect(page.getByText("Transcription en cours…")).toBeVisible();
+  await page.getByRole("button", { name: "Annuler", exact: true }).click();
+  release();
+  await expect(page.getByLabel("Votre message", { exact: true })).toHaveValue(
+    "",
+  );
+});
+
+test("réglages dictée : fournisseur distinct, secret à écriture seule et brouillon protégé", async ({
+  page,
+}) => {
+  const data = await fixture(page);
+  await page.goto("/settings");
+  await page
+    .getByRole("checkbox", {
+      name: "Utiliser le fournisseur et la clé de la conversation",
+    })
+    .uncheck();
+  await page
+    .getByLabel("Clé API de dictée", { exact: true })
+    .fill("synthetic-dictation-secret");
+  page.once("dialog", (dialog) => dialog.dismiss());
+  await page
+    .getByRole("navigation", { name: "Sections des réglages" })
+    .getByRole("link", { name: "Tâches", exact: true })
+    .click();
+  await expect(
+    page.getByLabel("Clé API de dictée", { exact: true }),
+  ).toHaveValue("synthetic-dictation-secret");
+  await page
+    .getByRole("button", { name: "Enregistrer la dictée", exact: true })
+    .click();
+  await expect(
+    page.getByLabel("Clé API de dictée", { exact: true }),
+  ).toHaveValue("");
+  expect(
+    data.requests.find(
+      (request) =>
+        request.path === "/assistant/transcription/settings" &&
+        request.method === "PUT",
+    )?.body.api_token,
+  ).toBe("synthetic-dictation-secret");
+  expect(
+    await page.evaluate(() => JSON.stringify({ ...localStorage })),
+  ).not.toContain("synthetic-dictation-secret");
+});
+
+test("sources : quatre pièces maximum, image trop grande et cartes accessibles à 320 px", async ({
+  page,
+}) => {
+  const data = await fixture(page);
+  await page.setViewportSize({ width: 320, height: 900 });
+  await page.goto("/");
+  await page.locator('input[type="file"]').setInputFiles(
+    Array.from({ length: 5 }, (_, i) => ({
+      name: `note-${i}.txt`,
+      mimeType: "text/plain",
+      buffer: Buffer.from("Note"),
+    })),
+  );
+  await expect(
+    page.getByText("Vous pouvez joindre au maximum 4 sources par message."),
+  ).toBeVisible();
+  await expect(page.locator(".assistant-source")).toHaveCount(4);
+  await expect.poll(() => data.sources.size).toBe(4);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  const remove = page.getByLabel("Retirer la source note-0.txt");
+  expect((await remove.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  await remove.click();
+  await page.locator('input[type="file"]').setInputFiles({
+    name: "large.png",
+    mimeType: "image/png",
+    buffer: Buffer.alloc(5 * 1024 * 1024 + 1),
+  });
+  await expect(
+    page.getByText(
+      "Ce fichier dépasse la taille autorisée, ou le total des sources est trop volumineux.",
+    ),
+  ).toBeVisible();
+  expect(data.sources.size).toBe(4);
+});
+
+test("dictée : arrêt automatique à deux minutes et réessai sans réenregistrer", async ({
+  page,
+}) => {
+  await fixture(page);
+  await fakeRecorder(page);
+  await page.clock.install();
+  let attempts = 0;
+  await page.route("**/api/v1/assistant/transcription?**", async (route) => {
+    attempts++;
+    expect(new URL(route.request().url()).searchParams.get("filename")).toBe(
+      "dictation.m4a",
+    );
+    if (attempts === 1)
+      return route.fulfill({ status: 503, json: { detail: "Unavailable" } });
+    return route.fulfill({ json: { text: "Transcription récupérée." } });
+  });
+  await page.goto("/");
+  await page.getByLabel("Dicter un texte", { exact: true }).click();
+  await expect(page.getByText(/Dictée en cours/)).toBeVisible();
+  await page.clock.runFor(120_001);
+  await page
+    .getByRole("button", { name: "Réessayer la transcription" })
+    .click();
+  await expect(page.getByLabel("Votre message", { exact: true })).toHaveValue(
+    "Transcription récupérée.",
+  );
+  expect(attempts).toBe(2);
+  expect(await page.evaluate(() => (window as any).stoppedTracks)).toBe(1);
+});
+
+test("réglages dictée : la configuration indépendante survit à la réutilisation du chat", async ({
+  page,
+}) => {
+  const data = await fixture(page);
+  await page.goto("/settings");
+  const reuse = page.getByRole("checkbox", {
+    name: "Utiliser le fournisseur et la clé de la conversation",
+  });
+  await reuse.uncheck();
+  await page.getByLabel(/^Fournisseur de dictée/).selectOption("gemini");
+  await page
+    .getByLabel("Modèle de dictée", { exact: true })
+    .fill("gemini-transcription-test");
+  await page
+    .getByLabel("Clé API de dictée", { exact: true })
+    .fill("synthetic-independent-gemini-key");
+  const save = page.getByRole("button", {
+    name: "Enregistrer la dictée",
+    exact: true,
+  });
+  await save.click();
+  await expect(save).toBeDisabled();
+  await reuse.check();
+  await save.click();
+  await expect(save).toBeDisabled();
+  await page.reload();
+  await reuse.uncheck();
+  await expect(page.getByLabel(/^Fournisseur de dictée/)).toHaveValue("gemini");
+  await expect(
+    page.getByLabel("Modèle de dictée", { exact: true }),
+  ).toHaveValue("gemini-transcription-test");
+  await expect(
+    page.getByLabel("Clé API de dictée", { exact: true }),
+  ).toHaveValue("");
+  await save.click();
+  await expect(save).toBeDisabled();
+  const writes = data.requests.filter(
+    (request) =>
+      request.path === "/assistant/transcription/settings" &&
+      request.method === "PUT",
+  );
+  expect(writes).toHaveLength(3);
+  expect(writes[2].body).toEqual({
+    provider: "gemini",
+    model: "gemini-transcription-test",
+    use_chat_provider: false,
+  });
+});
+
+test("sources : les lots attendent les deux créneaux d’import et les sources en attente s’annulent", async ({
+  page,
+}) => {
+  await fixture(page);
+  let active = 0,
+    maximum = 0,
+    admitted = 0;
+  const releases: (() => void)[] = [];
+  await page.route("**/api/v1/assistant/sources/files?**", async (route) => {
+    active++;
+    admitted++;
+    maximum = Math.max(maximum, active);
+    await new Promise<void>((resolve) => releases.push(resolve));
+    active--;
+    await route.fallback();
+  });
+  await page.goto("/");
+  await page.locator('input[type="file"]').setInputFiles(
+    Array.from({ length: 4 }, (_, index) => ({
+      name: `queued-${index}.txt`,
+      mimeType: "text/plain",
+      buffer: Buffer.from("Source"),
+    })),
+  );
+  await expect.poll(() => admitted).toBe(2);
+  await expect(page.locator(".assistant-source")).toHaveCount(4);
+  await page.getByLabel("Retirer la source queued-3.txt").click();
+  releases.shift()!();
+  await expect.poll(() => admitted).toBe(3);
+  expect(maximum).toBe(2);
+  while (releases.length) releases.shift()!();
+  await expect(
+    page.getByRole("button", { name: "Envoyer le message" }),
+  ).toBeEnabled();
+  expect(admitted).toBe(3);
+  await expect(page.getByLabel("Retirer la source queued-3.txt")).toHaveCount(
+    0,
+  );
+});
+
+test("sources : le retour navigateur conserve une URL refusée et efface son abandon accepté", async ({
+  page,
+}) => {
+  const data = await fixture(page);
+  data.seed("conversation-1", []);
+  await page.goto("/?conversation=conversation-1");
+  await expect(page.getByLabel("Votre message", { exact: true })).toBeEnabled();
+  await page
+    .getByRole("button", { name: "Nouvelle conversation", exact: true })
+    .click();
+  await expect(page).toHaveURL(/\/$/);
+  await page
+    .getByRole("button", { name: "Ajouter une page web", exact: true })
+    .click();
+  const input = page.getByLabel("Adresse de la page web");
+  await input.fill("https://example.com/private-draft");
+  page.once("dialog", (dialog) => dialog.dismiss());
+  await page.evaluate(() => history.back());
+  await expect(page).toHaveURL(/\/$/);
+  await expect(input).toHaveValue("https://example.com/private-draft");
+  page.once("dialog", (dialog) => dialog.accept());
+  await page.evaluate(() => history.back());
+  await expect(page).toHaveURL(/conversation=conversation-1/);
+  await expect(input).toHaveCount(0);
+  await expect(page.getByLabel("Votre message", { exact: true })).toHaveValue(
+    "",
+  );
+  await page
+    .getByRole("button", { name: "Ajouter une page web", exact: true })
+    .click();
+  await expect(input).toHaveValue("");
+  expect(
+    data.requests.filter(
+      (request) => request.path === "/assistant/sources/web",
     ),
   ).toHaveLength(0);
 });

@@ -53,3 +53,9 @@ PostgreSQL initialization creates `life` as database owner without superuser, da
 Secrets are server settings. Names, colors, ordering, filters and themes are **business data**, changed through the [API](api.md), never frontend environment variables.
 
 **Upcoming** preferences belong to the account: period (today/tomorrow/week/custom), 1–90-day horizon, overdue/completed inclusion and filters. They use `/api/v1/agenda/view`; no extra environment setting is needed.
+
+## AI source quota and dictation
+
+`LIFE_ASSISTANT_SOURCE_QUOTA_BYTES` bounds files and extracted text stored per account (default `209715200`, 200 MiB; range 20 MiB–2 GiB). `GET /api/v1/assistant/sources/limits` exposes it. Format/message/processing limits remain conservative in the assistant module. A reservation counts 10 MiB before import; allow this headroom even for a small file. Lowering quota never deletes data but may block imports until space is freed.
+
+Personal dictation settings use `/assistant/transcription/settings` and require no additional server secret: `LIFE_ASSISTANT_ENCRYPTION_KEYS` also protects an optional separate credential. Chat reuse selects OpenAI `gpt-transcribe` or the chat’s Gemini model. Explicitly choose a separate model/token if needed. No silent fallback between providers.

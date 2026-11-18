@@ -7,10 +7,17 @@ import { useSettingsDraft } from "../applications/useSettingsDraft";
 import { useApiAction, useApiResource } from "../useApiResource";
 import { assistantApi } from "./api";
 import type { AssistantSettings, Provider } from "./types";
+import { TranscriptionSettingsPanel } from "./TranscriptionSettings";
 import "./styles.css";
 
 export function AssistantSettingsPanel(props: SettingsPanelProps) {
   const resource = useApiResource(assistantApi.settings, []);
+  const [savedChat, setSavedChat] = useState<AssistantSettings>();
+  const [chatDirty, setChatDirty] = useState(false),
+    [voiceDirty, setVoiceDirty] = useState(false);
+  const [chatBusy, setChatBusy] = useState(false),
+    [voiceBusy, setVoiceBusy] = useState(false);
+  useSettingsDraft(props, chatDirty || voiceDirty, chatBusy || voiceBusy);
   return (
     <section className="settings-card settings-form" id="assistant-settings">
       <h3>
@@ -24,14 +31,30 @@ export function AssistantSettingsPanel(props: SettingsPanelProps) {
           {tr("try_again")}
         </button>
       )}
-      {resource.data && <SettingsForm initial={resource.data} {...props} />}
+      {resource.data && (
+        <SettingsForm
+          initial={resource.data}
+          onSaved={setSavedChat}
+          onDirty={setChatDirty}
+          onBusy={setChatBusy}
+        />
+      )}
+      <TranscriptionSettingsPanel
+        chatSettings={savedChat ?? resource.data}
+        onDirty={setVoiceDirty}
+        onBusy={setVoiceBusy}
+      />
     </section>
   );
 }
 function SettingsForm({
   initial,
+  onSaved,
   ...draft
-}: SettingsPanelProps & { initial: AssistantSettings }) {
+}: SettingsPanelProps & {
+  initial: AssistantSettings;
+  onSaved: (value: AssistantSettings) => void;
+}) {
   const [saved, setSaved] = useState(initial);
   const [provider, setProvider] = useState(initial.provider);
   const [model, setModel] = useState(initial.model);
@@ -65,6 +88,7 @@ function SettingsForm({
         }),
       (value) => {
         setSaved(value);
+        onSaved(value);
         setProvider(value.provider);
         setModel(value.model);
         setToken("");

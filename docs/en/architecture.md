@@ -16,7 +16,7 @@ Life retains the FastAPI / React / MkDocs monorepo. One Uvicorn process serves t
 
 Caddy terminates TLS and forwards to `life-web:8000` on `multisite_proxy`. The web service also joins the private Compose `database` network. PostgreSQL never joins the proxy network or publishes a host port; `postgres_data` persists its data. The application role owns its database without cluster-administration privileges.
 
-Only `web` also joins the non-internal Compose `egress` bridge (`life_egress` in production), providing provider hostname resolution and outbound HTTPS for the assistant. `database` and the existing `multisite_proxy` network remain internal; no host port or additional service is introduced. Application adapters fix the three allowed provider hosts; the bridge itself does not filter traffic by domain.
+Only `web` also joins the non-internal Compose `egress` bridge (`life_egress` in production), providing provider hostname resolution and outbound HTTPS for the assistant. `database` and the existing `multisite_proxy` network remain internal; no host port or additional service is introduced. AI adapters fix provider hosts; the ADR 009 public-page reader separately validates its destinations. The bridge itself does not filter traffic by domain.
 
 In development, Vite, FastAPI and MkDocs have separate servers; Vite’s proxy keeps one origin. `compose.dev.yaml` provides a local PostgreSQL instance independent of production.
 
@@ -69,7 +69,7 @@ uv/npm lockfiles are versioned. Images carry the full source SHA, although base-
 
 ## Chosen limits {#limites-choisies}
 
-This is a personal application: no workspace sharing, public registration, SSO, real-time synchronization, attachments or offline synchronization. Sport provides internal statistics; Tracking consumes Task events and Sport results through injected metric providers. No screen time is collected. Search uses SQL substring matching and the frontend loads every task in a view; large volumes would require measured pagination/indexing improvements.
+This is a personal application: no workspace sharing, public registration, SSO, real-time synchronization or offline synchronization. Sport provides internal statistics; Tracking consumes Task events and Sport results through injected metric providers. No screen time is collected. Search uses SQL substring matching and the frontend loads every task in a view; large volumes would require measured pagination/indexing improvements.
 
 Recurrence stays inside `apps/tasks`: `recurrence.py` validates/calculates dates using python-dateutil; `scheduling.py` parses account-language French or English. Completion advances the task in the existing transaction without a scheduler or additional service. The frontend requests parsing/preview from the API and retains only temporary drafts.
 
@@ -118,3 +118,9 @@ The seven FR/EN guides share the existing MkDocs build and static server. `mkdoc
 ## General settings
 
 [ADR 007](decisions/007-reglages-generaux.md), approved in issue #76, extends the frontend manifest with an optional `Settings` panel. The shell composes `/settings` from the existing registry and server catalogue. Business forms stay in their applications; shared preferences stay in their existing modules. Panels report drafts/pending writes and business panels mount only for enabled applications. No additional table, API or infrastructure. See the [guide](settings.md).
+
+## Multimodal sources and dictation
+
+[ADR 009](decisions/009-sources-assistant.md), approved in issue #89, extends `platform/assistant` with private PostgreSQL sources, typed provider blocks, bounded extraction and transient transcription. No new service, object storage or vector database. The web reader only adds HTTP/HTTPS connections to explicitly imported public pages, validating DNS/IPs and redirects and connecting to a verified address while retaining the TLS hostname. AI adapters keep fixed hosts.
+
+PDF/image/XML parsing and web reading run in disposable processes limited by CPU, memory and time; no external HTML executes. Admission reserves quota before reading, releases SQL during I/O, then revalidates session and owner. Direct instructions remain separate from sources: persistent `external_context` forces mutation previews and disables automatic memory, including follow-ups. No persistent external summary; recent context and ID-based source reading remain bounded. See [data](donnees.md), [API](assistant-api.md) and [backups](sauvegardes.md#migration-0016-sources-and-dictation).

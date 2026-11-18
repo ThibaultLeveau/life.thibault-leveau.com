@@ -314,6 +314,12 @@ Après validations, auto-revue, CI et fusion, publier avec `scripts/deploy.sh` e
 
 Sur un compte synthétique, vérifier première séance partielle, exercice entièrement omis, séance vide (0), difficulté relative charge/distance/allure, références, historique/statistiques, FR/EN, mobile 320 px et clavier. Vérifier l’API `score_details`, les références figées, les propositions suivantes et la conservation des résultats. Contrôler SHA réellement exécuté, sondes, OpenAPI, `/sport` et guides FR/EN en HTTPS ; consigner sauvegarde, reprise et résultats dans l’issue.
 
+## Livraison sources IA, images, dictée et pages web
+
+Après validations, revue, CI et fusion, publier `main` validé avec `scripts/deploy.sh`, sauvegarde puis migration `0016_assistant_sources`. Les dépendances Pillow, pypdf et defusedxml sont verrouillées et incluses dans l’image ; aucun nouveau service ou volume. Le quota utilise son défaut sauf configuration explicite. L’ancien processus peut continuer ses écritures textuelles pendant cette migration additive, mais aucune ancienne image ne doit reprendre après livraison.
+
+Sur un compte synthétique, vérifier import document/image, récupération d’une page publique, refus URL interne et faux format, source seule et texte+source, historique/retrait, brouillon après erreur, confirmation obligatoire des actions et absence de mémoire automatique. Vérifier réglages dictée, refus micro, arrêt/annulation et texte modifiable ; sans credential fournisseur réel, consigner cette limite et utiliser les tests simulés sans prétendre à une transcription réelle. Contrôler FR/EN, thèmes, 320 px/clavier, versions réellement exécutées, sondes, routes HTTPS, OpenAPI et guides. Vérifier sources/restauration et sortie réseau publique depuis l’image exécutée. Consigner sauvegarde, SHA, révision et preuves dans l’issue #89.
+
 ## Livraison de l’import de tâches
 
 Aucune migration ni nouveau stockage. Publier avec sauvegarde et procédure habituelles. Vérifier les budgets effectifs : les anciennes configurations explicites `LIFE_ASSISTANT_TIMEOUT_SECONDS=180` restent prioritaires ; les passer à 600 pour les demandes longues si aucun délai plus court n’est souhaité. Les plafonds par défaut sont 96 appels et 200 actions. Contrôler OpenAPI `/tasks/import`, import de dix tâches sur un compte synthétique, annulation complète d’un lot invalide et aperçu/confirmation IA. Les sauvegardes/restaurations existantes incluent tâches, événements et reçus sans nouvelle procédure.
