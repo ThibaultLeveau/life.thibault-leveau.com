@@ -31,6 +31,8 @@ Omettre `api_token` conserve la valeur existante ; `null` la supprime ; une cha�
 
 Les sources, dates et identifiants des souvenirs sont attribués côté serveur. Les messages portent `role`, `content`, `status`, `snippets`, `run_id` et leur date. Les états de réponse sont `running`, `complete`, `interrupted`, `failed`. Les conversations supprimées entraînent la suppression de leurs messages, exécutions, événements et opérations ; l’option d’oubli contrôle séparément les souvenirs.
 
+Les snippets de version 1 conservent le résultat complet de chaque opération dans `data.entity`, son indicateur booléen `data.read_only` et, pour les aperçus, les arguments validés. Les lectures, y compris les découvertes et les capacités LifeOS, restent dans les messages ; leur regroupement replié est une présentation frontend. Une confirmation remplace le snippet de même identifiant à sa position. Aucun changement de schéma SQL ni de contrat de confirmation : les limites de pagination des API métier restent applicables. Les quantités décimales API conservent leur précision ; seul leur affichage est formaté.
+
 ## Streaming et idempotence
 
 Le POST renvoie `text/event-stream`. Chaque événement est un objet JSON dans une ligne `data:`, suivi d’une ligne vide, avec `type`, `run_id` et `sequence`. Types : `status` (texte de progression), `delta` (texte partiel), `message` (message et snippets à réconcilier), `error` (code), `done` (fin). Réconcilier les messages et cartes par identifiant plutôt que de les ajouter à nouveau.

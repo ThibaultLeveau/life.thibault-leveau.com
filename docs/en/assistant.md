@@ -22,6 +22,18 @@ Life loads the relevant application's tools and reads objects before changing th
 
 Explicitly requested simple changes may be saved directly. Suggestions, bulk changes and destructive actions show a **preview requiring confirmation**. Cards bring small application views into the conversation: the affected object, useful values, a result or an application link. A preview is not a saved change. Confirmation rechecks permissions and versions; if the object changed, request a new preview.
 
+## Consultations and card details
+
+Intermediate reads are grouped under **Consultations**, collapsed beneath the answer by default. Expand it to inspect the consulted objects. Every proposal awaiting confirmation remains visible, even when there are more than three; saved changes remain distinct from reads. Receipts keep their order and confirming a proposal replaces its preview without duplicating the action.
+
+Each card offers **View all details**: complete instructions, ingredients, exercises and set values, key results, tracking fields or preferences. The summary stays short; **Read full text** also expands long text directly in the card, without an inner scrollbar. Both controls can be collapsed again. Lists are no longer silently cut to three, five or eight items. Technical references remain available through the API.
+
+Details cover the actual consulted result. When a search returns a page, the number received and the total are shown; the application link lets you continue browsing. Empty results have an explicit message. Disabled applications and unsupported card versions do not reveal their details.
+
+Numbers, dates and units follow the account language: for example **350 g** and **1.25 g** in English, **1,25 g** in French. Redundant trailing zeroes disappear while useful small quantities (up to Recipes’ six decimal places) remain visible. Formatting does not change saved values. Model instructions distinguish concise answers from complete proposed record content; review a proposal before confirming it.
+
+These controls support Enter/Space, shared themes and 320 px screens. Expanded details scroll with the conversation.
+
 ## History and interruptions
 
 Create a conversation, find it with search, rename it or archive it. Archiving preserves messages and supports restoration. Restore an archived conversation before sending another message. Deleting permanently removes the conversation and its receipts; separately choose whether to forget its sourced memories.

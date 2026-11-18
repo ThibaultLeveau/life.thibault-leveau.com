@@ -22,6 +22,18 @@ Life charge les outils de l’application concernée et consulte les objets avan
 
 Les actions simples explicitement demandées peuvent être enregistrées directement. Une proposition, une modification en lot ou une action destructive présente un **aperçu à confirmer**. Les cartes montrent de petites parties des applications : objet concerné, valeurs pertinentes, résultat ou lien vers l’application. Un aperçu n’est pas une modification enregistrée. La confirmation revalide les droits et les versions ; si l’objet a changé, demandez un nouvel aperçu.
 
+## Consultations et détails des cartes
+
+Les lectures intermédiaires sont regroupées sous **Consultations**, replié par défaut sous la réponse. Ouvrez ce volet pour retrouver les objets consultés. Les propositions à confirmer restent visibles, même lorsqu’il y en a plus de trois ; les résultats enregistrés sont distincts des lectures. Les opérations conservent leur ordre et une confirmation remplace son aperçu sans dupliquer l’action.
+
+Chaque carte propose **Voir tous les détails** : instructions complètes, ingrédients, exercices et valeurs de séries, résultats clés, champs de suivi ou préférences. Le résumé reste court ; **Lire le texte complet** déplie aussi un texte long directement dans la carte, sans zone de défilement imbriquée. Vous pouvez ensuite replier le texte ou les détails. Les listes ne sont plus coupées silencieusement à trois, cinq ou huit éléments. Les références techniques restent accessibles par l’API.
+
+Les détails portent sur le résultat effectivement consulté : si une recherche renvoie une page, le nombre de résultats reçus et le total sont indiqués. Le lien vers l’application permet de poursuivre la recherche. Un résultat vide est signalé explicitement. Les cartes d’une application désactivée ou d’une version non reconnue n’exposent pas leurs détails.
+
+Nombres, dates et unités suivent la langue du compte : par exemple **350 g** et **1,25 g** en français, **1.25 g** en anglais. Les zéros décimaux superflus disparaissent ; les petites quantités utiles (jusqu’aux six décimales de Recettes) restent visibles. Ce formatage ne modifie aucune valeur enregistrée. Les consignes du modèle distinguent la concision de sa réponse de l’intégralité des contenus proposés ; une proposition reste à vérifier avant confirmation.
+
+Ces volets fonctionnent avec Entrée/Espace au clavier, les thèmes communs et les écrans de 320 px. Les détails dépliés font partie du défilement normal de la conversation.
+
 ## Historique et interruptions
 
 Créez une conversation, retrouvez-la avec la recherche, renommez-la ou archivez-la. L’archive conserve ses messages et permet une restauration. Une conversation archivée doit être restaurée avant un nouveau message. La suppression est définitive pour la conversation et ses reçus ; elle propose séparément d’oublier les souvenirs qui en proviennent.

@@ -108,3 +108,7 @@ Keep the seven independent guides declared in `mkdocs.yml`: Technical, General, 
 ## Settings panel
 
 [ADR 007](decisions/007-reglages-generaux.md) allows an optional `Settings.tsx` in each application, loaded lazily through its manifest. Implement `SettingsPanelProps` (`onDirty`, `onBusy`), clear these states on unmount and use existing business APIs. Do not import the whole Page or move business logic into the platform. The shell supplies names, activation and the common calendar. Settings links open `/settings?application=<id>`; contextual settings can remain on their objects with an explicit panel link. Test drafts, errors, conflicts, sessions, activation and FR/EN/mobile navigation.
+
+## Snippet details
+
+A renderer keeps a compact business summary and uses `platform/assistant/components/SnippetDetails` for complete receipt content (`snippetValue`). Labels and value formatting stay in `apps/<id>/assistant/`; the platform knows no business module. Do not truncate data in reading helpers. Long texts use the accessible disclosure in `shared/ui/SnippetSummary`. Test long lists, the final item, text beyond 1,500 characters, zero, booleans, small decimals, pagination and FR/EN/mobile modes.
