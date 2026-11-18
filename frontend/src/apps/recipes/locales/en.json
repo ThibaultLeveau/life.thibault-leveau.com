@@ -204,5 +204,11 @@
   "no_shopping_items": "Add your first item or import a recipe.",
   "shopping_items_one": "{{count}} item",
   "shopping_items_other": "{{count}} items",
-  "shopping_item": "Item"
+  "shopping_item": "Item",
+  "assistant_field_shopping_items": "Items",
+  "assistant_field_article": "Item",
+  "assistant_field_purchase": "Basket",
+  "assistant_item_bought": "Bought",
+  "assistant_item_to_buy": "To buy",
+  "assistant_item_in_cart": "{{quantity}} in the basket"
 }
