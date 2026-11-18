@@ -2,6 +2,12 @@
 
 React, TypeScript et Vite conservent l'outillage du socle. `App.tsx` assemble la connexion commune, l’accueil `/`, la bibliothèque `/applications` et les Pages enregistrées, sans routeur supplémentaire ni fallback général. Sans espace indiqué, `/tasks` ouvre l’agenda global (`?view=agenda`). L'espace actif peut être référencé avec `?space=<UUID>` ; les accès sont toujours contrôlés côté serveur.
 
+## Mise en forme des messages de l’assistant
+
+`platform/assistant/components/MessageText.tsx` rend paragraphes, gras, code en ligne/blocs et tableaux à barres verticales avec des nœuds texte React. Les nombres de colonnes d’en-tête et de séparation doivent correspondre ; les barres extérieures sont facultatives, `\|` échappe une barre et les deux-points règlent l’alignement. Les cellules manquantes sont complétées ; une ligne avec des cellules supplémentaires reste littérale pour ne pas masquer son contenu. Une ligne sans barre termine le tableau. Les blocs délimités, même inachevés, conservent les exemples de tableaux comme code. Ce formateur limité n’est pas un moteur Markdown complet ; il n’injecte aucun HTML et ne charge aucune image ni lien du message.
+
+Les tableaux utilisent des en-têtes sémantiques et une région défilante focalisable, localisée, avec les tokens des thèmes existants. Le `content` API original reste inchangé dans PostgreSQL : streaming et historique partagent le rendu, sans nouveau réglage, dépendance, migration ni procédure de sauvegarde. `assistant.spec.ts` couvre rendu, entrées malformées, fragments SSE, sécurité, thèmes FR/EN, défilement clavier et largeur de 320 px.
+
 ## Navigation commune des applications
 
 Tâches, Sport, Suivi et Objectifs OKR composent la même `ApplicationSidebar` et la même `ApplicationTopbar` depuis `shared/ui/ApplicationNavigation.tsx`. Le fichier `shared/styles/navigation.css` possède leurs styles : largeur de sidebar de 252 px sur bureau, barre supérieure de 66 px (64 px sur mobile), mêmes liens et états visuels. Les applications fournissent leur nom, icône, fil d’Ariane et liens métier, sans surcharger cet habillage.

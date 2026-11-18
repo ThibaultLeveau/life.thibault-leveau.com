@@ -34,6 +34,20 @@ Numbers, dates and units follow the account language: for example **350 g** and 
 
 These controls support Enter/Space, shared themes and 320 px screens. Expanded details scroll with the conversation.
 
+## Tables in messages
+
+Messages display Markdown tables as columns with a header row, including in saved conversations. Bold text, inline code and column alignment are preserved. On small screens, swipe horizontally inside a wide table; with a keyboard, focus the table using Tab and scroll with the arrow keys.
+
+A table needs a header and a matching separator row, for example:
+
+```text
+| Task | Details |
+| --- | --- |
+| Write my profile | Career milestones and concrete examples. |
+```
+
+Use `\|` for a literal pipe inside a cell. Until a valid separator arrives during a response, the text remains visible as written. Code blocks keep their literal contents. This formatting changes only the display: it does not create tasks or modify the saved message. HTML, images and links in messages remain inert text.
+
 ## History and interruptions
 
 Create a conversation, find it with search, rename it or archive it. Archiving preserves messages and supports restoration. Restore an archived conversation before sending another message. Deleting permanently removes the conversation and its receipts; separately choose whether to forget its sourced memories.

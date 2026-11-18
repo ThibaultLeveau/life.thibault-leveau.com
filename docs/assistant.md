@@ -34,6 +34,20 @@ Nombres, dates et unités suivent la langue du compte : par exemple **350 g** et
 
 Ces volets fonctionnent avec Entrée/Espace au clavier, les thèmes communs et les écrans de 320 px. Les détails dépliés font partie du défilement normal de la conversation.
 
+## Tableaux dans les messages
+
+Les messages affichent les tableaux Markdown en colonnes avec une ligne d’en-têtes, y compris dans les anciennes conversations. Le gras, le code en ligne et l’alignement des colonnes sont conservés. Sur petit écran, faites défiler un tableau large horizontalement à l’intérieur de sa zone ; au clavier, donnez-lui le focus avec Tab puis utilisez les flèches.
+
+Un tableau nécessite un en-tête et une ligne de séparation correspondante, par exemple :
+
+```text
+| Tâche | Détail |
+| --- | --- |
+| Rédiger mon profil | Parcours et exemples concrets. |
+```
+
+Utilisez `\|` pour une barre verticale dans une cellule. Tant que la séparation n’est pas valide pendant une réponse, le texte reste visible tel quel. Les blocs de code conservent leur contenu littéral. Cette mise en forme concerne seulement l’affichage : elle ne crée aucune tâche et ne modifie pas le message enregistré. Le HTML, les images et les liens des messages restent du texte inerte.
+
 ## Historique et interruptions
 
 Créez une conversation, retrouvez-la avec la recherche, renommez-la ou archivez-la. L’archive conserve ses messages et permet une restauration. Une conversation archivée doit être restaurée avant un nouveau message. La suppression est définitive pour la conversation et ses reçus ; elle propose séparément d’oublier les souvenirs qui en proviennent.
