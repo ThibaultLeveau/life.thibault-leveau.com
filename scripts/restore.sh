@@ -19,7 +19,7 @@ docker compose --env-file .env.production exec -T db \
   pg_restore --file=- --clean --if-exists --no-owner --no-privileges <"$2" >>"$temporary"
 cat scripts/restore-suffix.sql >>"$temporary"
 ./scripts/backup.sh
-docker compose --env-file .env.production stop web
+docker compose --env-file .env.production stop web recipe-browser
 docker compose --env-file .env.production exec -T db \
   psql --username life --dbname life --single-transaction --set ON_ERROR_STOP=1 <"$temporary"
 echo 'Base restaurée. Life reste arrêté : sélectionner une image compatible avant de le redémarrer.'

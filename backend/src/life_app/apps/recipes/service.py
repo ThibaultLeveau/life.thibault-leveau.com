@@ -174,6 +174,9 @@ def output(db, item, servings=None):
             instructions=item.instructions,
             servings=servings or item.servings,
             base_servings=item.servings,
+            source_url=item.source_url,
+            source_title=item.source_title,
+            imported_at=item.imported_at,
         )
     return s.ListOutput(**common, kind=item.kind, completed_at=item.completed_at)
 
@@ -223,10 +226,11 @@ def touch(item):
     item.updated_at = utcnow()
 
 
-def create_recipe(db, user, payload):
+def create_recipe(db, user, payload, *, source=None):
     enforce_limit(db, user, m.Recipe)
     groups = grouped(db, user, payload.items)
     item = m.Recipe(
+        **(source or {}),
         owner_id=user.id,
         title=payload.title,
         servings=payload.servings,

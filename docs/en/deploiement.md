@@ -319,3 +319,13 @@ On a synthetic account verify file/image import, public-page reading, private UR
 ## Deploying task imports
 
 No migration or new storage. Use the normal backup and deployment procedure. Verify effective budgets: existing explicit `LIFE_ASSISTANT_TIMEOUT_SECONDS=180` settings still take precedence; raise them to 600 for longer requests unless a shorter deadline is intended. Default caps are 96 calls and 200 actions. Check OpenAPI `/tasks/import`, ten-task imports on a synthetic account, complete rollback of invalid batches and assistant preview/confirmation. Existing backups/restores include tasks, events and receipts without a new procedure.
+
+## Recipes import services (ADR 010)
+
+Before first deployment, add `LIFE_RECIPE_BROWSER_TOKEN` to `.env.production` (mode 600) and any additional VPS public IPs to `LIFE_RECIPE_DENIED_IPS`. The deployment script now builds three images with the same SHA: `local/life`, `local/life-recipe-browser`, `local/life-recipe-egress`. Their Compose variables are `LIFE_IMAGE`, `LIFE_BROWSER_IMAGE`, `LIFE_RECIPE_EGRESS_IMAGE`. It backs up PostgreSQL, applies additive migration 0017 and waits for all service health checks. Browser/proxy ports are never published; keep `recipe-control` and `recipe-outbound` internal.
+
+Run `make docker-build` then `bash scripts/test-recipe-browser.sh` on a host supporting unprivileged user namespaces before release. The test uses a synthetic website on an internal Docker network and checks the active Chromium sandbox, human interaction, cookies, ownership, page versions and network denials. Never add `--no-sandbox`, privileged mode, a Docker mount or a DevTools port. The seccomp profile comes from Playwright 1.64.1, with `chroot` allowed inside the user namespace without adding container capabilities.
+
+After release, verify `org.opencontainers.image.revision` labels on all three containers, health checks, public HTTPS routes and the Recipes workflow. Private probes are `recipe-browser:8090/health` and `recipe-egress:3128/health`. Restarting discards open pages, never saved recipes. Diagnose failures through proxy health and quotas without logging pages, cookies, screenshots or secrets. Update Chromium and Playwright together and repeat these tests.
+
+Rollback requires all three service images at the same SHA and schema compatibility. To return to a version before ADR 010, use that version’s checkout and instructions, stop the two added services and explicitly check schema compatibility; never discard provenance or receipts. Data rollback is never automatic.

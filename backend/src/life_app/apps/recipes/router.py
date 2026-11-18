@@ -1,10 +1,12 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Request, Response
 
 from life_app.apps.recipes import models as m
 from life_app.apps.recipes import schemas as s
 from life_app.apps.recipes import service as svc
+from life_app.apps.recipes import web_import as web
+from life_app.apps.recipes import web_schemas as w
 from life_app.core.database import Database
 from life_app.platform.auth.service import CurrentUser
 
@@ -172,3 +174,44 @@ def check_item(id: UUID, item_id: UUID, payload: s.CheckItem, user: CurrentUser,
             db, user, svc.owned(db, user, m.ShoppingList, id), item_id, payload, "checked"
         ),
     )
+
+
+# The browser control surface is deliberately unavailable as autonomous AI tools.
+@router.post("/web-import/sessions", response_model=w.BrowserFrame, status_code=201)
+def open_web_page(payload: w.BrowserOpen, request: Request, user: CurrentUser, db: Database):
+    identity = web.browser_identity(request, user)
+    data = payload.model_dump(mode="json") | {
+        "locale": user.locale,
+        "expires_at": identity["expires_at"],
+    }
+    return web.browser_operation(request, db, user, "POST", "/sessions", data)
+
+
+@router.get("/web-import/sessions/{id}/frame", response_model=w.BrowserFrame)
+def web_page_frame(id: UUID, request: Request, user: CurrentUser, db: Database):
+    return web.browser_operation(request, db, user, "POST", f"/sessions/{id}/frame", {})
+
+
+@router.post("/web-import/sessions/{id}/input", response_model=dict[str, bool])
+def web_page_input(
+    id: UUID, payload: w.BrowserInput, request: Request, user: CurrentUser, db: Database
+):
+    return web.browser_operation(
+        request, db, user, "POST", f"/sessions/{id}/input", payload.model_dump(exclude_none=True)
+    )
+
+
+@router.delete("/web-import/sessions/{id}", status_code=204)
+def close_web_page(id: UUID, request: Request, user: CurrentUser, db: Database):
+    web.browser_operation(request, db, user, "DELETE", f"/sessions/{id}")
+    return Response(status_code=204)
+
+
+@router.post("/web-import/prepare", response_model=w.ImportDraft)
+def prepare_web_import(payload: w.ImportPrepare, request: Request, user: CurrentUser, db: Database):
+    return web.prepare(request, db, user, payload)
+
+
+@router.post("/web-import/save", response_model=s.RecipeOutput, status_code=201)
+def save_web_import(payload: w.ImportSave, user: CurrentUser, db: Database):
+    return saved(db, web.save(db, user, payload))

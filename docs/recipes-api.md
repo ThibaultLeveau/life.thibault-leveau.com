@@ -83,3 +83,32 @@ Le dernier appel ajoute 450 g. Cocher utilise `PUT /lists/{id}/items/{item_id}/c
 Les messages métier suivent la langue du compte. Les événements conservent le propriétaire, l’objet, le type, l’instant UTC et l’instantané de la version concernée ; ils ne sont ni modifiables ni supprimables. Les noms fournis dans ces instantanés gardent la langue du moment de l’événement, tandis que la fiche courante suit la langue du compte.
 
 Le fournisseur de métriques expose `recipes`, `lists`, `imports`, `templates` via `/api/v1/integrations` : agrégation `count`, aucun filtre, bornes UTC issues de la période/fuseau. Il compte les événements de première confirmation, identifiés par une clé unique ; archives et réouvertures ne changent pas le passé. Le fournisseur de progression attribue les XP dans la même transaction, avec 60 quêtes et dix titres. Les détails, barèmes et limites sont dans le [guide](recipes.md#suivi-quetes-et-motivation) et les [contrats communs](api.md#progression-par-application).
+
+## Import web et brouillon IA
+
+Toutes les routes ci-dessous sont préfixées `/api/v1/recipes/web-import`, nécessitent une session connectée et l’activation de Recettes. Les mutations nécessitent `X-CSRF-Token` et le contrôle d’origine habituel. Les réponses ne sont pas mises en cache. Les commandes du navigateur sont réservées à l’utilisateur ; l’assistant dispose uniquement de `save_web_import`, soumis à confirmation.
+
+| Méthode / route | Contrat |
+| --- | --- |
+| `POST /sessions` | `{id: UUID, url: URL HTTP(S), width?: 320..1280}` ; crée/remplace le navigateur du compte ; 201 avec `id,url,title,document,width,height,image,expires_at` |
+| `GET /sessions/{id}/frame` | Renouvelle le bail et retourne l’image JPEG encodée en base64, sans préfixe data URI |
+| `POST /sessions/{id}/input` | `{document,action,...}` ; `click/move/down/up` avec `x,y`, `scroll` avec `dx,dy` (±1500), `key` avec une touche autorisée, `text` (1–2000 caractères), `back/reload` sans paramètre supplémentaire |
+| `DELETE /sessions/{id}` | Ferme la session ; 204, ou 404 si déjà expirée |
+| `POST /prepare` | Soit `{session_id,document}`, soit `{text,source_url?}` ; texte de 20 à 60 000 caractères ; retourne un brouillon sans écrire en base |
+| `POST /save` | Enregistrement atomique et rejouable du contrat ci-dessous ; 201 avec la recette |
+
+Touches autorisées : Enter, Tab, Shift+Tab, Backspace, Delete, Escape, flèches, Home, End, PageUp, PageDown, Space. Aucun JavaScript ou accès DevTools arbitraire. `document` est la version retournée par le cadre ; un changement de navigation invalide une commande ou capture obsolète (409). Les identifiants ne donnent jamais accès au navigateur d’un autre compte ou d’une autre connexion (404).
+
+Exemple indépendant du cadre, avec un cookie jar et le CSRF obtenus par l’API de connexion :
+
+```bash
+curl -b cookies.txt -H "X-CSRF-Token: $CSRF" -H 'Content-Type: application/json' \
+  -d '{"text":"Lemon pasta for 2: 200 g pasta, 1 lemon. Boil pasta and add lemon.","source_url":"https://example.com/lemon-pasta"}' \
+  https://life.thibault-leveau.com/api/v1/recipes/web-import/prepare
+```
+
+Le brouillon contient `import_id`, `locale`, `title`, `servings`, `instructions`, `items`, `warnings`, `source_url`, `source_title`. Chaque ligne contient `name`, `quantity`, `unit`, `ingredient_id`, `catalogue_name`, `source_text`, `note`. Les données incertaines restent `null`. Après relecture, envoyer `/save` avec ces champs racine sauf `warnings`, et des lignes limitées à `{ingredient_id?,name,quantity,unit}`. Quantité, unité et portions doivent alors être renseignées selon les contrats Recettes. Conserver les notes utiles dans la préparation. Un ingrédient sans identifiant est réutilisé par nom exact ou créé dans le catalogue privé. Un identifiant étranger ou une erreur annule toute la transaction.
+
+Conserver `import_id` lors d’une nouvelle tentative du même enregistrement : même contenu → même recette, contenu différent → 409. Un nouvel import utilise un nouvel UUID. La langue doit toujours correspondre au compte (409 sinon). La recette expose `source_url`, `source_title`, `imported_at`, également présents dans son événement de création.
+
+Erreurs : 401 session invalide, 403 CSRF/origine/application désactivée, 404 navigateur inaccessible, 409 langue/page/rejeu incompatible ou fournisseur non configuré, 422 contrat invalide ou aucune recette exploitable, 429 capacité/quota, 502 page ou fournisseur indisponible, 503 navigateur non configuré. La génération autorise une opération par compte, deux globalement et cinq tentatives par minute par compte ; ces quotas temporaires se réinitialisent au redémarrage. Les appels réseau libèrent les verrous SQL ; les droits et la langue sont revérifiés avant de retourner un résultat.

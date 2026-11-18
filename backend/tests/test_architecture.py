@@ -127,7 +127,22 @@ def test_assistant_capabilities_cover_application_routes_with_owned_handlers():
         assert app.actions is not None
         actions = app.actions.actions
         assert actions and len({action.name for action in actions}) == len(actions)
-        assert {(action.method, action.path) for action in actions} == {
+        # ADR 010: live human browser control and model-backed preparation are
+        # technical, direct-user operations. They must never be autonomous tools.
+        human_browser_routes = (
+            {
+                ("POST", "/recipes/web-import/sessions"),
+                ("GET", "/recipes/web-import/sessions/{id}/frame"),
+                ("POST", "/recipes/web-import/sessions/{id}/input"),
+                ("DELETE", "/recipes/web-import/sessions/{id}"),
+                ("POST", "/recipes/web-import/prepare"),
+            }
+            if app.id == "recipes"
+            else set()
+        )
+        action_routes = {(action.method, action.path) for action in actions}
+        assert not action_routes & human_browser_routes
+        assert action_routes | human_browser_routes == {
             (method, route.path) for route in app.router.routes for method in route.methods
         }
         for action in actions:

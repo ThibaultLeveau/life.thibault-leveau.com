@@ -41,6 +41,7 @@ services:
       LIFE_DATABASE_URL: ${LIFE_DATABASE_URL:?Set the PostgreSQL connection URL in .env.production}
       LIFE_SESSION_HOURS: ${LIFE_SESSION_HOURS:-168}
       LIFE_ASSISTANT_ENCRYPTION_KEYS: ${LIFE_ASSISTANT_ENCRYPTION_KEYS:-}
+      LIFE_RECIPE_BROWSER_TOKEN: ${LIFE_RECIPE_BROWSER_TOKEN:?Set the private browser token}
       LIFE_ASSISTANT_MAX_MODEL_CALLS: ${LIFE_ASSISTANT_MAX_MODEL_CALLS:-96}
       LIFE_ASSISTANT_MAX_ACTIONS: ${LIFE_ASSISTANT_MAX_ACTIONS:-200}
       LIFE_ASSISTANT_TIMEOUT_SECONDS: ${LIFE_ASSISTANT_TIMEOUT_SECONDS:-600}
@@ -54,13 +55,70 @@ services:
         aliases:
           - life-web
       egress:
+      recipe-control:
     logging:
       driver: json-file
       options:
         max-size: 10m
         max-file: '3'
 
+  recipe-browser:
+    image: ${LIFE_BROWSER_IMAGE:-local/life-recipe-browser:development}
+    restart: unless-stopped
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=512m,mode=1777
+    shm_size: 256m
+    mem_limit: 2g
+    cpus: 2
+    pids_limit: 256
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+      - seccomp=./infrastructure/recipe-browser/seccomp.json
+    environment:
+      LIFE_RECIPE_BROWSER_TOKEN: ${LIFE_RECIPE_BROWSER_TOKEN:?Set the private browser token}
+    networks: [recipe-control, recipe-outbound]
+    depends_on:
+      recipe-egress:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:8090/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: json-file
+      options: {max-size: 5m, max-file: '2'}
+  recipe-egress:
+    image: ${LIFE_RECIPE_EGRESS_IMAGE:-local/life-recipe-egress:development}
+    restart: unless-stopped
+    init: true
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 128m
+    cpus: 0.5
+    pids_limit: 32
+    environment:
+      LIFE_RECIPE_BLOCKED_HOSTS: life.thibault-leveau.com
+      LIFE_RECIPE_DENIED_IPS: ${LIFE_RECIPE_DENIED_IPS:-}
+    networks: [recipe-outbound, egress]
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:3128/health', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: json-file
+      options: {max-size: 5m, max-file: '2'}
+
 networks:
+  recipe-control:
+    internal: true
+  recipe-outbound:
+    internal: true
   database:
     internal: true
   proxy:

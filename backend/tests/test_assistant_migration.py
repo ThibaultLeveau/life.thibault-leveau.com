@@ -4,6 +4,7 @@ from uuid import uuid4
 
 import pytest
 from alembic import command
+from alembic.script import ScriptDirectory
 from sqlalchemy import inspect, select, text
 from sqlalchemy.exc import IntegrityError
 
@@ -116,7 +117,9 @@ def test_assistant_migration_preserves_business_data_and_allows_empty_round_trip
     assert completed.status_code == 200, completed.text
     assert client.put("/api/v1/preferences", json={"locale": "en", "theme": "dark"}).is_success
     business_tables = [
-        table for table in Base.metadata.sorted_tables if not table.name.startswith("assistant_")
+        table
+        for table in Base.metadata.sorted_tables
+        if not table.name.startswith("assistant_") and table.name != "recipes_web_import_receipts"
     ]
     before = snapshot(engine, business_tables)
     try:
@@ -144,7 +147,7 @@ def test_each_assistant_table_prevents_lossy_downgrade(app, engine, table):
     with engine.connect() as connection:
         assert (
             connection.scalar(text("SELECT version_num FROM alembic_version"))
-            == "0016_assistant_sources"
+            == ScriptDirectory.from_config(migration_config()).get_current_head()
         )
     assert snapshot(engine, ASSISTANT_TABLES) == before
     migrate(engine, "upgrade", "head")

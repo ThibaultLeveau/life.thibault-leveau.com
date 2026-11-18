@@ -72,6 +72,9 @@ class RecipeUpdate(RecipeInput, Version):
 
 
 class RecipeOutput(Contract):
+    source_url: str | None = None
+    source_title: str | None = None
+    imported_at: datetime | None = None
     id: UUID
     title: str
     servings: int

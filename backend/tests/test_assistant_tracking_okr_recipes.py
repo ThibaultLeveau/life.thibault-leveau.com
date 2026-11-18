@@ -86,12 +86,15 @@ def assert_all_called(invoke, domain):
     assert invoke.called[domain] == {action.name for action in definition(domain).actions.actions}
 
 
-@pytest.mark.parametrize("domain,count", [("tracking", 16), ("okr", 11), ("recipes", 21)])
+@pytest.mark.parametrize("domain,count", [("tracking", 16), ("okr", 11), ("recipes", 22)])
 def test_every_http_operation_has_one_owned_typed_capability(domain, count):
     app = definition(domain)
     actions = app.actions.actions
     routes = {
-        (method, route.path): route for route in app.router.routes for method in route.methods
+        (method, route.path): route
+        for route in app.router.routes
+        for method in route.methods
+        if "/web-import/" not in route.path or route.path.endswith("/save")
     }
     assert len(actions) == count == len(routes)
     assert len({action.name for action in actions}) == count
@@ -111,6 +114,7 @@ def test_every_http_operation_has_one_owned_typed_capability(domain, count):
         assert capability(domain, "order_trackers").confirmation
     if domain == "recipes":
         assert capability(domain, "import_recipe").confirmation
+        assert capability(domain, "save_web_import").confirmation
 
 
 def test_tracking_tools_match_http_and_preserve_snapshots(client, invoke):
@@ -351,6 +355,31 @@ def test_recipe_tools_match_http_scale_and_preserve_checks(client, invoke):
         "completed",
         "restored",
     }
+    imported = invoke(
+        "recipes",
+        "save_web_import",
+        {
+            "payload": {
+                "import_id": str(uuid4()),
+                "locale": "fr",
+                "title": "Imported rice",
+                "servings": 2,
+                "instructions": "Boil rice.",
+                "items": [
+                    {
+                        "name": ingredient["name"],
+                        "ingredient_id": ingredient["id"],
+                        "quantity": "200",
+                        "unit": "g",
+                    }
+                ],
+                "source_url": "https://example.com/rice",
+                "source_title": "Rice source",
+            }
+        },
+    )
+    assert imported == get(client, f"/recipes/recipes/{imported['id']}")
+    assert imported["source_url"] == "https://example.com/rice"
     assert_all_called(invoke, "recipes")
 
 

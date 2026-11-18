@@ -231,7 +231,7 @@ for okr_table in okr_objectives okr_events okr_settings; do
   [[ "$source_okr" != '[]' && "$source_okr" == "$restored_okr" ]]
 done
 # All recipe quantities, purchase states, templates, ingredients and history survive intact.
-for recipes_table in recipes_ingredients recipes_recipes recipes_recipe_items recipes_lists recipes_list_items recipes_events; do
+for recipes_table in recipes_ingredients recipes_recipes recipes_recipe_items recipes_lists recipes_list_items recipes_events recipes_web_import_receipts; do
   recipes_query="SELECT coalesce(jsonb_agg(to_jsonb(t) ORDER BY to_jsonb(t)::text), '[]'::jsonb) FROM $recipes_table t"
   source_recipes=$(docker exec "$db" psql -U life -d life -Atc "$recipes_query")
   restored_recipes=$(docker exec "$db" psql -U life -d life_restored -Atc "$recipes_query")

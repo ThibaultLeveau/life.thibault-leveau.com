@@ -51,6 +51,9 @@ class Recipe(Base):
     title: Mapped[str] = mapped_column(String(160))
     servings: Mapped[int]
     instructions: Mapped[str] = mapped_column(String(20000), default="")
+    source_url: Mapped[str | None] = mapped_column(String(2048))
+    source_title: Mapped[str | None] = mapped_column(String(300))
+    imported_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     version: Mapped[int] = mapped_column(default=1)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
@@ -144,3 +147,17 @@ class Event(Base):
     reward_key: Mapped[str | None] = mapped_column(String(100))
     occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     snapshot: Mapped[dict] = mapped_column(JSONB)
+
+
+class WebImportReceipt(Base):
+    __tablename__ = "recipes_web_import_receipts"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["recipe_id", "owner_id"], ["recipes_recipes.id", "recipes_recipes.owner_id"]
+        ),
+    )
+    owner_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    import_id: Mapped[UUID] = mapped_column(primary_key=True)
+    recipe_id: Mapped[UUID]
+    fingerprint: Mapped[str] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

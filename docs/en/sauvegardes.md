@@ -208,3 +208,9 @@ Additive migration `0016_assistant_sources` adds `assistant_sources`, `assistant
 Downgrade refuses any source (including removed receipts), dictation configuration or externally marked conversation to preserve data and confirmations. Old images do not recognize the revision. Do not drop tables to roll back; restore a compatible backup and image using the existing procedure.
 
 After restore, `restore-suffix.sql` revokes sessions, interrupts runs, invalidates previews, releases transcription leases and removes unfinished import reservations. Ready/bound sources, digests, metadata, extracted text, external marker and credentials remain intact. Verify integrity and authenticated downloads on a synthetic account. `life rotate-assistant-key <account> --dry-run`, then without the option, validates/re-encrypts both credentials atomically; one unreadable key aborts everything. Retain old keys needed for earlier dumps.
+
+## Recipe web imports
+
+Migration 0017 adds `source_url`, `source_title`, `imported_at` to recipes and `recipes_web_import_receipts` (owner/import composite key, recipe/owner composite foreign key, content fingerprint and timestamp). PostgreSQL backups retain attribution, receipts and creation events; disabling/re-enabling Recipes preserves them. Replaying a restored import finds the existing recipe. Downgrade refuses to discard receipts.
+
+Browser pages, frames, cookies and profiles are transient and excluded from backups; stop `recipe-browser` before restoring, then restart it to invalidate in-memory leases too. Protect `.env.production` and its service token separately. Browsers have no persistent volume, SQL access or AI credentials.

@@ -16,5 +16,17 @@
   "metric_imports": "Recettes utilisées pour les courses",
   "metric_imports_description": "Premier import de chaque couple liste/recette. Les imports dans un modèle sont exclus.",
   "metric_templates": "Modèles de courses préparés",
-  "metric_templates_description": "Première fois où chaque modèle contient un ingrédient, archives comprises."
+  "metric_templates_description": "Première fois où chaque modèle contient un ingrédient, archives comprises.",
+  "web_unavailable": "Le navigateur d’import est indisponible. Vous pouvez coller le texte de la recette.",
+  "web_invalid_url": "Saisissez une adresse HTTP ou HTTPS publique, sans identifiants.",
+  "web_session_expired": "La session de navigation est terminée. Ouvrez de nouveau la page.",
+  "web_page_changed": "La page a changé. Vérifiez l’aperçu puis réessayez.",
+  "web_busy": "Un import est déjà en cours ou la limite temporaire est atteinte. Réessayez dans un instant.",
+  "web_invalid_command": "Cette interaction avec la page n’est pas valide.",
+  "web_page_unavailable": "La page n’a pas pu être chargée. Réessayez ou collez le texte de la recette.",
+  "web_language_changed": "La langue du compte a changé. Préparez de nouveau l’import dans la langue actuelle.",
+  "web_no_recipe": "Aucune recette unique et exploitable n’a été trouvée. Vérifiez la page ou collez la recette souhaitée.",
+  "web_truncated": "La page est longue : une partie de son texte n’a pas été transmise. Vérifiez que la recette est complète.",
+  "web_import_conflict": "Cet import a déjà été enregistré avec un contenu différent. Ouvrez la recette enregistrée.",
+  "web_cancelled": "Import annulé."
 }

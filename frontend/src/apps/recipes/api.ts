@@ -1,5 +1,8 @@
 import { api } from "../../platform/api";
 import type {
+  BrowserCommand,
+  BrowserFrame,
+  RecipeImportDraft,
   Ingredient,
   ItemInput,
   Kind,
@@ -122,4 +125,63 @@ export const recipesApi = {
       undefined,
       signal,
     ),
+};
+
+const webRoot = `${root}/web-import`;
+export const webImportApi = {
+  open: (id: string, url: string, width: number, signal?: AbortSignal) =>
+    api<BrowserFrame>(
+      `${webRoot}/sessions`,
+      "POST",
+      { id, url, width },
+      signal,
+      false,
+    ),
+  frame: (id: string, signal?: AbortSignal) =>
+    api<BrowserFrame>(
+      `${webRoot}/sessions/${id}/frame`,
+      "GET",
+      undefined,
+      signal,
+    ),
+  input: (id: string, command: BrowserCommand, signal?: AbortSignal) =>
+    api<{ ok: boolean }>(
+      `${webRoot}/sessions/${id}/input`,
+      "POST",
+      command,
+      signal,
+      false,
+    ),
+  close: (id: string) =>
+    api<void>(
+      `${webRoot}/sessions/${id}`,
+      "DELETE",
+      undefined,
+      undefined,
+      false,
+    ),
+  prepare: (
+    source:
+      | { session_id: string; document: number }
+      | { text: string; source_url: string | null },
+    signal?: AbortSignal,
+  ) =>
+    api<RecipeImportDraft>(`${webRoot}/prepare`, "POST", source, signal, false),
+  save: (draft: RecipeImportDraft, signal?: AbortSignal) => {
+    const { warnings: _warnings, ...payload } = draft;
+    return api<Recipe>(
+      `${webRoot}/save`,
+      "POST",
+      {
+        ...payload,
+        items: draft.items.map(({ name, ingredient_id, quantity, unit }) => ({
+          name,
+          ingredient_id,
+          quantity,
+          unit,
+        })),
+      },
+      signal,
+    );
+  },
 };

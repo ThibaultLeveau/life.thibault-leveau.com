@@ -6,6 +6,7 @@ image=${LIFE_TEST_IMAGE:-local/life:$(git rev-parse HEAD)}
 project="life-network-check-$$-$RANDOM"
 database="${project}_database"
 egress="${project}_egress"
+control="${project}_recipe-control"
 proxy="$project-proxy"
 web="$project-web"
 endpoint="$project-endpoint"
@@ -16,6 +17,7 @@ compose() {
     LIFE_POSTGRES_ADMIN_PASSWORD=synthetic-network-admin-password \
     LIFE_POSTGRES_PASSWORD=synthetic-network-application-password \
     LIFE_DATABASE_URL=postgresql+psycopg://life:synthetic-network-application-password@db:5432/life \
+    LIFE_RECIPE_BROWSER_TOKEN=synthetic-private-browser-test-token-only \
     LIFE_SESSION_HOURS=168 LIFE_ASSISTANT_ENCRYPTION_KEYS= LIFE_ASSISTANT_TIMEOUT_SECONDS=180 \
     docker compose --env-file /dev/null -p "$project" \
       -f compose.yaml -f "$temporary/override.yaml" "$@"
@@ -45,8 +47,14 @@ import sys
 config = json.load(open(sys.argv[1]))
 services, networks = config['services'], config['networks']
 assert set(services['db']['networks']) == {'database'}
-assert set(services['web']['networks']) == {'database', 'proxy', 'egress'}
-assert all(not services[name].get('ports') for name in ('db', 'web'))
+assert set(services['web']['networks']) == {'database', 'proxy', 'egress', 'recipe-control'}
+assert all(not services[name].get('ports') for name in ('db', 'web', 'recipe-browser', 'recipe-egress'))
+assert set(services['recipe-browser']['networks']) == {'recipe-control', 'recipe-outbound'}
+assert set(services['recipe-egress']['networks']) == {'recipe-outbound', 'egress'}
+assert all(networks[name].get('internal') for name in ('recipe-control', 'recipe-outbound'))
+assert all(services[name]['read_only'] for name in ('recipe-browser', 'recipe-egress'))
+assert services['recipe-browser']['cap_drop'] == ['ALL']
+assert not services['recipe-browser'].get('volumes')
 assert networks['database'].get('internal') is True
 assert not networks['database'].get('external', False)
 assert networks['proxy'].get('external') is True
@@ -76,7 +84,7 @@ class Handler(BaseHTTPRequestHandler):
 HTTPServer(("0.0.0.0", 8080), Handler).serve_forever()
 ' >/dev/null
 docker inspect "$web" >"$temporary/web.json"
-docker network inspect "$database" "$proxy" "$egress" >"$temporary/networks.json"
+docker network inspect "$database" "$proxy" "$egress" "$control" >"$temporary/networks.json"
 gateway=$(python3 - "$temporary" "$database" "$proxy" "$egress" <<'PY'
 import json
 import sys
@@ -86,7 +94,7 @@ directory = Path(sys.argv[1])
 web = json.loads((directory / 'web.json').read_text())[0]
 networks = {item['Name']: item for item in json.loads((directory / 'networks.json').read_text())}
 database, proxy, egress = sys.argv[2:]
-assert set(web['NetworkSettings']['Networks']) == {database, proxy, egress}
+assert set(web['NetworkSettings']['Networks']) == {database, proxy, egress, database.removesuffix("_database") + "_recipe-control"}
 assert not web['HostConfig']['PortBindings']
 assert networks[database]['Internal'] and networks[proxy]['Internal']
 assert networks[egress]['Driver'] == 'bridge' and not networks[egress]['Internal']
