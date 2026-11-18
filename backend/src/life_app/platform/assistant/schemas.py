@@ -126,6 +126,7 @@ class CheckOutput(BaseModel):
 class CapabilityOutput(BaseModel):
     application_id: str
     name: str
+    label: str
     description: str
     input_schema: dict
     mutating: bool

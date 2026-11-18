@@ -11,7 +11,7 @@ Toutes les routes utilisent `/api/v1/assistant`. La session commune identifie le
 | `GET /settings` | `provider`, `model`, `configured`, `token_hint`, `memory_enabled` ; aucun token lisible |
 | `PUT /settings` | Mise à jour partielle : `provider` (`openai/anthropic/gemini`), `model`, `api_token`, `memory_enabled` |
 | `POST /settings/test` | Appel réseau au fournisseur configuré ; retourne `{ "ok": true }` en cas de succès |
-| `GET /capabilities` | Capacités actives, contrats JSON, route HTTP correspondante, écriture et confirmation requise |
+| `GET /capabilities` | Capacités actives, libellé `label` dans la langue du compte, contrats JSON, route HTTP correspondante, écriture et confirmation requise |
 | `GET /conversations` | Recherche `q` (160 caractères), `archived=false`, `offset=0`, `limit=30` (1–100) ; `{ items, total }` |
 | `POST /conversations` | `{ "title": "" }` facultatif ; titre de 160 caractères maximum ; retourne la conversation (201) |
 | `GET /conversations/{id}` | Conversation et messages ; `offset=0`, `limit=100` (1–200), `has_more` |

@@ -11,7 +11,7 @@ All routes use `/api/v1/assistant`. The shared session identifies the owner; mut
 | `GET /settings` | `provider`, `model`, `configured`, `token_hint`, `memory_enabled`; no readable token |
 | `PUT /settings` | Partial update: `provider` (`openai/anthropic/gemini`), `model`, `api_token`, `memory_enabled` |
 | `POST /settings/test` | Calls the configured provider; returns `{ "ok": true }` on success |
-| `GET /capabilities` | Enabled capabilities, JSON contracts, corresponding HTTP routes, mutation and confirmation flags |
+| `GET /capabilities` | Enabled capabilities, `label` in the account language, JSON contracts, corresponding HTTP routes, mutation and confirmation flags |
 | `GET /conversations` | Search `q` (160 characters), `archived=false`, `offset=0`, `limit=30` (1–100); `{ items, total }` |
 | `POST /conversations` | Optional `{ "title": "" }`, maximum 160 characters; returns a conversation (201) |
 | `GET /conversations/{id}` | Conversation and messages; `offset=0`, `limit=100` (1–200), `has_more` |

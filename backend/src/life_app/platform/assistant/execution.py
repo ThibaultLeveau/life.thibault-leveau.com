@@ -250,6 +250,7 @@ def capabilities(db, user, definitions):
         s.CapabilityOutput(
             application_id=definition.id,
             name=action.name,
+            label=action.localized_label(),
             description=action.description,
             input_schema=action.input_model.model_json_schema(),
             mutating=action.mutating,
@@ -265,6 +266,7 @@ def capabilities(db, user, definitions):
         s.CapabilityOutput(
             application_id="lifeos",
             name=action.name,
+            label=action.localized_label(),
             description=action.description,
             input_schema=action.input_model.model_json_schema(),
             mutating=action.mutating,

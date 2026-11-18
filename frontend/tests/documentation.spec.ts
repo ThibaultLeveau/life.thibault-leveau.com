@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 const guides = [
-  { id: "general", path: "applications", pages: ["applications", "settings", "progression"], query: ["applications", "applications"] },
+  { id: "general", path: "applications", pages: ["applications", "assistant", "settings", "progression"], query: ["applications", "applications"] },
   { id: "tasks", path: "taches", pages: ["taches"], query: ["récurrence", "recurrence"] },
   { id: "sport", path: "sport", pages: ["sport"], query: ["HYROX", "HYROX"] },
   { id: "tracking", path: "tracking", pages: ["tracking"], query: ["calendrier", "calendar"] },
@@ -94,14 +94,21 @@ for (const [index, locale] of ["fr", "en"].entries()) {
 }
 
 for (const locale of ["fr", "en"]) {
-  test(`${locale}: settings and its decision belong to the appropriate guides`, async ({ page }) => {
-    for (const [path, guide] of [["settings", "general"], ["decisions/007-reglages-generaux", "technical"]]) {
+  test(`${locale}: settings, assistant and their decisions belong to the appropriate guides`, async ({ page }) => {
+    for (const [path, guide] of [
+      ["settings", "general"],
+      ["assistant", "general"],
+      ["assistant-api", "technical"],
+      ["decisions/007-reglages-generaux", "technical"],
+      ["decisions/008-assistant-ia", "technical"],
+    ]) {
       await page.goto(`/documentation/${locale === "en" ? "en/" : ""}${path}/`);
       await expect(page.locator("html")).toHaveAttribute("lang", locale);
       await expect(page.locator(".guide-toolbar")).toHaveAttribute("data-guide", guide);
       await page.locator(".guide-toolbar a[hreflang]").click();
       await expect(page).toHaveURL(new RegExp(`/documentation/${locale === "fr" ? "en/" : ""}${path}/$`));
       await expect(page.locator("html")).toHaveAttribute("lang", locale === "fr" ? "en" : "fr");
+      await expect(page.locator(".guide-toolbar")).toHaveAttribute("data-guide", guide);
     }
   });
 }

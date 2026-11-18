@@ -331,7 +331,7 @@ class Runtime:
                         self.steps += 1
                         yield {
                             "type": "status",
-                            "text": execution.action_label(loaded[call["name"]]),
+                            "text": loaded[call["name"]].label,
                         }
                         result = execution.execute(
                             self.app,

@@ -125,7 +125,9 @@ def test_settings_encrypt_owner_binding_rotation_and_no_secret_reads(app, client
     assert changed.json()["model"] == ""
 
 
-def test_stream_delegates_to_scoped_agent_and_persists_actual_result(app, client):
+@pytest.mark.parametrize("locale", ["fr", "en"])
+def test_stream_delegates_to_scoped_agent_and_persists_actual_result(app, client, locale):
+    assert client.put("/api/v1/preferences", json={"locale": locale}).status_code == 200
     ScriptedSession.created = []
     app.state.assistant_provider_factory = ScriptedSession
     id = conversation(client)
@@ -134,6 +136,12 @@ def test_stream_delegates_to_scoped_agent_and_persists_actual_result(app, client
     output = events(response)
     assert output[-1]["type"] == "done", output
     assert not [item for item in output if item["type"] == "error"], output
+    capability = next(
+        item
+        for item in client.get("/api/v1/assistant/capabilities").json()
+        if item["application_id"] == "tasks" and item["name"] == "create_workspace"
+    )
+    assert capability["label"] in [item["text"] for item in output if item["type"] == "status"]
     detail = client.get(f"/api/v1/assistant/conversations/{id}").json()
     assert len(detail["messages"]) == 2
     assistant = next(item for item in detail["messages"] if item["role"] == "assistant")
