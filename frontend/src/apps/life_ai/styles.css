@@ -69,9 +69,6 @@
   color: var(--ui-muted);
   line-height: 1.7;
 }
-.assistant-app-links {
-  margin-top: 24px;
-}
 .assistant-welcome {
   padding: clamp(40px, 9vh, 100px) 0 38px;
   animation: assistant-arrive 0.5s ease both;

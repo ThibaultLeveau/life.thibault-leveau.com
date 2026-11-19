@@ -2,6 +2,8 @@
 
 Après connexion, l’**Accueil** est un Dashboard : vos applications activées défilent sur une seule ligne et une carte permet de commencer une conversation avec [Life AI](assistant.md). La **Bibliothèque** gère les activations. Les boutons du carrousel, le glissement tactile et les touches fléchées/Début/Fin permettent de parcourir les cartes.
 
+Le menu du Dashboard donne accès à toutes vos applications activées, sur ordinateur comme sur mobile. Le menu Life AI reste consacré aux conversations, à la mémoire et à ses réglages.
+
 ## Se connecter
 
 1. Ouvrez LifeOS et saisissez l’identifiant et le mot de passe fournis par votre administrateur. Il n’existe pas d’inscription publique.

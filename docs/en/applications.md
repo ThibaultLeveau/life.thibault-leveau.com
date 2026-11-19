@@ -2,6 +2,8 @@
 
 After signing in, **Home** is Dashboard: enabled applications scroll in one row and a card starts a conversation with [Life AI](assistant.md). The **Library** manages activation. Carousel buttons, touch scrolling and arrows/Home/End let you browse cards.
 
+The Dashboard menu gives access to all your enabled applications, on desktop and mobile. The Life AI menu is dedicated to conversations, memory and its settings.
+
 ## Sign in
 
 1. Open LifeOS and enter the username and password supplied by your administrator. Public sign-up is not available.

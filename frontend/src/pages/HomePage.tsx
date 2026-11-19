@@ -8,7 +8,7 @@ import {
   ApplicationSidebar,
   ApplicationTopbar,
 } from "../shared/ui/ApplicationNavigation";
-import { Icon } from "../shared/ui/Icon";
+import { Icon, type IconName } from "../shared/ui/Icon";
 import { formatLocale, tr } from "../shared/i18n";
 import "./home.css";
 
@@ -23,6 +23,7 @@ export function HomePage({
   const [draft, setDraft] = useState("");
   const field = useRef<HTMLTextAreaElement>(null);
   const submitting = useRef(false);
+  const enabled = items?.filter((item) => item.enabled) ?? [];
   const ai = items?.find((item) => item.id === "life_ai");
   const permit = useCallback(
     () =>
@@ -93,12 +94,12 @@ export function HomePage({
           <Icon name="grid" />
           {tr("home")}
         </a>
-        {ai?.enabled && (
-          <a className="application-nav-item" href={ai.path}>
-            <Icon name="sparkles" />
-            {ai.name}
+        {enabled.map((app) => (
+          <a key={app.id} className="application-nav-item" href={app.path}>
+            <Icon name={app.icon as IconName} />
+            {app.name}
           </a>
-        )}
+        ))}
         <a className="application-nav-item" href="/settings">
           <Icon name="settings" />
           {tr("settings")}
@@ -124,9 +125,7 @@ export function HomePage({
             <h1>{tr("dashboard_greeting", { name: session.username })}</h1>
             <p>{tr("dashboard_intro")}</p>
           </header>
-          <ApplicationCarousel
-            items={items?.filter((item) => item.enabled) ?? []}
-          />
+          <ApplicationCarousel items={enabled} />
           <section
             className="dashboard-chat"
             aria-labelledby="dashboard-chat-title"

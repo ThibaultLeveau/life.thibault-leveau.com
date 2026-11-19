@@ -6,6 +6,8 @@
 
 Dashboard/Life AI separation follows [ADR 011](decisions/011-dashboard-life-ai.md). Validation evidence and the published commit are recorded in [issue #104](https://github.com/ThibaultLeveau/life.thibault-leveau.com/issues/104).
 
+The Life AI menu contains conversations, memory and settings. To open another application, use the Dashboard menu; the library remains available in the shared menu footer.
+
 ## Configure a provider
 
 Open **Settings → Life AI → AI provider (or General)**. Choose OpenAI, Anthropic or Google Gemini, enter the identifier of a model available to your provider account and its API token, then save. **Test connection** makes a real provider request and may consume quota. The model must support the assistant's tools and streaming responses.
