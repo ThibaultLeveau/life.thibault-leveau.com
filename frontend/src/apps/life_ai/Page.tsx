@@ -9,7 +9,7 @@ import {
 } from "../../shared/ui/ApplicationNavigation";
 import { ApplicationFooter } from "../../platform/auth/ApplicationFooter";
 import { Dialog, ErrorMessage } from "../../shared/ui/Dialog";
-import { Icon, type IconName } from "../../shared/ui/Icon";
+import { Icon } from "../../shared/ui/Icon";
 import { useApiAction, useApiResource } from "../../platform/useApiResource";
 import { assistantApi } from "./api";
 import { useConversation } from "./useConversation";
@@ -311,17 +311,6 @@ export function Page({
           revision={revision}
           onOpen={navigate}
         />
-        {!!enabled.length && (
-          <div className="assistant-app-links">
-            <p className="assistant-sidebar-caption">{tr("assistant_apps")}</p>
-            {enabled.map((app) => (
-              <a key={app.id} className="application-nav-item" href={app.path}>
-                <Icon name={app.icon as IconName} size={16} />
-                <span>{app.name}</span>
-              </a>
-            ))}
-          </div>
-        )}
       </ApplicationSidebar>
       <main id="assistant-main" tabIndex={-1} className="assistant-main">
         <ApplicationTopbar

@@ -51,6 +51,9 @@ for (const locale of ["fr", "en"] as const) {
             "inert",
             "",
           );
+          await expect(
+            page.locator('.application-sidebar a[href="/tasks"]'),
+          ).toBeVisible();
           await page.keyboard.press("Escape");
           await expect(menu).toBeFocused();
         }
@@ -61,6 +64,46 @@ for (const locale of ["fr", "en"] as const) {
         expect(
           data.requests.some((r) => r.path.startsWith("/assistant/")),
         ).toBe(false);
+        const navigation = page.locator(".application-sidebar-links");
+        const paths = [
+          "/tasks", "/sport", "/tracking", "/okr", "/recipes", "/ai",
+        ];
+        const names = locale === "fr"
+          ? [
+              "Tâches", "Sport", "Suivi", "Objectifs OKR",
+              "Recettes & Liste de courses", "Life AI",
+            ]
+          : [
+              "Tasks", "Sport", "Tracking", "OKR Goals",
+              "Recipes & Shopping lists", "Life AI",
+            ];
+        for (const [index, path] of paths.entries()) {
+          await expect(navigation.locator(`a[href="${path}"]`)).toHaveText(
+            names[index],
+          );
+        }
+        await page.goto("/ai");
+        if (width === 320) await page.locator("#assistant-main-menu").click();
+        for (const path of paths) {
+          await expect(navigation.locator(`a[href="${path}"]`)).toHaveCount(0);
+        }
+        await expect(navigation.getByRole("button", {
+          name: locale === "fr" ? "Nouvelle conversation" : "New conversation",
+          exact: true,
+        })).toBeVisible();
+        await expect(navigation.getByRole("button", {
+          name: locale === "fr" ? "Mémoire" : "Memory", exact: true,
+        })).toBeVisible();
+        await expect(
+          navigation.locator('a[href="/settings?application=life_ai"]'),
+        ).toBeVisible();
+        await expect(
+          page.locator('.application-sidebar-footer a[href="/applications"]'),
+        ).toBeVisible();
+        if (width === 320) {
+          await page.keyboard.press("Escape");
+          await expect(page.locator("#assistant-main-menu")).toBeFocused();
+        }
       });
     }
   }
@@ -199,3 +242,34 @@ test("désactivation et expiration démontent Life AI et ses données privées",
   await expect(page.getByLabel("Mot de passe")).toBeVisible();
   await expect(page.locator(".assistant-message")).toHaveCount(0);
 });
+
+for (const width of [1440, 320]) {
+  test(`menu Dashboard ${width} : activation et protection du brouillon`, async ({
+    page,
+  }) => {
+    const data = await fixture(page);
+    data.disabled.add("sport");
+    await page.setViewportSize({ width, height: 1000 });
+    await page.goto("/");
+    const navigation = page.locator(".application-sidebar-links");
+    await expect(navigation.locator('a[href="/sport"]')).toHaveCount(0);
+    await expect(
+      page.locator('.application-carousel a[href="/sport"]'),
+    ).toHaveCount(0);
+    data.disabled.delete("sport");
+    await page.reload();
+    await expect(navigation.locator('a[href="/sport"]')).toHaveCount(1);
+    await page.locator("#dashboard-message").fill("Brouillon à conserver");
+    if (width === 320) await page.locator("#dashboard-main-menu").click();
+    page.once("dialog", (dialog) => dialog.dismiss());
+    await navigation.locator('a[href="/ai"]').click();
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.locator("#dashboard-message")).toHaveValue(
+      "Brouillon à conserver",
+    );
+    page.once("dialog", (dialog) => dialog.accept());
+    await navigation.locator('a[href="/ai"]').click();
+    await expect(page).toHaveURL(/\/ai$/);
+    await expect(page.locator(".assistant-composer textarea")).toHaveValue("");
+  });
+}

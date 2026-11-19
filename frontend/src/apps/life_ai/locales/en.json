@@ -23,7 +23,6 @@
   "assistant_footnote": "Life AI can make mistakes. Check important changes.",
   "assistant_configure": "Set up my assistant",
   "assistant_configuration_needed": "Choose a provider and add your API key in settings to get started.",
-  "assistant_apps": "Your applications",
   "assistant_no_apps": "Enable your apps in the library to use them with your assistant.",
   "assistant_more": "Show more",
   "assistant_previous": "Earlier messages",
